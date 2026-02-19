@@ -20,11 +20,11 @@ GEMINI_URL     = f"https://generativelanguage.googleapis.com/v1beta/models/gemin
 BANKROLL       = 15.0
 MAX_BET        = 2.0
 
-MIN_EV_PCT_TO_CALL_GEMINI = 8.0
-MIN_SECONDS_REMAINING     = 60   
-MAX_SECONDS_FOR_NEW_BET   = 290
-MIN_BODY_SIZE             = 5.0
-MAX_CROWD_PROB_TO_CALL    = 85.0
+MIN_EV_PCT_TO_CALL_GEMINI = 2.0
+MIN_SECONDS_REMAINING     = 30   
+MAX_SECONDS_FOR_NEW_BET   = 285
+MIN_BODY_SIZE             = 1.5
+MAX_CROWD_PROB_TO_CALL    = 92.0
 
 # ============================================================
 # LOGGING (UTF-8 Enforced)
