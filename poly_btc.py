@@ -8,6 +8,7 @@ import re
 import time
 import math
 import io
+from urllib.parse import urlparse
 from datetime import datetime, timezone
 
 # ============================================================
@@ -47,6 +48,7 @@ gemini_skip_count = 0
 candle_history: list[dict] = []
 MAX_HISTORY = 10
 target_slug: str = ""
+market_family_prefix: str = ""
 
 # ============================================================
 # UTILITIES
@@ -193,6 +195,73 @@ async def find_active_5m_btc_market(session: aiohttp.ClientSession) -> str:
         return best_slug
     except Exception as e:
         log.error(f"[HUNTER] Error: {e}")
+        return ""
+
+def extract_slug_from_market_url(raw_input: str) -> str:
+    """Accepts a slug or full market URL and returns the normalized slug."""
+    cleaned = (raw_input or "").strip()
+    if not cleaned:
+        return ""
+
+    if "/event/" in cleaned:
+        path = urlparse(cleaned).path
+        slug = path.split("/event/", 1)[-1].strip("/")
+    else:
+        slug = cleaned.strip("/")
+
+    return slug.lower()
+
+def build_market_family_prefix(seed_slug: str) -> str:
+    """Builds a stable slug prefix used to locate later market windows."""
+    if not seed_slug:
+        return ""
+
+    known_prefix = re.match(r"^(btc-(?:updown|up-or-down)(?:-[0-9]+m?)?)", seed_slug)
+    if known_prefix:
+        return known_prefix.group(1)
+
+    parts = seed_slug.split("-")
+    return "-".join(parts[:4]) if len(parts) >= 4 else seed_slug
+
+async def find_next_market_in_family(session: aiohttp.ClientSession, family_prefix: str, previous_slug: str = "") -> str:
+    """Finds the nearest-expiring active market that matches the family prefix."""
+    if not family_prefix:
+        return ""
+
+    url = "https://gamma-api.polymarket.com/events"
+    params = {"active": "true", "closed": "false", "limit": 200}
+    best_slug = ""
+    best_secs = float('inf')
+
+    try:
+        async with session.get(url, params=params, timeout=5) as r:
+            r.raise_for_status()
+            events = await r.json()
+
+        for event in events:
+            slug = event.get("slug", "").lower()
+            if not slug.startswith(family_prefix):
+                continue
+
+            secs_left = _parse_seconds_remaining(event.get("endDate", ""))
+            if secs_left <= 0:
+                continue
+
+            if slug == previous_slug and secs_left > 0:
+                # Keep current market if it is still live.
+                return slug
+
+            if secs_left < best_secs:
+                best_secs = secs_left
+                best_slug = slug
+
+        if best_slug:
+            log.info(f"[HUNTER] Rolled to next market in family: {best_slug} (~{int(best_secs)}s remaining)")
+        else:
+            log.warning(f"[HUNTER] No active market found for family prefix '{family_prefix}'.")
+        return best_slug
+    except Exception as e:
+        log.error(f"[HUNTER] Error while finding next family market: {e}")
         return ""
 
 async def prefill_history(session: aiohttp.ClientSession):
@@ -353,7 +422,7 @@ async def call_gemini(session: aiohttp.ClientSession, current_candle: dict, hist
 # MAIN EVENT LOOP
 # ============================================================
 async def engine_loop():
-    global target_slug, gemini_skip_count
+    global target_slug, gemini_skip_count, market_family_prefix
     
     async with aiohttp.ClientSession() as session:
         await prefill_history(session)
@@ -379,7 +448,7 @@ async def engine_loop():
                         log.info(f"[CANDLE] [{candle['timestamp']}] {candle['structure']} | O:{candle['open']:.2f} C:{candle['close']:.2f} | Vol:{candle['volume']:.2f} | Body:{candle['body_size']:.2f}")
                         
                         if not target_slug:
-                            target_slug = await find_active_5m_btc_market(session)
+                            target_slug = await find_next_market_in_family(session, market_family_prefix)
                             if not target_slug:
                                 continue
                                 
@@ -408,9 +477,19 @@ async def engine_loop():
                 await asyncio.sleep(5)
 
 if __name__ == "__main__":
+    user_market = input("[INPUT] Enter current Polymarket BTC market URL or slug: ").strip()
+    target_slug = extract_slug_from_market_url(user_market)
+    market_family_prefix = build_market_family_prefix(target_slug)
+
+    if not target_slug:
+        print("[ERROR] Invalid market URL/slug. Please restart and provide a valid value.")
+        raise SystemExit(1)
+
     print("\n" + "="*52)
     print("  BTC/USDT -> Polymarket Arbitrage Engine (QUANT MATH)")
     print("="*52)
+    print(f"\n[OK] Seed market slug: {target_slug}")
+    print(f"[OK] Market family prefix: {market_family_prefix}")
     print(f"\n[OK] Target calculations injected: Volatility/Time Z-Scoring active.")
     
     try:
