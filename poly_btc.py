@@ -15,16 +15,32 @@ from datetime import datetime, timezone
 # CONFIG
 # ============================================================
 SOCKET         = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m"
-GEMINI_API_KEY = "GEMINI_API_KEY"  # <-- INSERT YOUR GEMINI API KEY HERE
-GEMINI_URL     = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+
+# ── Multi-key rotation ──────────────────────────────────────
+# Key A is used on even-numbered minutes, Key B on odd-numbered minutes.
+# This effectively doubles your free-tier rate limit.
+GEMINI_KEY_A   = "PASTE_YOUR_FIRST_GEMINI_API_KEY_HERE"   # <-- Account 1
+GEMINI_KEY_B   = "PASTE_YOUR_SECOND_GEMINI_API_KEY_HERE"       # <-- Account 2
+
+GEMINI_MODEL   = "gemini-2.0-flash"
+
+def get_gemini_url() -> str:
+    """Returns the correct Gemini endpoint based on the current minute (even=A, odd=B)."""
+    minute = datetime.now().minute
+    key    = GEMINI_KEY_A if minute % 2 == 0 else GEMINI_KEY_B
+    label  = "A" if minute % 2 == 0 else "B"
+    log.debug(f"[KEY ROUTER] Minute {minute} → Key {label}")
+    return f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={key}"
+
 BANKROLL       = 15.0
 MAX_BET        = 2.0
 
-MIN_EV_PCT_TO_CALL_GEMINI = 2.0
-MIN_SECONDS_REMAINING     = 30   
-MAX_SECONDS_FOR_NEW_BET   = 285
-MIN_BODY_SIZE             = 1.5
-MAX_CROWD_PROB_TO_CALL    = 92.0
+# ── Thresholds (lowered to maximise call frequency) ─────────
+MIN_EV_PCT_TO_CALL_GEMINI = 0.1   # was 2.0  -- fire on almost any edge
+MIN_SECONDS_REMAINING     = 10    # was 30   -- trade closer to expiry
+MAX_SECONDS_FOR_NEW_BET   = 295   # was 285  -- enter a little earlier
+MIN_BODY_SIZE             = 0.1   # was 1.5  -- accept near-doji candles
+MAX_CROWD_PROB_TO_CALL    = 97.0  # was 92.0 -- skip only extreme lock-ins
 
 # ============================================================
 # LOGGING (UTF-8 Enforced)
@@ -74,16 +90,10 @@ def parse_candle(raw: dict) -> dict:
 # QUANTITATIVE MATH ENGINE
 # ============================================================
 def calculate_strike_probability(current_price: float, strike_price: float, history: list, seconds_remaining: float, direction: str) -> float:
-    """
-    Calculates the statistical probability of the price crossing the strike 
-    using historical volatility and time-scaled distance (Z-Score).
-    """
     if seconds_remaining <= 0 or not history or strike_price <= 0:
         return 50.0
 
     minutes_remaining = seconds_remaining / 60.0
-
-    # 1. Calculate Standard Deviation (Volatility) of recent 1m closes
     closes = [c['close'] for c in history] + [current_price]
     if len(closes) < 2: return 50.0
 
@@ -91,24 +101,17 @@ def calculate_strike_probability(current_price: float, strike_price: float, hist
     variance = sum((x - mean_close)**2 for x in closes) / len(closes)
     std_dev = math.sqrt(variance)
 
-    # Hard floor for volatility to prevent division by zero in dead markets
     if std_dev < 1.0: std_dev = 1.0
 
-    # 2. Time-scale the volatility (Random Walk logic)
     time_scaled_vol = std_dev * math.sqrt(minutes_remaining)
     distance = current_price - strike_price
-
-    # 3. Calculate Z-Score (How many standard deviations away is the strike?)
     z_score = distance / time_scaled_vol
 
-    # 4. Convert Z-Score to Probability using Error Function (CDF)
     prob = 0.5 * (1.0 + math.erf(z_score / math.sqrt(2.0)))
 
-    # If the market asks "Will it be DOWN?", invert the probability
     if direction == "DOWN":
         prob = 1.0 - prob
 
-    # Clamp realistic limits (never 0% or 100% in crypto)
     return max(1.0, min(prob * 100.0, 99.0))
 
 def compute_ev(true_prob_pct: float, market_prob_pct: float, max_bet: float) -> dict:
@@ -168,7 +171,6 @@ def build_technical_context(current_candle: dict, history: list) -> dict:
 # ASYNC I/O OPERATIONS
 # ============================================================
 async def find_active_5m_btc_market(session: aiohttp.ClientSession) -> str:
-    """Pulls all active Polymarket events and finds the 5m clock closest to hitting 0."""
     url = "https://gamma-api.polymarket.com/events"
     params = {"active": "true", "closed": "false", "limit": 100}
     best_slug = ""
@@ -183,7 +185,6 @@ async def find_active_5m_btc_market(session: aiohttp.ClientSession) -> str:
                 slug = event.get("slug", "").lower()
                 if "btc-updown-5m" in slug or "btc-up-or-down-5" in slug:
                     secs_left = _parse_seconds_remaining(event.get("endDate", ""))
-                    # We want the market that expires NEXT (shortest time > 0)
                     if 0 < secs_left < best_secs:
                         best_secs = secs_left
                         best_slug = slug
@@ -198,33 +199,26 @@ async def find_active_5m_btc_market(session: aiohttp.ClientSession) -> str:
         return ""
 
 def extract_slug_from_market_url(raw_input: str) -> str:
-    """Accepts a slug or full market URL and returns the normalized slug."""
     cleaned = (raw_input or "").strip()
     if not cleaned:
         return ""
-
     if "/event/" in cleaned:
         path = urlparse(cleaned).path
         slug = path.split("/event/", 1)[-1].strip("/")
     else:
         slug = cleaned.strip("/")
-
     return slug.lower()
 
 def build_market_family_prefix(seed_slug: str) -> str:
-    """Builds a stable slug prefix used to locate later market windows."""
     if not seed_slug:
         return ""
-
     known_prefix = re.match(r"^(btc-(?:updown|up-or-down)(?:-[0-9]+m?)?)", seed_slug)
     if known_prefix:
         return known_prefix.group(1)
-
     parts = seed_slug.split("-")
     return "-".join(parts[:4]) if len(parts) >= 4 else seed_slug
 
 async def find_next_market_in_family(session: aiohttp.ClientSession, family_prefix: str, previous_slug: str = "") -> str:
-    """Finds the nearest-expiring active market that matches the family prefix."""
     if not family_prefix:
         return ""
 
@@ -248,7 +242,6 @@ async def find_next_market_in_family(session: aiohttp.ClientSession, family_pref
                 continue
 
             if slug == previous_slug and secs_left > 0:
-                # Keep current market if it is still live.
                 return slug
 
             if secs_left < best_secs:
@@ -327,7 +320,7 @@ def run_gatekeeper(current_candle: dict, history: list, poly_data: dict) -> tupl
     if seconds_left > MAX_SECONDS_FOR_NEW_BET:
         return False, f"{int(seconds_left)}s remaining -- too early", {}, {}, 0.0
     if current_candle['body_size'] < MIN_BODY_SIZE:
-        return False, f"Doji candle (body={current_candle['body_size']:.2f})", {}, {}, 0.0
+        return False, f"Body too small (body={current_candle['body_size']:.2f})", {}, {}, 0.0
     
     direction = current_candle['structure']
     if direction == "BULLISH":
@@ -338,8 +331,7 @@ def run_gatekeeper(current_candle: dict, history: list, poly_data: dict) -> tupl
     if market_prob > MAX_CROWD_PROB_TO_CALL:
         return False, f"Crowd already at {market_prob:.1f}% -- payout negligible", {}, {}, 0.0
         
-    # Inject the actual mathematical probability based on strike price and volatility
-    strike = poly_data.get("strike_price", 0.0)
+    strike    = poly_data.get("strike_price", 0.0)
     math_prob = calculate_strike_probability(current_candle['close'], strike, history, seconds_left, favored_dir)
     
     ev         = compute_ev(math_prob,       market_prob,  MAX_BET)
@@ -354,7 +346,11 @@ def run_gatekeeper(current_candle: dict, history: list, poly_data: dict) -> tupl
 async def call_gemini(session: aiohttp.ClientSession, current_candle: dict, history: list, poly_data: dict, ev: dict, counter_ev: dict, math_prob: float):
     global gemini_call_count
     gemini_call_count += 1
-    log.info(f"[GEMINI] Firing background API call #{gemini_call_count}...")
+
+    # ── Key rotation: pick the correct URL at call time ──────
+    gemini_url  = get_gemini_url()
+    active_key  = "A" if datetime.now().minute % 2 == 0 else "B"
+    log.info(f"[GEMINI] Firing background API call #{gemini_call_count} (Key {active_key})...")
     
     ctx             = build_technical_context(current_candle, history)
     direction       = ctx["direction"]
@@ -403,12 +399,19 @@ async def call_gemini(session: aiohttp.ClientSession, current_candle: dict, hist
     
     for attempt in range(max_retries):
         try:
-            async with session.post(GEMINI_URL, json=payload, timeout=12) as r:
+            async with session.post(gemini_url, json=payload, timeout=12) as r:
                 if r.status == 429:
-                    wait = 2 ** attempt
-                    log.warning(f"[GEMINI] Rate limited -- waiting {wait}s")
-                    await asyncio.sleep(wait)
-                    continue
+                    # On rate limit, immediately try the other key
+                    fallback_key  = GEMINI_KEY_B if active_key == "A" else GEMINI_KEY_A
+                    fallback_url  = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={fallback_key}"
+                    log.warning(f"[GEMINI] Key {active_key} rate limited -- falling back to other key")
+                    async with session.post(fallback_url, json=payload, timeout=12) as r2:
+                        if r2.status != 200:
+                            wait = 2 ** attempt
+                            log.warning(f"[GEMINI] Fallback also failed -- waiting {wait}s")
+                            await asyncio.sleep(wait)
+                            continue
+                        r = r2
                 r.raise_for_status()
                 data = await r.json()
                 signal = data['candidates'][0]['content']['parts'][0]['text'].strip()
@@ -488,9 +491,12 @@ if __name__ == "__main__":
     print("\n" + "="*52)
     print("  BTC/USDT -> Polymarket Arbitrage Engine (QUANT MATH)")
     print("="*52)
-    print(f"\n[OK] Seed market slug: {target_slug}")
-    print(f"[OK] Market family prefix: {market_family_prefix}")
-    print(f"\n[OK] Target calculations injected: Volatility/Time Z-Scoring active.")
+    print(f"\n[OK] Seed market slug:      {target_slug}")
+    print(f"[OK] Market family prefix:  {market_family_prefix}")
+    print(f"[OK] Key A (even minutes):  {GEMINI_KEY_A[:16]}...")
+    print(f"[OK] Key B (odd  minutes):  {GEMINI_KEY_B[:16]}...")
+    print(f"\n[OK] Thresholds: EV>{MIN_EV_PCT_TO_CALL_GEMINI}% | Body>{MIN_BODY_SIZE} | {MIN_SECONDS_REMAINING}s-{MAX_SECONDS_FOR_NEW_BET}s window | Crowd<{MAX_CROWD_PROB_TO_CALL}%")
+    print(f"[OK] Volatility/Time Z-Scoring active.")
     
     try:
         asyncio.run(engine_loop())
