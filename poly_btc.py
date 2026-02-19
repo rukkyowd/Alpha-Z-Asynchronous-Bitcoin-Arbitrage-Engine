@@ -1,0 +1,419 @@
+import asyncio
+import aiohttp
+import websockets
+import json
+import logging
+import sys
+import re
+import time
+import math
+import io
+from datetime import datetime, timezone
+
+# ============================================================
+# CONFIG
+# ============================================================
+SOCKET         = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m"
+GEMINI_API_KEY = "GEMINI_API_KEY"  # <-- INSERT YOUR GEMINI API KEY HERE
+GEMINI_URL     = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+BANKROLL       = 15.0
+MAX_BET        = 2.0
+
+MIN_EV_PCT_TO_CALL_GEMINI = 8.0
+MIN_SECONDS_REMAINING     = 60   
+MAX_SECONDS_FOR_NEW_BET   = 290
+MIN_BODY_SIZE             = 5.0
+MAX_CROWD_PROB_TO_CALL    = 85.0
+
+# ============================================================
+# LOGGING (UTF-8 Enforced)
+# ============================================================
+_fmt            = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
+_file_handler   = logging.FileHandler("trading_log.txt", encoding="utf-8")
+_file_handler.setFormatter(_fmt)
+_utf8_stdout    = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", line_buffering=True)
+_stream_handler = logging.StreamHandler(_utf8_stdout)
+_stream_handler.setFormatter(_fmt)
+logging.root.setLevel(logging.INFO)
+logging.root.addHandler(_file_handler)
+logging.root.addHandler(_stream_handler)
+log = logging.getLogger(__name__)
+
+# ============================================================
+# STATE
+# ============================================================
+gemini_call_count = 0
+gemini_skip_count = 0
+candle_history: list[dict] = []
+MAX_HISTORY = 10
+target_slug: str = ""
+
+# ============================================================
+# UTILITIES
+# ============================================================
+def _parse_seconds_remaining(end_date_str: str) -> float:
+    if not end_date_str: return -1.0
+    try:
+        end_dt = datetime.fromisoformat(end_date_str.replace("Z", "+00:00"))
+        return (end_dt - datetime.now(timezone.utc)).total_seconds()
+    except Exception:
+        return -1.0
+
+def parse_candle(raw: dict) -> dict:
+    o, h, l, c, v = float(raw['o']), float(raw['h']), float(raw['l']), float(raw['c']), float(raw['v'])
+    return {
+        "timestamp":  datetime.fromtimestamp(raw['t']/1000, tz=timezone.utc).strftime('%Y-%m-%d %H:%M:%S'),
+        "open": o, "high": h, "low": l, "close": c, "volume": v,
+        "body_size": abs(c-o), "upper_wick": h-max(o,c), "lower_wick": min(o,c)-l,
+        "structure": "BULLISH" if c > o else "BEARISH",
+    }
+
+# ============================================================
+# QUANTITATIVE MATH ENGINE
+# ============================================================
+def calculate_strike_probability(current_price: float, strike_price: float, history: list, seconds_remaining: float, direction: str) -> float:
+    """
+    Calculates the statistical probability of the price crossing the strike 
+    using historical volatility and time-scaled distance (Z-Score).
+    """
+    if seconds_remaining <= 0 or not history or strike_price <= 0:
+        return 50.0
+
+    minutes_remaining = seconds_remaining / 60.0
+
+    # 1. Calculate Standard Deviation (Volatility) of recent 1m closes
+    closes = [c['close'] for c in history] + [current_price]
+    if len(closes) < 2: return 50.0
+
+    mean_close = sum(closes) / len(closes)
+    variance = sum((x - mean_close)**2 for x in closes) / len(closes)
+    std_dev = math.sqrt(variance)
+
+    # Hard floor for volatility to prevent division by zero in dead markets
+    if std_dev < 1.0: std_dev = 1.0
+
+    # 2. Time-scale the volatility (Random Walk logic)
+    time_scaled_vol = std_dev * math.sqrt(minutes_remaining)
+    distance = current_price - strike_price
+
+    # 3. Calculate Z-Score (How many standard deviations away is the strike?)
+    z_score = distance / time_scaled_vol
+
+    # 4. Convert Z-Score to Probability using Error Function (CDF)
+    prob = 0.5 * (1.0 + math.erf(z_score / math.sqrt(2.0)))
+
+    # If the market asks "Will it be DOWN?", invert the probability
+    if direction == "DOWN":
+        prob = 1.0 - prob
+
+    # Clamp realistic limits (never 0% or 100% in crypto)
+    return max(1.0, min(prob * 100.0, 99.0))
+
+def compute_ev(true_prob_pct: float, market_prob_pct: float, max_bet: float) -> dict:
+    token = market_prob_pct / 100.0
+    prob  = true_prob_pct   / 100.0
+    if not (0 < token < 1):
+        return {"ev": 0.0, "ev_pct": 0.0, "edge": 0.0, "kelly_fraction": 0.0, "kelly_bet": 0.0}
+    net_win        = 1.0 - token
+    ev             = prob * net_win - (1 - prob) * token
+    ev_pct         = (ev / token) * 100
+    edge           = prob - token
+    b              = net_win / token
+    kelly_fraction = max(0.0, (b * prob - (1 - prob)) / b)
+    kelly_bet      = round(min((kelly_fraction * 0.5) * max_bet, max_bet), 2)
+    return {"ev": round(ev,4), "ev_pct": round(ev_pct,2), "edge": round(edge,4),
+            "kelly_fraction": round(kelly_fraction,4), "kelly_bet": kelly_bet}
+
+def build_technical_context(current_candle: dict, history: list) -> dict:
+    direction = current_candle['structure']
+    body      = current_candle['body_size']
+    upper     = current_candle['upper_wick']
+    lower     = current_candle['lower_wick']
+    vol_delta_pct  = 0.0
+    vol_vs_avg_pct = 0.0
+    recent_5       = history[-5:] if len(history) >= 5 else history
+    if history:
+        pv = history[-1]['volume']
+        if pv > 0: vol_delta_pct = ((current_candle['volume'] - pv) / pv) * 100
+        av = sum(c['volume'] for c in recent_5) / max(len(recent_5), 1)
+        if av > 0: vol_vs_avg_pct = ((current_candle['volume'] - av) / av) * 100
+    streak = 0
+    for c in reversed(recent_5):
+        if c['structure'] == direction: streak += 1
+        else: break
+    bull_n = sum(1 for c in recent_5 if c['structure'] == "BULLISH")
+    bear_n = len(recent_5) - bull_n
+    if streak == len(recent_5) and streak > 0: streak_text = f"{streak} consecutive {direction} candles"
+    elif streak >= 2:                          streak_text = f"{streak}-candle {direction} streak"
+    else:                                      streak_text = f"Mixed ({bull_n} bull / {bear_n} bear in last {len(recent_5)})"
+    if body > 0:
+        if upper > body*1.5 and lower < body*0.5:   wick_bias = "Strong SELL pressure (upper wick rejection)"
+        elif lower > body*1.5 and upper < body*0.5: wick_bias = "Strong BUY pressure (lower wick rejection)"
+        elif upper > body and lower > body:         wick_bias = "Indecision (both wicks prominent)"
+        else:                                       wick_bias = "Clean body -- no strong wick rejection"
+    else:
+        wick_bias = "Doji / near-doji"
+    
+    history_table = "\n".join([
+        f"  [{c['timestamp']}] {c['structure']:<8} | O:{c['open']:.2f} C:{c['close']:.2f} | Body:{c['body_size']:.2f} | Vol:{c['volume']:.2f}"
+        for c in recent_5
+    ]) or "  (no history yet)"
+    
+    return {"direction": direction, "vol_delta_pct": vol_delta_pct, "vol_vs_avg_pct": vol_vs_avg_pct,
+            "streak_text": streak_text, "wick_bias": wick_bias, "history_table": history_table}
+
+# ============================================================
+# ASYNC I/O OPERATIONS
+# ============================================================
+async def find_active_5m_btc_market(session: aiohttp.ClientSession) -> str:
+    """Pulls all active Polymarket events and finds the 5m clock closest to hitting 0."""
+    url = "https://gamma-api.polymarket.com/events"
+    params = {"active": "true", "closed": "false", "limit": 100}
+    best_slug = ""
+    best_secs = float('inf')
+
+    try:
+        async with session.get(url, params=params, timeout=5) as r:
+            r.raise_for_status()
+            events = await r.json()
+
+            for event in events:
+                slug = event.get("slug", "").lower()
+                if "btc-updown-5m" in slug or "btc-up-or-down-5" in slug:
+                    secs_left = _parse_seconds_remaining(event.get("endDate", ""))
+                    # We want the market that expires NEXT (shortest time > 0)
+                    if 0 < secs_left < best_secs:
+                        best_secs = secs_left
+                        best_slug = slug
+
+        if best_slug:
+            log.info(f"[HUNTER] Locked LIVE market: {best_slug} (~{int(best_secs)}s remaining)")
+        else:
+            log.warning("[HUNTER] No active live market found under 5m.")
+        return best_slug
+    except Exception as e:
+        log.error(f"[HUNTER] Error: {e}")
+        return ""
+
+async def prefill_history(session: aiohttp.ClientSession):
+    log.info("[SYSTEM] Prefilling history from Binance REST API...")
+    try:
+        async with session.get("https://api.binance.com/api/v3/klines", params={"symbol": "BTCUSDT", "interval": "1m", "limit": 10}, timeout=5) as r:
+            r.raise_for_status()
+            data = await r.json()
+            for k in data:
+                o, h, l, c, v = float(k[1]), float(k[2]), float(k[3]), float(k[4]), float(k[5])
+                candle_history.append({
+                    "timestamp":  datetime.fromtimestamp(k[0]/1000, tz=timezone.utc).strftime('%Y-%m-%d %H:%M:%S'),
+                    "open": o, "high": h, "low": l, "close": c, "volume": v,
+                    "body_size": abs(c-o), "upper_wick": h-max(o,c), "lower_wick": min(o,c)-l,
+                    "structure": "BULLISH" if c > o else "BEARISH",
+                })
+            log.info(f"[OK] {len(candle_history)} candles loaded.")
+    except Exception as e:
+        log.error(f"[ERROR] Prefill failed: {e}")
+
+async def get_polymarket_odds(session: aiohttp.ClientSession, slug: str) -> dict:
+    if not slug: return {"market_found": False, "error": "No slug"}
+    try:
+        async with session.get("https://gamma-api.polymarket.com/events", params={"slug": slug}, timeout=6) as r:
+            r.raise_for_status()
+            data = await r.json()
+            for event in data:
+                if event.get("slug", "") != slug: continue
+                markets = event.get("markets", [])
+                if not markets: return {"market_found": False, "error": "No markets"}
+                
+                market       = markets[0]
+                description  = event.get("description", "")
+                sm           = re.search(r'\$([0-9,]+\.[0-9]{2})', description)
+                strike_price = float(sm.group(1).replace(',', '')) if sm else 0.0
+                
+                seconds_remaining = _parse_seconds_remaining(event.get("endDate", ""))
+                
+                raw_prices = market.get("outcomePrices", "[]")
+                prices     = json.loads(raw_prices) if isinstance(raw_prices, str) else raw_prices
+                raw_out    = market.get("outcomes", "[]")
+                outcomes   = json.loads(raw_out) if isinstance(raw_out, str) else raw_out
+                
+                if len(prices) < 2 or len(outcomes) < 2: return {"market_found": False, "error": "Bad shape"}
+                return {
+                    "market_found": True, "title": event.get("title", slug),
+                    "up_prob": float(prices[0])*100, "down_prob": float(prices[1])*100,
+                    "strike_price": strike_price, "seconds_remaining": seconds_remaining,
+                }
+            return {"market_found": False, "error": f"Slug '{slug}' not in response"}
+    except Exception as e:
+        return {"market_found": False, "error": str(e)}
+
+# ============================================================
+# GATEKEEPER & BACKGROUND TASK
+# ============================================================
+def run_gatekeeper(current_candle: dict, history: list, poly_data: dict) -> tuple:
+    if not poly_data["market_found"]: return False, "No Polymarket data", {}, {}, 0.0
+    
+    seconds_left = poly_data.get("seconds_remaining", 0)
+    if seconds_left < MIN_SECONDS_REMAINING:
+        return False, f"Only {int(seconds_left)}s left -- time decay too severe", {}, {}, 0.0
+    if seconds_left > MAX_SECONDS_FOR_NEW_BET:
+        return False, f"{int(seconds_left)}s remaining -- too early", {}, {}, 0.0
+    if current_candle['body_size'] < MIN_BODY_SIZE:
+        return False, f"Doji candle (body={current_candle['body_size']:.2f})", {}, {}, 0.0
+    
+    direction = current_candle['structure']
+    if direction == "BULLISH":
+        favored_dir, market_prob, counter_prob = "UP",   poly_data["up_prob"],   poly_data["down_prob"]
+    else:
+        favored_dir, market_prob, counter_prob = "DOWN", poly_data["down_prob"], poly_data["up_prob"]
+        
+    if market_prob > MAX_CROWD_PROB_TO_CALL:
+        return False, f"Crowd already at {market_prob:.1f}% -- payout negligible", {}, {}, 0.0
+        
+    # Inject the actual mathematical probability based on strike price and volatility
+    strike = poly_data.get("strike_price", 0.0)
+    math_prob = calculate_strike_probability(current_candle['close'], strike, history, seconds_left, favored_dir)
+    
+    ev         = compute_ev(math_prob,       market_prob,  MAX_BET)
+    counter_ev = compute_ev(100-math_prob, counter_prob, MAX_BET)
+    best_ev    = max(ev["ev_pct"], counter_ev["ev_pct"])
+    
+    if best_ev < MIN_EV_PCT_TO_CALL_GEMINI:
+        return False, f"Math EV {best_ev:+.2f}% < {MIN_EV_PCT_TO_CALL_GEMINI}%", ev, counter_ev, math_prob
+        
+    return True, "", ev, counter_ev, math_prob
+
+async def call_gemini(session: aiohttp.ClientSession, current_candle: dict, history: list, poly_data: dict, ev: dict, counter_ev: dict, math_prob: float):
+    global gemini_call_count
+    gemini_call_count += 1
+    log.info(f"[GEMINI] Firing background API call #{gemini_call_count}...")
+    
+    ctx             = build_technical_context(current_candle, history)
+    direction       = ctx["direction"]
+    current_price   = current_candle['close']
+    seconds_left    = int(poly_data.get("seconds_remaining", 0))
+    strike          = poly_data.get("strike_price", 0.0)
+    strike_text     = f"${strike:,.2f}" if strike > 0 else "Unknown"
+    distance_text   = f"{current_price - strike:+.2f} USDT" if strike > 0 else "N/A"
+    favored_dir     = "UP" if direction == "BULLISH" else "DOWN"
+    market_prob     = poly_data["up_prob"] if direction == "BULLISH" else poly_data["down_prob"]
+    
+    ev_block = (
+        f"=== QUANTITATIVE ARBITRAGE ANALYSIS ===\n"
+        f"  Favored Direction:       {favored_dir}\n"
+        f"  Math Prob (Vol/Time):    {math_prob:.1f}%\n"
+        f"  Polymarket Crowd Prob:   {market_prob:.1f}%\n"
+        f"  EV% Return on Capital:   {ev['ev_pct']:+.2f}%\n"
+        f"  Kelly Fraction / Bet:    {ev['kelly_fraction']:.4f} / ${ev['kelly_bet']:.2f}\n"
+    )
+
+    prompt = (
+        "You are an elite statistical arbitrage engine for Polymarket binary crypto markets.\n"
+        "The gatekeeper confirmed a mathematically high-EV setup based on volatility modeling. Verify it.\n\n"
+        "=== THE PRICE TO BEAT ===\n"
+        f"  Polymarket Strike: {strike_text}\n"
+        f"  Current BTC Price: ${current_price:,.2f}\n"
+        f"  Distance to Win:   {distance_text}\n"
+        f"  Time Remaining:    {seconds_left} seconds\n\n"
+        "=== LATEST CLOSED 1m CANDLE ===\n"
+        f"  OHLC:             {current_candle['open']:.2f} / {current_candle['high']:.2f} / {current_candle['low']:.2f} / {current_candle['close']:.2f}\n"
+        f"  Structure:        {current_candle['structure']}\n"
+        f"  Body Size:        {current_candle['body_size']:.2f}\n"
+        f"  Wick Bias:        {ctx['wick_bias']}\n"
+        f"  Vol delta 5m avg: {ctx['vol_vs_avg_pct']:+.2f}%\n\n"
+        f"{ev_block}\n\n"
+        "=== OUTPUT FORMAT (strict -- no other text) ===\n"
+        "DECISION: UP | DOWN | SKIP\n"
+        "CONFIDENCE: Low | Medium | High\n"
+        f"EV: {ev['ev_pct']:+.2f}%\n"
+        "BET SIZE: $0 | $1 | $2\n"
+        "REASON: <One sentence citing distance to strike, volatility math, and time remaining.>"
+    )
+    
+    payload = {"contents": [{"parts": [{"text": prompt}]}]}
+    max_retries = 3
+    
+    for attempt in range(max_retries):
+        try:
+            async with session.post(GEMINI_URL, json=payload, timeout=12) as r:
+                if r.status == 429:
+                    wait = 2 ** attempt
+                    log.warning(f"[GEMINI] Rate limited -- waiting {wait}s")
+                    await asyncio.sleep(wait)
+                    continue
+                r.raise_for_status()
+                data = await r.json()
+                signal = data['candidates'][0]['content']['parts'][0]['text'].strip()
+                log.info(f"\n{'='*52}\n{signal}\n{'='*52}")
+                return
+        except Exception as e:
+            log.error(f"[GEMINI] Error: {e}")
+            break
+
+# ============================================================
+# MAIN EVENT LOOP
+# ============================================================
+async def engine_loop():
+    global target_slug, gemini_skip_count
+    
+    async with aiohttp.ClientSession() as session:
+        await prefill_history(session)
+        
+        while True:
+            try:
+                log.info("[SYSTEM] Connecting to Binance WebSocket...")
+                async with websockets.connect(SOCKET) as ws:
+                    async for message in ws:
+                        raw = json.loads(message)
+                        candle_raw = raw['k']
+                        print(f"\r  BTC Live: ${float(candle_raw['c']):,.2f}", end="", flush=True)
+                        
+                        if not candle_raw['x']:
+                            continue
+                            
+                        print()
+                        candle = parse_candle(candle_raw)
+                        candle_history.append(candle)
+                        if len(candle_history) > MAX_HISTORY:
+                            candle_history.pop(0)
+                            
+                        log.info(f"[CANDLE] [{candle['timestamp']}] {candle['structure']} | O:{candle['open']:.2f} C:{candle['close']:.2f} | Vol:{candle['volume']:.2f} | Body:{candle['body_size']:.2f}")
+                        
+                        if not target_slug:
+                            target_slug = await find_active_5m_btc_market(session)
+                            if not target_slug:
+                                continue
+                                
+                        poly_data = await get_polymarket_odds(session, target_slug)
+                        if poly_data["market_found"]:
+                            seconds_left = poly_data.get("seconds_remaining", 0)
+                            if seconds_left <= 0:
+                                log.info("[SYSTEM] Market expired -- initiating new hunt...")
+                                target_slug = ""
+                                continue
+                            log.info(f"[POLYMARKET] Strike: ${poly_data.get('strike_price', 0.0):,.2f} | UP: {poly_data['up_prob']:.1f}% | DOWN: {poly_data['down_prob']:.1f}% | Remaining: {int(seconds_left)}s")
+                        else:
+                            target_slug = ""
+                            continue
+                            
+                        should_call, skip_reason, ev, counter_ev, math_prob = run_gatekeeper(candle, candle_history[:-1], poly_data)
+                        if not should_call:
+                            gemini_skip_count += 1
+                            log.info(f"[GATE] SKIP -- {skip_reason}")
+                            continue
+                            
+                        asyncio.create_task(call_gemini(session, candle, candle_history[:-1], poly_data, ev, counter_ev, math_prob))
+
+            except Exception as e:
+                log.warning(f"[SYSTEM] Reconnecting in 5s... ({e})")
+                await asyncio.sleep(5)
+
+if __name__ == "__main__":
+    print("\n" + "="*52)
+    print("  BTC/USDT -> Polymarket Arbitrage Engine (QUANT MATH)")
+    print("="*52)
+    print(f"\n[OK] Target calculations injected: Volatility/Time Z-Scoring active.")
+    
+    try:
+        asyncio.run(engine_loop())
+    except KeyboardInterrupt:
+        print("\n[SYSTEM] Engine manually stopped.")
