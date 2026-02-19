@@ -16,21 +16,8 @@ from datetime import datetime, timezone
 # ============================================================
 SOCKET         = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m"
 
-# ── Multi-key rotation ──────────────────────────────────────
-# Key A is used on even-numbered minutes, Key B on odd-numbered minutes.
-# This effectively doubles your free-tier rate limit.
-GEMINI_KEY_A   = "PASTE_YOUR_FIRST_GEMINI_API_KEY_HERE"   # <-- Account 1
-GEMINI_KEY_B   = "PASTE_YOUR_SECOND_GEMINI_API_KEY_HERE"       # <-- Account 2
-
-GEMINI_MODEL   = "gemini-2.0-flash"
-
-def get_gemini_url() -> str:
-    """Returns the correct Gemini endpoint based on the current minute (even=A, odd=B)."""
-    minute = datetime.now().minute
-    key    = GEMINI_KEY_A if minute % 2 == 0 else GEMINI_KEY_B
-    label  = "A" if minute % 2 == 0 else "B"
-    log.debug(f"[KEY ROUTER] Minute {minute} → Key {label}")
-    return f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={key}"
+LOCAL_AI_URL = "http://localhost:11434/v1/chat/completions"
+LOCAL_AI_MODEL = "llama3.2:3b"
 
 BANKROLL       = 15.0
 MAX_BET        = 2.0
@@ -343,14 +330,10 @@ def run_gatekeeper(current_candle: dict, history: list, poly_data: dict) -> tupl
         
     return True, "", ev, counter_ev, math_prob
 
-async def call_gemini(session: aiohttp.ClientSession, current_candle: dict, history: list, poly_data: dict, ev: dict, counter_ev: dict, math_prob: float):
+async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, history: list, poly_data: dict, ev: dict, counter_ev: dict, math_prob: float):
     global gemini_call_count
     gemini_call_count += 1
-
-    # ── Key rotation: pick the correct URL at call time ──────
-    gemini_url  = get_gemini_url()
-    active_key  = "A" if datetime.now().minute % 2 == 0 else "B"
-    log.info(f"[GEMINI] Firing background API call #{gemini_call_count} (Key {active_key})...")
+    log.info(f"[LOCAL AI] Firing background API call #{gemini_call_count}...")
     
     ctx             = build_technical_context(current_candle, history)
     direction       = ctx["direction"]
@@ -394,32 +377,20 @@ async def call_gemini(session: aiohttp.ClientSession, current_candle: dict, hist
         "REASON: <One sentence citing distance to strike, volatility math, and time remaining.>"
     )
     
-    payload = {"contents": [{"parts": [{"text": prompt}]}]}
-    max_retries = 3
+    payload = {
+        "model": LOCAL_AI_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.1,
+    }
     
-    for attempt in range(max_retries):
-        try:
-            async with session.post(gemini_url, json=payload, timeout=12) as r:
-                if r.status == 429:
-                    # On rate limit, immediately try the other key
-                    fallback_key  = GEMINI_KEY_B if active_key == "A" else GEMINI_KEY_A
-                    fallback_url  = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={fallback_key}"
-                    log.warning(f"[GEMINI] Key {active_key} rate limited -- falling back to other key")
-                    async with session.post(fallback_url, json=payload, timeout=12) as r2:
-                        if r2.status != 200:
-                            wait = 2 ** attempt
-                            log.warning(f"[GEMINI] Fallback also failed -- waiting {wait}s")
-                            await asyncio.sleep(wait)
-                            continue
-                        r = r2
-                r.raise_for_status()
-                data = await r.json()
-                signal = data['candidates'][0]['content']['parts'][0]['text'].strip()
-                log.info(f"\n{'='*52}\n{signal}\n{'='*52}")
-                return
-        except Exception as e:
-            log.error(f"[GEMINI] Error: {e}")
-            break
+    try:
+        async with session.post(LOCAL_AI_URL, json=payload, timeout=15) as r:
+            r.raise_for_status()
+            data = await r.json()
+            signal = data['choices'][0]['message']['content'].strip()
+            log.info(f"\n{'━'*50}\n[LOCAL AI] {signal}\n{'━'*50}")
+    except Exception as e:
+        log.error(f"[LOCAL AI] Error: {e}")
 
 # ============================================================
 # MAIN EVENT LOOP
@@ -473,7 +444,7 @@ async def engine_loop():
                             log.info(f"[GATE] SKIP -- {skip_reason}")
                             continue
                             
-                        asyncio.create_task(call_gemini(session, candle, candle_history[:-1], poly_data, ev, counter_ev, math_prob))
+                        asyncio.create_task(call_local_ai(session, candle, candle_history[:-1], poly_data, ev, counter_ev, math_prob))
 
             except Exception as e:
                 log.warning(f"[SYSTEM] Reconnecting in 5s... ({e})")
@@ -493,8 +464,8 @@ if __name__ == "__main__":
     print("="*52)
     print(f"\n[OK] Seed market slug:      {target_slug}")
     print(f"[OK] Market family prefix:  {market_family_prefix}")
-    print(f"[OK] Key A (even minutes):  {GEMINI_KEY_A[:16]}...")
-    print(f"[OK] Key B (odd  minutes):  {GEMINI_KEY_B[:16]}...")
+    print(f"[OK] Local AI endpoint:      {LOCAL_AI_URL}")
+    print(f"[OK] Local AI model:         {LOCAL_AI_MODEL}")
     print(f"\n[OK] Thresholds: EV>{MIN_EV_PCT_TO_CALL_GEMINI}% | Body>{MIN_BODY_SIZE} | {MIN_SECONDS_REMAINING}s-{MAX_SECONDS_FOR_NEW_BET}s window | Crowd<{MAX_CROWD_PROB_TO_CALL}%")
     print(f"[OK] Volatility/Time Z-Scoring active.")
     
