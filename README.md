@@ -1,99 +1,100 @@
-# BTC-Polymarket-Arb: Statistical Arbitrage Engine
+# BTC Polymarket Arbitrage Engine (v5)
 
-An automated trading research tool that identifies **Expected Value (EV)** opportunities in Polymarket’s Bitcoin "Up/Down" binary markets. It utilizes a dual-engine approach: quantitative Z-score modeling for probability estimation and a local LLM (via Ollama) for final technical analysis validation.
+A high-performance, asynchronous Python trading bot that executes statistical arbitrage between Binance BTC/USDT spot price movement and Polymarket "Up/Down" binary markets.
 
 ## 🚀 Overview
 
-The engine monitors 1-minute BTC candles and cross-references them with Polymarket's order book. It calculates the mathematical probability of a "Price to Beat" settlement based on current volatility and time remaining, triggering an AI-assisted review when a significant "edge" is detected.
+This engine monitors the 1-minute BTC candle structure, Volume Weighted Average Price (VWAP), and Cumulative Volume Delta (CVD) to predict settlement outcomes for Polymarket's 5-minute price targets. It uses a **Gatekeeper → Rule Engine → AI Validation** pipeline to ensure only high-probability trades are executed.
 
-### Key Components
+### Key Features
 
-* **Source of Truth:** Uses **Chainlink’s BTC/USD Aggregator** on Polygon for ultra-precise settlement pricing.
-* **Quantitative Gatekeeper:** Calculates probability using a time-scaled Z-score and the Error Function ().
-* **AI Validator:** Fires a background task to a local **Llama 3.2:3b** model to verify price action structure before signaling.
-* **Market Rolling:** Automatically increments the market slug (e.g., `...-14400` → `...-14700`) to follow the 5-minute cycle without manual restart.
+* **Real-time Data:** Uses WebSockets for Binance K-Lines and Aggregate Trades (aggTrade) for sub-second price updates.
+* **Order Flow Analysis:** Calculates real-time CVD (Cumulative Volume Delta) to detect institutional buying or selling pressure.
+* **Multi-Step Validation:** * **Gatekeeper:** Filters markets based on Time-to-Expiry, Expected Value (EV), and liquidity.
+* **Rule Engine:** A deterministic scoring system (0-4) based on VWAP, EMA Crosses, RSI, and CVD.
+* **Local AI (Ollama):** Uses `llama3.2:3b` to provide a "second opinion" on borderline trade setups.
 
----
 
-## 🛠 Features
-
-* **Real-time WebSocket:** Streams live candles from Binance.
-* **Kelly Criterion Integration:** Suggests optimal bet sizing based on calculated edge and bankroll.
-* **Wick & Body Analysis:** Filters out "noisy" price action like Dojis or extreme crowd sentiment (>97%).
-* **Auto-Correction:** If the local price deviates from the settlement source, it overrides Binance data with Chainlink data for accuracy.
+* **Automated Betting:** Integrated with the Polymarket CLOB (Central Limit Order Book) for automated execution.
+* **Safety First:** Includes a Circuit Breaker for AI timeouts, a "Dry Run" mode, and Kelly Criterion-based position sizing.
 
 ---
 
-## 📋 Prerequisites
+## 🛠 Setup & Installation
+
+### 1. Prerequisites
 
 * **Python 3.10+**
-* **Ollama:** Must be running locally with the `llama3.2:3b` model (or update `LOCAL_AI_MODEL` in config).
-* **Active Internet Connection:** To fetch Gamma API (Polymarket) and Chainlink RPC data.
+* **Ollama:** Must be running locally with the `llama3.2:3b` model loaded.
+* **Polymarket Account:** A proxy/funder wallet address and your private key.
 
-### Installation
+### 2. Install Dependencies
 
-1. **Clone the repo:**
 ```bash
-git clone https://github.com/rukkyowd/btc-polymarket-arb.git
-cd btc-polymarket-arb
+pip install asyncio aiohttp websockets py-clob-client python-dotenv
 
 ```
 
+### 3. Environment Variables
 
-2. **Install dependencies:**
-```bash
-pip install aiohttp websockets
+Create a `.env` file in the root directory:
+
+```env
+POLY_PRIVATE_KEY=your_private_key_here
+POLY_FUNDER=your_proxy_wallet_address
+POLY_SIG_TYPE=1
+DRY_RUN=true
 
 ```
 
-
+> **Note:** Set `DRY_RUN=false` only when you are ready to risk real USDC.
 
 ---
 
-## ⚙️ Configuration
+## 📊 Technical Indicators Used
 
-You can tune the "Gatekeeper" in the script header to match your risk tolerance:
-
-| Variable | Default | Description |
+| Indicator | Description | Purpose |
 | --- | --- | --- |
-| `BANKROLL` | `15.0` | Your current available trading capital. |
-| `MIN_EV_PCT` | `0.1` | Minimum % Expected Value to trigger the AI. |
-| `MIN_SECONDS` | `10` | Won't trade if the market expires in <10s. |
-| `LOCAL_AI_URL` | `.../v1/...` | Endpoint for your local Ollama/Llama instance. |
+| **VWAP** | Volume Weighted Average Price | Identifies the true "fair value" of the session. |
+| **CVD** | Cumulative Volume Delta | Measures the net difference between market buy and sell volume. |
+| **EMA (9/21/50)** | Exponential Moving Averages | Detects short-term and medium-term trend momentum. |
+| **RSI** | Relative Strength Index | Prevents entering trades in overextended (Overbought/Oversold) conditions. |
+| **Log-Vol Prob** | Log-return Volatility Math | Calculates the mathematical probability of a strike hitting based on historical volatility. |
 
 ---
 
-## 🖥 Usage
+## 🚦 How it Works
 
-1. Start your local AI server (e.g., `ollama serve`).
-2. Run the engine:
-```bash
-python poly_btc.py
-
-```
-
-
-3. **Input:** When prompted, paste a Polymarket BTC Up/Down market URL or its slug.
-* *Example:* `https://polymarket.com/event/bitcoin-price-at-830-pm-et`
+1. **Prefill:** On startup, the bot fetches the last 120 minutes of BTC history to seed the indicators.
+2. **Streams:** It opens three concurrent WebSocket connections:
+* Binance Klines (1m candles).
+* Binance aggTrade (Tick-by-tick price/CVD).
+* Polymarket Live Data (Oracle price monitoring).
 
 
+3. **Evaluation:** Every 5 seconds, the `evaluation_loop` checks the current market:
+* If **Score ≥ 3**: Places a bet immediately.
+* If **Score = 1 or 2**: Calls the local AI to decide whether to "SKIP" or "COMMIT."
+
+
+4. **Market Roll:** Once a market expires, the bot automatically increments the slug (e.g., `...-1030` → `...-1035`) and begins evaluating the next window.
 
 ---
 
-## 📈 Probability Logic
+## 📈 Logging & Statistics
 
-The engine determines the "True Probability" () of a strike being hit using:
+The bot maintains a detailed `trading_log.txt` for real-time debugging and an `ai_trade_history.csv` for performance tracking.
 
-Where:
+The CSV tracks:
 
-*  is the rolling standard deviation (volatility).
-*  is the minutes remaining until expiry.
-* The result is passed through the **Gaussian Error Function** to estimate the probability of the price finishing above or below the strike.
+* Strike Price vs. Final Price.
+* AI Decisions & Rule Scores.
+* Win/Loss outcome and running Win Rate.
 
 ---
 
 ## ⚠️ Disclaimer
 
-**This is a research tool.** Trading binary options and crypto futures involves significant risk. The "decisions" provided by the local AI are based on technical patterns and statistical models, not financial advice. Use this code to inform your own strategies, not to trade blindly.
+*This software is for educational purposes. Trading cryptocurrency involves significant risk. The authors are not responsible for any financial losses incurred through the use of this bot.*
 
 ---
