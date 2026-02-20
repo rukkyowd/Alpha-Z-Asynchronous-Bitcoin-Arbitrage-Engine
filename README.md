@@ -1,66 +1,99 @@
-## BTC-Arb-Link: Asynchronous Quantitative Arbitrage Engine
+# BTC-Polymarket-Arb: Statistical Arbitrage Engine
 
-### Overview
+An automated trading research tool that identifies **Expected Value (EV)** opportunities in Polymarket’s Bitcoin "Up/Down" binary markets. It utilizes a dual-engine approach: quantitative Z-score modeling for probability estimation and a local LLM (via Ollama) for final technical analysis validation.
 
-BTC-Arb-Link is a high-frequency statistical arbitrage engine designed to exploit pricing discrepancies between live Bitcoin order flow and Polymarket binary prediction markets. The system leverages a non-blocking asynchronous architecture to process real-time market data and calculate execution signals using quantitative volatility modeling.
+## 🚀 Overview
 
----
+The engine monitors 1-minute BTC candles and cross-references them with Polymarket's order book. It calculates the mathematical probability of a "Price to Beat" settlement based on current volatility and time remaining, triggering an AI-assisted review when a significant "edge" is detected.
 
-### Core Technical Architecture
+### Key Components
 
-#### 1. Asynchronous Execution Core
-
-The engine is built on Python’s `asyncio` and `websockets` libraries. Unlike standard synchronous scripts that block execution during API calls, this system maintains a persistent connection to the Binance L1 WebSocket. While the engine performs heavy quantitative calculations or awaits an LLM response, the market listener continues to stream and buffer tick data without latency or connection drops.
-
-#### 2. Quantitative Volatility Model (Z-Score)
-
-Rather than relying on subjective technical analysis, the engine calculates the mathematical probability of price crossing the Polymarket strike using a time-scaled Z-Score model.
-
-* **Calculated Volatility:** Standard deviation derived from the preceding 10 minutes of one-minute klines.
-* **Time Scaling:** Volatility is scaled by the square root of time remaining in the market window ().
-* **Probability Output:** A cumulative distribution function (CDF) determines the statistical likelihood of a successful strike cross before market expiry.
-
-#### 3. Automated Market Discovery
-
-The "Auto-Slug Hunter" eliminates manual URL entry. It polls the Polymarket Gamma API to identify active 5-minute Bitcoin events. It evaluates candidate markets by their proximity to expiration and automatically locks onto the most imminent live window, resetting itself the moment the current market resolves.
-
-#### 4. Local EV Gatekeeper
-
-To optimize computational resources and API throughput, a local gatekeeper evaluates the Expected Value (EV) of every candle close. The system only triggers an external execution confirm when:
-
-* The mathematical EV exceeds a +8% threshold.
-* The model probability exceeds a 62% confidence level.
-* Market liquidity and time-decay constraints (90s - 270s) are met.
+* **Source of Truth:** Uses **Chainlink’s BTC/USD Aggregator** on Polygon for ultra-precise settlement pricing.
+* **Quantitative Gatekeeper:** Calculates probability using a time-scaled Z-score and the Error Function ().
+* **AI Validator:** Fires a background task to a local **Llama 3.2:3b** model to verify price action structure before signaling.
+* **Market Rolling:** Automatically increments the market slug (e.g., `...-14400` → `...-14700`) to follow the 5-minute cycle without manual restart.
 
 ---
 
-### Key Features
+## 🛠 Features
 
-* **Zero-Warmup Infiltration:** Prefills historical candlestick data via Binance REST API upon boot for instant trade readiness.
-* **Exponential Backoff:** Integrated rate-limit handling for external API dependencies.
-* **UTF-8 Enforcement:** Customized logging handlers to ensure data integrity across various terminal environments.
-* **Capital Preservation Logic:** Automatic "SKIP" triggers for Doji structures, low-volatility environments, and extreme crowd pricing.
-
----
-
-### Prerequisites
-
-* Python 3.10+
-* `websockets`
-* `aiohttp`
-* Google Gemini API Key (Flash 2.0 recommended for low-latency response)
+* **Real-time WebSocket:** Streams live candles from Binance.
+* **Kelly Criterion Integration:** Suggests optimal bet sizing based on calculated edge and bankroll.
+* **Wick & Body Analysis:** Filters out "noisy" price action like Dojis or extreme crowd sentiment (>97%).
+* **Auto-Correction:** If the local price deviates from the settlement source, it overrides Binance data with Chainlink data for accuracy.
 
 ---
 
-### Installation and Usage
+## 📋 Prerequisites
 
-1. Clone the repository.
-2. Install dependencies: `pip install websockets aiohttp`.
-3. Configure `GEMINI_API_KEY` within the script.
-4. Execute: `python poly_btc.py`.
+* **Python 3.10+**
+* **Ollama:** Must be running locally with the `llama3.2:3b` model (or update `LOCAL_AI_MODEL` in config).
+* **Active Internet Connection:** To fetch Gamma API (Polymarket) and Chainlink RPC data.
+
+### Installation
+
+1. **Clone the repo:**
+```bash
+git clone https://github.com/yourusername/btc-polymarket-arb.git
+cd btc-polymarket-arb
+
+```
+
+
+2. **Install dependencies:**
+```bash
+pip install aiohttp websockets
+
+```
+
+
 
 ---
 
-### Disclaimer
+## ⚙️ Configuration
 
-This software is for educational and research purposes only. Quantitative trading involves significant risk. The developers are not responsible for financial losses incurred through the use of this engine.
+You can tune the "Gatekeeper" in the script header to match your risk tolerance:
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `BANKROLL` | `15.0` | Your current available trading capital. |
+| `MIN_EV_PCT` | `0.1` | Minimum % Expected Value to trigger the AI. |
+| `MIN_SECONDS` | `10` | Won't trade if the market expires in <10s. |
+| `LOCAL_AI_URL` | `.../v1/...` | Endpoint for your local Ollama/Llama instance. |
+
+---
+
+## 🖥 Usage
+
+1. Start your local AI server (e.g., `ollama serve`).
+2. Run the engine:
+```bash
+python trading_engine.py
+
+```
+
+
+3. **Input:** When prompted, paste a Polymarket BTC Up/Down market URL or its slug.
+* *Example:* `https://polymarket.com/event/bitcoin-price-at-830-pm-et`
+
+
+
+---
+
+## 📈 Probability Logic
+
+The engine determines the "True Probability" () of a strike being hit using:
+
+Where:
+
+*  is the rolling standard deviation (volatility).
+*  is the minutes remaining until expiry.
+* The result is passed through the **Gaussian Error Function** to estimate the probability of the price finishing above or below the strike.
+
+---
+
+## ⚠️ Disclaimer
+
+**This is a research tool.** Trading binary options and crypto futures involves significant risk. The "decisions" provided by the local AI are based on technical patterns and statistical models, not financial advice. Use this code to inform your own strategies, not to trade blindly.
+
+---
