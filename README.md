@@ -68,7 +68,7 @@ You can tune the "Gatekeeper" in the script header to match your risk tolerance:
 1. Start your local AI server (e.g., `ollama serve`).
 2. Run the engine:
 ```bash
-python trading_engine.py
+python poly_btc.py
 
 ```
 
