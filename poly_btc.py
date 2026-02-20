@@ -1033,6 +1033,7 @@ async def agg_trade_listener():
 # ============================================================
 async def evaluation_loop(session: aiohttp.ClientSession):
     global target_slug, total_wins, total_losses, ai_call_in_flight
+    global poly_live_binance, poly_live_chainlink, live_price, live_candle
 
     log.info(f"[EVAL] Evaluation loop starting — tick every {EVAL_TICK_SECONDS}s")
     await asyncio.sleep(EVAL_TICK_SECONDS)   # let streams connect first
