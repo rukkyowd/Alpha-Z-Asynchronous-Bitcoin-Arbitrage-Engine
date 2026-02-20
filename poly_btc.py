@@ -97,6 +97,8 @@ market_family_prefix: str = ""
 total_wins          = 0
 total_losses        = 0
 active_predictions: dict = {}
+poly_live_binance: float = 0.0
+poly_live_chainlink: float = 0.0
 
 # Slugs with a committed UP/DOWN decision — never re-evaluated.
 committed_slugs: set = set()
@@ -114,7 +116,7 @@ market_open_prices: dict = {}
 strike_price_cache: dict = {}
 
 # ── CLOB client (initialised in main(), injected where needed) ──
-clob_client = None   # type: ClobClient | None
+clob_client = None  
 
 # ── Live price: written by the kline stream, read by evaluation loop ──
 live_price: float = 0.0
@@ -506,23 +508,32 @@ async def fetch_price_to_beat_for_market(session: aiohttp.ClientSession, slug: s
 # ASYNC I/O
 # ============================================================
 async def get_chainlink_price(session: aiohttp.ClientSession) -> float:
-    url     = "https://rpc.ankr.com/polygon"
+    # BTC/USD Feed on Polygon: 0xc907E116054Ad103354f2D350FD2455D0EB91572
+    url = "https://rpc.ankr.com/polygon"
     payload = {
-        "jsonrpc": "2.0", "method": "eth_call",
-        "params": [{"to": "0xc907E116054Ad103354f2D350FD2455D0EB91572",
-                    "data": "0xfeaf968c"}, "latest"],
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+            {
+                "to": "0xc907E116054Ad103354f2D350FD2455D0EB91572",
+                "data": "0xfeaf968c" # latestRoundData()
+            }, 
+            "latest"
+        ],
         "id": 1
     }
     try:
         async with session.post(url, json=payload, timeout=5) as r:
-            r.raise_for_status()
-            data   = await r.json()
+            data = await r.json()
             result = data.get("result")
-            if result and len(result) >= 130:
-                return int(result[66:130], 16) / 1e8
+            if result and result != "0x":
+                # Chainlink returns (roundId, answer, startedAt, updatedAt, answeredInRound)
+                # 'answer' is the second 32-byte word (index 66 to 130)
+                raw_price = int(result[66:130], 16)
+                return raw_price / 1e8  # BTC feed has 8 decimals
         return 0.0
     except Exception as e:
-        log.error(f"[CHAINLINK] {e}")
+        log.error(f"[CHAINLINK] RPC Error: {e}")
         return 0.0
 
 
@@ -1191,7 +1202,53 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             soft_skipped_slugs.add(slug)
             best_ev_seen[slug] = max(best_ev_seen.get(slug, -999.0), current_ev_pct)
 
+# ============================================================
+# CONCURRENT TASK 4: polymarket loop
+# =========
+async def polymarket_rtds_loop():
+    """
+    Listens to Polymarket's own price feed (Binance and Chainlink sources).
+    Useful for detecting 'Oracle Lag' before settlement.
+    """
+    global poly_live_binance, poly_live_chainlink
+    url = "wss://ws-live-data.polymarket.com"
+    
+    while True:
+        try:
+            async with websockets.connect(url) as ws:
+                # Helper to send heartbeat PINGs every 5s
+                async def heartbeat():
+                    while True:
+                        await asyncio.sleep(5)
+                        await ws.send("PING")
+                
+                heartbeat_task = asyncio.create_task(heartbeat())
+                
+                sub_msg = {
+                    "action": "subscribe",
+                    "subscriptions": [
+                        {"topic": "crypto_prices", "type": "update", "filters": "btcusdt"},
+                        {"topic": "crypto_prices_chainlink", "type": "*", "filters": "{\"symbol\":\"btc/usd\"}"}
+                    ]
+                }
+                await ws.send(json.dumps(sub_msg))
+                log.info("[POLY-RTDS] Subscribed to Binance & Chainlink.")
 
+                async for message in ws:
+                    # Handle PING/PONG (Send PING every 5s)
+                    # Note: Most libs handle PONG automatically if you send PING.
+                    data = json.loads(message)
+                    topic = data.get("topic")
+                    payload = data.get("payload", {})
+
+                    if topic == "crypto_prices":
+                        poly_live_binance = float(payload.get("value", 0))
+                    elif topic == "crypto_prices_chainlink":
+                        poly_live_chainlink = float(payload.get("value", 0))
+
+        except Exception as e:
+            log.warning(f"[POLY-RTDS] Error: {e}. Reconnecting in 5s...")
+            await asyncio.sleep(5)
 # ============================================================
 # HELPER
 # ============================================================
@@ -1246,6 +1303,7 @@ async def main():
         await asyncio.gather(
             kline_stream_loop(),       # candle history + VWAP
             agg_trade_listener(),      # live_price + CVD
+            polymarket_rtds_loop(),
             evaluation_loop(session),  # decision engine, fires every EVAL_TICK_SECONDS
         )
 
