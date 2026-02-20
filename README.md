@@ -34,7 +34,7 @@ The engine monitors 1-minute BTC candles and cross-references them with Polymark
 
 1. **Clone the repo:**
 ```bash
-git clone https://github.com/yourusername/btc-polymarket-arb.git
+git clone https://github.com/rukkyowd/btc-polymarket-arb.git
 cd btc-polymarket-arb
 
 ```
