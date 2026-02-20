@@ -26,8 +26,8 @@ SOCKET_TRADE    = "wss://stream.binance.com:9443/ws/btcusdt@aggTrade"
 LOCAL_AI_URL    = "http://localhost:11434/v1/chat/completions"
 LOCAL_AI_MODEL  = "llama3.2:3b"
 
-BANKROLL        = 15.0
-MAX_BET         = 2.0
+BANKROLL        = 6.41
+MAX_BET         = 1.01
 
 GAMMA_API       = "https://gamma-api.polymarket.com"
 
@@ -298,7 +298,23 @@ def compute_ev(true_prob_pct: float, market_prob_pct: float, max_bet: float) -> 
     edge           = prob - token
     b              = net_win / token
     kelly_fraction = max(0.0, (b * prob - (1 - prob)) / b)
-    kelly_bet      = round(min(kelly_fraction * BANKROLL * 0.25, max_bet), 2)
+    
+    # OLD LOGIC:
+    # kelly_bet      = round(min(kelly_fraction * BANKROLL * 0.25, max_bet), 2)
+    
+    # --- NEW LOGIC BELOW ---
+    raw_kelly_bet = kelly_fraction * BANKROLL * 0.25
+    
+    # If the mathematical bet is greater than 0 but less than $1.00, round it up to the minimum.
+    if 0 < raw_kelly_bet < 1.0:
+        kelly_bet = 1.01
+    else:
+        # Otherwise, take the normal Kelly bet, but cap it at max_bet
+        kelly_bet = min(raw_kelly_bet, max_bet)
+        
+    kelly_bet = round(kelly_bet, 2)
+    # -----------------------
+
     return {"ev": round(ev,4), "ev_pct": round(ev_pct,2), "edge": round(edge,4),
             "kelly_fraction": round(kelly_fraction,4), "kelly_bet": kelly_bet}
 
@@ -1244,7 +1260,7 @@ if __name__ == "__main__":
         raise SystemExit(1)
 
     print("\n" + "="*60)
-    print("  BTC/USDT → Polymarket Arbitrage Engine  (v5 - LIVE BETTING)")
+    print("  BTC/USDT → Polymarket Arbitrage Engine")
     print("="*60)
     print(f"\n  Seed slug:          {target_slug}")
     print(f"  Family prefix:      {market_family_prefix}")
