@@ -1,4 +1,4 @@
-# BTC Polymarket Arbitrage Engine (v5)
+# BTC Polymarket Arbitrage Engine
 
 A high-performance, asynchronous Python trading bot that executes statistical arbitrage between Binance BTC/USDT spot price movement and Polymarket "Up/Down" binary markets.
 
