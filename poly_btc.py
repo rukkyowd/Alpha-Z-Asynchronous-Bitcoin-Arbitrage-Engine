@@ -13,6 +13,9 @@ import io
 from collections import deque
 from urllib.parse import urlparse
 from datetime import datetime, timezone, timedelta
+from dotenv import load_dotenv
+
+load_dotenv()   # loads .env from cwd; safe no-op if absent
 
 # ============================================================
 # CONFIG
@@ -27,6 +30,20 @@ BANKROLL        = 15.0
 MAX_BET         = 2.0
 
 GAMMA_API       = "https://gamma-api.polymarket.com"
+
+# ── Polymarket CLOB betting ──────────────────────────────────
+CLOB_HOST        = "https://clob.polymarket.com"
+CHAIN_ID         = 137                               # Polygon mainnet
+
+# Wallet credentials — loaded from .env (never hardcode these)
+POLY_PRIVATE_KEY = os.getenv("POLY_PRIVATE_KEY", "")  # wallet private key
+POLY_FUNDER      = os.getenv("POLY_FUNDER", "")        # proxy/funder address
+# signature_type: 0=EOA, 1=email/Magic wallet, 2=browser wallet (MetaMask proxy)
+POLY_SIG_TYPE    = int(os.getenv("POLY_SIG_TYPE", "1"))
+
+# DRY_RUN=true  → log the bet but don't submit a real order (safe default)
+# DRY_RUN=false → live trading; real USDC at risk
+DRY_RUN          = os.getenv("DRY_RUN", "true").lower() != "false"
 
 # ── Thresholds ───────────────────────────────────────────────
 MIN_EV_PCT_TO_CALL_AI     = 0.1
@@ -95,6 +112,9 @@ best_ev_seen: dict = {}          # slug → float (ev_pct)
 ai_call_in_flight: str = ""
 market_open_prices: dict = {}
 strike_price_cache: dict = {}
+
+# ── CLOB client (initialised in main(), injected where needed) ──
+clob_client = None   # type: ClobClient | None
 
 # ── Live price: written by the kline stream, read by evaluation loop ──
 live_price: float = 0.0
@@ -556,6 +576,10 @@ async def _fetch_polymarket_odds(session: aiohttp.ClientSession, slug: str) -> d
                 prices            = json.loads(raw_prices) if isinstance(raw_prices, str) else raw_prices
                 strike_price      = await fetch_price_to_beat_for_market(session, slug)
 
+                # clobTokenIds[0] = YES/UP token, [1] = NO/DOWN token
+                raw_token_ids = market.get("clobTokenIds", "[]")
+                token_ids     = json.loads(raw_token_ids) if isinstance(raw_token_ids, str) else raw_token_ids
+
                 result = {
                     "market_found":      True,
                     "title":             event.get("title", slug),
@@ -564,6 +588,9 @@ async def _fetch_polymarket_odds(session: aiohttp.ClientSession, slug: str) -> d
                     "strike_price":      strike_price,
                     "seconds_remaining": seconds_remaining,
                     "start_date":        event.get("startDate", ""),
+                    # Token IDs needed to place orders via CLOB
+                    "token_id_up":       token_ids[0] if len(token_ids) > 0 else "",
+                    "token_id_down":     token_ids[1] if len(token_ids) > 1 else "",
                 }
                 log.info(f"[POLY] Strike=${strike_price:,.2f} | UP={result['up_prob']:.1f}% | "
                          f"DOWN={result['down_prob']:.1f}% | {int(seconds_remaining)}s left")
@@ -804,7 +831,7 @@ def _commit_decision(slug: str, result: dict, poly_data: dict, current_ev_pct: f
     if decision in ["UP", "DOWN"]:
         # Hard lock — this market is done, no re-evaluation ever.
         committed_slugs.add(slug)
-        soft_skipped_slugs.discard(slug)   # clean up if it was previously soft-skipped
+        soft_skipped_slugs.discard(slug)
         best_ev_seen.pop(slug, None)
         active_predictions[slug] = {"decision": decision, "strike": strike}
         log.info(
@@ -814,6 +841,10 @@ def _commit_decision(slug: str, result: dict, poly_data: dict, current_ev_pct: f
             f"  Reason: {result.get('reason','')}\n"
             f"{'━'*55}"
         )
+        # Place the bet — fire-and-forget so the engine never blocks on I/O
+        asyncio.create_task(
+            place_bet(slug, decision, result.get("bet_size", 0.0), poly_data)
+        )
     else:
         # Soft skip — remember it but stay re-evaluable.
         soft_skipped_slugs.add(slug)
@@ -821,6 +852,87 @@ def _commit_decision(slug: str, result: dict, poly_data: dict, current_ev_pct: f
         prev_best = best_ev_seen.get(slug, -999.0)
         best_ev_seen[slug] = max(prev_best, current_ev_pct)
         log.info(f"[SKIP] {slug} -- {result.get('reason','')} (EV={current_ev_pct:+.2f}%, best={best_ev_seen[slug]:+.2f}%)")
+
+# ============================================================
+# BET PLACEMENT  (fires once per committed UP/DOWN decision)
+# ============================================================
+async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
+    """
+    Places a FOK market order on Polymarket via the CLOB API.
+    - decision: "UP" buys the YES/UP token; "DOWN" buys the NO/DOWN token
+    - bet_size: USDC amount to spend
+    - Uses DRY_RUN flag: if True, logs the order but never submits it
+    - All errors are caught and logged — a failed bet never crashes the engine
+    """
+    global clob_client
+
+    token_id = (
+        poly_data.get("token_id_up",   "")
+        if decision == "UP"
+        else poly_data.get("token_id_down", "")
+    )
+    market_prob = poly_data["up_prob"] if decision == "UP" else poly_data["down_prob"]
+    # Price for a FOK market order: use current market price (probability / 100)
+    # Polymarket prices are in cents (0.00–1.00)
+    price = round(market_prob / 100.0, 4)
+
+    if not token_id:
+        log.error(f"[BET] ✗ No token_id for {decision} on {slug} — cannot place bet")
+        return
+
+    if DRY_RUN:
+        log.info(
+            f"\n{'─'*55}\n"
+            f"  [DRY RUN] Would place bet:\n"
+            f"    Market:   {slug}\n"
+            f"    Decision: {decision}  (token: ...{token_id[-12:]})\n"
+            f"    Size:     ${bet_size:.2f} USDC\n"
+            f"    Price:    {price:.4f} ({market_prob:.1f}%)\n"
+            f"  Set DRY_RUN=false in .env to trade live.\n"
+            f"{'─'*55}"
+        )
+        return
+
+    if clob_client is None:
+        log.error("[BET] ✗ CLOB client not initialised — check POLY_PRIVATE_KEY in .env")
+        return
+
+    try:
+        from py_clob_client.clob_types import MarketOrderArgs, OrderType
+        from py_clob_client.order_builder.constants import BUY
+
+        order_args = MarketOrderArgs(
+            token_id   = token_id,
+            amount     = bet_size,   # USDC amount (not shares)
+            side       = BUY,
+        )
+
+        # create_market_order and post_order are synchronous — run in thread
+        signed = await asyncio.to_thread(clob_client.create_market_order, order_args)
+        resp   = await asyncio.to_thread(clob_client.post_order, signed, OrderType.FOK)
+
+        status     = resp.get("status",    "unknown")
+        order_id   = resp.get("orderID",   resp.get("id", "?"))
+        error_msg  = resp.get("errorMsg",  "")
+        filled     = resp.get("sizeFilled", "?")
+
+        if status == "matched":
+            log.info(
+                f"\n{'━'*55}\n"
+                f"  ✅ BET PLACED: {decision} on {slug}\n"
+                f"     Order ID:  {order_id}\n"
+                f"     Size:      ${bet_size:.2f} USDC  |  Filled: {filled}\n"
+                f"     Price:     {price:.4f} ({market_prob:.1f}%)\n"
+                f"{'━'*55}"
+            )
+        else:
+            log.warning(
+                f"[BET] ⚠️  Order not matched: status={status} "
+                f"id={order_id} err='{error_msg}'"
+            )
+
+    except Exception as e:
+        log.error(f"[BET] ✗ Exception placing bet for {slug}: {type(e).__name__}: {e}")
 
 # ============================================================
 # CONCURRENT TASK 1: kline stream
@@ -1080,7 +1192,28 @@ async def _prefetch_strike(session: aiohttp.ClientSession, slug: str):
 # ENTRY POINT
 # ============================================================
 async def main():
-    global target_slug, market_family_prefix
+    global target_slug, market_family_prefix, clob_client
+
+    # ── Initialise CLOB client ────────────────────────────────
+    if not POLY_PRIVATE_KEY:
+        log.warning("[CLOB] POLY_PRIVATE_KEY not set — running in DRY_RUN mode regardless of .env")
+    else:
+        try:
+            from py_clob_client.client import ClobClient
+            _kwargs = dict(host=CLOB_HOST, key=POLY_PRIVATE_KEY, chain_id=CHAIN_ID)
+            if POLY_FUNDER:
+                _kwargs["signature_type"] = POLY_SIG_TYPE
+                _kwargs["funder"]         = POLY_FUNDER
+            clob_client = ClobClient(**_kwargs)
+            # Derive/create API credentials (L2 auth header) — required for order placement
+            clob_client.set_api_creds(clob_client.create_or_derive_api_creds())
+            log.info(f"[CLOB] Client initialised. DRY_RUN={DRY_RUN}")
+        except ImportError:
+            log.error("[CLOB] py-clob-client not installed. Run: pip install py-clob-client")
+            log.error("[CLOB] Continuing in DRY_RUN mode.")
+        except Exception as e:
+            log.error(f"[CLOB] Failed to initialise client: {e}")
+            log.error("[CLOB] Continuing in DRY_RUN mode.")
 
     async with aiohttp.ClientSession() as session:
         # Seed history and indicators before anything else
@@ -1111,13 +1244,19 @@ if __name__ == "__main__":
         raise SystemExit(1)
 
     print("\n" + "="*60)
-    print("  BTC/USDT → Polymarket Arbitrage Engine")
+    print("  BTC/USDT → Polymarket Arbitrage Engine  (v5 - LIVE BETTING)")
     print("="*60)
     print(f"\n  Seed slug:          {target_slug}")
     print(f"  Family prefix:      {market_family_prefix}")
     print(f"  Local AI endpoint:  {LOCAL_AI_URL}")
     print(f"  Local AI model:     {LOCAL_AI_MODEL}")
     print(f"  History window:     {MAX_HISTORY} candles")
+    print(f"\n  Betting:")
+    print(f"    Mode:             {'⚠️  DRY RUN (no real orders)' if DRY_RUN else '🔴 LIVE — real USDC at risk'}")
+    print(f"    Wallet key set:   {'Yes' if POLY_PRIVATE_KEY else 'No (set POLY_PRIVATE_KEY in .env)'}")
+    print(f"    Funder set:       {'Yes' if POLY_FUNDER else 'No (set POLY_FUNDER in .env)'}")
+    print(f"    Sig type:         {POLY_SIG_TYPE}  (0=EOA, 1=email/Magic, 2=MetaMask proxy)")
+    print(f"    Max bet:          ${MAX_BET:.2f} USDC")
     print(f"\n  Concurrent tasks:")
     print(f"    ✓ kline_stream_loop   — candle history, VWAP, CVD snapshot")
     print(f"    ✓ agg_trade_listener  — live price, CVD (trade-level)")
