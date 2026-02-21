@@ -1045,8 +1045,17 @@ async def evaluation_loop(session: aiohttp.ClientSession):
         if not candle_history or not live_candle:
             continue
 
-        slug          = target_slug
-        current_price = live_price if live_price > 0 else float(live_candle.get('c', 0))
+        slug = target_slug
+        
+        # FIX: Prioritize the Polymarket RTDS Binance feed.
+        # Fallback to direct aggTrade, then fallback to kline close.
+        if poly_live_binance > 0:
+            current_price = poly_live_binance
+        elif live_price > 0:
+            current_price = live_price
+        else:
+            current_price = float(live_candle.get('c', 0))
+
         if current_price == 0:
             continue
 

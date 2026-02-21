@@ -104,3 +104,93 @@
 2026-02-20 17:19:30,611 [INFO] [LOCK] btc-updown-5m-1771622100 committed -- holding (29s left).
 2026-02-20 17:19:35,677 [INFO] [POLY] Strike=$67,699.16 | UP=50.5% | DOWN=49.5% | 24s left
 2026-02-20 17:19:35,677 [INFO] [LOCK] btc-updown-5m-1771622100 committed -- holding (24s left).
+2026-02-20 17:19:40,746 [INFO] [POLY] Strike=$67,699.16 | UP=50.5% | DOWN=49.5% | 19s left
+2026-02-20 17:19:40,747 [INFO] [LOCK] btc-updown-5m-1771622100 committed -- holding (19s left).
+2026-02-20 17:19:45,805 [INFO] [POLY] Strike=$67,699.16 | UP=50.5% | DOWN=49.5% | 14s left
+2026-02-20 17:19:45,805 [INFO] [LOCK] btc-updown-5m-1771622100 committed -- holding (14s left).
+2026-02-20 17:19:50,872 [INFO] [POLY] Strike=$67,699.16 | UP=50.5% | DOWN=49.5% | 9s left
+2026-02-20 17:19:50,873 [INFO] [LOCK] btc-updown-5m-1771622100 committed -- holding (9s left).
+2026-02-20 17:19:55,932 [INFO] [POLY] Strike=$67,699.16 | UP=50.5% | DOWN=49.5% | 4s left
+2026-02-20 17:19:55,933 [INFO] [LOCK] btc-updown-5m-1771622100 committed -- holding (4s left).
+2026-02-20 17:19:58,685 [INFO] [CANDLE] BULLISH | O:67685.44 H:67732.00 L:67676.67 C:67731.99 | VWAP: $67,701.00
+2026-02-20 17:20:00,996 [INFO] [POLY] Strike=$67,699.16 | UP=50.5% | DOWN=49.5% | 0s left
+2026-02-20 17:20:00,996 [INFO] [LOSS] btc-updown-5m-1771622100: predicted DOWN, actual UP | $67,699.16 → $67,722.00
+2026-02-20 17:20:00,997 [INFO] [STATS] W:0 L:1 | WinRate:0.00%
+2026-02-20 17:20:00,999 [INFO] [ROLL] btc-updown-5m-1771622100 → btc-updown-5m-1771622400
+2026-02-20 17:20:04,010 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771622400' via Chainlink API...
+2026-02-20 17:20:04,192 [WARNING] [STRIKE] openPrice missing: {'openPrice': None, 'closePrice': None, 'timestamp': 1771622397055, 'completed': False, 'incomplete': True, 'cached': False}
+2026-02-20 17:20:04,192 [WARNING] [STRIKE] Pre-fetch returned 0 for 'btc-updown-5m-1771622400' -- will retry on next eval tick.
+2026-02-20 17:20:06,064 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771622400' via Chainlink API...
+2026-02-20 17:20:06,145 [INFO] [STRIKE] ✓ Price to Beat for 'btc-updown-5m-1771622400': $67,710.57
+2026-02-20 17:20:06,146 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 293s left
+2026-02-20 17:20:06,146 [INFO] [RULE] Score=-2/4 → SKIP | Signals oppose UP (score=-2). Above VWAP +$21 (+1) | 9-EMA < 21-EMA (-1) | CVD sell $-51,952 (-1) | Math edge -5.9% vs crowd (-1) (EV=+9.78%)
+2026-02-20 17:20:11,205 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 288s left
+2026-02-20 17:20:16,319 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 283s left
+2026-02-20 17:20:21,412 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 278s left
+2026-02-20 17:20:26,469 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 273s left
+2026-02-20 17:20:26,470 [INFO] [RULE] Score=0/4 → SKIP | Neutral (score=0). Above VWAP +$21 (+1) | 9-EMA < 21-EMA (-1) | CVD buy +$5,267 (+1) | Math edge -6.1% vs crowd (-1) (EV=+10.17%)
+2026-02-20 17:20:31,526 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 268s left
+2026-02-20 17:20:36,578 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 263s left
+2026-02-20 17:20:36,579 [INFO] [REEVAL] ✓ btc-updown-5m-1771622400 previously skipped — signals now favour DOWN (score=1/4, EV=+5.76%) — committing!
+2026-02-20 17:20:36,580 [INFO] [RULE] Score=1/4 → DOWN | Above VWAP +$5 (-1) | 9-EMA < 21-EMA (+1) | CVD sell $-68,847 (+1) | Math edge +2.9% (0)
+2026-02-20 17:20:36,580 [INFO] [AI CONFIRM] Borderline score -- asking Ollama (call #1)...
+2026-02-20 17:20:41,632 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 258s left
+2026-02-20 17:20:41,633 [INFO] [LOCK] AI confirming btc-updown-5m-1771622400 -- waiting.
+2026-02-20 17:20:46,710 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 253s left
+2026-02-20 17:20:46,710 [INFO] [LOCK] AI confirming btc-updown-5m-1771622400 -- waiting.
+2026-02-20 17:20:51,773 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 248s left
+2026-02-20 17:20:51,774 [INFO] [LOCK] AI confirming btc-updown-5m-1771622400 -- waiting.
+2026-02-20 17:20:53,669 [INFO] [AI CONFIRM] Response: 'DOWN' (17.1s)
+2026-02-20 17:20:53,669 [INFO] 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  DECISION LOCKED: DOWN  |  Confidence: Low  |  Bet: $1.00
+  Score: 1/4  |  Strike: $67,710.57
+  Reason: AI confirmed: Above VWAP +$5 (-1) | 9-EMA < 21-EMA (+1) | CVD sell $-68,847 (+1) | Math edge +2.9% (0)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-02-20 17:20:53,670 [INFO] 
+───────────────────────────────────────────────────────
+  [DRY RUN] Would place bet:
+    Market:   btc-updown-5m-1771622400
+    Decision: DOWN  (token: ...061256337653)
+    Size:     $1.00 USDC
+    Price:    0.4950 (49.5%)
+  Set DRY_RUN=false in .env to trade live.
+───────────────────────────────────────────────────────
+2026-02-20 17:20:56,823 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 243s left
+2026-02-20 17:20:56,823 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (243s left).
+2026-02-20 17:20:58,686 [INFO] [CANDLE] BEARISH | O:67731.99 H:67731.99 L:67705.52 C:67705.90 | VWAP: $67,701.05
+2026-02-20 17:21:01,874 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 238s left
+2026-02-20 17:21:01,875 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (238s left).
+2026-02-20 17:21:06,940 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 233s left
+2026-02-20 17:21:06,941 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (233s left).
+2026-02-20 17:21:12,007 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 227s left
+2026-02-20 17:21:12,007 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (227s left).
+2026-02-20 17:21:17,078 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 222s left
+2026-02-20 17:21:17,079 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (222s left).
+2026-02-20 17:21:22,140 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 217s left
+2026-02-20 17:21:22,140 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (217s left).
+2026-02-20 17:21:27,191 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 212s left
+2026-02-20 17:21:27,191 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (212s left).
+2026-02-20 17:21:32,241 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 207s left
+2026-02-20 17:21:32,241 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (207s left).
+2026-02-20 17:21:37,295 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 202s left
+2026-02-20 17:21:37,295 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (202s left).
+2026-02-20 17:21:42,342 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 197s left
+2026-02-20 17:21:42,342 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (197s left).
+2026-02-20 17:21:47,422 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 192s left
+2026-02-20 17:21:47,423 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (192s left).
+2026-02-20 17:21:52,479 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 187s left
+2026-02-20 17:21:52,480 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (187s left).
+2026-02-20 17:21:57,531 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 182s left
+2026-02-20 17:21:57,532 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (182s left).
+2026-02-20 17:21:58,675 [INFO] [CANDLE] BEARISH | O:67705.91 H:67710.00 L:67697.53 C:67701.58 | VWAP: $67,701.06
+2026-02-20 17:22:02,593 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 177s left
+2026-02-20 17:22:02,594 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (177s left).
+2026-02-20 17:22:07,652 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 172s left
+2026-02-20 17:22:07,652 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (172s left).
+2026-02-20 17:22:12,722 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 167s left
+2026-02-20 17:22:12,722 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (167s left).
+2026-02-20 17:22:17,776 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 162s left
+2026-02-20 17:22:17,777 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (162s left).
+2026-02-20 17:22:22,836 [INFO] [POLY] Strike=$67,710.57 | UP=50.5% | DOWN=49.5% | 157s left
+2026-02-20 17:22:22,837 [INFO] [LOCK] btc-updown-5m-1771622400 committed -- holding (157s left).
