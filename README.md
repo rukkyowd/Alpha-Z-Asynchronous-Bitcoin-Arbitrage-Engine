@@ -107,7 +107,9 @@ The Alpha-Z asynchronous architecture is highly validated for trending market re
 
 ### 📈 Engine Performance Charts
 
-*(Make sure to create an `images` folder in your repo and upload the PNG files there for these to display!)*
+![Win Rate Over Time](images/win_rate_over_time.png)
+
+![BTC Price Action](images/btc_price_action.png)
 
 ---
 
