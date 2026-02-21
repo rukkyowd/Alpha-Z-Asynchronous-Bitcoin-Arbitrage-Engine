@@ -97,8 +97,6 @@ market_family_prefix: str = ""
 total_wins          = 0
 total_losses        = 0
 active_predictions: dict = {}
-poly_live_binance: float = 0.0
-poly_live_chainlink: float = 0.0
 
 # Slugs with a committed UP/DOWN decision — never re-evaluated.
 committed_slugs: set = set()
@@ -116,9 +114,12 @@ market_open_prices: dict = {}
 strike_price_cache: dict = {}
 
 # ── CLOB client (initialised in main(), injected where needed) ──
-clob_client = None  
+clob_client = None
 
-# ── Live price: written by the kline stream, read by evaluation loop ──
+# ── Live price: written by aggTrade stream, read by evaluation loop ──
+# This is tick-by-tick Binance spot price (~$1-3 of Chainlink at all times).
+# Chainlink itself aggregates from Binance and other CEX feeds, so this is
+# effectively the same data Polymarket's oracle uses for settlement.
 live_price: float = 0.0
 
 # ── Live candle accumulator ──────────────────────────────────
@@ -300,22 +301,16 @@ def compute_ev(true_prob_pct: float, market_prob_pct: float, max_bet: float) -> 
     edge           = prob - token
     b              = net_win / token
     kelly_fraction = max(0.0, (b * prob - (1 - prob)) / b)
-    
-    # OLD LOGIC:
-    # kelly_bet      = round(min(kelly_fraction * BANKROLL * 0.25, max_bet), 2)
-    
-    # --- NEW LOGIC BELOW ---
+
     raw_kelly_bet = kelly_fraction * BANKROLL * 0.25
-    
-    # If the mathematical bet is greater than 0 but less than $1.00, round it up to the minimum.
+
+    # If the mathematical bet is greater than 0 but less than $1.00, round up to minimum.
     if 0 < raw_kelly_bet < 1.0:
         kelly_bet = 1.01
     else:
-        # Otherwise, take the normal Kelly bet, but cap it at max_bet
         kelly_bet = min(raw_kelly_bet, max_bet)
-        
+
     kelly_bet = round(kelly_bet, 2)
-    # -----------------------
 
     return {"ev": round(ev,4), "ev_pct": round(ev_pct,2), "edge": round(edge,4),
             "kelly_fraction": round(kelly_fraction,4), "kelly_bet": kelly_bet}
@@ -427,7 +422,7 @@ def calculate_rsi(closes: list[float], period: int = 14) -> float:
     return round(100 - (100 / (1 + rs)), 1)
 
 # ============================================================
-# FETCH PRICE TO BEAT
+# FETCH PRICE TO BEAT (strike price via Polymarket's Chainlink API)
 # ============================================================
 async def fetch_market_meta_from_slug(session: aiohttp.ClientSession, slug: str) -> dict | None:
     try:
@@ -507,34 +502,6 @@ async def fetch_price_to_beat_for_market(session: aiohttp.ClientSession, slug: s
 # ============================================================
 # ASYNC I/O
 # ============================================================
-async def get_chainlink_price(session: aiohttp.ClientSession) -> float:
-    url = "https://polygon.drpc.org"
-    payload = {
-        "jsonrpc": "2.0",
-        "method": "eth_call",
-        "params": [
-            {
-                "to": "0xc907E116054Ad103354f2D350FD2455D0EB91572",
-                "data": "0xfeaf968c"
-            }, 
-            "latest"
-        ],
-        "id": 1
-    }
-    try:
-        async with session.post(url, json=payload, timeout=5) as r:
-            data = await r.json()
-            log.info(f"[CHAINLINK DEBUG] Status={r.status} Response={str(data)[:200]}")
-            result = data.get("result")
-            if result and result != "0x":
-                raw_price = int(result[66:130], 16)
-                return raw_price / 1e8
-        return 0.0
-    except Exception as e:
-        log.error(f"[CHAINLINK] RPC Error: {e}")
-        return 0.0
-
-
 async def prefill_history(session: aiohttp.ClientSession):
     global cvd_snapshot_at_candle_open
     log.info(f"[SYSTEM] Prefilling {MAX_HISTORY} candles from Binance REST API...")
@@ -1024,14 +991,16 @@ async def agg_trade_listener():
 # ============================================================
 # CONCURRENT TASK 3: evaluation loop
 #   - Fires every EVAL_TICK_SECONDS
-#   - Uses live_price + live_candle (not gated on candle close)
+#   - Uses live_price (Binance aggTrade) as primary price source.
+#     Binance aggTrade is tick-by-tick and within $1-3 of Chainlink
+#     at all times since Chainlink aggregates from Binance and other CEXes.
 #   - UP/DOWN decisions are committed and locked forever per market
 #   - SKIP decisions are soft — rule engine re-runs every tick freely;
 #     commits only when signals flip to UP/DOWN
 # ============================================================
 async def evaluation_loop(session: aiohttp.ClientSession):
     global target_slug, total_wins, total_losses, ai_call_in_flight
-    global poly_live_binance, poly_live_chainlink, live_price, live_candle
+    global live_price, live_candle
 
     log.info(f"[EVAL] Evaluation loop starting — tick every {EVAL_TICK_SECONDS}s")
     await asyncio.sleep(EVAL_TICK_SECONDS)   # let streams connect first
@@ -1044,15 +1013,10 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             continue
 
         slug = target_slug
-        
-        # FIX: Prioritize the Polymarket RTDS Binance feed.
-        # Fallback to direct aggTrade, then fallback to kline close.
-        if poly_live_binance > 0:
-            current_price = poly_live_binance
-        elif live_price > 0:
-            current_price = live_price
-        else:
-            current_price = float(live_candle.get('c', 0))
+
+        # Use Binance aggTrade as primary price source (tick-by-tick).
+        # Fallback to kline close if aggTrade hasn't received a tick yet.
+        current_price = live_price if live_price > 0 else float(live_candle.get('c', 0))
 
         if current_price == 0:
             continue
@@ -1211,31 +1175,6 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             best_ev_seen[slug] = max(best_ev_seen.get(slug, -999.0), current_ev_pct)
 
 # ============================================================
-# CONCURRENT TASK 4: Chainlink oracle price poller
-#   Reads directly from the same Polygon smart contract
-#   Polymarket uses for settlement. No API key needed.
-# ============================================================
-async def polymarket_rtds_loop():
-    global poly_live_binance
-    POLL_INTERVAL = 2.0
-
-    log.info("[CHAINLINK] Starting Chainlink oracle price poller...")
-
-    async with aiohttp.ClientSession() as session:
-        while True:
-            try:
-                price = await get_chainlink_price(session)
-                if price > 0:
-                    poly_live_binance = price
-                    log.debug(f"[CHAINLINK] Oracle: ${price:,.2f}")
-                else:
-                    log.warning("[CHAINLINK] Returned 0 — fallback to Binance aggTrade")
-            except Exception as e:
-                log.warning(f"[CHAINLINK] Error: {e}")
-
-            await asyncio.sleep(POLL_INTERVAL)
-
-# ============================================================
 # HELPER
 # ============================================================
 async def _prefetch_strike(session: aiohttp.ClientSession, slug: str):
@@ -1275,25 +1214,6 @@ async def main():
     async with aiohttp.ClientSession() as session:
         await prefill_history(session)
 
-        # ── Probe crypto-price response shape once at startup ──
-        try:
-            now    = datetime.now(timezone.utc)
-            end_dt = now + timedelta(seconds=30)
-            async with session.get(
-                "https://polymarket.com/api/crypto/crypto-price",
-                params={
-                    "symbol":         "BTC",
-                    "eventStartTime": (end_dt - timedelta(minutes=10)).strftime('%Y-%m-%dT%H:%M:%SZ'),
-                    "variant":        "fiveminute",
-                    "endDate":        end_dt.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                },
-                timeout=aiohttp.ClientTimeout(total=5)
-            ) as r:
-                raw = await r.text()
-                log.info(f"[POLY-PRICE DEBUG] Status={r.status} Body={raw[:300]}")
-        except Exception as e:
-            log.warning(f"[POLY-PRICE DEBUG] Failed: {e}")
-
         initial_strike = await fetch_price_to_beat_for_market(session, target_slug)
         if initial_strike > 0:
             log.info(f"[STRIKE] Seed market strike pre-loaded: ${initial_strike:,.2f}")
@@ -1303,7 +1223,6 @@ async def main():
         await asyncio.gather(
             kline_stream_loop(),
             agg_trade_listener(),
-            polymarket_rtds_loop(),
             evaluation_loop(session),
         )
 
@@ -1335,7 +1254,9 @@ if __name__ == "__main__":
     print(f"    ✓ kline_stream_loop   — candle history, VWAP, CVD snapshot")
     print(f"    ✓ agg_trade_listener  — live price, CVD (trade-level)")
     print(f"    ✓ evaluation_loop     — fires every {EVAL_TICK_SECONDS}s, one decision per market")
-    print(f"    ✓ polymarket_rtds_loop — Chainlink oracle price (Polygon RPC, no key needed)")
+    print(f"\n  Price source:")
+    print(f"    ✓ Binance aggTrade (tick-by-tick, ~$1-3 of Chainlink oracle)")
+    print(f"    ✓ Kline close as fallback if aggTrade lags")
     print(f"\n  Thresholds:")
     print(f"    Min EV:           {MIN_EV_PCT_TO_CALL_AI}%")
     print(f"    Time window:      {MIN_SECONDS_REMAINING}s – {MAX_SECONDS_FOR_NEW_BET}s")

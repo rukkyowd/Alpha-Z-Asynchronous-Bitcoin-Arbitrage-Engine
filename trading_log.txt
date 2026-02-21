@@ -32298,3 +32298,1473 @@ websockets.exceptions.ConnectionClosedError: no close frame received or sent
 2026-02-21 12:20:30,408 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
 2026-02-21 12:20:34,974 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 265s left
 2026-02-21 12:20:34,974 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (265s left).
+2026-02-21 12:20:40,032 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 259s left
+2026-02-21 12:20:40,033 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (259s left).
+2026-02-21 12:20:45,099 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 254s left
+2026-02-21 12:20:45,100 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (254s left).
+2026-02-21 12:20:50,164 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 249s left
+2026-02-21 12:20:50,165 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (249s left).
+2026-02-21 12:20:55,226 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 244s left
+2026-02-21 12:20:55,226 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (244s left).
+2026-02-21 12:21:00,029 [INFO] [CANDLE] BULLISH | O:68262.36 H:68279.43 L:68256.30 C:68279.42 | VWAP: $68,109.44
+2026-02-21 12:21:00,274 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 239s left
+2026-02-21 12:21:00,274 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (239s left).
+2026-02-21 12:21:05,456 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 234s left
+2026-02-21 12:21:05,456 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (234s left).
+2026-02-21 12:21:10,518 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 229s left
+2026-02-21 12:21:10,518 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (229s left).
+2026-02-21 12:21:15,602 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 224s left
+2026-02-21 12:21:15,603 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (224s left).
+2026-02-21 12:21:20,657 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 219s left
+2026-02-21 12:21:20,658 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (219s left).
+2026-02-21 12:21:21,077 [INFO] HTTP Request: POST https://clob.polymarket.com/auth/api-key "HTTP/2 400 Bad Request"
+2026-02-21 12:21:21,208 [INFO] HTTP Request: GET https://clob.polymarket.com/auth/derive-api-key "HTTP/2 200 OK"
+2026-02-21 12:21:21,209 [INFO] [CLOB] Client initialised. DRY_RUN=True
+2026-02-21 12:21:21,210 [INFO] [SYSTEM] Prefilling 120 candles from Binance REST API...
+2026-02-21 12:21:21,440 [INFO] [VWAP] Session reset for 2026-02-21
+2026-02-21 12:21:21,442 [INFO] [OK] 120 candles loaded. VWAP seeded at $68,491.41
+2026-02-21 12:21:21,750 [INFO] [POLY-PRICE DEBUG] Status=200 Body={"openPrice":68388.91826891433,"closePrice":68270.94897524946,"timestamp":1771690881855,"completed":true,"incomplete":false,"cached":true}
+2026-02-21 12:21:21,751 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771690800' via Chainlink API...
+2026-02-21 12:21:22,020 [INFO] [STRIKE] ✓ Price to Beat for 'btc-updown-5m-1771690800': $68,249.45
+2026-02-21 12:21:22,021 [INFO] [STRIKE] Seed market strike pre-loaded: $68,249.45
+2026-02-21 12:21:22,021 [INFO] [KLINE] Connecting to Binance kline stream...
+2026-02-21 12:21:22,052 [INFO] [CVD] Connecting to aggTrade stream...
+2026-02-21 12:21:22,054 [INFO] [CHAINLINK] Starting Chainlink oracle price poller...
+2026-02-21 12:21:22,056 [INFO] [EVAL] Evaluation loop starting — tick every 5s
+2026-02-21 12:21:22,218 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:22,219 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:22,994 [INFO] [CVD] aggTrade stream connected.
+2026-02-21 12:21:24,294 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:24,294 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:25,718 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 214s left
+2026-02-21 12:21:25,718 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (214s left).
+2026-02-21 12:21:26,357 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:26,357 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:28,411 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:28,412 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:30,482 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:30,482 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:30,770 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 209s left
+2026-02-21 12:21:30,771 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (209s left).
+2026-02-21 12:21:32,116 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 207s left
+2026-02-21 12:21:32,117 [INFO] [RULE] Score=4/4 → DOWN | Below VWAP -$276 (+1) | 9-EMA < 21-EMA (+1) | CVD sell $-456,852 (+1) | Math edge +21.6% vs crowd (+1)
+2026-02-21 12:21:32,117 [INFO] 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  DECISION LOCKED: DOWN  |  Confidence: High  |  Bet: $1.01
+  Score: 4/4  |  Strike: $68,249.45
+  Reason: Below VWAP -$276 (+1) | 9-EMA < 21-EMA (+1) | CVD sell $-456,852 (+1) | Math edge +21.6% vs crowd (+1)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-02-21 12:21:32,118 [INFO] 
+───────────────────────────────────────────────────────
+  [DRY RUN] Would place bet:
+    Market:   btc-updown-5m-1771690800
+    Decision: DOWN  (token: ...460076020987)
+    Size:     $1.01 USDC
+    Price:    0.4950 (49.5%)
+  Set DRY_RUN=false in .env to trade live.
+───────────────────────────────────────────────────────
+2026-02-21 12:21:32,560 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:32,560 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:34,611 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:34,612 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:35,828 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 204s left
+2026-02-21 12:21:35,829 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (204s left).
+2026-02-21 12:21:36,668 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:36,669 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:37,166 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 202s left
+2026-02-21 12:21:37,166 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (202s left).
+2026-02-21 12:21:38,742 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:38,742 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:40,790 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:40,791 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:40,882 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 199s left
+2026-02-21 12:21:40,883 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (199s left).
+2026-02-21 12:21:42,221 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 197s left
+2026-02-21 12:21:42,222 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (197s left).
+2026-02-21 12:21:42,851 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:42,852 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:44,917 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:44,917 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:45,956 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 194s left
+2026-02-21 12:21:45,956 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (194s left).
+2026-02-21 12:21:46,986 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:46,987 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:47,277 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 192s left
+2026-02-21 12:21:47,277 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (192s left).
+2026-02-21 12:21:49,043 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:49,044 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:51,021 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 188s left
+2026-02-21 12:21:51,021 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (188s left).
+2026-02-21 12:21:51,105 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:51,106 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:52,341 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 187s left
+2026-02-21 12:21:52,350 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (187s left).
+2026-02-21 12:21:53,165 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:53,165 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:55,225 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:55,226 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:56,077 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 183s left
+2026-02-21 12:21:56,077 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (183s left).
+2026-02-21 12:21:57,278 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:57,279 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:57,397 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 182s left
+2026-02-21 12:21:57,398 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (182s left).
+2026-02-21 12:21:59,335 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:21:59,336 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:21:59,988 [INFO] [CANDLE] BEARISH | O:68279.43 H:68279.43 L:68193.69 C:68214.32 | VWAP: $68,110.05
+2026-02-21 12:22:01,143 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 178s left
+2026-02-21 12:22:01,143 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (178s left).
+2026-02-21 12:22:01,393 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:01,394 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:02,450 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 177s left
+2026-02-21 12:22:02,451 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (177s left).
+2026-02-21 12:22:03,462 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:03,463 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:05,523 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:05,523 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:06,202 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 173s left
+2026-02-21 12:22:06,203 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (173s left).
+2026-02-21 12:22:07,522 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 172s left
+2026-02-21 12:22:07,523 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (172s left).
+2026-02-21 12:22:07,597 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:07,597 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:09,656 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:09,656 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:11,259 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 168s left
+2026-02-21 12:22:11,260 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (168s left).
+2026-02-21 12:22:11,719 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:11,719 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:12,576 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 167s left
+2026-02-21 12:22:12,577 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (167s left).
+2026-02-21 12:22:13,805 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:13,806 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:15,868 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:15,869 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:16,328 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 163s left
+2026-02-21 12:22:16,329 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (163s left).
+2026-02-21 12:22:17,632 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 162s left
+2026-02-21 12:22:17,632 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (162s left).
+2026-02-21 12:22:17,924 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:17,924 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:19,975 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:19,976 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:21,385 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 158s left
+2026-02-21 12:22:21,386 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (158s left).
+2026-02-21 12:22:22,032 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:22,033 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:22,692 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 157s left
+2026-02-21 12:22:22,693 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (157s left).
+2026-02-21 12:22:24,090 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:24,090 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:26,161 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:26,161 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:26,454 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 153s left
+2026-02-21 12:22:26,454 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (153s left).
+2026-02-21 12:22:27,746 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 152s left
+2026-02-21 12:22:27,747 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (152s left).
+2026-02-21 12:22:28,221 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:28,221 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:30,283 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:30,283 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:31,507 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 148s left
+2026-02-21 12:22:31,507 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (148s left).
+2026-02-21 12:22:32,340 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:32,341 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:32,809 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 147s left
+2026-02-21 12:22:32,810 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (147s left).
+2026-02-21 12:22:34,397 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:34,397 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:36,454 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:36,455 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:36,578 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 143s left
+2026-02-21 12:22:36,578 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (143s left).
+2026-02-21 12:22:37,879 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 142s left
+2026-02-21 12:22:37,879 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (142s left).
+2026-02-21 12:22:38,534 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:38,535 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:40,595 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:40,596 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:41,638 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 138s left
+2026-02-21 12:22:41,638 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (138s left).
+2026-02-21 12:22:42,670 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:42,681 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:42,941 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 137s left
+2026-02-21 12:22:42,941 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (137s left).
+2026-02-21 12:22:44,740 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:44,740 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:46,705 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 133s left
+2026-02-21 12:22:46,706 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (133s left).
+2026-02-21 12:22:46,795 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:46,796 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:47,986 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 132s left
+2026-02-21 12:22:47,986 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (132s left).
+2026-02-21 12:22:48,861 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:48,862 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:50,914 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:50,914 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:51,763 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 128s left
+2026-02-21 12:22:51,763 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (128s left).
+2026-02-21 12:22:52,988 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:52,988 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:53,038 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 126s left
+2026-02-21 12:22:53,038 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (126s left).
+2026-02-21 12:22:55,047 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:55,048 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:56,823 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 123s left
+2026-02-21 12:22:56,823 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (123s left).
+2026-02-21 12:22:57,110 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:57,110 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:22:58,087 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 121s left
+2026-02-21 12:22:58,088 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (121s left).
+2026-02-21 12:22:59,166 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:22:59,167 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:00,007 [INFO] [CANDLE] BEARISH | O:68214.32 H:68255.09 L:68160.18 C:68191.76 | VWAP: $68,472.04
+2026-02-21 12:23:00,007 [INFO] [CANDLE] BEARISH | O:68214.32 H:68255.09 L:68160.18 C:68191.76 | VWAP: $68,111.08
+2026-02-21 12:23:01,233 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:01,234 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:01,877 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 118s left
+2026-02-21 12:23:01,877 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (118s left).
+2026-02-21 12:23:03,142 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 116s left
+2026-02-21 12:23:03,142 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (116s left).
+2026-02-21 12:23:03,313 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:03,313 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:05,366 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:05,366 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:06,937 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 113s left
+2026-02-21 12:23:06,937 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (113s left).
+2026-02-21 12:23:07,429 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:07,430 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:08,205 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 111s left
+2026-02-21 12:23:08,206 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (111s left).
+2026-02-21 12:23:09,487 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:09,487 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:11,552 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:11,552 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:11,997 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 108s left
+2026-02-21 12:23:11,997 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (108s left).
+2026-02-21 12:23:13,253 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 106s left
+2026-02-21 12:23:13,253 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (106s left).
+2026-02-21 12:23:13,617 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:13,618 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:15,669 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:15,670 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:17,063 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 102s left
+2026-02-21 12:23:17,063 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (102s left).
+2026-02-21 12:23:17,742 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:17,742 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:18,306 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 101s left
+2026-02-21 12:23:18,307 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (101s left).
+2026-02-21 12:23:19,800 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:19,801 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:21,862 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:21,862 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:22,128 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 97s left
+2026-02-21 12:23:22,128 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (97s left).
+2026-02-21 12:23:23,364 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 96s left
+2026-02-21 12:23:23,364 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (96s left).
+2026-02-21 12:23:23,947 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:23,948 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:26,021 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:26,021 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:27,179 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 92s left
+2026-02-21 12:23:27,180 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (92s left).
+2026-02-21 12:23:28,085 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:28,086 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:28,418 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 91s left
+2026-02-21 12:23:28,418 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (91s left).
+2026-02-21 12:23:30,152 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:30,152 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:32,223 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:32,223 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:32,238 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 87s left
+2026-02-21 12:23:32,239 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (87s left).
+2026-02-21 12:23:33,464 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 86s left
+2026-02-21 12:23:33,464 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (86s left).
+2026-02-21 12:23:34,283 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:34,283 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:36,342 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:36,343 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:37,286 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 82s left
+2026-02-21 12:23:37,286 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (82s left).
+2026-02-21 12:23:38,406 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:38,406 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:38,534 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 81s left
+2026-02-21 12:23:38,534 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (81s left).
+2026-02-21 12:23:40,455 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:40,456 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:42,348 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 77s left
+2026-02-21 12:23:42,371 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (77s left).
+2026-02-21 12:23:42,520 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:42,521 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:43,576 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 76s left
+2026-02-21 12:23:43,577 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (76s left).
+2026-02-21 12:23:44,600 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:44,601 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:46,666 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:46,666 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:47,428 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 72s left
+2026-02-21 12:23:47,429 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (72s left).
+2026-02-21 12:23:48,628 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 71s left
+2026-02-21 12:23:48,628 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (71s left).
+2026-02-21 12:23:48,717 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:48,717 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:50,770 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:50,770 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:52,490 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 67s left
+2026-02-21 12:23:52,490 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (67s left).
+2026-02-21 12:23:52,827 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:52,827 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:53,681 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 66s left
+2026-02-21 12:23:53,681 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (66s left).
+2026-02-21 12:23:54,889 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:54,890 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:56,945 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:56,946 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:23:57,547 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 62s left
+2026-02-21 12:23:57,548 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (62s left).
+2026-02-21 12:23:58,734 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 61s left
+2026-02-21 12:23:58,735 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (61s left).
+2026-02-21 12:23:59,005 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:23:59,005 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:24:00,014 [INFO] [CANDLE] BEARISH | O:68191.39 H:68191.39 L:68141.13 C:68157.42 | VWAP: $68,468.36
+2026-02-21 12:24:00,017 [INFO] [CANDLE] BEARISH | O:68191.39 H:68191.39 L:68141.13 C:68157.42 | VWAP: $68,111.23
+2026-02-21 12:24:01,066 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:24:01,067 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:24:02,612 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 57s left
+2026-02-21 12:24:02,613 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (57s left).
+2026-02-21 12:24:03,124 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x'}
+2026-02-21 12:24:03,124 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:24:03,790 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 56s left
+2026-02-21 12:24:03,790 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (56s left).
+2026-02-21 12:24:07,671 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 52s left
+2026-02-21 12:24:07,671 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (52s left).
+2026-02-21 12:24:12,729 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 47s left
+2026-02-21 12:24:12,729 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (47s left).
+2026-02-21 12:24:17,786 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 42s left
+2026-02-21 12:24:17,786 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (42s left).
+2026-02-21 12:24:18,266 [INFO] HTTP Request: POST https://clob.polymarket.com/auth/api-key "HTTP/2 400 Bad Request"
+2026-02-21 12:24:18,397 [INFO] HTTP Request: GET https://clob.polymarket.com/auth/derive-api-key "HTTP/2 200 OK"
+2026-02-21 12:24:18,398 [INFO] [CLOB] Client initialised. DRY_RUN=True
+2026-02-21 12:24:18,398 [INFO] [SYSTEM] Prefilling 120 candles from Binance REST API...
+2026-02-21 12:24:18,635 [INFO] [VWAP] Session reset for 2026-02-21
+2026-02-21 12:24:18,637 [INFO] [OK] 120 candles loaded. VWAP seeded at $68,465.96
+2026-02-21 12:24:18,948 [INFO] [POLY-PRICE DEBUG] Status=200 Body={"openPrice":68357.35195816465,"closePrice":68250.76588268105,"timestamp":1771691059053,"completed":true,"incomplete":false,"cached":true}
+2026-02-21 12:24:18,948 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771690800' via Chainlink API...
+2026-02-21 12:24:19,108 [INFO] [STRIKE] ✓ Price to Beat for 'btc-updown-5m-1771690800': $68,249.45
+2026-02-21 12:24:19,109 [INFO] [STRIKE] Seed market strike pre-loaded: $68,249.45
+2026-02-21 12:24:19,109 [INFO] [KLINE] Connecting to Binance kline stream...
+2026-02-21 12:24:19,143 [INFO] [CVD] Connecting to aggTrade stream...
+2026-02-21 12:24:19,144 [INFO] [CHAINLINK] Starting Chainlink oracle price poller...
+2026-02-21 12:24:19,146 [INFO] [EVAL] Evaluation loop starting — tick every 5s
+2026-02-21 12:24:19,260 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:20,093 [INFO] [CVD] aggTrade stream connected.
+2026-02-21 12:24:21,319 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:22,838 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 37s left
+2026-02-21 12:24:22,838 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (37s left).
+2026-02-21 12:24:23,380 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:25,453 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:27,503 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:27,894 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 32s left
+2026-02-21 12:24:27,895 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (32s left).
+2026-02-21 12:24:29,213 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 30s left
+2026-02-21 12:24:29,214 [INFO] [GATE] Only 30s left -- avoiding illiquid spread
+2026-02-21 12:24:29,571 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:31,621 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:32,949 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 27s left
+2026-02-21 12:24:32,950 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (27s left).
+2026-02-21 12:24:33,684 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:34,288 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 25s left
+2026-02-21 12:24:34,288 [INFO] [GATE] Only 25s left -- avoiding illiquid spread
+2026-02-21 12:24:35,745 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:37,804 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:38,012 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 21s left
+2026-02-21 12:24:38,012 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (21s left).
+2026-02-21 12:24:39,338 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 20s left
+2026-02-21 12:24:39,339 [INFO] [GATE] Only 20s left -- avoiding illiquid spread
+2026-02-21 12:24:39,856 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:41,913 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:43,062 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 16s left
+2026-02-21 12:24:43,063 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (16s left).
+2026-02-21 12:24:43,991 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:44,384 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 15s left
+2026-02-21 12:24:44,385 [INFO] [GATE] Only 15s left -- avoiding illiquid spread
+2026-02-21 12:24:46,053 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:48,119 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 11s left
+2026-02-21 12:24:48,119 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (11s left).
+2026-02-21 12:24:48,130 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:49,443 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 10s left
+2026-02-21 12:24:49,443 [INFO] [GATE] Only 10s left -- avoiding illiquid spread
+2026-02-21 12:24:50,203 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:52,254 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098d0000000000000000000000000000000000000000000000000000002e197995470000000000000000000000000000000
+2026-02-21 12:24:53,181 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 6s left
+2026-02-21 12:24:53,182 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (6s left).
+2026-02-21 12:24:54,317 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098e0000000000000000000000000000000000000000000000000000002e14f6de850000000000000000000000000000000
+2026-02-21 12:24:54,499 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 5s left
+2026-02-21 12:24:54,499 [INFO] [GATE] Only 5s left -- avoiding illiquid spread
+2026-02-21 12:24:56,365 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098e0000000000000000000000000000000000000000000000000000002e14f6de850000000000000000000000000000000
+2026-02-21 12:24:58,239 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 1s left
+2026-02-21 12:24:58,240 [INFO] [LOCK] btc-updown-5m-1771690800 committed -- holding (1s left).
+2026-02-21 12:24:58,427 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098e0000000000000000000000000000000000000000000000000000002e14f6de850000000000000000000000000000000
+2026-02-21 12:24:59,554 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | 0s left
+2026-02-21 12:24:59,555 [INFO] [GATE] Only 0s left -- avoiding illiquid spread
+2026-02-21 12:25:00,001 [INFO] [CANDLE] BULLISH | O:68157.42 H:68191.32 L:68129.91 C:68191.31 | VWAP: $68,464.32
+2026-02-21 12:25:00,002 [INFO] [CANDLE] BULLISH | O:68157.42 H:68191.32 L:68129.91 C:68191.31 | VWAP: $68,111.30
+2026-02-21 12:25:00,517 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098e0000000000000000000000000000000000000000000000000000002e14f6de850000000000000000000000000000000
+2026-02-21 12:25:02,572 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098e0000000000000000000000000000000000000000000000000000002e14f6de850000000000000000000000000000000
+2026-02-21 12:25:03,285 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | -3s left
+2026-02-21 12:25:03,286 [INFO] [LOSS] btc-updown-5m-1771690800: predicted UP, actual DOWN | $68,249.45 → $68,191.57
+2026-02-21 12:25:03,286 [INFO] [STATS] W:155 L:55 | WinRate:73.81%
+2026-02-21 12:25:03,287 [INFO] [ROLL] btc-updown-5m-1771690800 → btc-updown-5m-1771691100
+2026-02-21 12:25:04,609 [INFO] [POLY] Strike=$68,249.45 | UP=50.5% | DOWN=49.5% | -4s left
+2026-02-21 12:25:04,610 [INFO] [ROLL] btc-updown-5m-1771690800 → btc-updown-5m-1771691100
+2026-02-21 12:25:04,623 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098e0000000000000000000000000000000000000000000000000000002e14f6de850000000000000000000000000000000
+2026-02-21 12:25:06,298 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771691100' via Chainlink API...
+2026-02-21 12:25:06,544 [WARNING] [STRIKE] openPrice missing: {'openPrice': None, 'closePrice': None, 'timestamp': 1771691096053, 'completed': False, 'incomplete': True, 'cached': False}
+2026-02-21 12:25:06,545 [WARNING] [STRIKE] Pre-fetch returned 0 for 'btc-updown-5m-1771691100' -- will retry on next eval tick.
+2026-02-21 12:25:06,672 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098e0000000000000000000000000000000000000000000000000000002e14f6de850000000000000000000000000000000
+2026-02-21 12:25:07,623 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771691100' via Chainlink API...
+2026-02-21 12:25:07,779 [INFO] [STRIKE] ✓ Price to Beat for 'btc-updown-5m-1771691100': $68,174.61
+2026-02-21 12:25:07,779 [INFO] [STRIKE] Pre-fetched next market strike: $68,174.61 for 'btc-updown-5m-1771691100'
+2026-02-21 12:25:08,348 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771691100' via Chainlink API...
+2026-02-21 12:25:08,447 [INFO] [STRIKE] ✓ Price to Beat for 'btc-updown-5m-1771691100': $68,174.61
+2026-02-21 12:25:08,447 [INFO] [POLY] Strike=$68,174.61 | UP=50.5% | DOWN=49.5% | 291s left
+2026-02-21 12:25:08,448 [INFO] [RULE] Score=1/4 → DOWN | Above VWAP +$60 (-1) | 9-EMA < 21-EMA (+1) | CVD sell $-71,760 (+1) | Math edge +2.3% (0)
+2026-02-21 12:25:08,448 [INFO] [AI CONFIRM] Borderline score -- asking Ollama (call #7)...
+2026-02-21 12:25:08,727 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098e0000000000000000000000000000000000000000000000000000002e14f6de850000000000000000000000000000000
+2026-02-21 12:25:09,666 [INFO] [POLY] Strike=$68,174.61 | UP=50.5% | DOWN=49.5% | 290s left
+2026-02-21 12:25:09,667 [INFO] [RULE] Score=0/4 → SKIP | RSI oversold (0.2) (EV=+100.00%)
+2026-02-21 12:25:10,785 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098e0000000000000000000000000000000000000000000000000000002e14f6de850000000000000000000000000000000
+2026-02-21 12:25:12,843 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098e0000000000000000000000000000000000000000000000000000002e14f6de850000000000000000000000000000000
+2026-02-21 12:25:13,496 [INFO] [POLY] Strike=$68,174.61 | UP=50.5% | DOWN=49.5% | 286s left
+2026-02-21 12:25:13,496 [INFO] [LOCK] AI confirming btc-updown-5m-1771691100 -- waiting.
+2026-02-21 12:25:14,732 [INFO] [POLY] Strike=$68,174.61 | UP=50.5% | DOWN=49.5% | 285s left
+2026-02-21 12:25:14,901 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098e0000000000000000000000000000000000000000000000000000002e14f6de850000000000000000000000000000000
+2026-02-21 12:25:17,068 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098e0000000000000000000000000000000000000000000000000000002e14f6de850000000000000000000000000000000
+2026-02-21 12:25:18,573 [INFO] [POLY] Strike=$68,174.61 | UP=50.5% | DOWN=49.5% | 281s left
+2026-02-21 12:25:18,573 [INFO] [LOCK] AI confirming btc-updown-5m-1771691100 -- waiting.
+2026-02-21 12:25:19,127 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098e0000000000000000000000000000000000000000000000000000002e14f6de850000000000000000000000000000000
+2026-02-21 12:25:19,916 [INFO] [POLY] Strike=$68,174.61 | UP=50.5% | DOWN=49.5% | 280s left
+2026-02-21 12:25:21,235 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098e0000000000000000000000000000000000000000000000000000002e14f6de850000000000000000000000000000000
+2026-02-21 12:25:23,294 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098e0000000000000000000000000000000000000000000000000000002e14f6de850000000000000000000000000000000
+2026-02-21 12:25:23,632 [INFO] [POLY] Strike=$68,174.61 | UP=50.5% | DOWN=49.5% | 276s left
+2026-02-21 12:25:23,647 [INFO] [LOCK] AI confirming btc-updown-5m-1771691100 -- waiting.
+2026-02-21 12:25:24,529 [INFO] [AI CONFIRM] Response: 'DOWN' (16.1s)
+2026-02-21 12:25:24,530 [INFO] 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  DECISION LOCKED: DOWN  |  Confidence: Low  |  Bet: $1.00
+  Score: 1/4  |  Strike: $68,174.61
+  Reason: AI confirmed: Above VWAP +$60 (-1) | 9-EMA < 21-EMA (+1) | CVD sell $-71,760 (+1) | Math edge +2.3% (0)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-02-21 12:25:24,530 [INFO] 
+───────────────────────────────────────────────────────
+  [DRY RUN] Would place bet:
+    Market:   btc-updown-5m-1771691100
+    Decision: DOWN  (token: ...839669907863)
+    Size:     $1.00 USDC
+    Price:    0.4950 (49.5%)
+  Set DRY_RUN=false in .env to trade live.
+───────────────────────────────────────────────────────
+2026-02-21 12:25:24,970 [INFO] [POLY] Strike=$68,174.61 | UP=50.5% | DOWN=49.5% | 275s left
+2026-02-21 12:25:25,359 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098e0000000000000000000000000000000000000000000000000000002e14f6de850000000000000000000000000000000
+2026-02-21 12:25:27,413 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098f0000000000000000000000000000000000000000000000000000002e19d980be0000000000000000000000000000000
+2026-02-21 12:25:28,701 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 271s left
+2026-02-21 12:25:28,702 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (271s left).
+2026-02-21 12:25:29,474 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098f0000000000000000000000000000000000000000000000000000002e19d980be0000000000000000000000000000000
+2026-02-21 12:25:30,038 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 269s left
+2026-02-21 12:25:31,537 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098f0000000000000000000000000000000000000000000000000000002e19d980be0000000000000000000000000000000
+2026-02-21 12:25:33,597 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098f0000000000000000000000000000000000000000000000000000002e19d980be0000000000000000000000000000000
+2026-02-21 12:25:33,757 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 266s left
+2026-02-21 12:25:33,758 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (266s left).
+2026-02-21 12:25:35,099 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 264s left
+2026-02-21 12:25:35,651 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098f0000000000000000000000000000000000000000000000000000002e19d980be0000000000000000000000000000000
+2026-02-21 12:25:37,713 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098f0000000000000000000000000000000000000000000000000000002e19d980be0000000000000000000000000000000
+2026-02-21 12:25:38,813 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 261s left
+2026-02-21 12:25:38,813 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (261s left).
+2026-02-21 12:25:39,775 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098f0000000000000000000000000000000000000000000000000000002e19d980be0000000000000000000000000000000
+2026-02-21 12:25:40,146 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 259s left
+2026-02-21 12:25:41,846 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098f0000000000000000000000000000000000000000000000000000002e19d980be0000000000000000000000000000000
+2026-02-21 12:25:43,869 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 256s left
+2026-02-21 12:25:43,869 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (256s left).
+2026-02-21 12:25:43,908 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098f0000000000000000000000000000000000000000000000000000002e19d980be0000000000000000000000000000000
+2026-02-21 12:25:45,203 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 254s left
+2026-02-21 12:25:45,964 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098f0000000000000000000000000000000000000000000000000000002e19d980be0000000000000000000000000000000
+2026-02-21 12:25:48,020 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098f0000000000000000000000000000000000000000000000000000002e19d980be0000000000000000000000000000000
+2026-02-21 12:25:48,929 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 251s left
+2026-02-21 12:25:48,929 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (251s left).
+2026-02-21 12:25:50,074 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098f0000000000000000000000000000000000000000000000000000002e19d980be0000000000000000000000000000000
+2026-02-21 12:25:50,265 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 249s left
+2026-02-21 12:25:52,131 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098f0000000000000000000000000000000000000000000000000000002e19d980be0000000000000000000000000000000
+2026-02-21 12:25:53,990 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 246s left
+2026-02-21 12:25:53,991 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (246s left).
+2026-02-21 12:25:54,191 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098f0000000000000000000000000000000000000000000000000000002e19d980be0000000000000000000000000000000
+2026-02-21 12:25:55,328 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 244s left
+2026-02-21 12:25:56,254 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098f0000000000000000000000000000000000000000000000000000002e19d980be0000000000000000000000000000000
+2026-02-21 12:25:58,309 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x000000000000000000000000000000000000000000000003000000000033098f0000000000000000000000000000000000000000000000000000002e19d980be0000000000000000000000000000000
+2026-02-21 12:25:59,040 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 240s left
+2026-02-21 12:25:59,041 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (240s left).
+2026-02-21 12:26:00,056 [INFO] [CANDLE] BEARISH | O:68191.32 H:68197.54 L:68147.53 C:68147.54 | VWAP: $68,463.44
+2026-02-21 12:26:00,056 [INFO] [CANDLE] BEARISH | O:68191.32 H:68197.54 L:68147.53 C:68147.54 | VWAP: $68,111.34
+2026-02-21 12:26:00,360 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309900000000000000000000000000000000000000000000000000000002e1594f8200000000000000000000000000000000
+2026-02-21 12:26:00,379 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 239s left
+2026-02-21 12:26:02,413 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309900000000000000000000000000000000000000000000000000000002e1594f8200000000000000000000000000000000
+2026-02-21 12:26:04,097 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 235s left
+2026-02-21 12:26:04,098 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (235s left).
+2026-02-21 12:26:04,473 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309900000000000000000000000000000000000000000000000000000002e1594f8200000000000000000000000000000000
+2026-02-21 12:26:05,437 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 234s left
+2026-02-21 12:26:06,551 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309900000000000000000000000000000000000000000000000000000002e1594f8200000000000000000000000000000000
+2026-02-21 12:26:08,612 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309900000000000000000000000000000000000000000000000000000002e1594f8200000000000000000000000000000000
+2026-02-21 12:26:09,148 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 230s left
+2026-02-21 12:26:09,148 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (230s left).
+2026-02-21 12:26:10,485 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 229s left
+2026-02-21 12:26:10,677 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309900000000000000000000000000000000000000000000000000000002e1594f8200000000000000000000000000000000
+2026-02-21 12:26:12,733 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309900000000000000000000000000000000000000000000000000000002e1594f8200000000000000000000000000000000
+2026-02-21 12:26:14,208 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 225s left
+2026-02-21 12:26:14,209 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (225s left).
+2026-02-21 12:26:14,781 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309900000000000000000000000000000000000000000000000000000002e1594f8200000000000000000000000000000000
+2026-02-21 12:26:15,543 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 224s left
+2026-02-21 12:26:16,837 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309900000000000000000000000000000000000000000000000000000002e1594f8200000000000000000000000000000000
+2026-02-21 12:26:18,896 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309900000000000000000000000000000000000000000000000000000002e1594f8200000000000000000000000000000000
+2026-02-21 12:26:19,274 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 220s left
+2026-02-21 12:26:19,274 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (220s left).
+2026-02-21 12:26:20,600 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 219s left
+2026-02-21 12:26:20,949 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309900000000000000000000000000000000000000000000000000000002e1594f8200000000000000000000000000000000
+2026-02-21 12:26:23,011 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309900000000000000000000000000000000000000000000000000000002e1594f8200000000000000000000000000000000
+2026-02-21 12:26:24,320 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 215s left
+2026-02-21 12:26:24,321 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (215s left).
+2026-02-21 12:26:25,071 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309900000000000000000000000000000000000000000000000000000002e1594f8200000000000000000000000000000000
+2026-02-21 12:26:25,647 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 214s left
+2026-02-21 12:26:27,126 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309900000000000000000000000000000000000000000000000000000002e1594f8200000000000000000000000000000000
+2026-02-21 12:26:29,182 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309900000000000000000000000000000000000000000000000000000002e1594f8200000000000000000000000000000000
+2026-02-21 12:26:29,372 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 210s left
+2026-02-21 12:26:29,373 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (210s left).
+2026-02-21 12:26:30,709 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 209s left
+2026-02-21 12:26:31,237 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309900000000000000000000000000000000000000000000000000000002e1594f8200000000000000000000000000000000
+2026-02-21 12:26:33,303 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309910000000000000000000000000000000000000000000000000000002e10ff35f30000000000000000000000000000000
+2026-02-21 12:26:34,431 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 205s left
+2026-02-21 12:26:34,432 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (205s left).
+2026-02-21 12:26:35,363 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309910000000000000000000000000000000000000000000000000000002e10ff35f30000000000000000000000000000000
+2026-02-21 12:26:35,771 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 204s left
+2026-02-21 12:26:37,421 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309910000000000000000000000000000000000000000000000000000002e10ff35f30000000000000000000000000000000
+2026-02-21 12:26:39,479 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 200s left
+2026-02-21 12:26:39,479 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (200s left).
+2026-02-21 12:26:39,489 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309910000000000000000000000000000000000000000000000000000002e10ff35f30000000000000000000000000000000
+2026-02-21 12:26:40,820 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 199s left
+2026-02-21 12:26:41,554 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309910000000000000000000000000000000000000000000000000000002e10ff35f30000000000000000000000000000000
+2026-02-21 12:26:43,607 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309910000000000000000000000000000000000000000000000000000002e10ff35f30000000000000000000000000000000
+2026-02-21 12:26:44,545 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 195s left
+2026-02-21 12:26:44,545 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (195s left).
+2026-02-21 12:26:45,670 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309910000000000000000000000000000000000000000000000000000002e10ff35f30000000000000000000000000000000
+2026-02-21 12:26:45,884 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 194s left
+2026-02-21 12:26:47,729 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309910000000000000000000000000000000000000000000000000000002e10ff35f30000000000000000000000000000000
+2026-02-21 12:26:49,612 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 190s left
+2026-02-21 12:26:49,612 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (190s left).
+2026-02-21 12:26:49,781 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309910000000000000000000000000000000000000000000000000000002e10ff35f30000000000000000000000000000000
+2026-02-21 12:26:50,948 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 189s left
+2026-02-21 12:26:51,836 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309910000000000000000000000000000000000000000000000000000002e10ff35f30000000000000000000000000000000
+2026-02-21 12:26:53,895 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309910000000000000000000000000000000000000000000000000000002e10ff35f30000000000000000000000000000000
+2026-02-21 12:26:54,661 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 185s left
+2026-02-21 12:26:54,661 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (185s left).
+2026-02-21 12:26:55,953 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309910000000000000000000000000000000000000000000000000000002e10ff35f30000000000000000000000000000000
+2026-02-21 12:26:56,001 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 183s left
+2026-02-21 12:26:58,004 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309910000000000000000000000000000000000000000000000000000002e10ff35f30000000000000000000000000000000
+2026-02-21 12:26:59,718 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 180s left
+2026-02-21 12:26:59,724 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (180s left).
+2026-02-21 12:27:00,008 [INFO] [CANDLE] BULLISH | O:68147.54 H:68184.42 L:68101.78 C:68184.41 | VWAP: $68,460.36
+2026-02-21 12:27:00,055 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309910000000000000000000000000000000000000000000000000000002e10ff35f30000000000000000000000000000000
+2026-02-21 12:27:01,057 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 178s left
+2026-02-21 12:27:02,118 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309910000000000000000000000000000000000000000000000000000002e10ff35f30000000000000000000000000000000
+2026-02-21 12:27:04,188 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309910000000000000000000000000000000000000000000000000000002e10ff35f30000000000000000000000000000000
+2026-02-21 12:27:04,796 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 175s left
+2026-02-21 12:27:04,797 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (175s left).
+2026-02-21 12:27:06,120 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 173s left
+2026-02-21 12:27:06,243 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309920000000000000000000000000000000000000000000000000000002e14922a9c0000000000000000000000000000000
+2026-02-21 12:27:08,300 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309920000000000000000000000000000000000000000000000000000002e14922a9c0000000000000000000000000000000
+2026-02-21 12:27:09,856 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 170s left
+2026-02-21 12:27:09,856 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (170s left).
+2026-02-21 12:27:10,359 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309920000000000000000000000000000000000000000000000000000002e14922a9c0000000000000000000000000000000
+2026-02-21 12:27:11,172 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 168s left
+2026-02-21 12:27:12,411 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309920000000000000000000000000000000000000000000000000000002e14922a9c0000000000000000000000000000000
+2026-02-21 12:27:14,463 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309920000000000000000000000000000000000000000000000000000002e14922a9c0000000000000000000000000000000
+2026-02-21 12:27:14,911 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 165s left
+2026-02-21 12:27:14,911 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (165s left).
+2026-02-21 12:27:16,230 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 163s left
+2026-02-21 12:27:16,544 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309920000000000000000000000000000000000000000000000000000002e14922a9c0000000000000000000000000000000
+2026-02-21 12:27:18,593 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309920000000000000000000000000000000000000000000000000000002e14922a9c0000000000000000000000000000000
+2026-02-21 12:27:19,968 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 160s left
+2026-02-21 12:27:19,968 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (160s left).
+2026-02-21 12:27:20,664 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309920000000000000000000000000000000000000000000000000000002e14922a9c0000000000000000000000000000000
+2026-02-21 12:27:21,285 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 158s left
+2026-02-21 12:27:22,736 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309920000000000000000000000000000000000000000000000000000002e14922a9c0000000000000000000000000000000
+2026-02-21 12:27:24,802 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309920000000000000000000000000000000000000000000000000000002e14922a9c0000000000000000000000000000000
+2026-02-21 12:27:25,032 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 154s left
+2026-02-21 12:27:25,032 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (154s left).
+2026-02-21 12:27:26,343 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 153s left
+2026-02-21 12:27:26,861 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309920000000000000000000000000000000000000000000000000000002e14922a9c0000000000000000000000000000000
+2026-02-21 12:27:28,920 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309920000000000000000000000000000000000000000000000000000002e14922a9c0000000000000000000000000000000
+2026-02-21 12:27:30,100 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 149s left
+2026-02-21 12:27:30,100 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (149s left).
+2026-02-21 12:27:30,983 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309920000000000000000000000000000000000000000000000000000002e14922a9c0000000000000000000000000000000
+2026-02-21 12:27:31,403 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 148s left
+2026-02-21 12:27:33,056 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309920000000000000000000000000000000000000000000000000000002e14922a9c0000000000000000000000000000000
+2026-02-21 12:27:35,105 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309920000000000000000000000000000000000000000000000000000002e14922a9c0000000000000000000000000000000
+2026-02-21 12:27:35,149 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 144s left
+2026-02-21 12:27:35,150 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (144s left).
+2026-02-21 12:27:36,457 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 143s left
+2026-02-21 12:27:37,160 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309920000000000000000000000000000000000000000000000000000002e14922a9c0000000000000000000000000000000
+2026-02-21 12:27:39,214 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:27:40,208 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 139s left
+2026-02-21 12:27:40,209 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (139s left).
+2026-02-21 12:27:41,304 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:27:41,515 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 138s left
+2026-02-21 12:27:43,357 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:27:45,270 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 134s left
+2026-02-21 12:27:45,270 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (134s left).
+2026-02-21 12:27:45,415 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:27:46,603 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 133s left
+2026-02-21 12:27:47,477 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:27:49,535 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:27:50,330 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 129s left
+2026-02-21 12:27:50,331 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (129s left).
+2026-02-21 12:27:51,585 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:27:51,653 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 128s left
+2026-02-21 12:27:53,657 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:27:55,391 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 124s left
+2026-02-21 12:27:55,392 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (124s left).
+2026-02-21 12:27:55,720 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:27:56,721 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 123s left
+2026-02-21 12:27:57,779 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:27:59,838 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:27:59,987 [INFO] [CANDLE] BULLISH | O:68184.42 H:68231.88 L:68183.08 C:68231.88 | VWAP: $68,458.61
+2026-02-21 12:27:59,987 [INFO] [CANDLE] BULLISH | O:68184.42 H:68231.88 L:68183.08 C:68231.88 | VWAP: $68,111.61
+2026-02-21 12:28:00,449 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 119s left
+2026-02-21 12:28:00,449 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (119s left).
+2026-02-21 12:28:01,782 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 118s left
+2026-02-21 12:28:01,890 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:28:03,948 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:28:05,510 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 114s left
+2026-02-21 12:28:05,510 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (114s left).
+2026-02-21 12:28:06,009 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:28:06,836 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 113s left
+2026-02-21 12:28:08,060 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:28:10,125 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:28:10,568 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 109s left
+2026-02-21 12:28:10,568 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (109s left).
+2026-02-21 12:28:11,892 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 108s left
+2026-02-21 12:28:12,177 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309930000000000000000000000000000000000000000000000000000002e1491f6900000000000000000000000000000000
+2026-02-21 12:28:14,224 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:15,645 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 104s left
+2026-02-21 12:28:15,646 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (104s left).
+2026-02-21 12:28:16,283 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:16,945 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 103s left
+2026-02-21 12:28:18,367 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:20,436 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:20,713 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 99s left
+2026-02-21 12:28:20,714 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (99s left).
+2026-02-21 12:28:22,043 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 97s left
+2026-02-21 12:28:22,494 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:24,554 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:25,778 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 94s left
+2026-02-21 12:28:25,779 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (94s left).
+2026-02-21 12:28:26,622 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:27,095 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 92s left
+2026-02-21 12:28:28,723 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:30,792 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:30,835 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 89s left
+2026-02-21 12:28:30,835 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (89s left).
+2026-02-21 12:28:32,151 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 87s left
+2026-02-21 12:28:32,859 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:34,913 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:35,918 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 84s left
+2026-02-21 12:28:35,919 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (84s left).
+2026-02-21 12:28:36,978 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:37,211 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 82s left
+2026-02-21 12:28:39,046 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:40,982 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 79s left
+2026-02-21 12:28:40,983 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (79s left).
+2026-02-21 12:28:41,111 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:42,272 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 77s left
+2026-02-21 12:28:43,163 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:45,212 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:46,035 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 73s left
+2026-02-21 12:28:46,036 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (73s left).
+2026-02-21 12:28:47,263 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:47,322 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 72s left
+2026-02-21 12:28:49,323 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:51,124 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 68s left
+2026-02-21 12:28:51,125 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (68s left).
+2026-02-21 12:28:51,384 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:52,389 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 67s left
+2026-02-21 12:28:53,437 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309940000000000000000000000000000000000000000000000000000002e20edc8f00000000000000000000000000000000
+2026-02-21 12:28:55,510 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309950000000000000000000000000000000000000000000000000000002e1d59ae8f0000000000000000000000000000000
+2026-02-21 12:28:56,185 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 63s left
+2026-02-21 12:28:56,186 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (63s left).
+2026-02-21 12:28:57,445 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 62s left
+2026-02-21 12:28:57,573 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309950000000000000000000000000000000000000000000000000000002e1d59ae8f0000000000000000000000000000000
+2026-02-21 12:28:59,634 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309950000000000000000000000000000000000000000000000000000002e1d59ae8f0000000000000000000000000000000
+2026-02-21 12:29:00,065 [INFO] [CANDLE] BEARISH | O:68231.88 H:68249.00 L:68204.46 C:68219.51 | VWAP: $68,111.89
+2026-02-21 12:29:00,065 [INFO] [CANDLE] BEARISH | O:68231.88 H:68249.00 L:68204.46 C:68219.51 | VWAP: $68,456.07
+2026-02-21 12:29:01,246 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 58s left
+2026-02-21 12:29:01,246 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (58s left).
+2026-02-21 12:29:01,695 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309950000000000000000000000000000000000000000000000000000002e1d59ae8f0000000000000000000000000000000
+2026-02-21 12:29:02,499 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 57s left
+2026-02-21 12:29:02,500 [INFO] [GATE] Only 57s left -- avoiding illiquid spread
+2026-02-21 12:29:03,750 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309950000000000000000000000000000000000000000000000000000002e1d59ae8f0000000000000000000000000000000
+2026-02-21 12:29:05,802 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309950000000000000000000000000000000000000000000000000000002e1d59ae8f0000000000000000000000000000000
+2026-02-21 12:29:06,297 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 53s left
+2026-02-21 12:29:06,297 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (53s left).
+2026-02-21 12:29:07,559 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 52s left
+2026-02-21 12:29:07,559 [INFO] [GATE] Only 52s left -- avoiding illiquid spread
+2026-02-21 12:29:07,864 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309950000000000000000000000000000000000000000000000000000002e1d59ae8f0000000000000000000000000000000
+2026-02-21 12:29:09,923 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309950000000000000000000000000000000000000000000000000000002e1d59ae8f0000000000000000000000000000000
+2026-02-21 12:29:11,348 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 48s left
+2026-02-21 12:29:11,349 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (48s left).
+2026-02-21 12:29:11,991 [INFO] [CHAINLINK DEBUG] Status=200 Response={'id': 1, 'jsonrpc': '2.0', 'result': '0x00000000000000000000000000000000000000000000000300000000003309950000000000000000000000000000000000000000000000000000002e1d59ae8f0000000000000000000000000000000
+2026-02-21 12:29:12,605 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 47s left
+2026-02-21 12:29:12,605 [INFO] [GATE] Only 47s left -- avoiding illiquid spread
+2026-02-21 12:29:16,401 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 43s left
+2026-02-21 12:29:16,401 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (43s left).
+2026-02-21 12:29:21,457 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 38s left
+2026-02-21 12:29:21,457 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (38s left).
+2026-02-21 12:29:26,516 [INFO] [POLY] Strike=$68,174.61 | UP=55.0% | DOWN=45.0% | 33s left
+2026-02-21 12:29:26,517 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (33s left).
+2026-02-21 12:29:31,586 [INFO] [POLY] Strike=$68,174.61 | UP=43.0% | DOWN=57.0% | 28s left
+2026-02-21 12:29:31,587 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (28s left).
+2026-02-21 12:29:36,674 [INFO] [POLY] Strike=$68,174.61 | UP=43.0% | DOWN=57.0% | 23s left
+2026-02-21 12:29:36,675 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (23s left).
+2026-02-21 12:29:41,730 [INFO] [POLY] Strike=$68,174.61 | UP=43.0% | DOWN=57.0% | 18s left
+2026-02-21 12:29:41,731 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (18s left).
+2026-02-21 12:29:46,785 [INFO] [POLY] Strike=$68,174.61 | UP=43.0% | DOWN=57.0% | 13s left
+2026-02-21 12:29:46,786 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (13s left).
+2026-02-21 12:29:48,117 [INFO] HTTP Request: POST https://clob.polymarket.com/auth/api-key "HTTP/2 400 Bad Request"
+2026-02-21 12:29:48,263 [INFO] HTTP Request: GET https://clob.polymarket.com/auth/derive-api-key "HTTP/2 200 OK"
+2026-02-21 12:29:48,264 [INFO] [CLOB] Client initialised. DRY_RUN=True
+2026-02-21 12:29:48,264 [INFO] [SYSTEM] Prefilling 120 candles from Binance REST API...
+2026-02-21 12:29:48,501 [INFO] [VWAP] Session reset for 2026-02-21
+2026-02-21 12:29:48,503 [INFO] [OK] 120 candles loaded. VWAP seeded at $68,454.29
+2026-02-21 12:29:48,810 [INFO] [POLY-PRICE DEBUG] Status=200 Body={"openPrice":68241.55903534841,"closePrice":68152.45206968997,"timestamp":1771691388919,"completed":true,"incomplete":false,"cached":true}
+2026-02-21 12:29:48,811 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771691100' via Chainlink API...
+2026-02-21 12:29:48,971 [INFO] [STRIKE] ✓ Price to Beat for 'btc-updown-5m-1771691100': $68,174.61
+2026-02-21 12:29:48,972 [INFO] [STRIKE] Seed market strike pre-loaded: $68,174.61
+2026-02-21 12:29:48,972 [INFO] [KLINE] Connecting to Binance kline stream...
+2026-02-21 12:29:49,028 [INFO] [CVD] Connecting to aggTrade stream...
+2026-02-21 12:29:49,030 [INFO] [CHAINLINK] Starting Chainlink oracle price poller...
+2026-02-21 12:29:49,031 [INFO] [EVAL] Evaluation loop starting — tick every 5s
+2026-02-21 12:29:49,242 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:29:49,914 [INFO] [CVD] aggTrade stream connected.
+2026-02-21 12:29:51,292 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:29:51,871 [INFO] [POLY] Strike=$68,174.61 | UP=43.0% | DOWN=57.0% | 8s left
+2026-02-21 12:29:51,871 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (8s left).
+2026-02-21 12:29:53,359 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:29:55,422 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:29:56,920 [INFO] [POLY] Strike=$68,174.61 | UP=43.0% | DOWN=57.0% | 3s left
+2026-02-21 12:29:56,920 [INFO] [LOCK] btc-updown-5m-1771691100 committed -- holding (3s left).
+2026-02-21 12:29:57,475 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:29:59,110 [INFO] [POLY] Strike=$68,174.61 | UP=43.0% | DOWN=57.0% | 0s left
+2026-02-21 12:29:59,111 [INFO] [GATE] Only 0s left -- avoiding illiquid spread
+2026-02-21 12:29:59,530 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:00,024 [INFO] [CANDLE] BULLISH | O:68219.50 H:68276.90 L:68218.62 C:68274.37 | VWAP: $68,452.13
+2026-02-21 12:30:00,025 [INFO] [CANDLE] BULLISH | O:68219.50 H:68276.90 L:68218.62 C:68274.37 | VWAP: $68,112.22
+2026-02-21 12:30:01,589 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:01,984 [INFO] [POLY] Strike=$68,174.61 | UP=43.0% | DOWN=57.0% | -1s left
+2026-02-21 12:30:01,984 [INFO] [LOSS] btc-updown-5m-1771691100: predicted DOWN, actual UP | $68,174.61 → $68,274.37
+2026-02-21 12:30:01,984 [INFO] [STATS] W:155 L:56 | WinRate:73.46%
+2026-02-21 12:30:01,986 [INFO] [ROLL] btc-updown-5m-1771691100 → btc-updown-5m-1771691400
+2026-02-21 12:30:03,645 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:04,163 [INFO] [POLY] Strike=$68,174.61 | UP=43.0% | DOWN=57.0% | -4s left
+2026-02-21 12:30:04,163 [INFO] [ROLL] btc-updown-5m-1771691100 → btc-updown-5m-1771691400
+2026-02-21 12:30:04,999 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771691400' via Chainlink API...
+2026-02-21 12:30:05,171 [INFO] [STRIKE] ✓ Price to Beat for 'btc-updown-5m-1771691400': $68,255.16
+2026-02-21 12:30:05,171 [INFO] [STRIKE] Pre-fetched next market strike: $68,255.16 for 'btc-updown-5m-1771691400'
+2026-02-21 12:30:05,699 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:07,033 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 292s left
+2026-02-21 12:30:07,034 [INFO] [RULE] Score=2/4 → UP | Above VWAP +$167 (+1) | 9-EMA < 21-EMA (-1) | CVD buy +$121,107 (+1) | Math edge +10.4% vs crowd (+1)
+2026-02-21 12:30:07,035 [INFO] 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  DECISION LOCKED: UP  |  Confidence: Medium  |  Bet: $1.00
+  Score: 2/4  |  Strike: $68,255.16
+  Reason: Above VWAP +$167 (+1) | 9-EMA < 21-EMA (-1) | CVD buy +$121,107 (+1) | Math edge +10.4% vs crowd (+1)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-02-21 12:30:07,035 [INFO] 
+───────────────────────────────────────────────────────
+  [DRY RUN] Would place bet:
+    Market:   btc-updown-5m-1771691400
+    Decision: UP  (token: ...037891117547)
+    Size:     $1.00 USDC
+    Price:    0.5250 (52.5%)
+  Set DRY_RUN=false in .env to trade live.
+───────────────────────────────────────────────────────
+2026-02-21 12:30:07,173 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771691400' via Chainlink API...
+2026-02-21 12:30:07,394 [INFO] [STRIKE] ✓ Price to Beat for 'btc-updown-5m-1771691400': $68,255.16
+2026-02-21 12:30:07,395 [INFO] [STRIKE] Pre-fetched next market strike: $68,255.16 for 'btc-updown-5m-1771691400'
+2026-02-21 12:30:07,750 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:09,214 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 290s left
+2026-02-21 12:30:09,215 [INFO] [RULE] Score=0/4 → SKIP | Neutral (score=0). Below VWAP -$173 (-1) | 9-EMA < 21-EMA (-1) | CVD buy +$125,421 (+1) | Math edge +10.9% vs crowd (+1) (EV=+20.85%)
+2026-02-21 12:30:09,806 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:11,868 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:12,097 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 287s left
+2026-02-21 12:30:12,098 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (287s left).
+2026-02-21 12:30:13,945 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:14,266 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 285s left
+2026-02-21 12:30:14,267 [INFO] [RULE] Score=-2/4 → SKIP | Signals oppose UP (score=-2). Below VWAP -$186 (-1) | 9-EMA < 21-EMA (-1) | CVD buy +$65,162 (+1) | Math edge -8.9% vs crowd (-1) (EV=+7.47%)
+2026-02-21 12:30:16,019 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:17,153 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 282s left
+2026-02-21 12:30:17,154 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (282s left).
+2026-02-21 12:30:18,073 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:19,322 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 280s left
+2026-02-21 12:30:20,132 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:22,191 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:22,218 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 277s left
+2026-02-21 12:30:22,219 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (277s left).
+2026-02-21 12:30:24,247 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:24,385 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 275s left
+2026-02-21 12:30:26,315 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:27,277 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 272s left
+2026-02-21 12:30:27,278 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (272s left).
+2026-02-21 12:30:28,367 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:29,437 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 270s left
+2026-02-21 12:30:30,425 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:32,345 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 267s left
+2026-02-21 12:30:32,350 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (267s left).
+2026-02-21 12:30:32,482 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:34,490 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 265s left
+2026-02-21 12:30:34,491 [INFO] [REEVAL] ✓ btc-updown-5m-1771691400 previously skipped — signals now favour DOWN (score=2/4, EV=+11.66%) — committing!
+2026-02-21 12:30:34,492 [INFO] [RULE] Score=2/4 → DOWN | Below VWAP -$202 (+1) | 9-EMA < 21-EMA (+1) | CVD buy +$44,763 (-1) | Math edge +5.5% vs crowd (+1)
+2026-02-21 12:30:34,492 [INFO] 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  DECISION LOCKED: DOWN  |  Confidence: Medium  |  Bet: $1.00
+  Score: 2/4  |  Strike: $68,255.16
+  Reason: Below VWAP -$202 (+1) | 9-EMA < 21-EMA (+1) | CVD buy +$44,763 (-1) | Math edge +5.5% vs crowd (+1)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-02-21 12:30:34,493 [INFO] 
+───────────────────────────────────────────────────────
+  [DRY RUN] Would place bet:
+    Market:   btc-updown-5m-1771691400
+    Decision: DOWN  (token: ...656516437984)
+    Size:     $1.00 USDC
+    Price:    0.4750 (47.5%)
+  Set DRY_RUN=false in .env to trade live.
+───────────────────────────────────────────────────────
+2026-02-21 12:30:34,543 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:36,592 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:37,415 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 262s left
+2026-02-21 12:30:37,416 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (262s left).
+2026-02-21 12:30:38,657 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:39,546 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 260s left
+2026-02-21 12:30:39,547 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (260s left).
+2026-02-21 12:30:40,734 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:42,462 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 257s left
+2026-02-21 12:30:42,462 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (257s left).
+2026-02-21 12:30:42,790 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:44,613 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 255s left
+2026-02-21 12:30:44,613 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (255s left).
+2026-02-21 12:30:44,842 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:46,896 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:47,522 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 252s left
+2026-02-21 12:30:47,523 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (252s left).
+2026-02-21 12:30:48,958 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:49,688 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 250s left
+2026-02-21 12:30:49,688 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (250s left).
+2026-02-21 12:30:51,015 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:52,592 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 247s left
+2026-02-21 12:30:52,592 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (247s left).
+2026-02-21 12:30:53,064 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:54,754 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 245s left
+2026-02-21 12:30:54,754 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (245s left).
+2026-02-21 12:30:55,128 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:57,188 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:57,654 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 242s left
+2026-02-21 12:30:57,655 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (242s left).
+2026-02-21 12:30:59,245 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:30:59,820 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 240s left
+2026-02-21 12:30:59,821 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (240s left).
+2026-02-21 12:30:59,979 [INFO] [CANDLE] BEARISH | O:68274.37 H:68279.43 L:68228.21 C:68228.22 | VWAP: $68,112.36
+2026-02-21 12:31:01,299 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:02,730 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 237s left
+2026-02-21 12:31:02,730 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (237s left).
+2026-02-21 12:31:03,358 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:04,879 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 235s left
+2026-02-21 12:31:04,879 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (235s left).
+2026-02-21 12:31:05,414 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:07,483 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:07,784 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 232s left
+2026-02-21 12:31:07,785 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (232s left).
+2026-02-21 12:31:09,543 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:09,937 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 230s left
+2026-02-21 12:31:09,938 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (230s left).
+2026-02-21 12:31:11,592 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:12,833 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 227s left
+2026-02-21 12:31:12,833 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (227s left).
+2026-02-21 12:31:13,649 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:14,990 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 225s left
+2026-02-21 12:31:14,991 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (225s left).
+2026-02-21 12:31:15,709 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:17,768 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:17,881 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 222s left
+2026-02-21 12:31:17,881 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (222s left).
+2026-02-21 12:31:22,934 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 217s left
+2026-02-21 12:31:22,934 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (217s left).
+2026-02-21 12:31:28,006 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 211s left
+2026-02-21 12:31:28,006 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (211s left).
+2026-02-21 12:31:33,076 [INFO] [POLY] Strike=$68,255.16 | UP=52.5% | DOWN=47.5% | 206s left
+2026-02-21 12:31:33,076 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (206s left).
+2026-02-21 12:31:36,791 [INFO] HTTP Request: POST https://clob.polymarket.com/auth/api-key "HTTP/2 400 Bad Request"
+2026-02-21 12:31:36,916 [INFO] HTTP Request: GET https://clob.polymarket.com/auth/derive-api-key "HTTP/2 200 OK"
+2026-02-21 12:31:36,917 [INFO] [CLOB] Client initialised. DRY_RUN=True
+2026-02-21 12:31:36,918 [INFO] [SYSTEM] Prefilling 120 candles from Binance REST API...
+2026-02-21 12:31:37,156 [INFO] [VWAP] Session reset for 2026-02-21
+2026-02-21 12:31:37,158 [INFO] [OK] 120 candles loaded. VWAP seeded at $68,447.59
+2026-02-21 12:31:37,466 [INFO] [POLY-PRICE DEBUG] Status=200 Body={"openPrice":68188.87061967641,"closePrice":68168.95092619027,"timestamp":1771691497576,"completed":true,"incomplete":false,"cached":true}
+2026-02-21 12:31:37,466 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771691400' via Chainlink API...
+2026-02-21 12:31:37,608 [INFO] [STRIKE] ✓ Price to Beat for 'btc-updown-5m-1771691400': $68,255.16
+2026-02-21 12:31:37,608 [INFO] [STRIKE] Seed market strike pre-loaded: $68,255.16
+2026-02-21 12:31:37,609 [INFO] [KLINE] Connecting to Binance kline stream...
+2026-02-21 12:31:37,631 [INFO] [CVD] Connecting to aggTrade stream...
+2026-02-21 12:31:37,632 [INFO] [CHAINLINK] Starting Chainlink oracle price poller...
+2026-02-21 12:31:37,635 [INFO] [EVAL] Evaluation loop starting — tick every 5s
+2026-02-21 12:31:37,749 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:38,137 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 201s left
+2026-02-21 12:31:38,137 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (201s left).
+2026-02-21 12:31:38,493 [INFO] [CVD] aggTrade stream connected.
+2026-02-21 12:31:39,819 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:41,877 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:43,199 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 196s left
+2026-02-21 12:31:43,199 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (196s left).
+2026-02-21 12:31:43,936 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:46,025 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:47,700 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 192s left
+2026-02-21 12:31:47,701 [INFO] [RULE] Score=4/4 → DOWN | Below VWAP -$300 (+1) | 9-EMA < 21-EMA (+1) | CVD sell $-76,673 (+1) | Math edge +46.6% vs crowd (+1)
+2026-02-21 12:31:47,701 [INFO] 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  DECISION LOCKED: DOWN  |  Confidence: High  |  Bet: $1.01
+  Score: 4/4  |  Strike: $68,255.16
+  Reason: Below VWAP -$300 (+1) | 9-EMA < 21-EMA (+1) | CVD sell $-76,673 (+1) | Math edge +46.6% vs crowd (+1)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-02-21 12:31:47,702 [INFO] 
+───────────────────────────────────────────────────────
+  [DRY RUN] Would place bet:
+    Market:   btc-updown-5m-1771691400
+    Decision: DOWN  (token: ...656516437984)
+    Size:     $1.01 USDC
+    Price:    0.5000 (50.0%)
+  Set DRY_RUN=false in .env to trade live.
+───────────────────────────────────────────────────────
+2026-02-21 12:31:48,090 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:48,261 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 191s left
+2026-02-21 12:31:48,262 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (191s left).
+2026-02-21 12:31:50,141 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:52,199 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:52,745 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 187s left
+2026-02-21 12:31:52,746 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (187s left).
+2026-02-21 12:31:53,320 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 186s left
+2026-02-21 12:31:53,321 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (186s left).
+2026-02-21 12:31:54,261 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:56,315 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:57,806 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 182s left
+2026-02-21 12:31:57,806 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (182s left).
+2026-02-21 12:31:58,372 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:31:58,372 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 181s left
+2026-02-21 12:31:58,372 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (181s left).
+2026-02-21 12:31:59,977 [INFO] [CANDLE] BEARISH | O:68228.21 H:68228.21 L:68147.53 C:68147.54 | VWAP: $68,112.59
+2026-02-21 12:32:00,421 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:02,484 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:02,867 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 177s left
+2026-02-21 12:32:02,868 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (177s left).
+2026-02-21 12:32:03,431 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 176s left
+2026-02-21 12:32:03,431 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (176s left).
+2026-02-21 12:32:04,540 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:06,591 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:07,925 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 172s left
+2026-02-21 12:32:07,925 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (172s left).
+2026-02-21 12:32:08,477 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 171s left
+2026-02-21 12:32:08,478 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (171s left).
+2026-02-21 12:32:08,650 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:10,709 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:12,780 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:12,998 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 167s left
+2026-02-21 12:32:12,999 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (167s left).
+2026-02-21 12:32:13,536 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 166s left
+2026-02-21 12:32:13,537 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (166s left).
+2026-02-21 12:32:14,834 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:16,900 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:18,052 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 161s left
+2026-02-21 12:32:18,052 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (161s left).
+2026-02-21 12:32:18,585 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 161s left
+2026-02-21 12:32:18,585 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (161s left).
+2026-02-21 12:32:18,960 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:21,011 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:23,066 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:23,107 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 156s left
+2026-02-21 12:32:23,107 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (156s left).
+2026-02-21 12:32:23,649 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 156s left
+2026-02-21 12:32:23,650 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (156s left).
+2026-02-21 12:32:25,137 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:27,198 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:28,160 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 151s left
+2026-02-21 12:32:28,160 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (151s left).
+2026-02-21 12:32:28,707 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 151s left
+2026-02-21 12:32:28,707 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (151s left).
+2026-02-21 12:32:29,273 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:31,330 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:33,229 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 146s left
+2026-02-21 12:32:33,230 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (146s left).
+2026-02-21 12:32:33,391 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:33,766 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 146s left
+2026-02-21 12:32:33,766 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (146s left).
+2026-02-21 12:32:35,452 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:37,518 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:38,280 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 141s left
+2026-02-21 12:32:38,281 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (141s left).
+2026-02-21 12:32:38,824 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 141s left
+2026-02-21 12:32:38,824 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (141s left).
+2026-02-21 12:32:39,578 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:41,642 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:43,331 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 136s left
+2026-02-21 12:32:43,331 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (136s left).
+2026-02-21 12:32:43,704 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:43,946 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 136s left
+2026-02-21 12:32:43,947 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (136s left).
+2026-02-21 12:32:45,767 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:47,824 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:48,385 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 131s left
+2026-02-21 12:32:48,385 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (131s left).
+2026-02-21 12:32:49,005 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 130s left
+2026-02-21 12:32:49,006 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (130s left).
+2026-02-21 12:32:49,882 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:51,942 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:53,452 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 126s left
+2026-02-21 12:32:53,452 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (126s left).
+2026-02-21 12:32:53,995 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:54,073 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 125s left
+2026-02-21 12:32:54,074 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (125s left).
+2026-02-21 12:32:56,060 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:58,126 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:32:58,504 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 121s left
+2026-02-21 12:32:58,504 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (121s left).
+2026-02-21 12:32:59,139 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 120s left
+2026-02-21 12:32:59,139 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (120s left).
+2026-02-21 12:32:59,994 [INFO] [CANDLE] BULLISH | O:68147.54 H:68181.96 L:68138.00 C:68181.95 | VWAP: $68,437.31
+2026-02-21 12:32:59,994 [INFO] [CANDLE] BULLISH | O:68147.54 H:68181.96 L:68138.00 C:68181.95 | VWAP: $68,112.80
+2026-02-21 12:33:00,174 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:02,238 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:03,562 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 116s left
+2026-02-21 12:33:03,563 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (116s left).
+2026-02-21 12:33:04,184 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 115s left
+2026-02-21 12:33:04,185 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (115s left).
+2026-02-21 12:33:04,302 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:06,378 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:08,428 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:08,628 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 111s left
+2026-02-21 12:33:08,629 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (111s left).
+2026-02-21 12:33:09,233 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 110s left
+2026-02-21 12:33:09,234 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (110s left).
+2026-02-21 12:33:10,501 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:12,561 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:13,680 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 106s left
+2026-02-21 12:33:13,680 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (106s left).
+2026-02-21 12:33:14,283 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 105s left
+2026-02-21 12:33:14,283 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (105s left).
+2026-02-21 12:33:14,609 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:16,670 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:18,716 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:18,762 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 101s left
+2026-02-21 12:33:18,763 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (101s left).
+2026-02-21 12:33:19,346 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 100s left
+2026-02-21 12:33:19,347 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (100s left).
+2026-02-21 12:33:20,769 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:22,831 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:23,819 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 96s left
+2026-02-21 12:33:23,819 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (96s left).
+2026-02-21 12:33:24,401 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 95s left
+2026-02-21 12:33:24,401 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (95s left).
+2026-02-21 12:33:24,881 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:26,930 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:28,869 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 91s left
+2026-02-21 12:33:28,869 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (91s left).
+2026-02-21 12:33:28,985 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:29,516 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 90s left
+2026-02-21 12:33:29,517 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (90s left).
+2026-02-21 12:33:31,050 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:33,105 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:33,923 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 86s left
+2026-02-21 12:33:33,923 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (86s left).
+2026-02-21 12:33:34,570 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 85s left
+2026-02-21 12:33:34,570 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (85s left).
+2026-02-21 12:33:35,167 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:37,252 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:38,972 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 81s left
+2026-02-21 12:33:38,973 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (81s left).
+2026-02-21 12:33:39,321 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:39,619 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 80s left
+2026-02-21 12:33:39,620 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (80s left).
+2026-02-21 12:33:41,376 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:43,429 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:44,045 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 75s left
+2026-02-21 12:33:44,046 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (75s left).
+2026-02-21 12:33:44,667 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 75s left
+2026-02-21 12:33:44,668 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (75s left).
+2026-02-21 12:33:45,474 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:47,532 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:49,106 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 70s left
+2026-02-21 12:33:49,107 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (70s left).
+2026-02-21 12:33:49,583 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:49,727 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 70s left
+2026-02-21 12:33:49,728 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (70s left).
+2026-02-21 12:33:51,660 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:53,739 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:54,162 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 65s left
+2026-02-21 12:33:54,162 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (65s left).
+2026-02-21 12:33:54,784 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 65s left
+2026-02-21 12:33:54,784 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (65s left).
+2026-02-21 12:33:55,789 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:57,841 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:59,215 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 60s left
+2026-02-21 12:33:59,216 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (60s left).
+2026-02-21 12:33:59,840 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 60s left
+2026-02-21 12:33:59,840 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (60s left).
+2026-02-21 12:33:59,901 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:33:59,980 [INFO] [CANDLE] BULLISH | O:68181.95 H:68190.49 L:68181.39 C:68189.37 | VWAP: $68,433.16
+2026-02-21 12:33:59,980 [INFO] [CANDLE] BULLISH | O:68181.95 H:68190.49 L:68181.39 C:68189.37 | VWAP: $68,113.05
+2026-02-21 12:34:01,967 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:04,043 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:04,270 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 55s left
+2026-02-21 12:34:04,271 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (55s left).
+2026-02-21 12:34:04,895 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 55s left
+2026-02-21 12:34:04,895 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (55s left).
+2026-02-21 12:34:06,109 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:08,162 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:09,321 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 50s left
+2026-02-21 12:34:09,322 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (50s left).
+2026-02-21 12:34:09,959 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 50s left
+2026-02-21 12:34:09,960 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (50s left).
+2026-02-21 12:34:10,232 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:12,309 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:14,376 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 45s left
+2026-02-21 12:34:14,377 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (45s left).
+2026-02-21 12:34:14,386 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:15,024 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 44s left
+2026-02-21 12:34:15,031 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (44s left).
+2026-02-21 12:34:16,449 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:18,517 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:19,435 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 40s left
+2026-02-21 12:34:19,436 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (40s left).
+2026-02-21 12:34:20,083 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 39s left
+2026-02-21 12:34:20,084 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (39s left).
+2026-02-21 12:34:20,576 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:22,632 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:24,485 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 35s left
+2026-02-21 12:34:24,485 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (35s left).
+2026-02-21 12:34:24,704 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:25,164 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 34s left
+2026-02-21 12:34:25,164 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (34s left).
+2026-02-21 12:34:26,752 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:28,799 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:29,532 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 30s left
+2026-02-21 12:34:29,532 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (30s left).
+2026-02-21 12:34:30,218 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 29s left
+2026-02-21 12:34:30,219 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (29s left).
+2026-02-21 12:34:30,854 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:32,907 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:34,591 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 25s left
+2026-02-21 12:34:34,591 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (25s left).
+2026-02-21 12:34:34,976 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:35,273 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 24s left
+2026-02-21 12:34:35,273 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (24s left).
+2026-02-21 12:34:37,038 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:39,087 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:39,646 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 20s left
+2026-02-21 12:34:39,647 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (20s left).
+2026-02-21 12:34:40,332 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 19s left
+2026-02-21 12:34:40,332 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (19s left).
+2026-02-21 12:34:41,145 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:43,204 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:44,706 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 15s left
+2026-02-21 12:34:44,707 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (15s left).
+2026-02-21 12:34:45,265 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:45,391 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 14s left
+2026-02-21 12:34:45,391 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (14s left).
+2026-02-21 12:34:47,310 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:49,363 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:49,759 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 10s left
+2026-02-21 12:34:49,760 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (10s left).
+2026-02-21 12:34:50,445 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 9s left
+2026-02-21 12:34:50,446 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (9s left).
+2026-02-21 12:34:51,442 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:53,513 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:54,822 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 5s left
+2026-02-21 12:34:54,822 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (5s left).
+2026-02-21 12:34:55,515 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 4s left
+2026-02-21 12:34:55,518 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (4s left).
+2026-02-21 12:34:55,581 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:57,639 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:59,698 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:34:59,871 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 0s left
+2026-02-21 12:34:59,872 [INFO] [LOCK] btc-updown-5m-1771691400 committed -- holding (0s left).
+2026-02-21 12:34:59,996 [INFO] [CANDLE] BULLISH | O:68189.37 H:68221.56 L:68189.37 C:68221.56 | VWAP: $68,431.22
+2026-02-21 12:34:59,997 [INFO] [CANDLE] BULLISH | O:68189.37 H:68221.56 L:68189.37 C:68221.56 | VWAP: $68,113.23
+2026-02-21 12:35:00,564 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | 0s left
+2026-02-21 12:35:00,565 [INFO] [LOSS] btc-updown-5m-1771691400: predicted UP, actual DOWN | $68,255.16 → $68,221.56
+2026-02-21 12:35:00,565 [INFO] [STATS] W:155 L:57 | WinRate:73.11%
+2026-02-21 12:35:00,577 [INFO] [ROLL] btc-updown-5m-1771691400 → btc-updown-5m-1771691700
+2026-02-21 12:35:01,761 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:03,592 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771691700' via Chainlink API...
+2026-02-21 12:35:03,766 [WARNING] [STRIKE] openPrice missing: {'openPrice': None, 'closePrice': None, 'timestamp': 1771691699773, 'completed': False, 'incomplete': True, 'cached': False}
+2026-02-21 12:35:03,767 [WARNING] [STRIKE] Pre-fetch returned 0 for 'btc-updown-5m-1771691700' -- will retry on next eval tick.
+2026-02-21 12:35:03,827 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:04,923 [INFO] [POLY] Strike=$68,255.16 | UP=50.0% | DOWN=50.0% | -4s left
+2026-02-21 12:35:04,924 [INFO] [WIN]  btc-updown-5m-1771691400: DOWN ✓ | $68,255.16 → $68,221.56
+2026-02-21 12:35:04,924 [INFO] [STATS] W:1 L:0 | WinRate:100.00%
+2026-02-21 12:35:04,925 [INFO] [ROLL] btc-updown-5m-1771691400 → btc-updown-5m-1771691700
+2026-02-21 12:35:05,640 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771691700' via Chainlink API...
+2026-02-21 12:35:05,745 [WARNING] [STRIKE] openPrice missing: {'openPrice': None, 'closePrice': None, 'timestamp': 1771691699773, 'completed': False, 'incomplete': True, 'cached': False}
+2026-02-21 12:35:05,745 [INFO] [POLY] Strike=$0.00 | UP=50.5% | DOWN=49.5% | 294s left
+2026-02-21 12:35:05,756 [INFO] [STRIKE] ⚠️  Chainlink unavailable. Open-price snapshot: $68,221.55
+2026-02-21 12:35:05,757 [INFO] [GATE] Body too small (0.00)
+2026-02-21 12:35:05,885 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:07,940 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771691700' via Chainlink API...
+2026-02-21 12:35:07,945 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:08,167 [WARNING] [STRIKE] openPrice missing: {'openPrice': None, 'closePrice': None, 'timestamp': 1771691699773, 'completed': False, 'incomplete': True, 'cached': False}
+2026-02-21 12:35:08,168 [WARNING] [STRIKE] Pre-fetch returned 0 for 'btc-updown-5m-1771691700' -- will retry on next eval tick.
+2026-02-21 12:35:09,995 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771691700' via Chainlink API...
+2026-02-21 12:35:10,005 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:10,091 [WARNING] [STRIKE] openPrice missing: {'openPrice': None, 'closePrice': None, 'timestamp': 1771691699773, 'completed': False, 'incomplete': True, 'cached': False}
+2026-02-21 12:35:10,092 [INFO] [POLY] Strike=$0.00 | UP=50.5% | DOWN=49.5% | 290s left
+2026-02-21 12:35:10,092 [INFO] [STRIKE] ⚠️  Chainlink unavailable. Open-price snapshot: $68,221.55
+2026-02-21 12:35:10,093 [INFO] [GATE] Body too small (0.00)
+2026-02-21 12:35:10,807 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771691700' via Chainlink API...
+2026-02-21 12:35:10,891 [INFO] [STRIKE] ✓ Price to Beat for 'btc-updown-5m-1771691700': $68,206.26
+2026-02-21 12:35:10,892 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 289s left
+2026-02-21 12:35:10,892 [INFO] [GATE] Body too small (0.00)
+2026-02-21 12:35:12,086 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:14,137 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:15,152 [INFO] [STRIKE] Fetching Price to Beat for 'btc-updown-5m-1771691700' via Chainlink API...
+2026-02-21 12:35:15,241 [INFO] [STRIKE] ✓ Price to Beat for 'btc-updown-5m-1771691700': $68,206.26
+2026-02-21 12:35:15,242 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 284s left
+2026-02-21 12:35:15,242 [INFO] [GATE] Body too small (0.00)
+2026-02-21 12:35:15,956 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 284s left
+2026-02-21 12:35:15,957 [INFO] [GATE] Body too small (0.00)
+2026-02-21 12:35:16,191 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:18,259 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:20,297 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 279s left
+2026-02-21 12:35:20,298 [INFO] [GATE] Body too small (0.01)
+2026-02-21 12:35:20,312 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:21,019 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 278s left
+2026-02-21 12:35:21,020 [INFO] [GATE] Body too small (0.00)
+2026-02-21 12:35:22,370 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:24,430 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:25,364 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 274s left
+2026-02-21 12:35:25,365 [INFO] [GATE] Body too small (0.00)
+2026-02-21 12:35:26,076 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 273s left
+2026-02-21 12:35:26,077 [INFO] [RULE] Score=2/4 → UP | Above VWAP +$115 (+1) | 9-EMA < 21-EMA (-1) | CVD buy +$233,983 (+1) | Math edge +11.7% vs crowd (+1)
+2026-02-21 12:35:26,077 [INFO] 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  DECISION LOCKED: UP  |  Confidence: Medium  |  Bet: $1.00
+  Score: 2/4  |  Strike: $68,206.26
+  Reason: Above VWAP +$115 (+1) | 9-EMA < 21-EMA (-1) | CVD buy +$233,983 (+1) | Math edge +11.7% vs crowd (+1)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2026-02-21 12:35:26,078 [INFO] 
+───────────────────────────────────────────────────────
+  [DRY RUN] Would place bet:
+    Market:   btc-updown-5m-1771691700
+    Decision: UP  (token: ...514121035335)
+    Size:     $1.00 USDC
+    Price:    0.5050 (50.5%)
+  Set DRY_RUN=false in .env to trade live.
+───────────────────────────────────────────────────────
+2026-02-21 12:35:26,492 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:28,554 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:30,429 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 269s left
+2026-02-21 12:35:30,430 [INFO] [RULE] Score=0/4 → SKIP | Neutral (score=0). Below VWAP -$197 (-1) | 9-EMA < 21-EMA (-1) | CVD buy +$312,325 (+1) | Math edge +14.9% vs crowd (+1) (EV=+29.60%)
+2026-02-21 12:35:30,608 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:31,141 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 268s left
+2026-02-21 12:35:31,141 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (268s left).
+2026-02-21 12:35:32,670 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:34,728 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:35,479 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 264s left
+2026-02-21 12:35:36,186 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 263s left
+2026-02-21 12:35:36,187 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (263s left).
+2026-02-21 12:35:36,783 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:38,841 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:40,547 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 259s left
+2026-02-21 12:35:40,897 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:41,247 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 258s left
+2026-02-21 12:35:41,248 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (258s left).
+2026-02-21 12:35:42,960 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:45,058 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:45,594 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 254s left
+2026-02-21 12:35:46,308 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 253s left
+2026-02-21 12:35:46,308 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (253s left).
+2026-02-21 12:35:47,121 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:49,177 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:50,653 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 249s left
+2026-02-21 12:35:51,225 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:51,361 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 248s left
+2026-02-21 12:35:51,362 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (248s left).
+2026-02-21 12:35:53,285 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:55,353 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:55,707 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 244s left
+2026-02-21 12:35:56,415 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 243s left
+2026-02-21 12:35:56,415 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (243s left).
+2026-02-21 12:35:57,418 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:59,478 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:35:59,997 [INFO] [CANDLE] BULLISH | O:68221.55 H:68240.67 L:68221.55 C:68232.05 | VWAP: $68,429.87
+2026-02-21 12:36:00,768 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 239s left
+2026-02-21 12:36:00,768 [INFO] [RULE] Score=-1/4 → SKIP | Signals oppose UP (score=-1). Below VWAP -$198 (-1) | 9-EMA < 21-EMA (-1) | CVD neutral (0) | Math edge +14.9% vs crowd (+1) (EV=+29.45%)
+2026-02-21 12:36:01,478 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 238s left
+2026-02-21 12:36:01,478 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (238s left).
+2026-02-21 12:36:01,533 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:03,606 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:05,667 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:05,824 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 234s left
+2026-02-21 12:36:05,824 [INFO] [RULE] Score=0/4 → SKIP | Neutral (score=0). Below VWAP -$173 (-1) | 9-EMA < 21-EMA (-1) | CVD buy +$244,500 (+1) | Math edge +27.6% vs crowd (+1) (EV=+54.56%)
+2026-02-21 12:36:06,534 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 233s left
+2026-02-21 12:36:06,535 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (233s left).
+2026-02-21 12:36:07,730 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:09,802 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:10,877 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 229s left
+2026-02-21 12:36:11,601 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 228s left
+2026-02-21 12:36:11,601 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (228s left).
+2026-02-21 12:36:11,863 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:13,912 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:15,929 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 224s left
+2026-02-21 12:36:15,979 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:16,657 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 223s left
+2026-02-21 12:36:16,658 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (223s left).
+2026-02-21 12:36:18,036 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:20,089 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:20,998 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 219s left
+2026-02-21 12:36:21,736 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 218s left
+2026-02-21 12:36:21,737 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (218s left).
+2026-02-21 12:36:22,140 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:24,197 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:26,061 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 213s left
+2026-02-21 12:36:26,257 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:26,843 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 213s left
+2026-02-21 12:36:26,843 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (213s left).
+2026-02-21 12:36:28,318 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:30,381 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:31,121 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 208s left
+2026-02-21 12:36:31,903 [INFO] [POLY] Strike=$68,206.26 | UP=50.5% | DOWN=49.5% | 208s left
+2026-02-21 12:36:31,904 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (208s left).
+2026-02-21 12:36:32,444 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:34,505 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:36,191 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 203s left
+2026-02-21 12:36:36,573 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:36,955 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 203s left
+2026-02-21 12:36:36,956 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (203s left).
+2026-02-21 12:36:38,631 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:40,681 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:41,242 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 198s left
+2026-02-21 12:36:42,044 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 197s left
+2026-02-21 12:36:42,044 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (197s left).
+2026-02-21 12:36:42,735 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:44,796 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:46,307 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 193s left
+2026-02-21 12:36:46,849 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:47,101 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 192s left
+2026-02-21 12:36:47,102 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (192s left).
+2026-02-21 12:36:48,911 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:50,982 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:51,368 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 188s left
+2026-02-21 12:36:52,154 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 187s left
+2026-02-21 12:36:52,155 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (187s left).
+2026-02-21 12:36:53,037 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:55,096 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:56,414 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 183s left
+2026-02-21 12:36:57,143 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:57,209 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 182s left
+2026-02-21 12:36:57,209 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (182s left).
+2026-02-21 12:36:59,197 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:36:59,989 [INFO] [CANDLE] BULLISH | O:68232.06 H:68291.77 L:68232.05 C:68291.77 | VWAP: $68,113.96
+2026-02-21 12:37:01,250 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:37:01,467 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 178s left
+2026-02-21 12:37:02,262 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 177s left
+2026-02-21 12:37:02,263 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (177s left).
+2026-02-21 12:37:03,307 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:37:05,363 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:37:06,524 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 173s left
+2026-02-21 12:37:07,320 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 172s left
+2026-02-21 12:37:07,321 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (172s left).
+2026-02-21 12:37:07,408 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:37:09,475 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:37:11,574 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:37:11,850 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 168s left
+2026-02-21 12:37:11,851 [INFO] [RULE] Score=-2/4 → SKIP | Signals oppose UP (score=-2). Below VWAP -$125 (-1) | 9-EMA < 21-EMA (-1) | CVD sell $-149,036 (-1) | Math edge +42.8% vs crowd (+1) (EV=+80.68%)
+2026-02-21 12:37:12,383 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 167s left
+2026-02-21 12:37:12,384 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (167s left).
+2026-02-21 12:37:13,634 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:37:15,691 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:37:16,904 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 163s left
+2026-02-21 12:37:17,435 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 162s left
+2026-02-21 12:37:17,435 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (162s left).
+2026-02-21 12:37:17,743 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:37:19,808 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:37:21,861 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:37:21,961 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 158s left
+2026-02-21 12:37:21,962 [INFO] [RULE] Score=0/4 → SKIP | Neutral (score=0). Below VWAP -$90 (-1) | 9-EMA < 21-EMA (-1) | CVD buy +$71,494 (+1) | Math edge +46.0% vs crowd (+1) (EV=+86.79%)
+2026-02-21 12:37:22,506 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 157s left
+2026-02-21 12:37:22,506 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (157s left).
+2026-02-21 12:37:23,910 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:37:25,972 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:37:27,011 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 152s left
+2026-02-21 12:37:27,565 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 152s left
+2026-02-21 12:37:27,565 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (152s left).
+2026-02-21 12:37:28,020 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:37:30,069 [WARNING] [CHAINLINK] Returned 0 — fallback to Binance aggTrade
+2026-02-21 12:37:32,629 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 147s left
+2026-02-21 12:37:32,629 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (147s left).
+2026-02-21 12:37:37,701 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 142s left
+2026-02-21 12:37:37,702 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (142s left).
+2026-02-21 12:37:42,759 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 137s left
+2026-02-21 12:37:42,759 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (137s left).
+2026-02-21 12:37:47,831 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 132s left
+2026-02-21 12:37:47,831 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (132s left).
+2026-02-21 12:37:52,885 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 127s left
+2026-02-21 12:37:52,885 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (127s left).
+2026-02-21 12:37:57,953 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 122s left
+2026-02-21 12:37:57,953 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (122s left).
+2026-02-21 12:37:59,976 [INFO] [CANDLE] BULLISH | O:68291.76 H:68348.40 L:68291.76 C:68328.99 | VWAP: $68,114.43
+2026-02-21 12:38:03,019 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 116s left
+2026-02-21 12:38:03,019 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (116s left).
+2026-02-21 12:38:08,067 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 111s left
+2026-02-21 12:38:08,068 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (111s left).
+2026-02-21 12:38:13,130 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 106s left
+2026-02-21 12:38:13,130 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (106s left).
+2026-02-21 12:38:18,198 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 101s left
+2026-02-21 12:38:18,198 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (101s left).
+2026-02-21 12:38:23,257 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 96s left
+2026-02-21 12:38:23,258 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (96s left).
+2026-02-21 12:38:28,321 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 91s left
+2026-02-21 12:38:28,322 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (91s left).
+2026-02-21 12:38:33,409 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 86s left
+2026-02-21 12:38:33,410 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (86s left).
+2026-02-21 12:38:38,463 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 81s left
+2026-02-21 12:38:38,464 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (81s left).
+2026-02-21 12:38:43,522 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 76s left
+2026-02-21 12:38:43,523 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (76s left).
+2026-02-21 12:38:48,581 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 71s left
+2026-02-21 12:38:48,581 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (71s left).
+2026-02-21 12:38:53,656 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 66s left
+2026-02-21 12:38:53,656 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (66s left).
+2026-02-21 12:38:58,713 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 61s left
+2026-02-21 12:38:58,714 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (61s left).
+2026-02-21 12:38:59,988 [INFO] [CANDLE] BULLISH | O:68328.98 H:68344.64 L:68325.17 C:68335.28 | VWAP: $68,114.59
+2026-02-21 12:39:03,775 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 56s left
+2026-02-21 12:39:03,776 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (56s left).
+2026-02-21 12:39:08,830 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 51s left
+2026-02-21 12:39:08,830 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (51s left).
+2026-02-21 12:39:13,888 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 46s left
+2026-02-21 12:39:13,888 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (46s left).
+2026-02-21 12:39:18,941 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 41s left
+2026-02-21 12:39:18,942 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (41s left).
+2026-02-21 12:39:24,008 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 35s left
+2026-02-21 12:39:24,008 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (35s left).
+2026-02-21 12:39:29,119 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 30s left
+2026-02-21 12:39:29,120 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (30s left).
+2026-02-21 12:39:34,180 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 25s left
+2026-02-21 12:39:34,180 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (25s left).
+2026-02-21 12:39:39,255 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 20s left
+2026-02-21 12:39:39,255 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (20s left).
+2026-02-21 12:39:44,320 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 15s left
+2026-02-21 12:39:44,320 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (15s left).
+2026-02-21 12:39:49,371 [INFO] [POLY] Strike=$68,206.26 | UP=53.0% | DOWN=47.0% | 10s left
+2026-02-21 12:39:49,371 [INFO] [LOCK] btc-updown-5m-1771691700 committed -- holding (10s left).
