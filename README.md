@@ -128,7 +128,3 @@ The CSV tracks:
 ## ⚠️ Disclaimer
 
 *This software is for educational purposes. Trading cryptocurrency involves significant risk. The authors are not responsible for any financial losses incurred through the use of this bot.*
-
-```
-
-```
