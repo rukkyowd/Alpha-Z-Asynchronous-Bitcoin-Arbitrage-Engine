@@ -1213,52 +1213,95 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             best_ev_seen[slug] = max(best_ev_seen.get(slug, -999.0), current_ev_pct)
 
 # ============================================================
-# CONCURRENT TASK 4: polymarket loop
-# =========
+# CONCURRENT TASK 4: Polymarket live BTC price poller
+#   Uses the same crypto-price endpoint that already works for
+#   strike fetching, but requests the current 5-min window.
+#   This gives the exact price Polymarket's oracle sees.
+# ============================================================
 async def polymarket_rtds_loop():
-    """
-    Listens to Polymarket's own price feed (Binance and Chainlink sources).
-    Useful for detecting 'Oracle Lag' before settlement.
-    """
-    global poly_live_binance, poly_live_chainlink
-    url = "wss://ws-live-data.polymarket.com"
-    
-    while True:
-        try:
-            async with websockets.connect(url) as ws:
-                # Helper to send heartbeat PINGs every 5s
-                async def heartbeat():
-                    while True:
-                        await asyncio.sleep(5)
-                        await ws.send("PING")
-                
-                heartbeat_task = asyncio.create_task(heartbeat())
-                
-                sub_msg = {
-                    "action": "subscribe",
-                    "subscriptions": [
-                        {"topic": "crypto_prices", "type": "update", "filters": "btcusdt"},
-                        {"topic": "crypto_prices_chainlink", "type": "*", "filters": "{\"symbol\":\"btc/usd\"}"}
-                    ]
+    global poly_live_binance
+    POLL_INTERVAL = 2.0   # seconds
+
+    log.info("[POLY-PRICE] Starting Polymarket oracle price poller...")
+
+    async with aiohttp.ClientSession() as session:
+        while True:
+            try:
+                # Build a ~10-minute window ending right now
+                now      = datetime.now(timezone.utc)
+                end_dt   = now + timedelta(seconds=30)   # slight future buffer
+                start_dt = end_dt - timedelta(minutes=10)
+
+                params = {
+                    "symbol":         "BTC",
+                    "eventStartTime": start_dt.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    "variant":        "fiveminute",
+                    "endDate":        end_dt.strftime('%Y-%m-%dT%H:%M:%SZ'),
                 }
-                await ws.send(json.dumps(sub_msg))
-                log.info("[POLY-RTDS] Subscribed to Binance & Chainlink.")
 
-                async for message in ws:
-                    # Handle PING/PONG (Send PING every 5s)
-                    # Note: Most libs handle PONG automatically if you send PING.
-                    data = json.loads(message)
-                    topic = data.get("topic")
-                    payload = data.get("payload", {})
+                async with session.get(
+                    "https://polymarket.com/api/crypto/crypto-price",
+                    params=params,
+                    timeout=aiohttp.ClientTimeout(total=4)
+                ) as r:
+                    if r.status == 200:
+                        data = await r.json()
+                        # 'currentPrice' is the live oracle price;
+                        # fall back to 'openPrice' if not present
+                        price_raw = data.get("currentPrice") or data.get("closePrice") or data.get("openPrice")
+                        if price_raw:
+                            price = float(price_raw)
+                            if price > 0:
+                                poly_live_binance = price
+                                log.debug(f"[POLY-PRICE] Oracle: ${price:,.2f}")
+                    else:
+                        log.warning(f"[POLY-PRICE] HTTP {r.status}")
 
-                    if topic == "crypto_prices":
-                        poly_live_binance = float(payload.get("value", 0))
-                    elif topic == "crypto_prices_chainlink":
-                        poly_live_chainlink = float(payload.get("value", 0))
+            except asyncio.TimeoutError:
+                log.warning("[POLY-PRICE] Timeout — retrying")
+            except Exception as e:
+                log.warning(f"[POLY-PRICE] Error: {e}")
 
-        except Exception as e:
-            log.warning(f"[POLY-RTDS] Error: {e}. Reconnecting in 5s...")
-            await asyncio.sleep(5)
+            await asyncio.sleep(POLL_INTERVAL)
+    global poly_live_binance, poly_live_chainlink
+    POLY_PRICE_URL = "https://polymarket.com/api/crypto/live-prices"
+    POLL_INTERVAL  = 1.5   # seconds — fast enough for 5-min markets
+
+    log.info("[POLY-PRICE] Starting Polymarket live price poller...")
+
+    async with aiohttp.ClientSession() as session:
+        while True:
+            try:
+                async with session.get(
+                    POLY_PRICE_URL,
+                    params={"symbols": "BTCUSDT"},
+                    timeout=aiohttp.ClientTimeout(total=4)
+                ) as r:
+                    if r.status == 200:
+                        data = await r.json()
+                        # Response is typically: {"BTCUSDT": {"price": 68474.48, ...}}
+                        # or a list — handle both shapes
+                        if isinstance(data, dict):
+                            btc = data.get("BTCUSDT") or data.get("btcusdt") or {}
+                            price = float(btc.get("price", 0)) if isinstance(btc, dict) else float(btc)
+                        elif isinstance(data, list):
+                            # Some endpoints return [{symbol, price}, ...]
+                            entry = next((x for x in data if x.get("symbol","").upper() == "BTCUSDT"), {})
+                            price = float(entry.get("price", 0))
+                        else:
+                            price = 0.0
+
+                        if price > 0:
+                            poly_live_binance = price
+                    else:
+                        log.warning(f"[POLY-PRICE] HTTP {r.status}")
+
+            except asyncio.TimeoutError:
+                log.warning("[POLY-PRICE] Timeout — retrying")
+            except Exception as e:
+                log.warning(f"[POLY-PRICE] Error: {e}")
+
+            await asyncio.sleep(POLL_INTERVAL)
 # ============================================================
 # HELPER
 # ============================================================
@@ -1301,6 +1344,31 @@ async def main():
     async with aiohttp.ClientSession() as session:
         # Seed history and indicators before anything else
         await prefill_history(session)
+
+    async with aiohttp.ClientSession() as session:
+        await prefill_history(session)
+
+        # ── Probe crypto-price response shape once at startup ──
+        try:
+            now    = datetime.now(timezone.utc)
+            end_dt = now + timedelta(seconds=30)
+            async with session.get(
+                "https://polymarket.com/api/crypto/crypto-price",
+                params={
+                    "symbol":         "BTC",
+                    "eventStartTime": (end_dt - timedelta(minutes=10)).strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    "variant":        "fiveminute",
+                    "endDate":        end_dt.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                },
+                timeout=aiohttp.ClientTimeout(total=5)
+            ) as r:
+                raw = await r.text()
+                log.info(f"[POLY-PRICE DEBUG] Status={r.status} Body={raw[:300]}")
+        except Exception as e:
+            log.warning(f"[POLY-PRICE DEBUG] Failed: {e}")
+
+        # Pre-fetch strike for seed market  ← this line was already here
+        initial_strike = await fetch_price_to_beat_for_market(session, target_slug)
 
         # Pre-fetch strike for seed market
         initial_strike = await fetch_price_to_beat_for_market(session, target_slug)
