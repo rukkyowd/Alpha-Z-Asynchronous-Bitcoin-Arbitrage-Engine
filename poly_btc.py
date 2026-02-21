@@ -508,15 +508,14 @@ async def fetch_price_to_beat_for_market(session: aiohttp.ClientSession, slug: s
 # ASYNC I/O
 # ============================================================
 async def get_chainlink_price(session: aiohttp.ClientSession) -> float:
-    # BTC/USD Feed on Polygon: 0xc907E116054Ad103354f2D350FD2455D0EB91572
-    url = "https://rpc.ankr.com/polygon"
+    url = "https://polygon.drpc.org"
     payload = {
         "jsonrpc": "2.0",
         "method": "eth_call",
         "params": [
             {
                 "to": "0xc907E116054Ad103354f2D350FD2455D0EB91572",
-                "data": "0xfeaf968c" # latestRoundData()
+                "data": "0xfeaf968c"
             }, 
             "latest"
         ],
@@ -525,12 +524,11 @@ async def get_chainlink_price(session: aiohttp.ClientSession) -> float:
     try:
         async with session.post(url, json=payload, timeout=5) as r:
             data = await r.json()
+            log.info(f"[CHAINLINK DEBUG] Status={r.status} Response={str(data)[:200]}")
             result = data.get("result")
             if result and result != "0x":
-                # Chainlink returns (roundId, answer, startedAt, updatedAt, answeredInRound)
-                # 'answer' is the second 32-byte word (index 66 to 130)
                 raw_price = int(result[66:130], 16)
-                return raw_price / 1e8  # BTC feed has 8 decimals
+                return raw_price / 1e8
         return 0.0
     except Exception as e:
         log.error(f"[CHAINLINK] RPC Error: {e}")
@@ -1213,50 +1211,30 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             best_ev_seen[slug] = max(best_ev_seen.get(slug, -999.0), current_ev_pct)
 
 # ============================================================
-# CONCURRENT TASK 4: Polymarket live BTC price poller
+# CONCURRENT TASK 4: Chainlink oracle price poller
+#   Reads directly from the same Polygon smart contract
+#   Polymarket uses for settlement. No API key needed.
 # ============================================================
 async def polymarket_rtds_loop():
     global poly_live_binance
     POLL_INTERVAL = 2.0
 
-    log.info("[POLY-PRICE] Starting Polymarket oracle price poller...")
+    log.info("[CHAINLINK] Starting Chainlink oracle price poller...")
 
     async with aiohttp.ClientSession() as session:
         while True:
             try:
-                now      = datetime.now(timezone.utc)
-                end_dt   = now + timedelta(seconds=30)
-                start_dt = end_dt - timedelta(minutes=10)
-
-                params = {
-                    "symbol":         "BTC",
-                    "eventStartTime": start_dt.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                    "variant":        "fiveminute",
-                    "endDate":        end_dt.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                }
-
-                async with session.get(
-                    "https://polymarket.com/api/crypto/crypto-price",
-                    params=params,
-                    timeout=aiohttp.ClientTimeout(total=4)
-                ) as r:
-                    if r.status == 200:
-                        data = await r.json()
-                        price_raw = data.get("currentPrice") or data.get("closePrice") or data.get("openPrice")
-                        if price_raw:
-                            price = float(price_raw)
-                            if price > 0:
-                                poly_live_binance = price
-                                log.debug(f"[POLY-PRICE] Oracle: ${price:,.2f}")
-                    else:
-                        log.warning(f"[POLY-PRICE] HTTP {r.status}")
-
-            except asyncio.TimeoutError:
-                log.warning("[POLY-PRICE] Timeout — retrying")
+                price = await get_chainlink_price(session)
+                if price > 0:
+                    poly_live_binance = price
+                    log.debug(f"[CHAINLINK] Oracle: ${price:,.2f}")
+                else:
+                    log.warning("[CHAINLINK] Returned 0 — fallback to Binance aggTrade")
             except Exception as e:
-                log.warning(f"[POLY-PRICE] Error: {e}")
+                log.warning(f"[CHAINLINK] Error: {e}")
 
             await asyncio.sleep(POLL_INTERVAL)
+
 # ============================================================
 # HELPER
 # ============================================================
@@ -1357,6 +1335,7 @@ if __name__ == "__main__":
     print(f"    ✓ kline_stream_loop   — candle history, VWAP, CVD snapshot")
     print(f"    ✓ agg_trade_listener  — live price, CVD (trade-level)")
     print(f"    ✓ evaluation_loop     — fires every {EVAL_TICK_SECONDS}s, one decision per market")
+    print(f"    ✓ polymarket_rtds_loop — Chainlink oracle price (Polygon RPC, no key needed)")
     print(f"\n  Thresholds:")
     print(f"    Min EV:           {MIN_EV_PCT_TO_CALL_AI}%")
     print(f"    Time window:      {MIN_SECONDS_REMAINING}s – {MAX_SECONDS_FOR_NEW_BET}s")
