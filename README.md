@@ -34,15 +34,14 @@ pip install asyncio aiohttp websockets py-clob-client python-dotenv
 
 ### 3. Environment Variables
 
-Create a `.env` file in the root directory:
+An env.example file is provided in the repository. Open your Windows command prompt and copy this file to create your active .env file:
 
-env
-POLY_PRIVATE_KEY=your_private_key_here
-POLY_FUNDER=your_proxy_wallet_address
-POLY_SIG_TYPE=1
-DRY_RUN=true
+```
+copy env.example .env
+```
+Open the newly created .env file and fill in your specific Polymarket proxy wallet address and private key credentials.
 
-> **Note:** Set `DRY_RUN=false` only when you are ready to risk real USDC.
+Note: Set DRY_RUN=false only when you are ready to risk real USDC.
 
 ---
 
