@@ -1214,22 +1214,18 @@ async def evaluation_loop(session: aiohttp.ClientSession):
 
 # ============================================================
 # CONCURRENT TASK 4: Polymarket live BTC price poller
-#   Uses the same crypto-price endpoint that already works for
-#   strike fetching, but requests the current 5-min window.
-#   This gives the exact price Polymarket's oracle sees.
 # ============================================================
 async def polymarket_rtds_loop():
     global poly_live_binance
-    POLL_INTERVAL = 2.0   # seconds
+    POLL_INTERVAL = 2.0
 
     log.info("[POLY-PRICE] Starting Polymarket oracle price poller...")
 
     async with aiohttp.ClientSession() as session:
         while True:
             try:
-                # Build a ~10-minute window ending right now
                 now      = datetime.now(timezone.utc)
-                end_dt   = now + timedelta(seconds=30)   # slight future buffer
+                end_dt   = now + timedelta(seconds=30)
                 start_dt = end_dt - timedelta(minutes=10)
 
                 params = {
@@ -1246,53 +1242,12 @@ async def polymarket_rtds_loop():
                 ) as r:
                     if r.status == 200:
                         data = await r.json()
-                        # 'currentPrice' is the live oracle price;
-                        # fall back to 'openPrice' if not present
                         price_raw = data.get("currentPrice") or data.get("closePrice") or data.get("openPrice")
                         if price_raw:
                             price = float(price_raw)
                             if price > 0:
                                 poly_live_binance = price
                                 log.debug(f"[POLY-PRICE] Oracle: ${price:,.2f}")
-                    else:
-                        log.warning(f"[POLY-PRICE] HTTP {r.status}")
-
-            except asyncio.TimeoutError:
-                log.warning("[POLY-PRICE] Timeout — retrying")
-            except Exception as e:
-                log.warning(f"[POLY-PRICE] Error: {e}")
-
-            await asyncio.sleep(POLL_INTERVAL)
-    global poly_live_binance, poly_live_chainlink
-    POLY_PRICE_URL = "https://polymarket.com/api/crypto/live-prices"
-    POLL_INTERVAL  = 1.5   # seconds — fast enough for 5-min markets
-
-    log.info("[POLY-PRICE] Starting Polymarket live price poller...")
-
-    async with aiohttp.ClientSession() as session:
-        while True:
-            try:
-                async with session.get(
-                    POLY_PRICE_URL,
-                    params={"symbols": "BTCUSDT"},
-                    timeout=aiohttp.ClientTimeout(total=4)
-                ) as r:
-                    if r.status == 200:
-                        data = await r.json()
-                        # Response is typically: {"BTCUSDT": {"price": 68474.48, ...}}
-                        # or a list — handle both shapes
-                        if isinstance(data, dict):
-                            btc = data.get("BTCUSDT") or data.get("btcusdt") or {}
-                            price = float(btc.get("price", 0)) if isinstance(btc, dict) else float(btc)
-                        elif isinstance(data, list):
-                            # Some endpoints return [{symbol, price}, ...]
-                            entry = next((x for x in data if x.get("symbol","").upper() == "BTCUSDT"), {})
-                            price = float(entry.get("price", 0))
-                        else:
-                            price = 0.0
-
-                        if price > 0:
-                            poly_live_binance = price
                     else:
                         log.warning(f"[POLY-PRICE] HTTP {r.status}")
 
@@ -1320,7 +1275,6 @@ async def _prefetch_strike(session: aiohttp.ClientSession, slug: str):
 async def main():
     global target_slug, market_family_prefix, clob_client
 
-    # ── Initialise CLOB client ────────────────────────────────
     if not POLY_PRIVATE_KEY:
         log.warning("[CLOB] POLY_PRIVATE_KEY not set — running in DRY_RUN mode regardless of .env")
     else:
@@ -1331,7 +1285,6 @@ async def main():
                 _kwargs["signature_type"] = POLY_SIG_TYPE
                 _kwargs["funder"]         = POLY_FUNDER
             clob_client = ClobClient(**_kwargs)
-            # Derive/create API credentials (L2 auth header) — required for order placement
             clob_client.set_api_creds(clob_client.create_or_derive_api_creds())
             log.info(f"[CLOB] Client initialised. DRY_RUN={DRY_RUN}")
         except ImportError:
@@ -1340,10 +1293,6 @@ async def main():
         except Exception as e:
             log.error(f"[CLOB] Failed to initialise client: {e}")
             log.error("[CLOB] Continuing in DRY_RUN mode.")
-
-    async with aiohttp.ClientSession() as session:
-        # Seed history and indicators before anything else
-        await prefill_history(session)
 
     async with aiohttp.ClientSession() as session:
         await prefill_history(session)
@@ -1367,22 +1316,17 @@ async def main():
         except Exception as e:
             log.warning(f"[POLY-PRICE DEBUG] Failed: {e}")
 
-        # Pre-fetch strike for seed market  ← this line was already here
-        initial_strike = await fetch_price_to_beat_for_market(session, target_slug)
-
-        # Pre-fetch strike for seed market
         initial_strike = await fetch_price_to_beat_for_market(session, target_slug)
         if initial_strike > 0:
             log.info(f"[STRIKE] Seed market strike pre-loaded: ${initial_strike:,.2f}")
         else:
             log.warning("[STRIKE] Could not pre-load seed strike -- will fetch on first eval tick.")
 
-        # Launch all three concurrent loops
         await asyncio.gather(
-            kline_stream_loop(),       # candle history + VWAP
-            agg_trade_listener(),      # live_price + CVD
+            kline_stream_loop(),
+            agg_trade_listener(),
             polymarket_rtds_loop(),
-            evaluation_loop(session),  # decision engine, fires every EVAL_TICK_SECONDS
+            evaluation_loop(session),
         )
 
 
