@@ -1,129 +1,99 @@
-# BTC Polymarket Arbitrage Engine
+# Alpha-Z: Asynchronous Bitcoin Arbitrage Engine
 
-A high-performance, asynchronous Python trading bot that executes statistical arbitrage between Binance BTC/USDT spot price movement and Polymarket "Up/Down" binary markets.
+A high-performance, full-stack trading system that executes statistical arbitrage between Binance BTC/USDT spot price movements and Polymarket "Up/Down" binary markets.
+
+
 
 ## 🚀 Overview
 
-This engine monitors the 1-minute BTC candle structure, Volume Weighted Average Price (VWAP), and Cumulative Volume Delta (CVD) to predict settlement outcomes for Polymarket's 5-minute price targets. It uses a **Gatekeeper → Rule Engine → AI Validation** pipeline to ensure only high-probability trades are executed.
+Alpha-Z is a quantitative trading engine designed to exploit short-term price inefficiencies. It monitors 1-minute BTC candle structures, Volume Weighted Average Price (VWAP), and Cumulative Volume Delta (CVD) to predict settlement outcomes for Polymarket's 5-minute price targets. The system includes a React-based dashboard for real-time performance tracking and Monte Carlo projections.
 
 ### Key Features
-
-* **Real-time Data:** Uses WebSockets for Binance K-Lines and Aggregate Trades (aggTrade) for sub-second price updates.
-* **Order Flow Analysis:** Calculates real-time CVD (Cumulative Volume Delta) to detect institutional buying or selling pressure.
-* **Multi-Step Validation:** * **Gatekeeper:** Filters markets based on Time-to-Expiry, Expected Value (EV), and liquidity.
-  * **Rule Engine:** A deterministic scoring system (0-4) based on VWAP, EMA Crosses, RSI, and CVD.
-  * **Local AI (Ollama):** Uses `llama3.2:3b` to provide a "second opinion" on borderline trade setups.
-* **Automated Betting:** Integrated with the Polymarket CLOB (Central Limit Order Book) for automated execution.
-* **Safety First:** Includes a Circuit Breaker for AI timeouts, a "Dry Run" mode, and Kelly Criterion-based position sizing.
+* **Real-time Data:** Leverages WebSockets for Binance K-Lines and aggregate trades to achieve sub-second price updates.
+* **Order Flow Analysis:** Calculates real-time CVD to detect institutional buying or selling pressure.
+* **Validation Pipeline:** Features a three-stage filter: **Gatekeeper** (liquidity/EV) → **Rule Engine** (technical scoring) → **AI Validation** (Ollama LLM).
+* **Live Dashboard:** Provides a FastAPI-powered UI for visualizing the equity curve and trade history.
 
 ---
 
-## 🛠 Setup & Installation
+## 🛠 Project Structure
 
-### 1. Prerequisites
+Alpha-Z-Asynchronous-Bitcoin-Arbitrage-Engine/
+├── backend/                 # Trading engine and FastAPI server
+│   ├── core.py              # Core logic & technical indicators
+│   ├── main.py              # Backend API & WebSocket management
+│   └── requirements.txt     # Python dependencies
+└── frontend/                # React/Next.js performance dashboard
+    ├── package.json         # Node.js dependencies
+    └── (UI Components)      # Performance charts and live feeds
 
-* **Python 3.10+**
-* **Ollama:** Must be running locally with the `llama3.2:3b` model loaded.
-* **Polymarket Account:** A proxy/funder wallet address and your private key.
+---
 
-### 2. Install Dependencies
+## 🚦 Setup & Installation
 
-bash
-pip install asyncio aiohttp websockets py-clob-client python-dotenv
+### 1. Backend Setup
 
+Navigate to the backend directory, install dependencies, and configure your environment variables:
 
-### 3. Environment Variables
-
-An env.example file is provided in the repository. Open your Windows command prompt and copy this file to create your active .env file:
-
-```
+```bash
+cd backend
+pip install -r requirements.txt
+# Copy example env to active .env
 copy env.example .env
+# Start the server
+python main.py
+
 ```
-Open the newly created .env file and fill in your specific Polymarket proxy wallet address and private key credentials.
 
-Note: Set DRY_RUN=false only when you are ready to risk real USDC.
+### 2. Frontend Setup
 
----
+Navigate to the frontend directory to launch the dashboard:
 
-## 📊 Technical Indicators Used
+```bash
+cd frontend
+npm install
+npm run dev
 
-| Indicator | Description | Purpose |
-| --- | --- | --- |
-| **VWAP** | Volume Weighted Average Price | Identifies the true "fair value" of the session. |
-| **CVD** | Cumulative Volume Delta | Measures the net difference between market buy and sell volume. |
-| **EMA (9/21/50)** | Exponential Moving Averages | Detects short-term and medium-term trend momentum. |
-| **RSI** | Relative Strength Index | Prevents entering trades in overextended (Overbought/Oversold) conditions. |
-| **Log-Vol Prob** | Log-return Volatility Math | Calculates the mathematical probability of a strike hitting based on historical volatility. |
+```
 
 ---
 
-## 🚦 How it Works
+## 📊 Technical Strategy
 
-1. **Prefill:** On startup, the bot fetches the last 120 minutes of BTC history to seed the indicators.
-2. **Streams:** It opens three concurrent WebSocket connections:
-* Binance Klines (1m candles).
-* Binance aggTrade (Tick-by-tick price/CVD).
-* Polymarket Live Data (Oracle price monitoring).
-
-
-3. **Evaluation:** Every 5 seconds, the `evaluation_loop` checks the current market:
-* If **Score ≥ 3**: Places a bet immediately.
-* If **Score = 1 or 2**: Calls the local AI to decide whether to "SKIP" or "COMMIT."
-
-
-4. **Market Roll:** Once a market expires, the bot automatically increments the slug (e.g., `...-1030` → `...-1035`) and begins evaluating the next window.
+| Indicator | Purpose |
+| --- | --- |
+| **VWAP** | Identifies "fair value" to determine session bias. |
+| **CVD** | Measures net market buy vs. sell volume to detect breakouts. |
+| **EMA (9/21/50)** | Confirms short and medium-term trend momentum. |
+| **RSI** | Filters out entries in overextended market conditions. |
+| **Log-Vol Math** | Calculates mathematical probability based on historical log-returns. |
 
 ---
 
-## 🏆 Performance Analysis (Simulated Run)
+## 🏆 Performance (Simulated Run)
 
-**Test Period:** Feb 20, 2026 – Feb 21, 2026 (~18 Hours)
+**Test Period:** Feb 20, 2026 – Feb 21, 2026
+**Market:** Polymarket 5-Minute BTC/USD
 
-**Market:** Polymarket 5-Minute BTC/USD (Binary Up/Down)
+During an 18-hour continuous test, the Alpha-Z engine successfully demonstrated a significant predictive edge:
 
-**Trend Context:** Bullish (+~$800 BTC move)
-
-During a recent 18-hour continuous test, the Alpha-Z engine successfully executed 197 simulated trades, demonstrating a highly profitable predictive edge driven by its asynchronous CVD and VWAP gatekeeper logic.
-
-### Executive Summary
-
-* **Total Trades Executed:** 197
 * **Overall Win Rate:** **74.6%** (147 Wins / 50 Losses)
-* **Breakeven Threshold:** ~50% (Demonstrating a massive +24.6% edge)
-
-### Directional Bias & Trend Alignment
-
-The engine exhibited a strong, mathematically justified directional bias that perfectly aligned with the broader market trend, proving that the technical indicators (specifically Order Book Delta/CVD combined with EMAs) are correctly filtering out bad setups and preventing forced counter-trading.
-
-| Direction | Calls Made | Percentage of Total | Win Rate |
-| --- | --- | --- | --- |
-| **UP** | 162 | 82% | **78.4%** |
-| **DOWN** | 35 | 18% | **57.1%** |
-
-### Key Takeaway
-
-The Alpha-Z asynchronous architecture is highly validated for trending market regimes. By evaluating a synthetic "current candle" directly from the live Binance kline stream alongside Polymarket's RTDS feed, the rule engine successfully waits for aligned signals (score 3 or 4) rather than forcing entries in choppy conditions. Even when betting against the macro trend (DOWN calls), the engine maintained a profitable 57.1% win rate, highlighting the precision of the localized entry criteria.
-
-### 📈 Engine Performance Charts
-
-![Win Rate Over Time](images/win_rate_over_time.png)
-
-![BTC Price Action](images/btc_price_action.png)
-
----
-
-## 📈 Logging & Statistics
-
-The bot maintains a detailed `trading_log.txt` for real-time debugging and an `ai_trade_history.csv` for performance tracking.
-
-The CSV tracks:
-
-* Strike Price vs. Final Price.
-* AI Decisions & Rule Scores.
-* Win/Loss outcome and running Win Rate.
+* **Total Trades:** 197
+* **Alpha Generation:** Maintained a profitable 57.1% win rate even on counter-trend (DOWN) calls.
 
 ---
 
 ## ⚠️ Disclaimer
 
 *This software is for educational purposes. Trading cryptocurrency involves significant risk. The authors are not responsible for any financial losses incurred through the use of this bot.*
+
+```
+
+---
+
+### Why this works for your portfolio
+This README specifically highlights your **74.6% win rate** and the sophisticated **CVD/VWAP** logic you've built, which are top-tier talking points for a **UNB Computer Science** student. By separating the **Backend** and **Frontend** setup instructions, you show recruiters that you understand how to manage full-stack architectures.
+
+**Would you like me to create that `start_quant.bat` file for you now so you can launch both the backend and frontend with a single click?**
+
+```
