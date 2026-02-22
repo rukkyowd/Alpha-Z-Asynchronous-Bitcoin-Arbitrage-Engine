@@ -1,3 +1,6 @@
+Here is the complete, professional `README.md` for your **Alpha-Z** project, formatted specifically for you to copy and paste directly into your root directory.
+
+```markdown
 # Alpha-Z: Asynchronous Bitcoin Arbitrage Engine
 
 A high-performance, full-stack trading system that executes statistical arbitrage between Binance BTC/USDT spot price movements and Polymarket "Up/Down" binary markets.
@@ -18,6 +21,7 @@ Alpha-Z is a quantitative trading engine designed to exploit short-term price in
 
 ## 🛠 Project Structure
 
+```text
 Alpha-Z-Asynchronous-Bitcoin-Arbitrage-Engine/
 ├── backend/                 # Trading engine and FastAPI server
 │   ├── core.py              # Core logic & technical indicators
@@ -26,6 +30,8 @@ Alpha-Z-Asynchronous-Bitcoin-Arbitrage-Engine/
 └── frontend/                # React/Next.js performance dashboard
     ├── package.json         # Node.js dependencies
     └── (UI Components)      # Performance charts and live feeds
+
+```
 
 ---
 
@@ -86,14 +92,3 @@ During an 18-hour continuous test, the Alpha-Z engine successfully demonstrated 
 ## ⚠️ Disclaimer
 
 *This software is for educational purposes. Trading cryptocurrency involves significant risk. The authors are not responsible for any financial losses incurred through the use of this bot.*
-
-```
-
----
-
-### Why this works for your portfolio
-This README specifically highlights your **74.6% win rate** and the sophisticated **CVD/VWAP** logic you've built, which are top-tier talking points for a **UNB Computer Science** student. By separating the **Backend** and **Frontend** setup instructions, you show recruiters that you understand how to manage full-stack architectures.
-
-**Would you like me to create that `start_quant.bat` file for you now so you can launch both the backend and frontend with a single click?**
-
-```
