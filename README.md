@@ -1,6 +1,3 @@
-Here is the complete, professional `README.md` for your **Alpha-Z** project, formatted specifically for you to copy and paste directly into your root directory.
-
-```markdown
 # Alpha-Z: Asynchronous Bitcoin Arbitrage Engine
 
 A high-performance, full-stack trading system that executes statistical arbitrage between Binance BTC/USDT spot price movements and Polymarket "Up/Down" binary markets.
