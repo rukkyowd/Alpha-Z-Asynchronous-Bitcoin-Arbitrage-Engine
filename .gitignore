@@ -1,1 +1,6 @@
 .env
+__pycache__/
+*.pyc
+trading_log.txt
+ai_trade_history.csv
+.venv/
