@@ -1009,6 +1009,10 @@ def rule_engine_decide(current_candle: dict, history: list, poly_data: dict, ev:
     current_price = current_candle['close']
     strike = poly_data.get("strike_price", 0.0)
 
+    if strike > 0 and abs(current_price - strike) < 10.0:
+        return {"decision": "SKIP", "confidence": "Low", "bet_size": 0.0,
+                "score": 0, "reason": f"Price too close to strike (${abs(current_price-strike):.2f})", "needs_ai": False}
+
     score = 0
     signal_log = []
 
