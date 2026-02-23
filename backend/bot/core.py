@@ -1,6 +1,5 @@
 import asyncio
 import aiohttp
-from pandas import core
 import websockets
 import json
 import logging
@@ -436,31 +435,6 @@ def compute_ev(true_prob_pct: float, market_prob_pct: float, current_balance: fl
         "kelly_fraction": round(kelly_fraction, 4), 
         "kelly_bet": round(dynamic_bet, 2)
     }
-    token = market_prob_pct / 100.0
-    prob  = true_prob_pct   / 100.0
-    if not (0 < token < 1):
-        return {"ev": 0.0, "ev_pct": 0.0, "edge": 0.0, "kelly_fraction": 0.0, "kelly_bet": 0.0}
-    
-    net_win        = 1.0 - token
-    ev             = prob * net_win - (1 - prob) * token
-    ev_pct         = (ev / token) * 100
-    edge           = prob - token
-    b              = net_win / token
-    
-    # Kelly Formula: f* = (bp - q) / b
-    kelly_fraction = max(0.0, (b * prob - (1 - prob)) / b)
-    
-    # DYNAMIC MULTIPLIER: 
-    # Normal trades use 25% of Kelly; High Conviction uses 50%
-    multiplier = 0.50 if is_high_conviction else 0.25
-    raw_kelly_bet = kelly_fraction * current_balance * multiplier
-    
-    # Absolute ceiling: Never risk more than 30% of balance regardless of conviction
-    absolute_ceiling = current_balance * 0.30 
-    dynamic_bet      = max(1.01, min(raw_kelly_bet, absolute_ceiling))
-    
-    return {"ev": round(ev,4), "ev_pct": round(ev_pct,2), "edge": round(edge,4),
-            "kelly_fraction": round(kelly_fraction,4), "kelly_bet": round(dynamic_bet, 2)}
 # ============================================================
 # TECHNICAL CONTEXT
 # ============================================================
@@ -999,28 +973,35 @@ async def resolve_market_outcome(session: aiohttp.ClientSession, slug: str, deci
 # ============================================================
 # ENGINE LOGIC
 # ============================================================
-def run_gatekeeper(current_candle: dict, history: list, poly_data: dict, current_balance: float) -> tuple:
-    ctx = build_technical_context(current_candle, history)
+def run_gatekeeper(current_candle: dict, history: list, poly_data: dict, current_balance: float, ctx: dict, is_high_conviction: bool = False) -> tuple:
     if not poly_data["market_found"]: return False, "No Polymarket data", {}, {}, 0.0
+    
     seconds_left = poly_data.get("seconds_remaining", 0)
-    if seconds_left < MIN_SECONDS_REMAINING: return False, f"Only {int(seconds_left)}s left -- avoiding illiquid spread", {}, {}, 0.0
+    if seconds_left < MIN_SECONDS_REMAINING: return False, f"Only {int(seconds_left)}s left", {}, {}, 0.0
     if seconds_left > MAX_SECONDS_FOR_NEW_BET: return False, f"{int(seconds_left)}s remaining -- too early", {}, {}, 0.0
     if current_candle['body_size'] < MIN_BODY_SIZE and ctx['cvd_candle_delta'] == 0:
         return False, "Dead market (no body & no volume)", {}, {}, 0.0
 
     direction = current_candle['structure']
-    if direction == "BULLISH": favored_dir, market_prob, counter_prob = "UP", poly_data["up_prob"], poly_data["down_prob"]
-    else: favored_dir, market_prob, counter_prob = "DOWN", poly_data["down_prob"], poly_data["up_prob"]
+    if direction == "BULLISH": 
+        favored_dir, market_prob, counter_prob = "UP", poly_data["up_prob"], poly_data["down_prob"]
+    else: 
+        favored_dir, market_prob, counter_prob = "DOWN", poly_data["down_prob"], poly_data["up_prob"]
 
     if market_prob > MAX_CROWD_PROB_TO_CALL: return False, f"Crowd already at {market_prob:.1f}%", {}, {}, 0.0
 
     strike    = poly_data.get("strike_price", 0.0)
     math_prob = calculate_strike_probability(current_candle['close'], strike, history, seconds_left, favored_dir)
-    ev        = compute_ev(math_prob, market_prob, current_balance)
-    counter_ev = compute_ev(100-math_prob, counter_prob, current_balance)
-    best_ev   = max(ev["ev_pct"], counter_ev["ev_pct"])
+    
+    # One-shot EV calculation with the correct conviction multiplier
+    ev         = compute_ev(math_prob, market_prob, current_balance, is_high_conviction=is_high_conviction)
+    counter_ev = compute_ev(100-math_prob, counter_prob, current_balance, is_high_conviction=is_high_conviction)
+    
+    best_ev_pct = max(ev["ev_pct"], counter_ev["ev_pct"])
 
-    if best_ev < MIN_EV_PCT_TO_CALL_AI: return False, f"Math EV {best_ev:+.2f}% < threshold", ev, counter_ev, math_prob
+    if best_ev_pct < MIN_EV_PCT_TO_CALL_AI: 
+        return False, f"Math EV {best_ev_pct:+.2f}% < threshold", ev, counter_ev, math_prob
+        
     return True, "", ev, counter_ev, math_prob
 
 def rule_engine_decide(current_candle: dict, history: list, poly_data: dict, ev: dict, math_prob: float, current_balance: float = 100.0) -> dict:
@@ -1517,13 +1498,16 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
 async def evaluation_loop(session: aiohttp.ClientSession):
     global target_slug, ai_call_in_flight, _poly_cache_slug
     await asyncio.sleep(EVAL_TICK_SECONDS)
+    
     while True:
         await asyncio.sleep(EVAL_TICK_SECONDS)
         if not candle_history or not live_candle: continue
-        slug          = target_slug
+        
+        slug = target_slug
         current_price = live_price if live_price > 0 else float(live_candle.get('c', 0))
         if current_price == 0: continue
 
+        # --- 1. PREPARE CURRENT CANDLE & CONTEXT ---
         k = live_candle
         current_candle = {
             "timestamp":  datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S'),
@@ -1537,143 +1521,88 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             "lower_wick": min(current_price, float(k.get('o', current_price))) - float(k.get('l', current_price)),
             "structure":  "BULLISH" if current_price >= float(k.get('o', current_price)) else "BEARISH",
         }
+        
+        ctx = build_technical_context(current_candle, candle_history)
+        is_high_conviction = "DIVERGENCE" in (ctx.get("cvd_divergence") or "")
 
         print(f"\r  [{datetime.now(timezone.utc).strftime('%H:%M:%S')}] Price: ${current_price:,.2f} | VWAP: ${get_vwap():,.2f} | Slug: {slug}   ", end="", flush=True)
 
+        # --- 2. POLL POLYMARKET ---
         poly_data = await get_polymarket_odds_cached(session, slug)
         if not poly_data.get("market_found"): continue
-
-        core.last_seconds_remaining = int(poly_data.get("seconds_remaining", 0))
-        if poly_data["strike_price"] == 0.0:
-            if slug not in market_open_prices: market_open_prices[slug] = current_price
-            poly_data = {**poly_data, "strike_price": market_open_prices[slug]}
-
+        
         secs = poly_data.get("seconds_remaining", 0)
+        
+        # --- 3. HANDLE EXPIRATION / SLUG ROTATION ---
         if secs <= 0:
             if slug in active_predictions:
                 pred = active_predictions[slug]
-                if pred.get("status") == "CLOSING":
-                    log.warning(f"[RESOLVE] {slug} is mid-exit, waiting...")
-                    continue
-                pred["status"] = "RESOLVING"
-                asyncio.create_task(resolve_market_outcome(
-                    session, slug, pred["decision"], pred["strike"],
-                    current_price, pred.get("bet_size", 1.01),
-                    pred.get("bought_price", 0.0)
-                ))
+                if pred.get("status") != "CLOSING":
+                    pred["status"] = "RESOLVING"
+                    asyncio.create_task(resolve_market_outcome(
+                        session, slug, pred["decision"], pred["strike"],
+                        current_price, pred.get("bet_size", 1.01), pred.get("bought_price", 0.0)
+                    ))
 
-            old_slug    = slug
+            # Cleanup and increment
+            old_slug = slug
             target_slug = increment_slug_by_300(slug)
             committed_slugs.discard(old_slug)
             soft_skipped_slugs.discard(old_slug)
             best_ev_seen.pop(old_slug, None)
             market_open_prices.pop(old_slug, None)
             strike_price_cache.pop(old_slug, None)
-            if ai_call_in_flight == old_slug: ai_call_in_flight = ""
             _poly_cache_slug = ""
             asyncio.create_task(_prefetch_strike(session, target_slug))
             continue
 
-        # --- GENERATE CONTEXT FOR EARLY EXIT ---
-        ctx = build_technical_context(current_candle, candle_history)
-
-        # --- EARLY EXIT MONITORING ---
+        # --- 4. EARLY EXIT MONITORING ---
         if slug in active_predictions and active_predictions[slug].get("status") == "OPEN":
             pred = active_predictions[slug]
-            decision = pred["decision"]
-            bought_price = pred["bought_price"]
+            current_token_price = poly_data["up_prob"] / 100.0 if pred["decision"] == "UP" else poly_data["down_prob"] / 100.0
             
-            # Get current live token price
-            current_token_price = poly_data["up_prob"] / 100.0 if decision == "UP" else poly_data["down_prob"] / 100.0
+            # Check Take Profit / Stop Loss
+            tp_threshold = get_dynamic_threshold(secs)
+            roi_pct = (current_token_price / pred["bought_price"]) - 1.0 if pred["bought_price"] > 0 else 0
             
-            if bought_price > 0:
-                roi_pct = (current_token_price / bought_price) - 1.0
-                
-                tp_threshold = get_dynamic_threshold(secs)
-                sl_threshold = -tp_threshold
+            if roi_pct >= tp_threshold or roi_pct <= -tp_threshold:
+                reason = "TAKE_PROFIT" if roi_pct > 0 else "STOP_LOSS"
+                asyncio.create_task(execute_early_exit(session, slug, f"{reason} ({roi_pct*100:.1f}%)", current_token_price))
+                continue
 
-                if roi_pct >= tp_threshold:
-                    reason = f"TAKE_PROFIT (+{tp_threshold*100:.0f}%)"
-                    asyncio.create_task(execute_early_exit(session, slug, f"TAKE_PROFIT ({tp_threshold*100:.0f}%)", current_token_price))
+            # Signal Reversal Exit (after 90s)
+            time_held = time.time() - pred.get("entry_time", time.time())
+            if time_held > 90:
+                if (pred["decision"] == "UP" and "BEARISH DIVERGENCE" in ctx.get("cvd_divergence", "")) or \
+                   (pred["decision"] == "DOWN" and "BULLISH DIVERGENCE" in ctx.get("cvd_divergence", "")):
+                    asyncio.create_task(execute_early_exit(session, slug, "SIGNAL_REVERSAL", current_token_price))
                     continue
-                
-                if roi_pct <= sl_threshold:
-                    reason = f"STOP_LOSS ({sl_threshold*100:.0f}%)"
-                    asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS ({sl_threshold*100:.0f}%)", current_token_price))
-                    continue
-                
-                # 3. Technical Signal Flip -- only after minimum hold time to avoid
-                #    exiting immediately on a divergence that was already present at entry
-                div_text = ctx.get("cvd_divergence", "")
-                time_held = time.time() - pred.get("entry_time", time.time())
-                MIN_HOLD_SECS = 90  # don't allow signal-reversal exit in first 90s
-                if time_held > MIN_HOLD_SECS:
-                    if decision == "UP" and "BEARISH DIVERGENCE" in div_text:
-                        asyncio.create_task(execute_early_exit(session, slug, "SIGNAL_REVERSAL (Bearish Divergence)", current_token_price))
-                        continue
-                    elif decision == "DOWN" and "BULLISH DIVERGENCE" in div_text:
-                        if roi_pct < -0.03:
-                            asyncio.create_task(execute_early_exit(session, slug, "SIGNAL_REVERSAL (Bullish Divergence)", current_token_price))
-                            continue
-        # -----------------------------
 
+        # --- 5. NEW ENTRY EVALUATION ---
         if slug in committed_slugs or ai_call_in_flight == slug: continue
 
-        if PAPER_TRADING:
-            current_effective_balance = simulated_balance
-        else:
-            current_effective_balance = await fetch_live_balance(session)
-
-        log.info(
-            f"[EVAL] tick | paper={PAPER_TRADING} dry_run={DRY_RUN} | "
-            f"balance=${current_effective_balance:.2f} | "
-            f"secs={int(poly_data.get('seconds_remaining',0))} | "
-            f"strike=${poly_data.get('strike_price',0):.2f}"
-        )
+        bal = simulated_balance if PAPER_TRADING else await fetch_live_balance(session)
+        
+        log.info(f"[EVAL] tick | balance=${bal:.2f} | secs={int(secs)} | conviction={'HIGH' if is_high_conviction else 'Normal'}")
 
         should_call, skip_reason, ev, counter_ev, math_prob = run_gatekeeper(
-            current_candle, candle_history, poly_data, current_effective_balance
+            current_candle, candle_history, poly_data, bal, ctx, is_high_conviction
         )
+        
         if not should_call:
             log.info(f"[GATE] BLOCKED: {skip_reason}")
             continue
 
-        # --- 3. UPDATED EVALUATION FLOW START ---       
-        # Determine if we have high conviction (CVD Divergence)
-        is_high_conviction = "DIVERGENCE" in (ctx.get("cvd_divergence") or "")
+        # Pass the already computed 'ev' into the rule engine
+        result = rule_engine_decide(current_candle, candle_history, poly_data, ev, math_prob, bal)
 
-        # Re-calculate EV with the conviction flag to get the boosted Kelly bet
-        # Note: We use math_prob and market_prob determined by the gatekeeper
-        direction = current_candle['structure']
-        favored_dir = "UP" if direction == "BULLISH" else "DOWN"
-        market_prob = poly_data["up_prob"] if favored_dir == "UP" else poly_data["down_prob"]
-        
-        ev = compute_ev(math_prob, market_prob, current_effective_balance, is_high_conviction=is_high_conviction)
-        
-        current_ev_pct = ev.get("ev_pct", 0.0)
-        # --- 3. UPDATED EVALUATION FLOW END ---
-
-        # Now pass the updated 'ev' into the rule engine
-        result = rule_engine_decide(current_candle, candle_history, poly_data, ev, math_prob, current_effective_balance)
-
-        log.info(
-            f"[RULE] Score={result['score']}/3 → {result['decision']} | "
-            f"Conviction: {'HIGH' if is_high_conviction else 'Normal'} | "
-            f"EV={current_ev_pct:+.2f}% | bet=${ev['kelly_bet']}"
-        )
-        # ... (keep the rest of the commit/AI logic) ...
+        log.info(f"[RULE] Score={result['score']}/3 → {result['decision']} | EV={ev['ev_pct']:+.2f}% | bet=${ev['kelly_bet']}")
 
         if result["decision"] in ("UP", "DOWN"):
             if not result.get("needs_ai"):
-                _commit_decision(slug, result, poly_data, current_ev_pct)
+                _commit_decision(slug, result, poly_data, ev['ev_pct'])
             else:
-                asyncio.create_task(
-                    call_local_ai(session, current_candle, candle_history,
-                                  poly_data, ev, counter_ev, math_prob, slug, result)
-                )
-        else:
-            soft_skipped_slugs.add(slug)
-            best_ev_seen[slug] = max(best_ev_seen.get(slug, -999.0), current_ev_pct)
+                asyncio.create_task(call_local_ai(session, current_candle, candle_history, poly_data, ev, counter_ev, math_prob, slug, result))
 
 async def warmup_ollama(session: aiohttp.ClientSession):
     """
