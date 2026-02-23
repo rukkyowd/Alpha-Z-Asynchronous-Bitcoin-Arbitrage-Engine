@@ -71,8 +71,9 @@ RESOLVE_CONFIRMED_THRESHOLD  = 0.95  # token price considered "resolved"
 # RISK MANAGEMENT ENGINE
 # ============================================================
 class RiskManager:
-    def __init__(self, daily_loss_limit=5.00, max_trade_pct=0.20):
-        self.daily_loss_limit = daily_loss_limit
+    def __init__(self, max_daily_loss_pct=0.10, max_trade_pct=0.20):
+        # Default to a 10% daily drawdown limit instead of a flat $5.00
+        self.max_daily_loss_pct = max_daily_loss_pct
         self.max_trade_pct = max_trade_pct
         self.current_daily_pnl = 0.0
 
@@ -81,10 +82,16 @@ class RiskManager:
         log.info("[RISK] Daily stats reset. New session started.")
 
     def can_trade(self, current_balance, trade_size):
-        if self.current_daily_pnl <= -self.daily_loss_limit:
-            return False, f"Daily loss limit reached (${self.current_daily_pnl:.2f})"
+        # Dynamically calculate the maximum allowed loss in dollars
+        dynamic_loss_limit = current_balance * self.max_daily_loss_pct
+        
+        # Check if current losses exceed the dynamic limit
+        if self.current_daily_pnl <= -dynamic_loss_limit:
+            return False, f"Daily loss limit reached (PnL: ${self.current_daily_pnl:.2f} / Limit: -${dynamic_loss_limit:.2f})"
+            
         if trade_size > (current_balance * self.max_trade_pct):
-            return False, f"Trade size ${trade_size} exceeds max risk pct."
+            return False, f"Trade size ${trade_size:.2f} exceeds max risk pct."
+            
         return True, "Approved"
 
 # ============================================================
@@ -149,7 +156,7 @@ market_family_prefix: str = ""
 total_wins          = 0
 total_losses        = 0
 active_predictions: dict = {}
-risk_manager = RiskManager(daily_loss_limit=5.00, max_trade_pct=0.30)
+risk_manager = RiskManager(max_daily_loss_pct=0.10, max_trade_pct=0.30)
 simulated_balance = PAPER_BALANCE
 last_seconds_remaining: int = 0
 
@@ -399,6 +406,36 @@ def get_cvd_candle_delta() -> float:
 # KELLY / EV MATH
 # ============================================================
 def compute_ev(true_prob_pct: float, market_prob_pct: float, current_balance: float, is_high_conviction: bool = False) -> dict:
+    token = market_prob_pct / 100.0
+    prob  = true_prob_pct   / 100.0
+    if not (0 < token < 1):
+        return {"ev": 0.0, "ev_pct": 0.0, "edge": 0.0, "kelly_fraction": 0.0, "kelly_bet": 0.0}
+    
+    net_win = 1.0 - token
+    ev      = prob * net_win - (1 - prob) * token
+    ev_pct  = (ev / token) * 100
+    b       = net_win / token
+    
+    # Kelly Formula: f* = (bp - q) / b
+    kelly_fraction = max(0.0, (b * prob - (1 - prob)) / b)
+    
+    # DYNAMIC MULTIPLIER: 10% for normal, 20% for high conviction
+    # This keeps you further from the "ruin" threshold of full Kelly
+    multiplier = 0.20 if is_high_conviction else 0.10
+    raw_kelly_bet = kelly_fraction * current_balance * multiplier
+    
+    # Use the RiskManager's defined ceiling (max_trade_pct = 0.30)
+    # This ensures consistency across the engine
+    absolute_ceiling = current_balance * risk_manager.max_trade_pct
+    dynamic_bet      = max(1.01, min(raw_kelly_bet, absolute_ceiling))
+    
+    return {
+        "ev": round(ev, 4), 
+        "ev_pct": round(ev_pct, 2), 
+        "edge": round(prob - token, 4),
+        "kelly_fraction": round(kelly_fraction, 4), 
+        "kelly_bet": round(dynamic_bet, 2)
+    }
     token = market_prob_pct / 100.0
     prob  = true_prob_pct   / 100.0
     if not (0 < token < 1):
@@ -957,7 +994,7 @@ async def resolve_market_outcome(session: aiohttp.ClientSession, slug: str, deci
         match_status=match_status,
     )
     active_predictions.pop(slug, None)
-    log.info(f"[EARLY EXIT] {slug} closed and removed from active predictions.")
+    log.info(f"[RESOLVE] {slug} closed and removed from active predictions.")
 
 # ============================================================
 # ENGINE LOGIC
