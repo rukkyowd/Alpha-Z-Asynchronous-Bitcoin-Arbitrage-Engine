@@ -24,7 +24,7 @@ SOCKET_KLINE    = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m"
 SOCKET_TRADE    = "wss://stream.binance.com:9443/ws/btcusdt@aggTrade"
 
 LOCAL_AI_URL    = "http://localhost:11434/v1/chat/completions"
-LOCAL_AI_MODEL  = "llama3.1"   
+LOCAL_AI_MODEL  = "llama3.2"   
 
 BANKROLL        = 10000.00
 
