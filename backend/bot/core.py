@@ -53,8 +53,8 @@ MAX_HISTORY     = 120
 VWAP_RESET_HOUR = 0
 
 AI_TIMEOUT_CONNECT  = 5
-AI_TIMEOUT_TOTAL    = 30
-AI_MAX_RETRIES      = 2
+AI_TIMEOUT_TOTAL    = 45   # FIX: mistral-nemo (12B) needs ~20-25s — 30s caused retry storms
+AI_MAX_RETRIES      = 1    # FIX: only 1 attempt — a retry burns another 45s and kills the trade window
 AI_RETRY_DELAY      = 2
 AI_MAX_TOKENS       = 120
 
@@ -1441,6 +1441,17 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
     ai_call_in_flight = slug
     log.info(f"[AI CONFIRM] Borderline score -- asking Ollama (call #{ai_call_count})...")
 
+    # FIX: If <150s remain by the time we get here, the AI latency will eat into the trade window
+    # badly. A borderline signal in the final 2.5 minutes is more likely to be noise than edge.
+    seconds_left = poly_data.get("seconds_remaining", 0)
+    if seconds_left < 150:
+        log.warning(f"[AI CONFIRM] Only {int(seconds_left)}s left — too late for borderline AI trade. SKIPPING.")
+        _commit_decision(slug, {**rule_decision, "decision": "SKIP", "bet_size": 0.0,
+                                 "reason": f"AI blocked: only {int(seconds_left)}s left for borderline signal"},
+                         poly_data, current_ev_pct=ev.get("ev_pct", 0.0))
+        ai_call_in_flight = ""
+        return
+
     ctx           = build_technical_context(current_candle, history)
     current_price = current_candle['close']
     seconds_left  = int(poly_data.get("seconds_remaining", 0))
@@ -1605,24 +1616,40 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             pred = active_predictions[slug]
             current_token_price = poly_data["up_prob"] / 100.0 if pred["decision"] == "UP" else poly_data["down_prob"] / 100.0
             
-            # Check Take Profit / Stop Loss
             tp_threshold, sl_threshold = get_dynamic_threshold(secs)
             roi_pct = (current_token_price / pred["bought_price"]) - 1.0 if pred["bought_price"] > 0 else 0
-            
-            if roi_pct >= tp_threshold:
-                asyncio.create_task(execute_early_exit(session, slug, f"TAKE_PROFIT ({roi_pct*100:.1f}%)", current_token_price))
-                continue
-            elif roi_pct <= sl_threshold:
-                asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS ({roi_pct*100:.1f}%)", current_token_price))
-                continue
 
-            # Signal Reversal Exit (after 90s)
-            time_held = time.time() - pred.get("entry_time", time.time())
-            if time_held > 90:
-                if (pred["decision"] == "UP" and "BEARISH DIVERGENCE" in ctx.get("cvd_divergence", "")) or \
-                   (pred["decision"] == "DOWN" and "BULLISH DIVERGENCE" in ctx.get("cvd_divergence", "")):
-                    asyncio.create_task(execute_early_exit(session, slug, "SIGNAL_REVERSAL", current_token_price))
+            # FIX: If we're in profit and >120s remain, NEVER take profit early.
+            # These are binary markets — a winning position with plenty of time should ride
+            # to expiry and collect the full payout, not be sold for a fraction of the gain.
+            # Early TP only makes sense in the final 2 minutes when time value is decaying fast.
+            if roi_pct > 0 and secs > 120:
+                # Still pass through stop-loss check — cut losers, ride winners
+                if roi_pct <= sl_threshold:
+                    asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS ({roi_pct*100:.1f}%)", current_token_price))
                     continue
+                # Signal reversal exit (after 90s held) — if CVD strongly contradicts our position
+                time_held = time.time() - pred.get("entry_time", time.time())
+                if time_held > 90:
+                    if (pred["decision"] == "UP" and "BEARISH DIVERGENCE" in ctx.get("cvd_divergence", "")) or \
+                       (pred["decision"] == "DOWN" and "BULLISH DIVERGENCE" in ctx.get("cvd_divergence", "")):
+                        asyncio.create_task(execute_early_exit(session, slug, "SIGNAL_REVERSAL", current_token_price))
+                        continue
+            else:
+                # <120s left OR in a loss: apply normal TP/SL thresholds
+                if roi_pct >= tp_threshold:
+                    asyncio.create_task(execute_early_exit(session, slug, f"TAKE_PROFIT ({roi_pct*100:.1f}%)", current_token_price))
+                    continue
+                elif roi_pct <= sl_threshold:
+                    asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS ({roi_pct*100:.1f}%)", current_token_price))
+                    continue
+                # Signal reversal exit (after 90s held)
+                time_held = time.time() - pred.get("entry_time", time.time())
+                if time_held > 90:
+                    if (pred["decision"] == "UP" and "BEARISH DIVERGENCE" in ctx.get("cvd_divergence", "")) or \
+                       (pred["decision"] == "DOWN" and "BULLISH DIVERGENCE" in ctx.get("cvd_divergence", "")):
+                        asyncio.create_task(execute_early_exit(session, slug, "SIGNAL_REVERSAL", current_token_price))
+                        continue
 
         # --- 5. NEW ENTRY EVALUATION ---
         if slug in committed_slugs or ai_call_in_flight == slug: continue
