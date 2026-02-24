@@ -1,4 +1,3 @@
-```markdown
 # ⚡ Alpha-Z: Asynchronous Bitcoin Arbitrage Engine
 
 A high-performance, full-stack quantitative trading system that executes statistical arbitrage between Binance BTC/USDT spot price movements and Polymarket "Up/Down" binary markets.
@@ -115,7 +114,3 @@ During a continuous 18-hour stress test, the Alpha-Z engine successfully demonst
 ## ⚠️ Disclaimer
 
 *This software is strictly for educational and research purposes. Trading cryptocurrency and binary options involves significant financial risk. The author is not responsible for any financial losses incurred through the use of this software. Always test with paper trading enabled.*
-
-```
-
-```
