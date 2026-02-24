@@ -1,3 +1,4 @@
+import os
 import sqlite3
 import pandas as pd
 import numpy as np
@@ -8,7 +9,11 @@ from datetime import datetime
 # ALPHA-Z QUANTITATIVE ANALYSIS TOOL
 # ============================================================
 
-def load_data(db_path="alpha_z_history.db"):
+# Dynamically get the directory where this script is located
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_DB_PATH = os.path.join(BASE_DIR, "alpha_z_history.db")
+
+def load_data(db_path=DEFAULT_DB_PATH):
     """Connects to the SQLite DB and returns a cleaned DataFrame."""
     try:
         conn = sqlite3.connect(db_path)
@@ -26,6 +31,8 @@ def load_data(db_path="alpha_z_history.db"):
     except Exception as e:
         print(f"(X) Error loading database: {e}")
         return None
+
+# ... [rest of your code stays exactly the same] ...
 
 def run_performance_report(df):
     """Generates high-level metrics and Market Regime breakdown."""

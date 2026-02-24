@@ -237,27 +237,26 @@ def log_trade_to_db(slug, decision, strike, final_price, actual_outcome, result,
 # ============================================================
 # UTILITIES
 # ============================================================
-def get_dynamic_threshold(secs_remaining: float) -> float:
+def get_dynamic_threshold(secs_remaining: float) -> tuple[float, float]:
     """
-    Returns the required ROI threshold for an early exit based on time remaining.
-    Closer to expiration = higher premium demanded to justify paying the spread.
-    Returns float('inf') to disable early exits in the final chaotic moments.
+    Returns the required (take_profit_pct, stop_loss_pct) for an early exit.
+    Closer to expiration = higher premium demanded for wins, but tight cutoff for losses.
     """
     if secs_remaining <= 45:
         # Final 45s: Order book is toxic/thin. Let the binary outcome ride.
-        return float('inf')
+        return float('inf'), float('-inf')
     
     elif secs_remaining <= 90:
-        # 45s - 90s: Very close to the end. Demand a massive 30% return to exit.
-        return 0.30
+        # 45s - 90s: Demand a massive 30% return to exit, but cut losses hard at -20%
+        return 0.30, -0.20
         
     elif secs_remaining <= 180:
-        # 1.5m - 3m: Moderate time left. Demand a 20% return.
-        return 0.20
+        # 1.5m - 3m: Moderate time left. Demand a 20% return, tight -15% SL
+        return 0.20, -0.15
         
     else:
-        # > 3m left: Standard 15% take profit (safe, early base hit)
-        return 0.15
+        # > 3m left: Standard 15% take profit, standard -15% SL
+        return 0.15, -0.15
 
 def _parse_seconds_remaining(end_date_str: str) -> float:
     if not end_date_str: return -1.0
@@ -1566,12 +1565,14 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             current_token_price = poly_data["up_prob"] / 100.0 if pred["decision"] == "UP" else poly_data["down_prob"] / 100.0
             
             # Check Take Profit / Stop Loss
-            tp_threshold = get_dynamic_threshold(secs)
+            tp_threshold, sl_threshold = get_dynamic_threshold(secs)
             roi_pct = (current_token_price / pred["bought_price"]) - 1.0 if pred["bought_price"] > 0 else 0
             
-            if roi_pct >= tp_threshold or roi_pct <= -tp_threshold:
-                reason = "TAKE_PROFIT" if roi_pct > 0 else "STOP_LOSS"
-                asyncio.create_task(execute_early_exit(session, slug, f"{reason} ({roi_pct*100:.1f}%)", current_token_price))
+            if roi_pct >= tp_threshold:
+                asyncio.create_task(execute_early_exit(session, slug, f"TAKE_PROFIT ({roi_pct*100:.1f}%)", current_token_price))
+                continue
+            elif roi_pct <= sl_threshold:
+                asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS ({roi_pct*100:.1f}%)", current_token_price))
                 continue
 
             # Signal Reversal Exit (after 90s)
