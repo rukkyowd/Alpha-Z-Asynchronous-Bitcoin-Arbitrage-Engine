@@ -24,7 +24,7 @@ SOCKET_KLINE    = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m"
 SOCKET_TRADE    = "wss://stream.binance.com:9443/ws/btcusdt@aggTrade"
 
 LOCAL_AI_URL    = "http://localhost:11434/v1/chat/completions"
-LOCAL_AI_MODEL  = "mistral-nemo"   # 12B — best local option for structured quant inference
+LOCAL_AI_MODEL  = "llama3.1"   
 
 BANKROLL        = 10000.00
 
@@ -53,8 +53,8 @@ MAX_HISTORY     = 120
 VWAP_RESET_HOUR = 0
 
 AI_TIMEOUT_CONNECT  = 5
-AI_TIMEOUT_TOTAL    = 45   # FIX: mistral-nemo (12B) needs ~20-25s — 30s caused retry storms
-AI_MAX_RETRIES      = 1    # FIX: only 1 attempt — a retry burns another 45s and kills the trade window
+AI_TIMEOUT_TOTAL    = 10   
+AI_MAX_RETRIES      = 1    # FIX: only 1 attempt — a retry burns another 10s and kills the trade window
 AI_RETRY_DELAY      = 2
 AI_MAX_TOKENS       = 120
 
