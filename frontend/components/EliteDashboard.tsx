@@ -496,7 +496,7 @@ function AiInferencePanel({ aiLog }: { aiLog: any }) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center px-1">
-        <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">Model: Llama3.2</span>
+        <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">Model: Mistral NeMo</span>
         <span className="text-[9px] font-mono text-zinc-600">{aiLog.timestamp}</span>
       </div>
       
