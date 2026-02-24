@@ -24,7 +24,7 @@ SOCKET_KLINE    = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m"
 SOCKET_TRADE    = "wss://stream.binance.com:9443/ws/btcusdt@aggTrade"
 
 LOCAL_AI_URL    = "http://localhost:11434/v1/chat/completions"
-LOCAL_AI_MODEL  = "llama3.2"
+LOCAL_AI_MODEL  = "mistral-nemo"   # 12B — best local option for structured quant inference
 
 BANKROLL        = 10000.00
 
@@ -240,23 +240,24 @@ def log_trade_to_db(slug, decision, strike, final_price, actual_outcome, result,
 def get_dynamic_threshold(secs_remaining: float) -> tuple[float, float]:
     """
     Returns the required (take_profit_pct, stop_loss_pct) for an early exit.
-    Closer to expiration = higher premium demanded for wins, but tight cutoff for losses.
+    Closer to expiration = tighter thresholds since time value is gone.
+    FIX: Previous 20-30% TP thresholds were never reachable — tightened to realistic levels.
     """
     if secs_remaining <= 45:
         # Final 45s: Order book is toxic/thin. Let the binary outcome ride.
         return float('inf'), float('-inf')
     
     elif secs_remaining <= 90:
-        # 45s - 90s: Demand a massive 30% return to exit, but cut losses hard at -20%
-        return 0.30, -0.20
+        # 45s - 90s: Late stage — take 12% gain, cut at -15%
+        return 0.12, -0.15
         
     elif secs_remaining <= 180:
-        # 1.5m - 3m: Moderate time left. Demand a 20% return, tight -15% SL
-        return 0.20, -0.15
+        # 1.5m - 3m: Mid stage — take 9% gain, cut at -12%
+        return 0.09, -0.12
         
     else:
-        # > 3m left: Standard 15% take profit, standard -15% SL
-        return 0.15, -0.15
+        # > 3m left: Early stage — take 8% gain, cut at -12%
+        return 0.08, -0.12
 
 def _parse_seconds_remaining(end_date_str: str) -> float:
     if not end_date_str: return -1.0
@@ -423,9 +424,9 @@ def compute_ev(true_prob_pct: float, market_prob_pct: float, current_balance: fl
     raw_kelly_bet = kelly_fraction * current_balance * multiplier
     
     # Use the RiskManager's defined ceiling (max_trade_pct = 0.30)
-    # This ensures consistency across the engine
+    # No artificial floor — if Kelly says < $0, the edge isn't real; skip it.
     absolute_ceiling = current_balance * risk_manager.max_trade_pct
-    dynamic_bet      = max(1.01, min(raw_kelly_bet, absolute_ceiling))
+    dynamic_bet      = min(raw_kelly_bet, absolute_ceiling)  # FIX: removed max(1.01, ...) floor
     
     return {
         "ev": round(ev, 4), 
@@ -495,10 +496,12 @@ def build_technical_context(current_candle: dict, history: list) -> dict:
 
     price_direction_up = current_close > history[-1]['close'] if history else True
     price_move         = abs(current_close - history[-1]['close']) if history else 0
+    # FIX: use 0.05% of current price as threshold — $30 was noise-level at BTC's current price
+    divergence_price_threshold = current_close * 0.0005
     cvd_divergence     = ""
-    if price_direction_up and price_move > 30 and cvd_candle_delta < -3000:
+    if price_direction_up and price_move > divergence_price_threshold and cvd_candle_delta < -3000:
         cvd_divergence = "⚠️  BEARISH DIVERGENCE: Price rising but heavy SELL flow"
-    elif not price_direction_up and price_move > 30 and cvd_candle_delta > 3000:
+    elif not price_direction_up and price_move > divergence_price_threshold and cvd_candle_delta > 3000:
         cvd_divergence = "⚠️  BULLISH DIVERGENCE: Price falling but heavy BUY flow"
 
     return {
@@ -981,16 +984,32 @@ def run_gatekeeper(current_candle: dict, history: list, poly_data: dict, current
     if current_candle['body_size'] < MIN_BODY_SIZE and ctx['cvd_candle_delta'] == 0:
         return False, "Dead market (no body & no volume)", {}, {}, 0.0
 
-    direction = current_candle['structure']
-    if direction == "BULLISH": 
-        favored_dir, market_prob, counter_prob = "UP", poly_data["up_prob"], poly_data["down_prob"]
-    else: 
-        favored_dir, market_prob, counter_prob = "DOWN", poly_data["down_prob"], poly_data["up_prob"]
+    # FIX: Add momentum body filter — require candle body > 30% of avg candle range
+    # to avoid entering on indecisive micro-moves that have no real directional momentum.
+    recent_5 = history[-5:] if len(history) >= 5 else history
+    avg_candle_range = sum((c['high'] - c['low']) for c in recent_5) / max(len(recent_5), 1) if recent_5 else 10.0
+    if current_candle['body_size'] < avg_candle_range * 0.30 and not is_high_conviction:
+        return False, f"Weak candle body (${current_candle['body_size']:.2f} < 30% of avg range ${avg_candle_range*0.30:.2f})", {}, {}, 0.0
+
+    # FIX: Unify favored_dir — always use strike-relative price, not candle structure.
+    # Previously gatekeeper used candle structure but rule_engine used price-vs-strike,
+    # which caused EV to be computed for the wrong direction on contradicting signals.
+    strike = poly_data.get("strike_price", 0.0)
+    current_price = current_candle['close']
+    if strike > 0:
+        favored_dir = "UP" if current_price > strike else "DOWN"
+    else:
+        # No strike available — fall back to candle structure
+        favored_dir = "UP" if current_candle['structure'] == "BULLISH" else "DOWN"
+
+    if favored_dir == "UP":
+        market_prob, counter_prob = poly_data["up_prob"], poly_data["down_prob"]
+    else:
+        market_prob, counter_prob = poly_data["down_prob"], poly_data["up_prob"]
 
     if market_prob > MAX_CROWD_PROB_TO_CALL: return False, f"Crowd already at {market_prob:.1f}%", {}, {}, 0.0
 
-    strike    = poly_data.get("strike_price", 0.0)
-    math_prob = calculate_strike_probability(current_candle['close'], strike, history, seconds_left, favored_dir)
+    math_prob = calculate_strike_probability(current_price, strike, history, seconds_left, favored_dir)
     
     # One-shot EV calculation with the correct conviction multiplier
     ev         = compute_ev(math_prob, market_prob, current_balance, is_high_conviction=is_high_conviction)
@@ -1008,9 +1027,18 @@ def rule_engine_decide(current_candle: dict, history: list, poly_data: dict, ev:
     current_price = current_candle['close']
     strike = poly_data.get("strike_price", 0.0)
 
-    if strike > 0 and abs(current_price - strike) < 10.0:
+    # --- DYNAMIC STRIKE BUFFER ---
+    # Calculate average High-Low spread of the last 5 minutes to measure current volatility
+    recent_5 = history[-5:] if len(history) >= 5 else history
+    avg_candle_size = sum((c['high'] - c['low']) for c in recent_5) / max(len(recent_5), 1) if recent_5 else 10.0
+    
+    # Set the buffer to 60% of the average candle size (capped between $5 and $25)
+    dynamic_buffer = max(5.0, min(avg_candle_size * 0.60, 25.0))
+
+    if strike > 0 and abs(current_price - strike) < dynamic_buffer:
         return {"decision": "SKIP", "confidence": "Low", "bet_size": 0.0,
-                "score": 0, "reason": f"Price too close to strike (${abs(current_price-strike):.2f})", "needs_ai": False}
+                "score": 0, "reason": f"Price inside noise zone (${abs(current_price-strike):.2f} < buffer ${dynamic_buffer:.2f})", "needs_ai": False}
+    # -----------------------------
 
     score = 0
     signal_log = []
@@ -1053,11 +1081,19 @@ def rule_engine_decide(current_candle: dict, history: list, poly_data: dict, ev:
 
     # 5. FINAL DECISION
     if score >= 3: # Boosted threshold because of higher weights
-        return {"decision": favored_dir, "confidence": "High", "bet_size": ev.get("kelly_bet", 1.01),
+        bet = ev.get("kelly_bet", 0.0)
+        if bet <= 0:
+            return {"decision": "SKIP", "confidence": "Low", "bet_size": 0.0,
+                    "score": score, "reason": "Kelly returned 0 — no real edge", "needs_ai": False}
+        return {"decision": favored_dir, "confidence": "High", "bet_size": bet,
                 "score": score, "reason": " | ".join(signal_log), "needs_ai": False}
     
     elif score >= 1 and ev.get("ev_pct", 0.0) >= 2.0:
-        return {"decision": favored_dir, "confidence": "Low", "bet_size": max(1.01, ev.get("kelly_bet", 1.01) * 0.5),
+        half_kelly = ev.get("kelly_bet", 0.0) * 0.5
+        if half_kelly <= 0:
+            return {"decision": "SKIP", "confidence": "Low", "bet_size": 0.0,
+                    "score": score, "reason": "Kelly returned 0 on borderline — skipping", "needs_ai": False}
+        return {"decision": favored_dir, "confidence": "Low", "bet_size": half_kelly,
                 "score": score, "reason": " | ".join(signal_log), "needs_ai": True}
 
     return {"decision": "SKIP", "confidence": "Low", "bet_size": 0.0,
@@ -1095,6 +1131,11 @@ def _commit_decision(slug: str, result: dict, poly_data: dict, current_ev_pct: f
 
 async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
     global clob_client, simulated_balance
+
+    # FIX: Guard against zero/near-zero bets that slipped through (Kelly returned no edge)
+    if bet_size < 0.50:
+        log.warning(f"[BET] ✗ Bet size ${bet_size:.2f} is below minimum — skipping order")
+        return
 
     if PAPER_TRADING:
         current_effective_bankroll = simulated_balance
@@ -1447,7 +1488,7 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
         "stream":      False,
         "options":     {
             "num_predict": 5,
-            "num_ctx": 512
+            "num_ctx": 1024   # FIX: bumped to match warmup context window for mistral-nemo
             },  
     }
     timeout = aiohttp.ClientTimeout(connect=AI_TIMEOUT_CONNECT, total=AI_TIMEOUT_TOTAL)
@@ -1621,8 +1662,8 @@ async def warmup_ollama(session: aiohttp.ClientSession):
         "model":      LOCAL_AI_MODEL,
         "prompt":     "hi",
         "stream":     False,
-        "keep_alive": "30m",   # keep model in VRAM/RAM for 30 minutes after last call
-        "num_ctx": 512,
+        "keep_alive": "60m",   # keep model in VRAM/RAM for 60 minutes (mistral-nemo is larger)
+        "num_ctx": 1024,       # FIX: bumped from 512 to give mistral-nemo enough context
     }
     try:
         log.info(f"[OLLAMA] Warming up {LOCAL_AI_MODEL} (this may take 10-20s)...")
