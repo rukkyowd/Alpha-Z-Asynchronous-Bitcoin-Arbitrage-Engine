@@ -2,7 +2,7 @@
 
 A high-performance, full-stack quantitative trading system that executes statistical arbitrage between Binance BTC/USDT spot price movements and Polymarket "Up/Down" binary markets.
 
-Built with an emphasis on low-latency execution and institutional-grade order flow analysis, Alpha-Z captures short-term price inefficiencies in 5-minute windows.
+Built with an emphasis on low-latency execution and institutional-grade order flow analysis, Alpha-Z captures short-term price inefficiencies in 5-minute windows. 
 
 ---
 
@@ -15,8 +15,8 @@ Alpha-Z operates on a highly concurrent, asynchronous architecture. It monitors 
 * **Sub-Second Data Ingestion:** Dual-track WebSockets for Binance K-Lines and aggregate trades ensure zero-lag price and volume updates.
 * **Order Flow Analysis:** Calculates real-time CVD to detect institutional buying or selling pressure, pinpointing high-probability divergences.
 * **Three-Stage Validation Pipeline:** 1. **Gatekeeper:** Evaluates liquidity, time decay, and mathematical Expected Value (EV).
-2. **Rule Engine:** Scores setups based on momentum and technical indicators.
-3. **AI Validation:** Leverages local LLMs (via Ollama) for final contextual verification before execution.
+  2. **Rule Engine:** Scores setups based on momentum and technical indicators.
+  3. **High-Speed AI Validation:** Leverages optimized local LLMs (via Ollama) for final contextual verification. Tuned specifically for lightweight models (3B - 8B parameters) to ensure execution occurs within critical sub-5-second windows before alpha decays.
 * **Dynamic Risk Management:** Implements fractional Kelly Criterion sizing, daily PnL circuit breakers, and dynamic Take-Profit/Stop-Loss thresholds based on time-to-expiration.
 * **Robust Execution:** Uses Polymarket's CLOB with Immediate-Or-Cancel (IOC) partial fill handling and "dust" management.
 
@@ -45,16 +45,22 @@ Alpha-Z-Asynchronous-Bitcoin-Arbitrage-Engine/
 
 * Python 3.10+
 * Node.js (v16+)
-* [Ollama](https://ollama.com/) installed and running locally (e.g., `qwen2.5:3b` or `llama3.2`).
+* [Ollama](https://ollama.com/) installed and running locally.
+* *Note: For the 5-minute trading windows, low-latency inference is required. We highly recommend using `llama3.1` (8B), `qwen2.5:7b`, or ultra-lightweight models like `llama3.2` (3B) rather than heavier 12B+ models to avoid timeout failures.*
+
+
 * Polymarket API Credentials (funded account on Polygon/Chain 137).
 
 ### 1. Backend Setup
 
-Navigate to the backend directory, install dependencies, and configure your environment variables:
+Navigate to the backend directory, install dependencies, pull your preferred AI model, and configure your environment variables:
 
 ```bash
 cd backend
 pip install -r requirements.txt
+
+# Pull the recommended high-speed reasoning model
+ollama pull llama3.1
 
 # Copy example environment variables to active .env
 cp env.example .env
@@ -108,5 +114,3 @@ During a continuous 18-hour stress test, the Alpha-Z engine successfully demonst
 ## ⚠️ Disclaimer
 
 *This software is strictly for educational and research purposes. Trading cryptocurrency and binary options involves significant financial risk. The author is not responsible for any financial losses incurred through the use of this software. Always test with paper trading enabled.*
-
----
