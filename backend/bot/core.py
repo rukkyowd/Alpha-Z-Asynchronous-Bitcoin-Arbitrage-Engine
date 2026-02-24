@@ -24,7 +24,7 @@ SOCKET_KLINE    = "wss://stream.binance.com:9443/ws/btcusdt@kline_1m"
 SOCKET_TRADE    = "wss://stream.binance.com:9443/ws/btcusdt@aggTrade"
 
 LOCAL_AI_URL    = "http://localhost:11434/v1/chat/completions"
-LOCAL_AI_MODEL  = "llama3.2"   
+LOCAL_AI_MODEL  = "llama3.2:1b"   
 
 BANKROLL        = 10000.00
 
@@ -94,7 +94,7 @@ class RiskManager:
         return True, "Approved"
 
 # ============================================================
-# LOGGING & LIVE STREAMING (FIXED)
+# LOGGING & LIVE STREAMING
 # ============================================================
 _fmt = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
 _file_handler = logging.FileHandler("trading_log.txt", encoding="utf-8")
@@ -144,6 +144,66 @@ def ui_log(msg: str, level: str = "info"):
 ui_log("Quant Engine Initialized. Monitoring WebSocket...", "info")
 
 # ============================================================
+# SQLITE STATS TRACKING 
+# ============================================================
+DB_FILE = "alpha_z_history.db"
+
+def init_db():
+    """Initializes the database and enables WAL mode for concurrent reads/writes."""
+    with sqlite3.connect(DB_FILE) as conn:
+        # Enable Write-Ahead Logging for high-performance concurrency
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS trades (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT,
+                slug TEXT,
+                decision TEXT,
+                strike REAL,
+                final_price REAL,
+                actual_outcome TEXT,
+                result TEXT,
+                win_rate REAL,
+                pnl_impact REAL,
+                local_calc_outcome TEXT,
+                official_outcome TEXT,
+                match_status TEXT
+            )
+        """)
+
+
+
+def get_historical_pnl() -> float:
+    """Calculates the total all-time PnL from the database."""
+    try:
+        with sqlite3.connect(DB_FILE, timeout=5.0) as conn:
+            cursor = conn.execute("SELECT SUM(pnl_impact) FROM trades")
+            result = cursor.fetchone()[0]
+            return float(result) if result else 0.0
+    except Exception as e:
+        log.warning(f"[DB] Could not load historical PnL: {e}")
+        return 0.0
+init_db()
+
+def log_trade_to_db(slug, decision, strike, final_price, actual_outcome, result, win_rate, 
+                     pnl_impact, local_calc_outcome="", official_outcome="", match_status=""):
+    """Inserts a resolved trade into the SQLite database."""
+    try:
+        timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+        with sqlite3.connect(DB_FILE, timeout=5.0) as conn:
+            conn.execute("""
+                INSERT INTO trades (
+                    timestamp, slug, decision, strike, final_price, actual_outcome,
+                    result, win_rate, pnl_impact, local_calc_outcome, official_outcome, match_status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                timestamp, slug, decision, strike, final_price, actual_outcome,
+                result, win_rate, pnl_impact, local_calc_outcome, official_outcome, match_status
+            ))
+    except Exception as e:
+        log.error(f"[DB ERROR] Failed to write trade: {e}")
+
+# ============================================================
 # STATE
 # ============================================================
 ai_call_count           = 0
@@ -156,7 +216,7 @@ total_wins          = 0
 total_losses        = 0
 active_predictions: dict = {}
 risk_manager = RiskManager(max_daily_loss_pct=0.10, max_trade_pct=0.30)
-simulated_balance = PAPER_BALANCE
+simulated_balance = PAPER_BALANCE + get_historical_pnl()
 last_seconds_remaining: int = 0
 
 committed_slugs: set = set()
@@ -184,55 +244,6 @@ _poly_cache: dict        = {}
 _poly_cache_slug: str    = ""
 _poly_cache_ts:   float  = 0.0
 POLY_CACHE_TTL:   float  = 4.5
-
-# ============================================================
-# SQLITE STATS TRACKING (Replaces CSV)
-# ============================================================
-DB_FILE = "alpha_z_history.db"
-
-def init_db():
-    """Initializes the database and enables WAL mode for concurrent reads/writes."""
-    with sqlite3.connect(DB_FILE) as conn:
-        # Enable Write-Ahead Logging for high-performance concurrency
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS trades (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                timestamp TEXT,
-                slug TEXT,
-                decision TEXT,
-                strike REAL,
-                final_price REAL,
-                actual_outcome TEXT,
-                result TEXT,
-                win_rate REAL,
-                pnl_impact REAL,
-                local_calc_outcome TEXT,
-                official_outcome TEXT,
-                match_status TEXT
-            )
-        """)
-
-# Call this once when the module loads
-init_db()
-
-def log_trade_to_db(slug, decision, strike, final_price, actual_outcome, result, win_rate, 
-                     pnl_impact, local_calc_outcome="", official_outcome="", match_status=""):
-    """Inserts a resolved trade into the SQLite database."""
-    try:
-        timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
-        with sqlite3.connect(DB_FILE, timeout=5.0) as conn:
-            conn.execute("""
-                INSERT INTO trades (
-                    timestamp, slug, decision, strike, final_price, actual_outcome,
-                    result, win_rate, pnl_impact, local_calc_outcome, official_outcome, match_status
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                timestamp, slug, decision, strike, final_price, actual_outcome,
-                result, win_rate, pnl_impact, local_calc_outcome, official_outcome, match_status
-            ))
-    except Exception as e:
-        log.error(f"[DB ERROR] Failed to write trade: {e}")
 
 # ============================================================
 # UTILITIES
@@ -1484,8 +1495,9 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
         f"- Polymarket Odds: {market_prob:.1f}%\n"
         f"- Expected Value (EV): {ev.get('ev_pct', 0.0):+.2f}%\n\n"
     
-        f"INSTRUCTION: Evaluate if technicals confirm the {favored_dir} edge. "
-        f"Output ONLY '{favored_dir}' or 'SKIP'."
+        f"Evaluate if technicals confirm the {favored_dir} edge.\n"
+        f"Respond with ONLY one word - either '{favored_dir}' or 'SKIP'. No explanation.\n"
+        f"Answer:"
     )
 
     last_ai_interaction["prompt"] = prompt
@@ -1495,10 +1507,11 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
         "model":       LOCAL_AI_MODEL,
         "messages":    [{"role": "user", "content": prompt}],
         "temperature": 0.1,
-        "max_tokens":  5,
+        "max_tokens":  50,  # FIX: increased from 5 to allow model to complete its response
         "stream":      False,
+        "keep_alive":  "60m",
         "options":     {
-            "num_predict": 5,
+            "num_predict": 50,  # FIX: increased from 5 to match max_tokens
             "num_ctx": 1024   # FIX: bumped to match warmup context window for mistral-nemo
             },  
     }
@@ -1511,9 +1524,19 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
             async with session.post(LOCAL_AI_URL, json=payload, timeout=timeout) as r:
                 r.raise_for_status()
                 data    = await r.json()
-                ai_word = data['choices'][0]['message']['content'].strip().upper()
+                raw_response = data['choices'][0]['message']['content'].strip()
+                ai_word = raw_response.upper()
+                
+                # FIX: Extract UP/DOWN/SKIP even if model adds extra words
+                # Look for the actual decision word anywhere in the response
+                if favored_dir in ai_word:
+                    ai_word = favored_dir
+                elif "SKIP" in ai_word:
+                    ai_word = "SKIP"
+                # else: keep the full response for logging
+                
                 elapsed = time.time() - t0
-                log.info(f"[AI CONFIRM] Response: '{ai_word}' ({elapsed:.1f}s)")
+                log.info(f"[AI CONFIRM] Raw: '{raw_response[:50]}' → Parsed: '{ai_word}' ({elapsed:.1f}s)")
                 ai_consecutive_failures = 0
                 break
         except asyncio.TimeoutError:
