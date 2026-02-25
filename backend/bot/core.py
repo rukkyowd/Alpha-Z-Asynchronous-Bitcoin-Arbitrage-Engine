@@ -215,7 +215,7 @@ market_family_prefix: str = ""
 total_wins          = 0
 total_losses        = 0
 active_predictions: dict = {}
-risk_manager = RiskManager(max_daily_loss_pct=0.80, max_trade_pct=0.50)
+risk_manager = RiskManager(max_daily_loss_pct=0.35, max_trade_pct=0.50)
 simulated_balance = PAPER_BALANCE + get_historical_pnl()
 last_seconds_remaining: int = 0
 
@@ -1113,7 +1113,7 @@ def rule_engine_decide(current_candle: dict, history: list, poly_data: dict, ev:
     
     elif score >= 1 and ev.get("ev_pct", 0.0) >= 2.0:
         raw_half = ev.get("kelly_bet", 0.0) * 0.5
-        half_kelly = max(raw_half, 1.05) if raw_half > 0 else 0.0
+        half_kelly = max(raw_half, 1.50) if raw_half > 0 else 0.0
         if half_kelly <= 0:
             return {"decision": "SKIP", "confidence": "Low", "bet_size": 0.0,
                     "score": score, "reason": "Kelly returned 0 on borderline — skipping", "needs_ai": False}
@@ -1241,7 +1241,7 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
             
     except Exception as e:
         log.error(f"[BET] ✗ Live execution failed: {e}")
-        
+
 async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_reason: str, current_token_price: float):
     global simulated_balance, total_wins, total_losses
     
