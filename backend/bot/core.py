@@ -1215,32 +1215,110 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
         log.error("[BET] ✗ CLOB client not initialised")
         return
 
-    # --- LIQUIDITY CHECK ---
-    # Intercepts thin books before we send the order, avoiding an API exception
-    async with aiohttp.ClientSession() as s:
-        is_liquid, liq_msg = await check_market_liquidity(s, token_id, bet_size)
-        if not is_liquid:
-            log.warning(f"[BET] ✗ Market too thin: {liq_msg}")
-            return
-
-    try:
-        from py_clob_client.clob_types import MarketOrderArgs, OrderType
-        from py_clob_client.order_builder.constants import BUY
-        
-        order_args = MarketOrderArgs(token_id=token_id, amount=bet_size, side=BUY)
-        signed     = await asyncio.to_thread(clob_client.create_market_order, order_args)
-        
-        # --- IOC EXECUTION ---
-        # Changed from OrderType.FOK to OrderType.IOC to allow partial fills
-        resp       = await asyncio.to_thread(clob_client.post_order, signed, OrderType.IOC)
-        
-        if resp.get("status") == "matched":
-            log.info(f"✅ ORDER MATCHED: {decision} on {slug} | ${bet_size:.2f}")
-        else:
-            log.warning(f"[BET] ⚠️  Order status: {resp.get('status')} | {resp.get('errorMsg','')}")
+    # ================================================================
+    # IMPROVED ERROR HANDLING WITH RETRY LOGIC
+    # ================================================================
+    max_retries = 2
+    retry_delay = 1.0
+    
+    for attempt in range(max_retries):
+        try:
+            from py_clob_client.clob_types import MarketOrderArgs, OrderType
+            from py_clob_client.order_builder.constants import BUY
             
-    except Exception as e:
-        log.error(f"[BET] ✗ Live execution failed: {e}")
+            # Pre-flight check: Verify CLOB connectivity before creating order
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(f"{CLOB_HOST}/book", 
+                                         params={"token_id": token_id}, 
+                                         timeout=aiohttp.ClientTimeout(total=3)) as test_resp:
+                        if test_resp.status != 200:
+                            log.warning(f"[BET] Pre-flight check failed: CLOB returned HTTP {test_resp.status}")
+                            if attempt < max_retries - 1:
+                                await asyncio.sleep(retry_delay)
+                                continue
+                            else:
+                                log.error(f"[BET] ✗ CLOB unreachable after {max_retries} attempts")
+                                return
+            except Exception as conn_err:
+                log.warning(f"[BET] Pre-flight check error (attempt {attempt+1}/{max_retries}): {type(conn_err).__name__}: {conn_err}")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(retry_delay)
+                    continue
+                else:
+                    log.error(f"[BET] ✗ Cannot reach CLOB API. Check network/firewall settings.")
+                    return
+            
+            # Create and sign the order
+            order_args = MarketOrderArgs(token_id=token_id, amount=bet_size, side=BUY)
+            
+            try:
+                signed = await asyncio.to_thread(clob_client.create_market_order, order_args)
+            except Exception as sign_err:
+                log.error(f"[BET] ✗ Order signing failed: {type(sign_err).__name__}: {sign_err}")
+                return
+            
+            # Post the order with FOK (Fill-or-Kill)
+            try:
+                resp = await asyncio.to_thread(clob_client.post_order, signed, OrderType.FOK)
+            except Exception as post_err:
+                err_type = type(post_err).__name__
+                err_msg = str(post_err)
+                
+                # Detailed error diagnostics
+                log.error(f"[BET] ✗ Order post failed (attempt {attempt+1}/{max_retries}): {err_type}")
+                
+                # Check for specific error patterns
+                if "Request exception" in err_msg or "status_code=None" in err_msg:
+                    log.error("[BET] Network error detected. Possible causes:")
+                    log.error("  - CLOB API is temporarily down")
+                    log.error("  - Network connectivity issue")
+                    log.error("  - Firewall blocking outbound requests")
+                    log.error("  - DNS resolution failure")
+                    log.error(f"  - CLOB_HOST: {CLOB_HOST}")
+                elif "Insufficient" in err_msg or "balance" in err_msg.lower():
+                    log.error("[BET] Insufficient balance or liquidity")
+                elif "signature" in err_msg.lower() or "auth" in err_msg.lower():
+                    log.error("[BET] Authentication/signature error - check POLY_PRIVATE_KEY")
+                
+                # Retry logic
+                if attempt < max_retries - 1:
+                    log.info(f"[BET] Retrying in {retry_delay}s...")
+                    await asyncio.sleep(retry_delay)
+                    retry_delay *= 1.5  # Exponential backoff
+                    continue
+                else:
+                    log.error(f"[BET] ✗ All {max_retries} attempts failed")
+                    return
+            
+            # Success path
+            if resp.get("status") == "matched":
+                log.info(f"✅ ORDER MATCHED: {decision} on {slug} | ${bet_size:.2f}")
+                return  # Success - exit retry loop
+            else:
+                status = resp.get('status', 'unknown')
+                error_msg = resp.get('errorMsg', '')
+                log.warning(f"[BET] ⚠️  Order status: {status}")
+                if error_msg:
+                    log.warning(f"[BET] Error message: {error_msg}")
+                
+                # Some statuses warrant a retry
+                if status in ["pending", "processing"] and attempt < max_retries - 1:
+                    log.info(f"[BET] Order {status}, retrying...")
+                    await asyncio.sleep(retry_delay)
+                    continue
+                else:
+                    return  # Non-retryable status or out of retries
+                    
+        except Exception as e:
+            log.error(f"[BET] ✗ Unexpected error (attempt {attempt+1}/{max_retries}): {type(e).__name__}: {e}")
+            if attempt < max_retries - 1:
+                await asyncio.sleep(retry_delay)
+                retry_delay *= 1.5
+                continue
+            else:
+                log.error(f"[BET] ✗ Fatal error after {max_retries} attempts")
+                return
 
 async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_reason: str, current_token_price: float):
     global simulated_balance, total_wins, total_losses
@@ -1752,6 +1830,94 @@ async def warmup_ollama(session: aiohttp.ClientSession):
     except Exception as e:
         log.warning(f"[OLLAMA] Warmup failed ({type(e).__name__}: {e}) -- AI calls may be slow on first use.")
 
+async def diagnose_clob_connectivity():
+    """
+    Diagnostic function to test CLOB API connectivity.
+    Call this at startup to verify everything works.
+    """
+    log.info("[DIAGNOSTIC] Testing CLOB API connectivity...")
+    
+    tests_passed = 0
+    tests_failed = 0
+    
+    # Test 1: DNS Resolution
+    try:
+        import socket
+        host = urlparse(CLOB_HOST).netloc or CLOB_HOST
+        socket.gethostbyname(host.split(':')[0])
+        log.info(f"[DIAGNOSTIC] ✓ DNS resolution for {host}")
+        tests_passed += 1
+    except Exception as e:
+        log.error(f"[DIAGNOSTIC] ✗ DNS resolution failed: {e}")
+        tests_failed += 1
+    
+    # Test 2: CLOB API Reachability
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"{CLOB_HOST}/markets", 
+                                 timeout=aiohttp.ClientTimeout(total=5)) as resp:
+                if resp.status == 200:
+                    log.info(f"[DIAGNOSTIC] ✓ CLOB API reachable (HTTP {resp.status})")
+                    tests_passed += 1
+                else:
+                    log.warning(f"[DIAGNOSTIC] ⚠️ CLOB API returned HTTP {resp.status}")
+                    tests_failed += 1
+    except Exception as e:
+        log.error(f"[DIAGNOSTIC] ✗ Cannot reach CLOB API: {type(e).__name__}: {e}")
+        tests_failed += 1
+    
+    # Test 3: Gamma API Reachability
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"{GAMMA_API}/events", 
+                                 timeout=aiohttp.ClientTimeout(total=5)) as resp:
+                if resp.status == 200:
+                    log.info(f"[DIAGNOSTIC] ✓ Gamma API reachable (HTTP {resp.status})")
+                    tests_passed += 1
+                else:
+                    log.warning(f"[DIAGNOSTIC] ⚠️ Gamma API returned HTTP {resp.status}")
+                    tests_failed += 1
+    except Exception as e:
+        log.error(f"[DIAGNOSTIC] ✗ Cannot reach Gamma API: {type(e).__name__}: {e}")
+        tests_failed += 1
+    
+    # Test 4: CLOB Client Initialization
+    if clob_client is not None:
+        log.info("[DIAGNOSTIC] ✓ CLOB client initialized")
+        tests_passed += 1
+    else:
+        log.error("[DIAGNOSTIC] ✗ CLOB client is None")
+        tests_failed += 1
+    
+    # Test 5: Private Key Check
+    if POLY_PRIVATE_KEY:
+        # Don't log the actual key, just confirm it exists
+        key_len = len(POLY_PRIVATE_KEY)
+        if key_len >= 64:  # Ethereum private keys are typically 64 hex chars
+            log.info(f"[DIAGNOSTIC] ✓ POLY_PRIVATE_KEY configured ({key_len} chars)")
+            tests_passed += 1
+        else:
+            log.warning(f"[DIAGNOSTIC] ⚠️ POLY_PRIVATE_KEY seems too short ({key_len} chars)")
+            tests_failed += 1
+    else:
+        log.error("[DIAGNOSTIC] ✗ POLY_PRIVATE_KEY not set")
+        tests_failed += 1
+    
+    log.info(f"[DIAGNOSTIC] Results: {tests_passed} passed, {tests_failed} failed")
+    
+    if tests_failed > 0:
+        log.warning("[DIAGNOSTIC] ⚠️ Some connectivity tests failed. Live trading may not work.")
+        log.warning("[DIAGNOSTIC] Common fixes:")
+        log.warning("  1. Check internet connection")
+        log.warning("  2. Verify firewall allows outbound HTTPS (443)")
+        log.warning("  3. Check if Polymarket APIs are operational")
+        log.warning("  4. Verify POLY_PRIVATE_KEY in .env file")
+        log.warning("  5. Try restarting the application")
+    else:
+        log.info("[DIAGNOSTIC] ✓ All connectivity tests passed!")
+    
+    return tests_passed, tests_failed
+
 async def main():
     global target_slug, market_family_prefix, clob_client
     if not POLY_PRIVATE_KEY:
@@ -1769,6 +1935,7 @@ async def main():
             log.error(f"[CLOB] Failed init: {e}")
 
     async with aiohttp.ClientSession() as session:
+        await diagnose_clob_connectivity()
         await warmup_ollama(session)
         await prefill_history(session)
         await asyncio.gather(kline_stream_loop(), agg_trade_listener(), evaluation_loop(session))
