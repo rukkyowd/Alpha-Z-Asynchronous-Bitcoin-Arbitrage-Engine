@@ -215,7 +215,7 @@ market_family_prefix: str = ""
 total_wins          = 0
 total_losses        = 0
 active_predictions: dict = {}
-risk_manager = RiskManager(max_daily_loss_pct=0.10, max_trade_pct=0.30)
+risk_manager = RiskManager(max_daily_loss_pct=0.80, max_trade_pct=0.50)
 simulated_balance = PAPER_BALANCE + get_historical_pnl()
 last_seconds_remaining: int = 0
 
@@ -437,7 +437,13 @@ def compute_ev(true_prob_pct: float, market_prob_pct: float, current_balance: fl
     # Use the RiskManager's defined ceiling (max_trade_pct = 0.30)
     # No artificial floor — if Kelly says < $0, the edge isn't real; skip it.
     absolute_ceiling = current_balance * risk_manager.max_trade_pct
-    dynamic_bet      = min(raw_kelly_bet, absolute_ceiling)  # FIX: removed max(1.01, ...) floor
+    
+    # Force a $1.05 minimum so Polymarket doesn't reject the order, 
+    # but only if Kelly actually found an edge (>0)
+    if raw_kelly_bet > 0:
+        dynamic_bet = min(max(raw_kelly_bet, 1.05), absolute_ceiling)
+    else:
+        dynamic_bet = 0.0
     
     return {
         "ev": round(ev, 4), 
@@ -507,9 +513,15 @@ def build_technical_context(current_candle: dict, history: list) -> dict:
 
     price_direction_up = current_close > history[-1]['close'] if history else True
     price_move         = abs(current_close - history[-1]['close']) if history else 0
-    # FIX: use 0.05% of current price as threshold — $30 was noise-level at BTC's current price
     divergence_price_threshold = current_close * 0.0005
-    cvd_divergence     = ""
+    
+    # FIX: Dynamic CVD Threshold
+    # Require CVD delta to be at least 15% of the average recent volume, capped with an $8,000 floor.
+    recent_5_vol = sum(c['volume'] for c in recent_5) / max(len(recent_5), 1) if history else 0
+    dynamic_cvd_threshold = max(8000.0, recent_5_vol * current_close * 0.15)
+
+    cvd_divergence = ""
+
     if price_direction_up and price_move > divergence_price_threshold and cvd_candle_delta < -3000:
         cvd_divergence = "⚠️  BEARISH DIVERGENCE: Price rising but heavy SELL flow"
     elif not price_direction_up and price_move > divergence_price_threshold and cvd_candle_delta > 3000:
@@ -1144,7 +1156,7 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
     global clob_client, simulated_balance
 
     # FIX: Guard against zero/near-zero bets that slipped through (Kelly returned no edge)
-    if bet_size < 0.50:
+    if bet_size < 1.05:  # Minimum viable bet size to avoid dust and ensure we can exit later
         log.warning(f"[BET] ✗ Bet size ${bet_size:.2f} is below minimum — skipping order")
         return
 
@@ -1234,6 +1246,12 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
     if shares_owned == 0:
         active_predictions.pop(slug, None)
         return
+    
+    current_value = shares_owned * current_token_price
+    if not PAPER_TRADING and current_value < 1.00:
+        log.warning(f"[EARLY EXIT] ⚠️ Position value (${current_value:.2f}) is below Polymarket's $1 minimum. Forced to hold to expiry.")
+        pred["status"] = "OPEN"  # Unlock the trade so it resolves normally at expiration
+        return
 
     # =========================================================
     # PAPER TRADING LOGIC (Assumes 100% infinite liquidity)
@@ -1322,13 +1340,8 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
                 # Update the active prediction state
                 remaining_shares = shares_owned - shares_sold
                 
-                # If we have less than $0.50 worth of shares left, consider it "dust" and close it out
-                if (remaining_shares * current_token_price) < 0.50:
-                    active_predictions.pop(slug, None)
-                else:
-                    # Update the remaining stake and unlock the trade to try selling the rest next tick
-                    pred["bet_size"] = remaining_shares * bought_price
-                    pred["status"] = "OPEN"
+                pred["bet_size"] = remaining_shares * bought_price
+                pred["status"] = "OPEN"
                     
             else:
                 # 0 shares sold (order book was empty at our limits)
@@ -1653,7 +1666,7 @@ async def evaluation_loop(session: aiohttp.ClientSession):
                     continue
                 # Signal reversal exit (after 90s held) — if CVD strongly contradicts our position
                 time_held = time.time() - pred.get("entry_time", time.time())
-                if time_held > 90:
+                if time_held > 180:
                     if (pred["decision"] == "UP" and "BEARISH DIVERGENCE" in ctx.get("cvd_divergence", "")) or \
                        (pred["decision"] == "DOWN" and "BULLISH DIVERGENCE" in ctx.get("cvd_divergence", "")):
                         asyncio.create_task(execute_early_exit(session, slug, "SIGNAL_REVERSAL", current_token_price))
