@@ -1112,7 +1112,8 @@ def rule_engine_decide(current_candle: dict, history: list, poly_data: dict, ev:
                 "score": score, "reason": " | ".join(signal_log), "needs_ai": False}
     
     elif score >= 1 and ev.get("ev_pct", 0.0) >= 2.0:
-        half_kelly = ev.get("kelly_bet", 0.0) * 0.5
+        raw_half = ev.get("kelly_bet", 0.0) * 0.5
+        half_kelly = max(raw_half, 1.05) if raw_half > 0 else 0.0
         if half_kelly <= 0:
             return {"decision": "SKIP", "confidence": "Low", "bet_size": 0.0,
                     "score": score, "reason": "Kelly returned 0 on borderline — skipping", "needs_ai": False}
