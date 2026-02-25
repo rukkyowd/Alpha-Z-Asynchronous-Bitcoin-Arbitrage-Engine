@@ -441,7 +441,7 @@ def compute_ev(true_prob_pct: float, market_prob_pct: float, current_balance: fl
     # Force a $1.05 minimum so Polymarket doesn't reject the order, 
     # but only if Kelly actually found an edge (>0)
     if raw_kelly_bet > 0:
-        dynamic_bet = min(max(raw_kelly_bet, 1.05), absolute_ceiling)
+        dynamic_bet = min(max(raw_kelly_bet, 1.50), absolute_ceiling)
     else:
         dynamic_bet = 0.0
     
@@ -1156,9 +1156,9 @@ def _commit_decision(slug: str, result: dict, poly_data: dict, current_ev_pct: f
 async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
     global clob_client, simulated_balance
 
-    # FIX: Guard against zero/near-zero bets that slipped through (Kelly returned no edge)
-    if bet_size < 1.05:  # Minimum viable bet size to avoid dust and ensure we can exit later
-        log.warning(f"[BET] ✗ Bet size ${bet_size:.2f} is below minimum — skipping order")
+    # FIX: Guard against zero/near-zero bets that slipped through and API rejections
+    if bet_size < 1.50:  
+        log.warning(f"[BET] ✗ Bet size ${bet_size:.2f} is below minimum $1.50 — skipping order")
         return
 
     if PAPER_TRADING:
@@ -1215,19 +1215,33 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
         log.error("[BET] ✗ CLOB client not initialised")
         return
 
+    # --- LIQUIDITY CHECK ---
+    # Intercepts thin books before we send the order, avoiding an API exception
+    async with aiohttp.ClientSession() as s:
+        is_liquid, liq_msg = await check_market_liquidity(s, token_id, bet_size)
+        if not is_liquid:
+            log.warning(f"[BET] ✗ Market too thin: {liq_msg}")
+            return
+
     try:
         from py_clob_client.clob_types import MarketOrderArgs, OrderType
         from py_clob_client.order_builder.constants import BUY
+        
         order_args = MarketOrderArgs(token_id=token_id, amount=bet_size, side=BUY)
         signed     = await asyncio.to_thread(clob_client.create_market_order, order_args)
-        resp       = await asyncio.to_thread(clob_client.post_order, signed, OrderType.FOK)
+        
+        # --- IOC EXECUTION ---
+        # Changed from OrderType.FOK to OrderType.IOC to allow partial fills
+        resp       = await asyncio.to_thread(clob_client.post_order, signed, OrderType.IOC)
+        
         if resp.get("status") == "matched":
             log.info(f"✅ ORDER MATCHED: {decision} on {slug} | ${bet_size:.2f}")
         else:
             log.warning(f"[BET] ⚠️  Order status: {resp.get('status')} | {resp.get('errorMsg','')}")
+            
     except Exception as e:
         log.error(f"[BET] ✗ Live execution failed: {e}")
-
+        
 async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_reason: str, current_token_price: float):
     global simulated_balance, total_wins, total_losses
     
