@@ -46,7 +46,7 @@ MIN_EV_PCT_TO_CALL_AI     = 0.1
 MIN_SECONDS_REMAINING     = 45
 MAX_SECONDS_FOR_NEW_BET   = 280
 MIN_BODY_SIZE             = 0.001
-MAX_CROWD_PROB_TO_CALL    = 97.0
+MAX_CROWD_PROB_TO_CALL    = 85.0  # Don't chase markets where one side is already >85% likely
 
 EVAL_TICK_SECONDS = 5
 MAX_HISTORY     = 120
@@ -477,7 +477,7 @@ def compute_ev(true_prob_pct: float, market_prob_pct: float, current_balance: fl
     
     # Use the RiskManager's defined ceiling (max_trade_pct = 0.30)
     # No artificial floor — if Kelly says < $0, the edge isn't real; skip it.
-    absolute_ceiling = current_balance * risk_manager.max_trade_pct
+    absolute_ceiling = min(current_balance * risk_manager.max_trade_pct, 2.00)  # Cap at $2.00 for thin markets
     
     # Force a $1.05 minimum so Polymarket doesn't reject the order, 
     # but only if Kelly actually found an edge (>0)
@@ -669,17 +669,27 @@ async def _fetch_polymarket_odds(session: aiohttp.ClientSession, slug: str) -> d
                 prices    = json.loads(market.get("outcomePrices", "[]")) if isinstance(market.get("outcomePrices"), str) else market.get("outcomePrices")
                 token_ids = json.loads(market.get("clobTokenIds", "[]")) if isinstance(market.get("clobTokenIds"), str) else market.get("clobTokenIds")
                 strike_price = await fetch_price_to_beat_for_market(session, slug)
+                
+                # FIX: Dynamically map token IDs based on the actual outcomes array
+                raw_outcomes = market.get("outcomes", '["Yes", "No"]')
+                outcomes = json.loads(raw_outcomes) if isinstance(raw_outcomes, str) else raw_outcomes
+                
+                up_idx, down_idx = 0, 1 # Safe defaults
+                for i, outcome in enumerate(outcomes):
+                    if outcome.upper() in ["UP", "YES"]:   up_idx = i
+                    elif outcome.upper() in ["DOWN", "NO"]: down_idx = i
+                
                 return {
                     "market_found": True, "title": event.get("title", slug),
-                    "up_prob": float(prices[0]) * 100, "down_prob": float(prices[1]) * 100,
+                    "up_prob": float(prices[up_idx]) * 100, "down_prob": float(prices[down_idx]) * 100,
                     "strike_price": strike_price, "seconds_remaining": _parse_seconds_remaining(event.get("endDate", "")),
-                    "token_id_up":   token_ids[0] if len(token_ids) > 0 else "",
-                    "token_id_down": token_ids[1] if len(token_ids) > 1 else "",
+                    "token_id_up":   token_ids[up_idx] if len(token_ids) > up_idx else "",
+                    "token_id_down": token_ids[down_idx] if len(token_ids) > down_idx else "",
                 }
     except Exception as e: return {"market_found": False, "error": str(e)}
     return {"market_found": False, "error": "Not found"}
 
-async def check_market_liquidity(session: aiohttp.ClientSession, token_id: str, bet_size: float, max_retries: int = 3) -> tuple[bool, str]:
+async def check_market_liquidity(session: aiohttp.ClientSession, token_id: str, bet_size: float, max_retries: int = 5) -> tuple[bool, str]:
     """Queries the Polymarket CLOB to ensure tight spread and sufficient depth. Retries if the book is temporarily thin."""
     if not token_id:
         return False, "No token ID available"
@@ -691,7 +701,8 @@ async def check_market_liquidity(session: aiohttp.ClientSession, token_id: str, 
             async with session.get(f"{CLOB_HOST}/book", params={"token_id": token_id}, timeout=3) as r:
                 if r.status != 200:
                     last_error_msg = f"CLOB HTTP {r.status}"
-                    await asyncio.sleep(1.5) # Wait 1.5s before retrying
+                    wait_time = min(1.5 * attempt, 5.0)  # Exponential backoff: 1.5s, 3s, 4.5s, 5s
+                    await asyncio.sleep(wait_time)
                     continue
                     
                 data = await r.json()
@@ -701,46 +712,52 @@ async def check_market_liquidity(session: aiohttp.ClientSession, token_id: str, 
 
                 if not bids or not asks:
                     last_error_msg = "Order book is empty"
-                    await asyncio.sleep(1.5)
+                    wait_time = min(1.5 * attempt, 5.0)
+                    await asyncio.sleep(wait_time)
                     continue
 
                 best_bid = float(bids[0]["price"])
                 best_ask = float(asks[0]["price"])
                 spread = best_ask - best_bid
 
-                # 1. Spread Check: Max 4 cents slippage
-                if spread > 0.15:
-                    last_error_msg = f"Order book empty/MMs pulled (Spread: {spread*100:.1f}¢)"
+                # 1. Extreme Spread Check: Only fast-fail if completely dead (>25¢)
+                if spread > 0.25:
+                    last_error_msg = f"Market completely dead (Spread: {spread*100:.1f}¢)"
                     if attempt < max_retries:
-                        await asyncio.sleep(1.5)
+                        wait_time = min(2.0 * attempt, 6.0)  # Wait longer for dead markets
+                        log.info(f"[LIQUIDITY] Attempt {attempt}/{max_retries}: {last_error_msg}. Retrying in {wait_time:.1f}s...")
+                        await asyncio.sleep(wait_time)
                         continue
-                    return False, f"{last_error_msg}. Fast-failing."
+                    return False, f"{last_error_msg}. Gave up after {max_retries} attempts."
 
-                # Existing strict check
+                # 2. Wide Spread Check: Retry if spread is wide but not dead (4-25¢)
                 if spread > 0.04:
-                    last_error_msg = f"Spread too wide ({spread*100:.1f}¢) - Bid: {best_bid}, Ask: {best_ask}"
+                    last_error_msg = f"Spread wide ({spread*100:.1f}¢) - Bid: {best_bid:.3f}, Ask: {best_ask:.3f}"
                     if attempt < max_retries:
-                        await asyncio.sleep(1.5)
+                        wait_time = min(1.5 * attempt, 4.0)
+                        await asyncio.sleep(wait_time)
                         continue
-                    return False, last_error_msg
+                    return False, f"{last_error_msg}. Proceeding despite wide spread."
 
-                # 2. Depth Check: Top 3 ask levels must absorb 2x our bet size
+                # 3. Depth Check: Top 3 ask levels must absorb 1.5x our bet size (reduced from 2x)
                 available_liquidity = sum(float(ask["size"]) * float(ask["price"]) for ask in asks[:3])
                 
-                if available_liquidity < (bet_size * 2):
-                    last_error_msg = f"Thin book (Avail: ${available_liquidity:.0f}, Need: ${bet_size*2:.0f})"
-                    await asyncio.sleep(1.5)
+                if available_liquidity < (bet_size * 1.5):
+                    last_error_msg = f"Thin book (Avail: ${available_liquidity:.0f}, Need: ${bet_size*1.5:.0f})"
+                    wait_time = 1.5
+                    await asyncio.sleep(wait_time)
                     continue
 
                 # If we make it here, the book is healthy!
                 if attempt > 1:
-                    log.info(f"[LIQUIDITY] Recovered on attempt {attempt}: Spread {spread*100:.1f}¢")
+                    log.info(f"[LIQUIDITY] ✓ Recovered on attempt {attempt}: Spread {spread*100:.1f}¢, Depth ${available_liquidity:.0f}")
                     
                 return True, f"Liquid (Spread: {spread*100:.1f}¢, Depth: ${available_liquidity:.0f})"
                 
         except Exception as e:
             last_error_msg = f"Liquidity API error: {e}"
-            await asyncio.sleep(1.5)
+            wait_time = min(1.5 * attempt, 4.0)
+            await asyncio.sleep(wait_time)
             
     # If the loop finishes without returning True, all attempts failed
     return False, f"Failed after {max_retries} attempts. Last reason: {last_error_msg}"
@@ -1331,6 +1348,8 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
     try:
         from py_clob_client.clob_types import MarketOrderArgs, OrderType
         from py_clob_client.order_builder.constants import BUY
+
+        shares_to_buy = round(bet_size / price, 2)
         
         order_args = MarketOrderArgs(token_id=token_id, amount=bet_size, side=BUY)
         signed     = await asyncio.to_thread(clob_client.create_market_order, order_args)
@@ -1778,37 +1797,37 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             tp_threshold, sl_threshold = get_dynamic_threshold(secs)
             roi_pct = (current_token_price / pred["bought_price"]) - 1.0 if pred["bought_price"] > 0 else 0
 
-            # FIX: If we're in profit and >120s remain, NEVER take profit early.
-            # These are binary markets — a winning position with plenty of time should ride
-            # to expiry and collect the full payout, not be sold for a fraction of the gain.
-            # Early TP only makes sense in the final 2 minutes when time value is decaying fast.
+            # FIX: Clean early exit logic without mathematical paradoxes
+            # Strategy: If in profit with time left, hold for full payout. Only exit on strong signal reversal.
             if roi_pct > 0 and secs > 120:
-                # Still pass through stop-loss check — cut losers, ride winners
-                if roi_pct <= sl_threshold:
-                    asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS ({roi_pct*100:.1f}%)", current_token_price))
-                    continue
-                # Signal reversal exit (after 90s held) — if CVD strongly contradicts our position
+                # We are early and in profit. Hold for the full 100% payout.
+                # Only exit if the volume momentum violently flips against us after 3 minutes.
                 time_held = time.time() - pred.get("entry_time", time.time())
-                if time_held > 180:
-                    if (pred["decision"] == "UP" and "BEARISH DIVERGENCE" in ctx.get("cvd_divergence", "")) or \
-                       (pred["decision"] == "DOWN" and "BULLISH DIVERGENCE" in ctx.get("cvd_divergence", "")):
-                        asyncio.create_task(execute_early_exit(session, slug, "SIGNAL_REVERSAL", current_token_price))
-                        continue
+                is_diverging_against = (
+                    (pred["decision"] == "UP" and "BEARISH DIVERGENCE" in ctx.get("cvd_divergence", "")) or
+                    (pred["decision"] == "DOWN" and "BULLISH DIVERGENCE" in ctx.get("cvd_divergence", ""))
+                )
+                if time_held > 180 and is_diverging_against:
+                    asyncio.create_task(execute_early_exit(session, slug, "SIGNAL_REVERSAL", current_token_price))
+                    continue
             else:
-                # <120s left OR in a loss: apply normal TP/SL thresholds
+                # <120s left OR currently in a loss: apply normal TP/SL and faster reversal checks
                 if roi_pct >= tp_threshold:
                     asyncio.create_task(execute_early_exit(session, slug, f"TAKE_PROFIT ({roi_pct*100:.1f}%)", current_token_price))
                     continue
                 elif roi_pct <= sl_threshold:
                     asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS ({roi_pct*100:.1f}%)", current_token_price))
                     continue
-                # Signal reversal exit (after 90s held)
+                
+                # Faster 90-second reversal threshold when time is running out
                 time_held = time.time() - pred.get("entry_time", time.time())
-                if time_held > 90:
-                    if (pred["decision"] == "UP" and "BEARISH DIVERGENCE" in ctx.get("cvd_divergence", "")) or \
-                       (pred["decision"] == "DOWN" and "BULLISH DIVERGENCE" in ctx.get("cvd_divergence", "")):
-                        asyncio.create_task(execute_early_exit(session, slug, "SIGNAL_REVERSAL", current_token_price))
-                        continue
+                is_diverging_against = (
+                    (pred["decision"] == "UP" and "BEARISH DIVERGENCE" in ctx.get("cvd_divergence", "")) or
+                    (pred["decision"] == "DOWN" and "BULLISH DIVERGENCE" in ctx.get("cvd_divergence", ""))
+                )
+                if time_held > 90 and is_diverging_against:
+                    asyncio.create_task(execute_early_exit(session, slug, "SIGNAL_REVERSAL", current_token_price))
+                    continue
 
         # --- 5. NEW ENTRY EVALUATION ---
         if slug in committed_slugs or ai_call_in_flight == slug: continue
@@ -1834,15 +1853,8 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             if not result.get("needs_ai"):
                 _commit_decision(slug, result, poly_data, ev['ev_pct'])
             else:
-                # NEW: Pre-flight liquidity check before burning 4s on AI inference
-                token_id = poly_data.get("token_id_up", "") if result["decision"] == "UP" else poly_data.get("token_id_down", "")
-        
-                is_liquid, liq_msg = await check_market_liquidity(session, token_id, ev.get("kelly_bet", 1.50), max_retries=1)
-        
-                if not is_liquid:
-                    log.warning(f"[GATE] Skipping AI call - CLOB illiquid: {liq_msg}")
-                else:
-                    asyncio.create_task(call_local_ai(session, current_candle, candle_history, poly_data, ev, counter_ev, math_prob, slug, result))
+                # Let CLOB order execution handle liquidity - pre-checking adds latency and false negatives
+                asyncio.create_task(call_local_ai(session, current_candle, candle_history, poly_data, ev, counter_ev, math_prob, slug, result))
 
 async def warmup_ollama(session: aiohttp.ClientSession):
     """
