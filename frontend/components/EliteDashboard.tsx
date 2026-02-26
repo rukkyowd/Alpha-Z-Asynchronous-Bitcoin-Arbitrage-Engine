@@ -194,6 +194,11 @@ export default function EliteDashboard() {
                     </div>
                  </Panel>
 
+                 {/* --- NEW SIGNAL TRACKER PANEL --- */}
+                 <Panel title="Signal Attribution Matrix">
+                    <SignalPerformancePanel signals={portfolio?.signals} />
+                 </Panel>
+
                  <Panel title="AI Strategy Insights">
                     <AiInsights insights={portfolio?.insights} />
                  </Panel>
@@ -519,6 +524,53 @@ function AiInferencePanel({ aiLog }: { aiLog: any }) {
     </div>
   );
 }
+
+function SignalPerformancePanel({ signals }: { signals: any }) {
+  if (!signals || Object.keys(signals).length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-6 border border-dashed border-zinc-800 rounded-xl">
+        <div className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest text-center">
+          Accumulating Signal Data... <br/>
+          <span className="text-[8px] opacity-70">(Requires resolved trades)</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Sort signals by win rate descending
+  const sortedSignals = Object.entries(signals).sort((a: any, b: any) => b[1].win_rate - a[1].win_rate);
+
+  return (
+    <div className="space-y-3">
+      {sortedSignals.map(([signal, stats]: any) => (
+        <div key={signal} className="p-3 bg-[#09090b] rounded-xl border border-zinc-800/50 flex justify-between items-center hover:border-blue-500/30 transition-colors">
+          <div className="flex flex-col w-1/2">
+            <span className="text-[9px] font-bold text-zinc-300 font-mono leading-tight mb-1 truncate" title={signal}>
+              {signal}
+            </span>
+            <span className="text-[8px] text-zinc-500 uppercase tracking-widest">
+              {stats.trades} Executions
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-3 text-right">
+            <div className="flex flex-col">
+              <span className={`text-[11px] font-black tabular-nums ${stats.win_rate >= 55 ? 'text-green-400' : 'text-yellow-400'}`}>
+                {stats.win_rate.toFixed(1)}% WR
+              </span>
+            </div>
+            <div className="flex flex-col w-14">
+              <span className={`text-[11px] font-black font-mono tabular-nums ${stats.avg_pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                {stats.avg_pnl >= 0 ? '+' : ''}${stats.avg_pnl.toFixed(2)}
+              </span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 
 function TradeReplayModal({ trade, onClose }: any) {
   const chartContainerRef = useRef<HTMLDivElement>(null);

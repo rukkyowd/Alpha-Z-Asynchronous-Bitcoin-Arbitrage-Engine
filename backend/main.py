@@ -139,20 +139,43 @@ async def get_trading_metrics():
     current_time_sec = int(time.time())
 
     if df is None or df.empty:
+        # Safe fetch for signals to prevent another potential AttributeError
+        signal_perf = []
+        if hasattr(core, "signal_tracker"):
+            signal_perf = core.signal_tracker.get_signal_performance()
+
+        # RETURN DEFAULT ZEROED STATE IF NO TRADES EXIST YET
         response_data = {
             "metrics": {
-                "current_pnl": round(current_effective_balance, 2), 
-                "win_rate": 0, "max_drawdown": 0, "total_trades": 0,
-                "sharpe": 0, "var_95": 0, "expectancy": 0,
-                "kelly_optimal": "0%", "current_streak": 0, "is_winning_streak": False
+                "win_rate": 0.0,
+                "total_trades": 0,
+                "max_drawdown": 0.0,
+                "current_pnl": round(current_effective_balance, 2),  
+                "sharpe": 0.0,
+                "var_95": 0.0,
+                "expectancy": 0.0,
+                "kelly_optimal": "0.0%",  # <--- FIXED HERE
+                "current_streak": 0,
+                "is_winning_streak": False
             },
-            "insights":[], 
-            "heatmap": [], 
-            "equity_curve": [{"time": current_time_sec, "value": round(current_effective_balance, 2)}], 
-            "projections": {"paths": []}, "journal": []
+            "projections": {
+                "median_180d": 0.0,
+                "paths": []
+            },
+            "equity_curve": [],
+            "heatmap": [],
+            "insights": generate_ai_insights( 
+                win_rate=0.0, 
+                expectancy=0.0, 
+                current_streak=0, 
+                is_winning_streak=False, 
+                max_drawdown=0.0
+            ),
+            "journal": [],
+            "signals": signal_perf # <--- SAFEGUARDED HERE
         }
         return sanitize_data(response_data)
-    
+        
     try:
         # 1. DATA PREP
         df['dt'] = pd.to_datetime(df['Timestamp (UTC)'])
@@ -211,6 +234,11 @@ async def get_trading_metrics():
         rolling_pnl = df["PnL"].rolling(window=5).sum().dropna()
         var_95_calc = round(np.percentile(rolling_pnl, 5), 2) if len(rolling_pnl) > 5 else 0
 
+        # Safe fetch for signals here too
+        signal_perf = []
+        if hasattr(core, "signal_tracker"):
+            signal_perf = core.signal_tracker.get_signal_performance()
+
         # 7. FINAL RESPONSE
         response_data = {
             "metrics": {
@@ -231,14 +259,15 @@ async def get_trading_metrics():
             },
             "equity_curve": df[["time", "Equity"]].rename(columns={"Equity": "value"}).to_dict(orient="records"),
             "heatmap": sorted(heatmap_data, key=lambda x: x['hour']),
-            "insights": generate_ai_insights( # <--- Add the function call here!
+            "insights": generate_ai_insights(
                 win_rate=win_rate * 100, 
                 expectancy=expectancy, 
                 current_streak=current_streak, 
                 is_winning_streak=is_winning_streak, 
                 max_drawdown=drawdown.min()
             ),
-            "journal": df.tail(50).iloc[::-1].to_dict(orient="records")
+            "journal": df.tail(50).iloc[::-1].to_dict(orient="records"),
+            "signals": signal_perf
         }
         return sanitize_data(response_data)
         
@@ -246,7 +275,7 @@ async def get_trading_metrics():
         import traceback
         print(traceback.format_exc())
         return {"error": str(e)}
-
+    
 @app.get("/api/history")
 async def get_candle_history():
     try:
