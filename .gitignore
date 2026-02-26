@@ -4,3 +4,9 @@ dist/
 build/
 .env
 *.log
+backend/alpha_z_history.db
+backend/alpha_z_history.db-shm
+backend/__pycache__/main.cpython-313.pyc
+backend/bot/__pycache__/core.cpython-313.pyc
+backend/bot/__pycache__/core.cpython-313.pyc
+backend/__pycache__/main.cpython-313.pyc
