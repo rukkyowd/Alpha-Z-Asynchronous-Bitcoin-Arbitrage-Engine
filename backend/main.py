@@ -140,7 +140,7 @@ async def get_trading_metrics():
 
     if df is None or df.empty:
         # Safe fetch for signals to prevent another potential AttributeError
-        signal_perf = []
+        signal_perf = {}
         if hasattr(core, "signal_tracker"):
             signal_perf = core.signal_tracker.get_signal_performance()
 

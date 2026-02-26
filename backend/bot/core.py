@@ -44,7 +44,7 @@ DRY_RUN          = os.getenv("DRY_RUN", "true").lower() != "false"
 # ── Thresholds ──
 MIN_EV_PCT_TO_CALL_AI     = 0.1
 MIN_SECONDS_REMAINING     = 45
-MAX_SECONDS_FOR_NEW_BET   = 298
+MAX_SECONDS_FOR_NEW_BET   = 280
 MIN_BODY_SIZE             = 0.001
 MAX_CROWD_PROB_TO_CALL    = 97.0
 
@@ -92,6 +92,47 @@ class RiskManager:
             return False, f"Trade size ${trade_size:.2f} exceeds max risk pct."
             
         return True, "Approved"
+
+
+# ============================================================
+# SIGNAL TRACKER
+# ============================================================
+class SignalTracker:
+    def __init__(self):
+        # Stores: { "VWAP Aligned (+1)": {"wins": 0, "losses": 0, "pnl": 0.0, "trades": 0} }
+        self.signals = {}
+
+    def log_resolution(self, signals_list: list, result_str: str, pnl_impact: float):
+        for sig in signals_list:
+            # Clean up the signal string (remove the AI confirmed prefix if it exists)
+            clean_sig = sig.replace("AI confirmed: ", "").strip()
+            if not clean_sig: continue
+
+            if clean_sig not in self.signals:
+                self.signals[clean_sig] = {"wins": 0, "losses": 0, "pnl": 0.0, "trades": 0}
+            
+            self.signals[clean_sig]["trades"] += 1
+            self.signals[clean_sig]["pnl"] += pnl_impact
+            
+            if "WIN" in result_str:
+                self.signals[clean_sig]["wins"] += 1
+            elif "LOSS" in result_str:
+                self.signals[clean_sig]["losses"] += 1
+
+    def get_signal_performance(self) -> dict:
+        perf = {}
+        for sig, data in self.signals.items():
+            if data["trades"] > 0:
+                win_rate = (data["wins"] / data["trades"]) * 100
+                perf[sig] = {
+                    "trades": data["trades"],
+                    "win_rate": win_rate,
+                    "avg_pnl": data["pnl"]
+                }
+        return perf
+
+# Instantiate the global tracker
+signal_tracker = SignalTracker()
 
 # ============================================================
 # LOGGING & LIVE STREAMING
@@ -505,26 +546,29 @@ def build_technical_context(current_candle: dict, history: list) -> dict:
     cvd_candle_delta = get_cvd_candle_delta()
     cvd_1m           = last_cvd_1min
 
-    if cvd_candle_delta > 5000:    cvd_signal = f"STRONG BUY FLOW (CVD +${cvd_candle_delta:,.0f} this candle)"
-    elif cvd_candle_delta > 1000:  cvd_signal = f"Moderate buy flow (CVD +${cvd_candle_delta:,.0f})"
-    elif cvd_candle_delta < -5000: cvd_signal = f"STRONG SELL FLOW (CVD ${cvd_candle_delta:,.0f} this candle)"
-    elif cvd_candle_delta < -1000: cvd_signal = f"Moderate sell flow (CVD ${cvd_candle_delta:,.0f})"
-    else:                          cvd_signal = f"Neutral flow (CVD ${cvd_candle_delta:,.0f})"
-
     price_direction_up = current_close > history[-1]['close'] if history else True
     price_move         = abs(current_close - history[-1]['close']) if history else 0
     divergence_price_threshold = current_close * 0.0005
     
-    # FIX: Dynamic CVD Threshold
-    # Require CVD delta to be at least 15% of the average recent volume, capped with an $8,000 floor.
+    # 1. Calculate dynamic thresholds based on 15% of recent 5-minute volume average
     recent_5_vol = sum(c['volume'] for c in recent_5) / max(len(recent_5), 1) if history else 0
+    
+    # Floor is $8k so micro-fluctuations in dead hours don't trigger alerts
     dynamic_cvd_threshold = max(8000.0, recent_5_vol * current_close * 0.15)
+    moderate_cvd_threshold = dynamic_cvd_threshold * 0.40 # 40% of the strong threshold
 
+    # 2. Apply dynamic thresholds to the general signal (fed to AI)
+    if cvd_candle_delta > dynamic_cvd_threshold:    cvd_signal = f"STRONG BUY FLOW (CVD +${cvd_candle_delta:,.0f})"
+    elif cvd_candle_delta > moderate_cvd_threshold:  cvd_signal = f"Moderate buy flow (CVD +${cvd_candle_delta:,.0f})"
+    elif cvd_candle_delta < -dynamic_cvd_threshold: cvd_signal = f"STRONG SELL FLOW (CVD ${cvd_candle_delta:,.0f})"
+    elif cvd_candle_delta < -moderate_cvd_threshold: cvd_signal = f"Moderate sell flow (CVD ${cvd_candle_delta:,.0f})"
+    else:                                            cvd_signal = f"Neutral flow (CVD ${cvd_candle_delta:,.0f})"
+
+    # 3. Apply dynamic threshold to the Divergence logic
     cvd_divergence = ""
-
-    if price_direction_up and price_move > divergence_price_threshold and cvd_candle_delta < -3000:
+    if price_direction_up and price_move > divergence_price_threshold and cvd_candle_delta < -dynamic_cvd_threshold:
         cvd_divergence = "⚠️  BEARISH DIVERGENCE: Price rising but heavy SELL flow"
-    elif not price_direction_up and price_move > divergence_price_threshold and cvd_candle_delta > 3000:
+    elif not price_direction_up and price_move > divergence_price_threshold and cvd_candle_delta > dynamic_cvd_threshold:
         cvd_divergence = "⚠️  BULLISH DIVERGENCE: Price falling but heavy BUY flow"
 
     return {
@@ -665,10 +709,20 @@ async def check_market_liquidity(session: aiohttp.ClientSession, token_id: str, 
                 spread = best_ask - best_bid
 
                 # 1. Spread Check: Max 4 cents slippage
+                if spread > 0.15:
+                    last_error_msg = f"Order book empty/MMs pulled (Spread: {spread*100:.1f}¢)"
+                    if attempt < max_retries:
+                        await asyncio.sleep(1.5)
+                        continue
+                    return False, f"{last_error_msg}. Fast-failing."
+
+                # Existing strict check
                 if spread > 0.04:
                     last_error_msg = f"Spread too wide ({spread*100:.1f}¢) - Bid: {best_bid}, Ask: {best_ask}"
-                    await asyncio.sleep(1.5)
-                    continue
+                    if attempt < max_retries:
+                        await asyncio.sleep(1.5)
+                        continue
+                    return False, last_error_msg
 
                 # 2. Depth Check: Top 3 ask levels must absorb 2x our bet size
                 available_liquidity = sum(float(ask["size"]) * float(ask["price"]) for ask in asks[:3])
@@ -959,6 +1013,9 @@ async def resolve_market_outcome(session: aiohttp.ClientSession, slug: str, deci
 
     risk_manager.current_daily_pnl += pnl_impact
 
+    if "signals" in pred:
+        signal_tracker.log_resolution(pred["signals"], result_str, pnl_impact)
+
     # CRITICAL: Protect the Win Rate! 
     # Only increment the win/loss counters for primary trades, not dust remnants.
     if result_str == "WIN":    total_wins   += 1
@@ -1037,10 +1094,15 @@ def run_gatekeeper(current_candle: dict, history: list, poly_data: dict, current
 
     # FIX: Add momentum body filter — require candle body > 30% of avg candle range
     # to avoid entering on indecisive micro-moves that have no real directional momentum.
+    # FIX: Compare body to average BODY, not average RANGE, and cap the threshold
     recent_5 = history[-5:] if len(history) >= 5 else history
-    avg_candle_range = sum((c['high'] - c['low']) for c in recent_5) / max(len(recent_5), 1) if recent_5 else 10.0
-    if current_candle['body_size'] < avg_candle_range * 0.30 and not is_high_conviction:
-        return False, f"Weak candle body (${current_candle['body_size']:.2f} < 30% of avg range ${avg_candle_range*0.30:.2f})", {}, {}, 0.0
+    avg_body_size = sum(c['body_size'] for c in recent_5) / max(len(recent_5), 1) if recent_5 else 10.0
+    
+    # Require 50% of recent average body, capped at a maximum of $12 to prevent lockout
+    momentum_threshold = min(avg_body_size * 0.50, 12.0)
+    
+    if current_candle['body_size'] < momentum_threshold and not is_high_conviction:
+        return False, f"Weak candle body (${current_candle['body_size']:.2f} < threshold ${momentum_threshold:.2f})", {}, {}, 0.0
 
     # FIX: Unify favored_dir — always use strike-relative price, not candle structure.
     # Previously gatekeeper used candle structure but rule_engine used price-vs-strike,
@@ -1078,13 +1140,18 @@ def rule_engine_decide(current_candle: dict, history: list, poly_data: dict, ev:
     current_price = current_candle['close']
     strike = poly_data.get("strike_price", 0.0)
 
-    # --- DYNAMIC STRIKE BUFFER ---
-    # Calculate average High-Low spread of the last 5 minutes to measure current volatility
+    # --- DYNAMIC STRIKE BUFFER (UPDATED) ---
     recent_5 = history[-5:] if len(history) >= 5 else history
-    avg_candle_size = sum((c['high'] - c['low']) for c in recent_5) / max(len(recent_5), 1) if recent_5 else 10.0
     
-    # Set the buffer to 60% of the average candle size (capped between $5 and $25)
-    dynamic_buffer = max(5.0, min(avg_candle_size * 0.60, 25.0))
+    # 1. Base buffer on actual closing momentum (body), not extreme wicks. Cap at $15.
+    avg_body_size = sum(c['body_size'] for c in recent_5) / max(len(recent_5), 1) if recent_5 else 10.0
+    base_buffer = max(5.0, min(avg_body_size * 0.80, 15.0))
+    
+    # 2. Time Decay: The noise zone should shrink as expiration approaches.
+    secs_left = poly_data.get("seconds_remaining", 300)
+    time_factor = max(0.3, secs_left / 300.0) # Scales from 1.0 (5m) down to 0.3 (<1.5m)
+    
+    dynamic_buffer = base_buffer * time_factor
 
     if strike > 0 and abs(current_price - strike) < dynamic_buffer:
         return {"decision": "SKIP", "confidence": "Low", "bet_size": 0.0,
@@ -1173,7 +1240,8 @@ def _commit_decision(slug: str, result: dict, poly_data: dict, current_ev_pct: f
             "bought_price": bought_price,
             "token_id":   token_id,   # <--- ADDED
             "status":     "OPEN",     # <--- ADDED
-            "entry_time": time.time() # <--- ADDED: track entry time for min hold period
+            "entry_time": time.time(), # <--- ADDED: track entry time for min hold period
+            "signals":    result.get("reason", "").split(" | ")
         }
         log.info(f"DECISION LOCKED: {decision} | Score: {result.get('score','?')}/4 | Bet: ${result.get('bet_size',0.0):.2f}")
         asyncio.create_task(place_bet(slug, decision, result.get("bet_size", 0.0), poly_data))
@@ -1187,6 +1255,8 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
     # FIX: Guard against zero/near-zero bets that slipped through and API rejections
     if bet_size < 1.50:  
         log.warning(f"[BET] ✗ Bet size ${bet_size:.2f} is below minimum $1.50 — skipping order")
+        active_predictions.pop(slug, None) 
+        committed_slugs.discard(slug)  # <--- NEW: Free the bot to try again
         return
 
     if PAPER_TRADING:
@@ -1198,6 +1268,8 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
     allowed, message = risk_manager.can_trade(current_effective_bankroll, bet_size)
     if not allowed:
         log.warning(f"[RISK REJECTED] {slug}: {message}")
+        active_predictions.pop(slug, None) 
+        committed_slugs.discard(slug)  # <--- NEW
         return
 
     token_id        = poly_data.get("token_id_up", "") if decision == "UP" else poly_data.get("token_id_down", "")
@@ -1209,6 +1281,8 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
 
     if not token_id:
         log.error(f"[BET] ✗ No token_id for {decision} on {slug}")
+        active_predictions.pop(slug, None) 
+        committed_slugs.discard(slug)  # <--- NEW
         return
 
     total_trades = total_wins + total_losses
@@ -1241,14 +1315,17 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
 
     if clob_client is None:
         log.error("[BET] ✗ CLOB client not initialised")
+        active_predictions.pop(slug, None) 
+        committed_slugs.discard(slug)  # <--- NEW
         return
 
     # --- LIQUIDITY CHECK ---
-    # Intercepts thin books before we send the order, avoiding an API exception
     async with aiohttp.ClientSession() as s:
         is_liquid, liq_msg = await check_market_liquidity(s, token_id, bet_size)
         if not is_liquid:
             log.warning(f"[BET] ✗ Market too thin: {liq_msg}")
+            active_predictions.pop(slug, None) 
+            committed_slugs.discard(slug)  # <--- NEW: Crucial for early-market rejections
             return
 
     try:
@@ -1258,18 +1335,21 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
         order_args = MarketOrderArgs(token_id=token_id, amount=bet_size, side=BUY)
         signed     = await asyncio.to_thread(clob_client.create_market_order, order_args)
         
-        # --- IOC EXECUTION ---
-        # Changed from OrderType.FOK to OrderType.FAK to allow partial fills
+        # --- FAK EXECUTION ---
         resp       = await asyncio.to_thread(clob_client.post_order, signed, OrderType.FAK)
         
         if resp.get("status") == "matched":
             log.info(f"✅ ORDER MATCHED: {decision} on {slug} | ${bet_size:.2f}")
         else:
             log.warning(f"[BET] ⚠️  Order status: {resp.get('status')} | {resp.get('errorMsg','')}")
+            active_predictions.pop(slug, None) 
+            committed_slugs.discard(slug)  # <--- NEW: Handles un-matched FAK orders
             
     except Exception as e:
         log.error(f"[BET] ✗ Live execution failed: {e}")
-        
+        active_predictions.pop(slug, None) 
+        committed_slugs.discard(slug)  # <--- NEW
+
 async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_reason: str, current_token_price: float):
     global simulated_balance, total_wins, total_losses
     
@@ -1754,7 +1834,15 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             if not result.get("needs_ai"):
                 _commit_decision(slug, result, poly_data, ev['ev_pct'])
             else:
-                asyncio.create_task(call_local_ai(session, current_candle, candle_history, poly_data, ev, counter_ev, math_prob, slug, result))
+                # NEW: Pre-flight liquidity check before burning 4s on AI inference
+                token_id = poly_data.get("token_id_up", "") if result["decision"] == "UP" else poly_data.get("token_id_down", "")
+        
+                is_liquid, liq_msg = await check_market_liquidity(session, token_id, ev.get("kelly_bet", 1.50), max_retries=1)
+        
+                if not is_liquid:
+                    log.warning(f"[GATE] Skipping AI call - CLOB illiquid: {liq_msg}")
+                else:
+                    asyncio.create_task(call_local_ai(session, current_candle, candle_history, poly_data, ev, counter_ev, math_prob, slug, result))
 
 async def warmup_ollama(session: aiohttp.ClientSession):
     """
