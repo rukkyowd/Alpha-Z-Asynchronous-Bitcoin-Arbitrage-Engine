@@ -635,41 +635,61 @@ async def _fetch_polymarket_odds(session: aiohttp.ClientSession, slug: str) -> d
     except Exception as e: return {"market_found": False, "error": str(e)}
     return {"market_found": False, "error": "Not found"}
 
-async def check_market_liquidity(session: aiohttp.ClientSession, token_id: str, bet_size: float) -> tuple[bool, str]:
-    """Queries the Polymarket CLOB to ensure tight spread and sufficient depth."""
+async def check_market_liquidity(session: aiohttp.ClientSession, token_id: str, bet_size: float, max_retries: int = 3) -> tuple[bool, str]:
+    """Queries the Polymarket CLOB to ensure tight spread and sufficient depth. Retries if the book is temporarily thin."""
     if not token_id:
         return False, "No token ID available"
         
-    try:
-        async with session.get(f"{CLOB_HOST}/book", params={"token_id": token_id}, timeout=3) as r:
-            if r.status != 200:
-                return False, f"CLOB HTTP {r.status}"
-            data = await r.json()
+    last_error_msg = ""
+    
+    for attempt in range(1, max_retries + 1):
+        try:
+            async with session.get(f"{CLOB_HOST}/book", params={"token_id": token_id}, timeout=3) as r:
+                if r.status != 200:
+                    last_error_msg = f"CLOB HTTP {r.status}"
+                    await asyncio.sleep(1.5) # Wait 1.5s before retrying
+                    continue
+                    
+                data = await r.json()
 
-            bids = data.get("bids", [])
-            asks = data.get("asks", [])
+                bids = data.get("bids", [])
+                asks = data.get("asks", [])
 
-            if not bids or not asks:
-                return False, "Order book is empty"
+                if not bids or not asks:
+                    last_error_msg = "Order book is empty"
+                    await asyncio.sleep(1.5)
+                    continue
 
-            best_bid = float(bids[0]["price"])
-            best_ask = float(asks[0]["price"])
-            spread = best_ask - best_bid
+                best_bid = float(bids[0]["price"])
+                best_ask = float(asks[0]["price"])
+                spread = best_ask - best_bid
 
-            # 1. Spread Check: Max 4 cents slippage
-            if spread > 0.04:
-                return False, f"Spread too wide ({spread*100:.1f}¢) - Bid: {best_bid}, Ask: {best_ask}"
+                # 1. Spread Check: Max 4 cents slippage
+                if spread > 0.04:
+                    last_error_msg = f"Spread too wide ({spread*100:.1f}¢) - Bid: {best_bid}, Ask: {best_ask}"
+                    await asyncio.sleep(1.5)
+                    continue
 
-            # 2. Depth Check: Top 3 ask levels must absorb 2x our bet size
-            available_liquidity = sum(float(ask["size"]) * float(ask["price"]) for ask in asks[:3])
+                # 2. Depth Check: Top 3 ask levels must absorb 2x our bet size
+                available_liquidity = sum(float(ask["size"]) * float(ask["price"]) for ask in asks[:3])
+                
+                if available_liquidity < (bet_size * 2):
+                    last_error_msg = f"Thin book (Avail: ${available_liquidity:.0f}, Need: ${bet_size*2:.0f})"
+                    await asyncio.sleep(1.5)
+                    continue
+
+                # If we make it here, the book is healthy!
+                if attempt > 1:
+                    log.info(f"[LIQUIDITY] Recovered on attempt {attempt}: Spread {spread*100:.1f}¢")
+                    
+                return True, f"Liquid (Spread: {spread*100:.1f}¢, Depth: ${available_liquidity:.0f})"
+                
+        except Exception as e:
+            last_error_msg = f"Liquidity API error: {e}"
+            await asyncio.sleep(1.5)
             
-            if available_liquidity < (bet_size * 2):
-                return False, f"Thin book (Avail: ${available_liquidity:.0f}, Need: ${bet_size*2:.0f})"
-
-            return True, f"Liquid (Spread: {spread*100:.1f}¢, Depth: ${available_liquidity:.0f})"
-            
-    except Exception as e:
-        return False, f"Liquidity API error: {e}"
+    # If the loop finishes without returning True, all attempts failed
+    return False, f"Failed after {max_retries} attempts. Last reason: {last_error_msg}"
 
 # ============================================================
 # POLYMARKET OFFICIAL RESOLUTION FETCHER
