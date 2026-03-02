@@ -128,8 +128,10 @@ def get_current_market_slug() -> str:
 @app.on_event("startup")
 async def start_trading_engine():
     core.target_slug = get_current_market_slug()
-    core.market_family_prefix = core.build_market_family_prefix(core.target_slug)
-    print(f"Starting Quant Engine: {core.target_slug}")
+    prefix_parts = core.target_slug.split("-")[:-1]
+    core.market_family_prefix = "-".join(prefix_parts)
+    
+    print(f"Starting Quant Engine: {core.target_slug} | Prefix: {core.market_family_prefix}")
     asyncio.create_task(core.main())
 
 @app.get("/api/metrics")
