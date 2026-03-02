@@ -122,8 +122,8 @@ async def get_current_balance() -> float:
 
 def get_current_market_slug() -> str:
     now = int(time.time())
-    next_boundary = ((now // 300) + 1) * 300
-    return f"btc-updown-5m-{next_boundary}"
+    current_boundary = (now // 900) * 900  # <--- Grabs the CURRENT 15m window
+    return f"btc-updown-15m-{current_boundary}"
 
 @app.on_event("startup")
 async def start_trading_engine():
@@ -346,7 +346,7 @@ async def live_data_feed(websocket: WebSocket):
             balance = await get_current_balance()
 
             now = int(time.time())
-            next_boundary = ((now // 300) + 1) * 300
+            next_boundary = ((now // 900) + 1) * 900
             time_left = next_boundary - now
 
             payload = {
