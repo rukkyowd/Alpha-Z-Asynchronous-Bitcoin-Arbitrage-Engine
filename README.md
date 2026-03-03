@@ -1,8 +1,3 @@
-Here is a comprehensive, production-ready `README.md` for your repository. It captures the advanced quantitative architecture, the recent critical fixes we implemented, and the full stack setup (Python backend + Next.js frontend).
-
----
-
-```markdown
 # ⚡ Alpha Z: Elite Asynchronous Bitcoin Arbitrage Engine
 
 Alpha Z is a high-performance, asynchronous quantitative trading engine designed explicitly for Polymarket's BTC/USD binary options (hourly and daily markets). It combines deterministic technical analysis, slippage-aware Expected Value (EV) modeling, and local Large Language Model (LLM) validation to execute +EV trades with strict risk management.
@@ -123,8 +118,3 @@ This generates an **Edge Attribution Report** (comparing AI-confirmed trades vs.
 
 **This software is for educational and research purposes only.** Cryptocurrency and binary options trading carry a high level of risk and may not be suitable for all investors. The developers are not responsible for any financial losses incurred while using this software. Always test thoroughly in `PAPER_TRADING=true` mode before deploying live capital.
 
-```
-
-Would you like me to also check your `requirements.txt` or `package.json` to ensure all the dependencies (like `pandas`, `matplotlib`, `lightweight-charts`, etc.) are properly listed for your new setup?
-
-```
