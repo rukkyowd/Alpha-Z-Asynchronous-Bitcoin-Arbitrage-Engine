@@ -285,8 +285,8 @@ function ActiveTradesPanel({ trades }: { trades: any }) {
               </span>
             </div>
             <span className="text-[10px] text-zinc-500 font-mono bg-zinc-900 px-2 py-1 rounded border border-zinc-800">
-              {slug.split('-').pop()}
-            </span>
+  {slug.split('-').slice(-2).join('-')}
+</span>
           </div>
           <div className="grid grid-cols-2 gap-4 text-xs">
             <div>

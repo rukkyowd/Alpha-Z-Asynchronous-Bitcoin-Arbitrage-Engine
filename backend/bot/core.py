@@ -7,6 +7,7 @@ import sys
 import re
 import os
 import sqlite3
+import datetime
 import time
 import math
 import io
@@ -15,7 +16,7 @@ from collections import deque
 from urllib.parse import urlparse
 from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
-from typing import Optional
+from typing import Optional, Tuple
 from decimal import Decimal, ROUND_DOWN
 
 load_dotenv()
@@ -29,10 +30,10 @@ SOCKET_TRADE    = "wss://stream.binance.com:9443/ws/btcusdt@aggTrade"
 LOCAL_AI_URL    = "http://localhost:11434/v1/chat/completions"
 LOCAL_AI_MODEL  = "llama3.2:3b-instruct-q4_K_M"
 
-BANKROLL        = 50.00
+BANKROLL        = 500.00
 
 PAPER_TRADING = os.getenv("PAPER_TRADING", "true").lower() == "true"
-PAPER_BALANCE = 50.00
+PAPER_BALANCE = 500.00
 
 GAMMA_API       = "https://gamma-api.polymarket.com"
 CLOB_HOST       = "https://clob.polymarket.com"
@@ -50,23 +51,23 @@ FRACTIONAL_KELLY_DAMPENER   = 0.10
 MAX_TRADES_PER_HOUR         = 3
 
 # ── Liquidity & Anti-Chop ──
-MAX_SPREAD_PCT              = 0.03
-MIN_LIQUIDITY_MULTIPLIER    = 3.0
-MIN_ATR_THRESHOLD           = 25.0
-EMA_SQUEEZE_PCT             = 0.0007  # Patched: Tighter anti-chop
+MAX_SPREAD_PCT              = 0.05
+MIN_LIQUIDITY_MULTIPLIER    = 1.5
+MIN_ATR_THRESHOLD           = 15.0
+EMA_SQUEEZE_PCT             = 0.0001
 # ── AI Bypass Threshold ──
 EV_AI_BYPASS_THRESHOLD = 40.0  
 
-MIN_EV_PCT_TO_CALL_AI     = 3.0  # Patched: Increased from 1.0 to avoid noise
+MIN_EV_PCT_TO_CALL_AI     = 1.5  # UPDATED: 1.5% net (after slippage)
 
-MIN_SECONDS_REMAINING     = 60   
-MAX_SECONDS_FOR_NEW_BET   = 780   
+MIN_SECONDS_REMAINING     = 30
+MAX_SECONDS_FOR_NEW_BET   = 3540
 
-MAX_CROWD_PROB_TO_CALL    = 86.0
+MAX_CROWD_PROB_TO_CALL    = 94.0
 
 EV_REENGAGE_DELTA         = 0.5
-CVD_DIVERGENCE_THRESHOLD  = 40000.0  # Patched: Raised from 30k
-CVD_CONTRA_VETO_THRESHOLD = 65000.0  # Patched: Raised from 50k
+CVD_DIVERGENCE_THRESHOLD  = 40000.0
+CVD_CONTRA_VETO_THRESHOLD = 65000.0
 VWAP_OVEREXTEND_PCT       = 0.006
 BODY_STRENGTH_MULTIPLIER  = 0.5
 
@@ -79,12 +80,19 @@ AI_MAX_RETRIES      = 1
 AI_RETRY_DELAY      = 2
 AI_MAX_TOKENS       = 120
 
-CB_FAILURE_THRESHOLD = 3
-CB_COOLDOWN_SECS     = 60
+CB_FAILURE_THRESHOLD = 5  
+CB_COOLDOWN_SECS     = 30  
 
 RESOLVE_POLL_INTERVAL        = 15
 RESOLVE_POLL_MAX_TRIES       = 60
 RESOLVE_CONFIRMED_THRESHOLD  = 0.95
+
+STRIKE_PRICE_CACHE_TTL = 300  
+
+# Adaptive thresholds
+VOLATILITY_LOOKBACK = 96  
+ATR_PERCENTILE = 0.30  
+CVD_ADAPTIVE_MULTIPLIER = 1.5  
 
 # ============================================================
 # ASYNC ML DATA LOGGER
@@ -92,18 +100,21 @@ RESOLVE_CONFIRMED_THRESHOLD  = 0.95
 ML_FILE = "ai_training_data.csv"
 
 async def log_ml_data(row: dict):
-    def _sync_write():
-        file_exists = os.path.isfile(ML_FILE)
-        try:
-            with open(ML_FILE, mode="a", newline="", encoding="utf-8") as f:
-                writer = csv.DictWriter(f, fieldnames=row.keys())
-                if not file_exists:
-                    writer.writeheader()
-                writer.writerow(row)
-        except Exception as e:
-            print(f"[ML LOG ERROR] Failed to write data: {e}", file=sys.stderr)
-    
-    await asyncio.to_thread(_sync_write)
+    async with ml_write_lock:
+        def _sync_write():
+            file_exists = os.path.isfile(ML_FILE)
+            is_empty = not file_exists or os.path.getsize(ML_FILE) == 0
+            
+            try:
+                with open(ML_FILE, mode="a", newline="", encoding="utf-8") as f:
+                    writer = csv.DictWriter(f, fieldnames=row.keys())
+                    if is_empty:
+                        writer.writeheader()
+                    writer.writerow(row)
+            except Exception as e:
+                print(f"[ML LOG ERROR] Failed to write data: {e}", file=sys.stderr)
+        
+        await asyncio.to_thread(_sync_write)
 
 # ============================================================
 # ELITE RISK MANAGEMENT ENGINE
@@ -218,23 +229,50 @@ DB_FILE = "alpha_z_history.db"
 
 async def init_db():
     def _sync_init():
-        with sqlite3.connect(DB_FILE) as conn:
-            conn.execute("PRAGMA journal_mode=WAL;")
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS trades (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    timestamp TEXT, slug TEXT, decision TEXT, strike REAL,
-                    final_price REAL, actual_outcome TEXT, result TEXT,
-                    win_rate REAL, pnl_impact REAL, local_calc_outcome TEXT,
-                    official_outcome TEXT, match_status TEXT
-                )
-            """)
+        from contextlib import closing
+        with closing(sqlite3.connect(DB_FILE)) as conn:
+            with conn: 
+                conn.execute("PRAGMA journal_mode=WAL;")
+                
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS trades (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        timestamp TEXT,
+                        slug TEXT,
+                        decision TEXT,
+                        strike REAL,
+                        final_price REAL,
+                        actual_outcome TEXT,
+                        result TEXT,
+                        win_rate REAL,
+                        pnl_impact REAL,
+                        local_calc_outcome TEXT,
+                        official_outcome TEXT,
+                        match_status TEXT,
+                        trigger_reason TEXT
+                    )
+                """)
+                
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS execution_metrics (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        timestamp TEXT,
+                        slug TEXT,
+                        direction TEXT,
+                        expected_price REAL,
+                        actual_price REAL,
+                        slippage_bps REAL,
+                        spread_cents REAL,
+                        liquidity_check TEXT
+                    )
+                """)
     await asyncio.to_thread(_sync_init)
-
+    
 async def get_historical_pnl() -> float:
     def _sync_fetch():
         try:
-            with sqlite3.connect(DB_FILE, timeout=5.0) as conn:
+            from contextlib import closing
+            with closing(sqlite3.connect(DB_FILE, timeout=5.0)) as conn:
                 cursor = conn.execute("SELECT SUM(pnl_impact) FROM trades")
                 result = cursor.fetchone()[0]
                 return float(result) if result else 0.0
@@ -243,22 +281,46 @@ async def get_historical_pnl() -> float:
     return await asyncio.to_thread(_sync_fetch)
 
 async def log_trade_to_db(slug, decision, strike, final_price, actual_outcome, result, win_rate,
-                     pnl_impact, local_calc_outcome="", official_outcome="", match_status=""):
+                     pnl_impact, local_calc_outcome="", official_outcome="", match_status="",
+                     trigger_reason=""):
     def _sync_write():
         try:
+            from contextlib import closing
             timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
-            with sqlite3.connect(DB_FILE, timeout=5.0) as conn:
-                conn.execute("""
-                    INSERT INTO trades (
+            
+            with closing(sqlite3.connect(DB_FILE, timeout=5.0)) as conn:
+                with conn:  
+                    conn.execute("""
+                        INSERT INTO trades (
+                            timestamp, slug, decision, strike, final_price, actual_outcome,
+                            result, win_rate, pnl_impact, local_calc_outcome, official_outcome, match_status, trigger_reason
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
                         timestamp, slug, decision, strike, final_price, actual_outcome,
-                        result, win_rate, pnl_impact, local_calc_outcome, official_outcome, match_status
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    timestamp, slug, decision, strike, final_price, actual_outcome,
-                    result, win_rate, pnl_impact, local_calc_outcome, official_outcome, match_status
-                ))
+                        result, win_rate, pnl_impact, local_calc_outcome, official_outcome, match_status, trigger_reason
+                    ))
         except Exception as e:
             print(f"[DB ERROR] Failed to write trade: {e}", file=sys.stderr)
+            
+    await asyncio.to_thread(_sync_write)
+
+async def log_execution_metrics(slug: str, direction: str, expected_price: float, 
+                                actual_price: float, spread_cents: float, liq_check: str):
+    def _sync_write():
+        try:
+            from contextlib import closing
+            timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+            slippage_bps = ((actual_price - expected_price) / expected_price * 10000) if expected_price > 0 else 0
+            
+            with closing(sqlite3.connect(DB_FILE, timeout=5.0)) as conn:
+                with conn: 
+                    conn.execute("""
+                        INSERT INTO execution_metrics 
+                        (timestamp, slug, direction, expected_price, actual_price, slippage_bps, spread_cents, liquidity_check)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (timestamp, slug, direction, expected_price, actual_price, slippage_bps, spread_cents, liq_check))
+        except Exception as e:
+            print(f"[EXEC METRICS ERROR] {e}", file=sys.stderr)
     await asyncio.to_thread(_sync_write)
 
 # ============================================================
@@ -267,6 +329,8 @@ async def log_trade_to_db(slug, decision, strike, final_price, actual_outcome, r
 ai_call_count           = 0
 ai_consecutive_failures = 0
 ai_circuit_open_until   = 0.0
+background_tasks = set()
+ml_write_lock = asyncio.Lock()
 
 candle_history: list[dict] = []
 target_slug: str    = ""
@@ -282,7 +346,8 @@ soft_skipped_slugs: set = set()
 best_ev_seen: dict = {}
 
 ai_call_in_flight: str = ""
-strike_price_cache: dict = {}
+ai_processing_lock = asyncio.Lock()  
+strike_price_cache: dict = {}  
 
 clob_client = None
 live_price: float = 0.0
@@ -304,13 +369,24 @@ POLY_CACHE_TTL:   float  = 4.5
 
 last_ai_interaction = {"prompt": "No AI calls yet.", "response": "N/A", "timestamp": ""}
 
+adaptive_atr_min: float = MIN_ATR_THRESHOLD
+adaptive_cvd_threshold: float = CVD_DIVERGENCE_THRESHOLD
+
 # ============================================================
 # UTILITIES
 # ============================================================
+def fire_and_forget(coro):
+    task = asyncio.create_task(coro)
+    background_tasks.add(task)
+    task.add_done_callback(background_tasks.discard)
+
 def get_dynamic_threshold(secs_remaining: float) -> tuple[float, float]:
-    if secs_remaining <= 120: return float('inf'), float('-inf')
-    elif secs_remaining <= 300: return 0.20, -0.25
-    else: return 0.15, -0.20
+    if secs_remaining <= 120: 
+        return 1.00, -1.00     
+    elif secs_remaining <= 600: 
+        return 0.15, -0.20     
+    else: 
+        return 0.25, -0.30     
 
 def build_market_family_prefix(seed_slug: str) -> str:
     if not seed_slug: return ""
@@ -327,13 +403,31 @@ def _parse_seconds_remaining(end_date_str: str) -> float:
     except Exception:
         return -1.0
 
-def increment_slug_by_15m(slug: str) -> str:
-    match = re.search(r'(\d+)$', slug)
-    if match:
-        new_id = int(match.group(1)) + 900
-        return re.sub(r'\d+$', str(new_id), slug)
-    return slug
+def increment_slug_by_interval(slug: str) -> str:
+    pattern = r"bitcoin-up-or-down-(\w+)-(\d+)-(\d+)(am|pm)-et"
+    match = re.search(pattern, slug)
+    
+    if not match:
+        return slug 
 
+    month_str, day, hour, ampm = match.groups()
+    
+    try:
+        current_year = datetime.now().year
+        dt_str = f"{month_str} {day} {current_year} {hour}{ampm}"
+        dt = datetime.strptime(dt_str, "%B %d %Y %I%p")
+        
+        next_dt = dt + timedelta(hours=1)
+        
+        new_month = next_dt.strftime('%B').lower()
+        new_day = next_dt.day
+        new_hour = next_dt.strftime('%I').lstrip('0') 
+        new_ampm = next_dt.strftime('%p').lower()
+        
+        return f"bitcoin-up-or-down-{new_month}-{new_day}-{new_hour}{new_ampm}-et"
+    except Exception:
+        return slug
+    
 def parse_candle(raw: dict, override_close: float = 0.0) -> dict:
     o, h, l, c, v = float(raw['o']), float(raw['h']), float(raw['l']), float(raw['c']), float(raw['v'])
     c = override_close if override_close > 0 else c
@@ -376,6 +470,27 @@ async def warmup_ai(session: aiohttp.ClientSession):
             log.info("[SYSTEM] AI Warmup complete. Engine is hot and ready.")
     except Exception as e:
         log.warning(f"[SYSTEM] AI Warmup failed! Is Ollama running? Error: {e}")
+
+def update_adaptive_thresholds(history: list[dict]):
+    global adaptive_atr_min, adaptive_cvd_threshold
+    
+    if len(history) < VOLATILITY_LOOKBACK:
+        return
+    
+    recent_atrs = []
+    for c in history[-VOLATILITY_LOOKBACK:]:
+        atr_proxy = c.get('body_size', 0) + c.get('upper_wick', 0) + c.get('lower_wick', 0)
+        recent_atrs.append(atr_proxy)
+    
+    recent_atrs.sort()
+    percentile_idx = int(len(recent_atrs) * ATR_PERCENTILE)
+    adaptive_atr_min = max(MIN_ATR_THRESHOLD * 0.5, recent_atrs[percentile_idx])
+    
+    recent_volumes = [c.get('volume', 0) for c in history[-24:]]  
+    avg_volume = sum(recent_volumes) / len(recent_volumes) if recent_volumes else 1000
+    adaptive_cvd_threshold = max(CVD_DIVERGENCE_THRESHOLD, avg_volume * CVD_ADAPTIVE_MULTIPLIER)
+    
+    log.debug(f"[ADAPTIVE] ATR min: {adaptive_atr_min:.1f} | CVD threshold: {adaptive_cvd_threshold:,.0f}")
 
 # ============================================================
 # INDICATOR & CONTEXT ENGINE
@@ -457,14 +572,14 @@ def get_vwap() -> float:
     return (vwap_cum_pv / vwap_cum_vol) if vwap_cum_vol > 0 else 0.0
 
 def update_vwap(candle: dict):
-    global vwap_cum_pv, vwap_cum_vol, vwap_date, cvd_snapshot_at_candle_open
+    global vwap_cum_pv, vwap_cum_vol, vwap_date, cvd_snapshot_at_candle_open, cvd_total
     today_str = datetime.now(timezone.utc).strftime('%Y-%m-%d')
     
-    # Patched: Corrected VWAP reset logic to reset anytime the day rolls over
     if vwap_date != today_str:
         vwap_cum_pv, vwap_cum_vol = 0.0, 0.0
+        cvd_total = 0.0  
         vwap_date = today_str
-        log.info(f"[VWAP] Reset for new day: {today_str}")
+        log.info(f"[VWAP] Reset for new day: {today_str} (CVD also reset)")
 
     typical_price = (candle['high'] + candle['low'] + candle['close']) / 3.0
     vwap_cum_pv  += typical_price * candle['volume']
@@ -501,7 +616,7 @@ def detect_market_regime(history: list[dict]) -> str:
     regime = None
     if atr > dynamic_vol_limit: 
         regime = "VOLATILE"
-    elif abs(ema_short - ema_long) / ema_long < 0.002: 
+    elif abs(ema_short - ema_long) / ema_long < 0.001: 
         regime = "RANGING"
     else:
         regime = "TRENDING"
@@ -535,14 +650,11 @@ def build_technical_context(current_candle: dict, history: list[dict]) -> dict:
         "body_size": current_candle.get('body_size', 0)
     }
 
-# ============================================================================
-# PATCH 2: compute_directional_prob — Sharper Alpha Signal
-# ============================================================================
 def compute_directional_prob(ctx: dict, strike: float, secs_remaining: float) -> tuple[float, float]:
     price = ctx['price']
     distance = price - strike
 
-    time_fraction = max(secs_remaining / 900.0, 0.01)
+    time_fraction = max(secs_remaining / 3600.0, 0.01)
     expected_move = ctx['atr'] * math.sqrt(time_fraction)
 
     if expected_move == 0:
@@ -555,7 +667,6 @@ def compute_directional_prob(ctx: dict, strike: float, secs_remaining: float) ->
 
     prob_up_base = norm_cdf(z_score) * 100.0
 
-    # ── RSI Bias: Log-scaled, asymmetric ──
     rsi_deviation = ctx['rsi'] - 50.0
     rsi_bias = math.copysign(
         math.log(1.0 + abs(rsi_deviation) / 10.0) * 5.5,
@@ -563,14 +674,12 @@ def compute_directional_prob(ctx: dict, strike: float, secs_remaining: float) ->
     )
     rsi_bias = max(-8.5, min(8.5, rsi_bias))
 
-    # ── CVD Bias: Continuous, higher threshold ──
     cvd_delta = ctx['cvd_candle_delta']
     CVD_SCALE_FACTOR = 50_000.0
     cvd_bias = max(-5.0, min(5.0, (cvd_delta / CVD_SCALE_FACTOR) * 5.0))
     if abs(cvd_delta) < 35_000:
         cvd_bias = cvd_bias * (abs(cvd_delta) / 35_000) 
 
-    # ── Candle Structure Bias ──
     candle_structure = ctx.get('candle_structure', 'NEUTRAL')
     structure_bias = 0.0
     ema_9, ema_21 = ctx.get('ema_9', 0), ctx.get('ema_21', 0)
@@ -593,29 +702,42 @@ def detect_cvd_divergence(ctx: dict, current_candle: dict) -> tuple[str, float]:
     cvd_delta = ctx['cvd_candle_delta']
     price_structure = current_candle['structure']
 
-    if price_structure == "BULLISH" and cvd_delta < -CVD_DIVERGENCE_THRESHOLD:
+    threshold = adaptive_cvd_threshold
+
+    if price_structure == "BULLISH" and cvd_delta < -threshold:
         strength = min(abs(cvd_delta) / 100000.0, 1.0)
         return "BEARISH_DIV", round(strength, 3)
 
-    if price_structure == "BEARISH" and cvd_delta > CVD_DIVERGENCE_THRESHOLD:
+    if price_structure == "BEARISH" and cvd_delta > threshold:
         strength = min(abs(cvd_delta) / 100000.0, 1.0)
         return "BULLISH_DIV", round(strength, 3)
 
     return "NONE", 0.0
 
 # ============================================================
-# TIME-ADJUSTED BET SIZING
+# TIME-ADJUSTED BET SIZING 
 # ============================================================
-def get_time_adjusted_bet(kelly_bet: float, secs_remaining: float) -> float:
-    if secs_remaining > 600:
-        multiplier = 1.0
-    elif secs_remaining > 360:
-        multiplier = 0.75
-    elif secs_remaining > MIN_SECONDS_REMAINING:
-        multiplier = 0.50
+def get_time_adjusted_bet(kelly_bet: float, secs_remaining: float, confidence_level: str = "Medium") -> float:
+    if secs_remaining > 1800:       
+        time_multiplier = 0.50
+    elif secs_remaining > 600:      
+        time_multiplier = 1.0
+    elif secs_remaining > 360:      
+        time_multiplier = 0.75
+    elif secs_remaining > MIN_SECONDS_REMAINING: 
+        time_multiplier = 0.50
     else:
         return 0.0
-    return round(kelly_bet * multiplier, 2)
+    
+    confidence_multipliers = {
+        "High": 1.0,
+        "Medium": 0.75,
+        "Scout": 0.5
+    }
+    conviction_mult = confidence_multipliers.get(confidence_level, 0.75)
+    
+    final_bet = kelly_bet * time_multiplier * conviction_mult
+    return round(max(final_bet, 1.00), 2)  
 
 # ============================================================
 # DETERMINISTIC AI FILTER
@@ -650,32 +772,74 @@ def deterministic_ai_filter(rule_decision: dict, ctx: dict, current_candle: dict
     return rule_decision
 
 # ============================================================
-# KELLY CRITERION & EV MATH
+# KELLY CRITERION & EV MATH WITH SLIPPAGE (FIX 3)
 # ============================================================
-def compute_ev(true_prob_pct: float, market_prob_pct: float, current_balance: float) -> dict:
-    token = market_prob_pct / 100.0
-    prob  = true_prob_pct   / 100.0
+def compute_ev_with_slippage(
+    true_prob_pct: float,
+    market_prob_pct: float,
+    current_balance: float,
+    bet_size: float,
+    estimated_spread_pct: float = 0.02, 
+) -> dict:
     
-    if not (0.01 < token < 0.99):
-        return {"ev_pct": 0.0, "kelly_bet": 0.0}
-
-    net_win = 1.0 - token
-    loss = token
-    ev = prob * net_win - (1 - prob) * loss
-    b = net_win / token
-    kelly_fraction = max(0.0, (b * prob - (1 - prob)) / b)
-
+    token_price = market_prob_pct / 100.0
+    true_prob = true_prob_pct / 100.0
+    
+    if not (0.01 < token_price < 0.99):
+        return {
+            "ev_pct": 0.0,
+            "ev_pct_gross": 0.0,
+            "kelly_bet": 0.0,
+            "slippage_cost_pct": 0.0,
+            "edge": 0.0,
+            "approved": False
+        }
+    
+    net_win = 1.0 - token_price  
+    loss = token_price  
+    
+    gross_ev = true_prob * net_win - (1 - true_prob) * loss
+    gross_ev_pct = (gross_ev / token_price) * 100
+    
+    if bet_size < 5.0:
+        slippage_cost_pct = estimated_spread_pct * 0.5
+    elif bet_size < 20.0:
+        slippage_cost_pct = estimated_spread_pct * 0.75
+    else:
+        size_impact = min((bet_size / 1000.0) * 0.01, 0.01)  
+        slippage_cost_pct = estimated_spread_pct + size_impact
+    
+    adjusted_token_price = token_price * (1 + slippage_cost_pct)
+    adjusted_net_win = 1.0 - adjusted_token_price
+    
+    net_ev = true_prob * adjusted_net_win - (1 - true_prob) * adjusted_token_price
+    net_ev_pct = (net_ev / adjusted_token_price) * 100
+    
+    b = adjusted_net_win / adjusted_token_price  
+    
+    if net_ev > 0:
+        kelly_fraction = max(0.0, (b * true_prob - (1 - true_prob)) / b)
+    else:
+        kelly_fraction = 0.0
+    
     raw_bet = kelly_fraction * current_balance * FRACTIONAL_KELLY_DAMPENER
-    MIN_BET = 1.50
-    absolute_ceiling = min(current_balance * risk_manager.max_trade_pct, 5.00)
+    
+    MIN_BET = 1.00
+    absolute_ceiling = min(current_balance * MAX_TRADE_PCT, 5.00)
     
     kelly_bet = 0.0
     if raw_bet >= MIN_BET:
         kelly_bet = round(min(raw_bet, absolute_ceiling), 2)
-
+    
+    edge = true_prob_pct - market_prob_pct
+    
     return {
-        "ev_pct": round((ev / token) * 100, 2),
-        "kelly_bet": kelly_bet
+        "ev_pct": round(net_ev_pct, 2),  
+        "ev_pct_gross": round(gross_ev_pct, 2),  
+        "kelly_bet": kelly_bet,
+        "slippage_cost_pct": round(slippage_cost_pct * 100, 2),
+        "edge": round(edge, 2),
+        "approved": net_ev_pct > 0  
     }
 
 # ============================================================
@@ -693,24 +857,66 @@ async def fetch_market_meta_from_slug(session: aiohttp.ClientSession, slug: str)
     except: return None
 
 async def fetch_price_to_beat_for_market(session: aiohttp.ClientSession, slug: str) -> float:
-    if slug in strike_price_cache: return strike_price_cache[slug]
+    if slug in strike_price_cache:
+        cached_price, cached_time = strike_price_cache[slug]
+        if time.time() - cached_time < STRIKE_PRICE_CACHE_TTL:
+            return cached_price
+    
     meta = await fetch_market_meta_from_slug(session, slug)
     if not meta: return 0.0
+
+    if "up-or-down" in slug or "updown" in slug:
+        end_time_str = meta["market"].get("endDate", "")
+        if end_time_str:
+            try:
+                end_dt = datetime.fromisoformat(end_time_str.replace("Z", "+00:00"))
+                start_dt = end_dt - timedelta(hours=1)
+                start_ts = int(start_dt.timestamp() * 1000)
+
+                params = {"symbol": "BTCUSDT", "interval": "1h", "startTime": start_ts, "limit": 1}
+                async with session.get("https://api.binance.com/api/v3/klines", params=params, timeout=5) as r:
+                    if r.status == 200:
+                        data = await r.json()
+                        if data:
+                            strike = float(data[0][1]) 
+                            strike_price_cache[slug] = (strike, time.time())
+                            return strike
+            except Exception as e:
+                log.debug(f"Failed to fetch Binance 1H Open for strike: {e}")
+    
+    title = meta.get("title", "")
+    match = re.search(r'\$([\d,]+\.?\d*)', title)
+    if match:
+        strike = float(match.group(1).replace(',', ''))
+        strike_price_cache[slug] = (strike, time.time())
+        return strike
+
     end_time_str = meta["market"].get("endDate", "")
     if not end_time_str: return 0.0
     try:
-        end_dt   = datetime.fromisoformat(end_time_str.replace("Z", "+00:00"))
-        start_dt = end_dt - timedelta(minutes=15)
-        params   = {"symbol": "BTC", "eventStartTime": start_dt.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                    "variant": "fiveminute", "endDate": end_dt.strftime('%Y-%m-%dT%H:%M:%SZ')}
+        end_dt = datetime.fromisoformat(end_time_str.replace("Z", "+00:00"))
+        
+        if "-15m" in slug:
+            start_dt = end_dt - timedelta(minutes=15)
+            variant = "fiveminute"
+        else:
+            start_dt = end_dt - timedelta(hours=1)
+            variant = "hourly"
+
+        params = {"symbol": "BTC", "eventStartTime": start_dt.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                  "variant": variant, "endDate": end_dt.strftime('%Y-%m-%dT%H:%M:%SZ')}
+                  
         async with session.get("https://polymarket.com/api/crypto/crypto-price", params=params, timeout=5) as r:
             if r.status == 200:
                 data = await r.json()
                 if data.get("openPrice"):
                     strike = float(data["openPrice"])
-                    strike_price_cache[slug] = strike
+                    strike_price_cache[slug] = (strike, time.time())
                     return strike
-    except: pass
+    except Exception as e: 
+        log.debug(f"Failed to fetch strike price from API fallback: {e}")
+        pass
+        
     return 0.0
 
 async def get_polymarket_odds_cached(session: aiohttp.ClientSession, slug: str) -> dict:
@@ -750,69 +956,89 @@ async def _fetch_polymarket_odds(session: aiohttp.ClientSession, slug: str) -> d
     return {"market_found": False}
 
 # ============================================================================
-# PATCH 1: check_liquidity_and_spread — TWO-STAGE FAST FILTER
+# DYNAMIC SIZING & LIQUIDITY CHECK (FIX 2)
 # ============================================================================
-async def check_liquidity_and_spread(
+async def check_liquidity_and_spread_v2(
     token_id: str,
     intended_bet: float,
-    session: Optional[aiohttp.ClientSession] = None
-) -> tuple[bool, str]:
-    if clob_client is None:
-        return True, "Paper bypass"
-
+    poly_data: Optional[dict] = None,
+    clob_client = None,
+    session: Optional[aiohttp.ClientSession] = None,
+    PAPER_TRADING: bool = True,
+    MAX_SPREAD_PCT: float = 0.05,
+    MIN_LIQUIDITY_MULTIPLIER: float = 1.5
+) -> Tuple[bool, str, float]:
+    
+    if PAPER_TRADING or clob_client is None:
+        return True, "Paper bypass", intended_bet
+    
+    if poly_data and poly_data.get("market_found"):
+        up_prob = poly_data.get("up_prob", 0.0)  
+        down_prob = poly_data.get("down_prob", 0.0)  
+        
+        if token_id == poly_data.get("token_id_up", ""):
+            amm_price = up_prob / 100.0  
+            complement = down_prob / 100.0  
+        elif token_id == poly_data.get("token_id_down", ""):
+            amm_price = down_prob / 100.0
+            complement = up_prob / 100.0
+        else:
+            amm_price = 0.0
+            complement = 0.0
+        
+        if 0.01 < amm_price < 0.99 and 0.01 < complement < 0.99:
+            amm_spread = abs(1.0 - amm_price - complement)
+            
+            if amm_spread > MAX_SPREAD_PCT:
+                return False, f"AMM spread {amm_spread*100:.2f}¢ > max {MAX_SPREAD_PCT*100:.0f}¢", 0.0
+            
+            ESTIMATED_AMM_DEPTH = 1000.0  
+            
+            if intended_bet > ESTIMATED_AMM_DEPTH * 0.5:
+                scaled_bet = round(ESTIMATED_AMM_DEPTH * 0.4, 2)
+                return True, f"OK (AMM scaled) | spread={amm_spread*100:.2f}¢", scaled_bet
+            
+            return True, f"OK (AMM) | spread={amm_spread*100:.2f}¢", intended_bet
+    
     try:
-        spread_data = await asyncio.to_thread(clob_client.get_spread, token_id)
-        if spread_data:
-            raw_spread = spread_data.get("spread")
-            if raw_spread is not None:
-                fast_spread = float(raw_spread)
+        try:
+            spread_data = await asyncio.to_thread(clob_client.get_spread, token_id)
+            if spread_data:
+                fast_spread = float(spread_data.get("spread", 0))
                 if fast_spread > MAX_SPREAD_PCT:
-                    return False, f"[Stage1] Spread {fast_spread*100:.2f}¢ > max {MAX_SPREAD_PCT*100:.0f}¢"
-    except Exception as e:
-        log.debug(f"[LIQ] /spread pre-flight unavailable: {e}, falling through to L2")
-
-    mid_price = None
-    try:
-        price_data = await asyncio.to_thread(clob_client.get_price, token_id, "buy")
-        if price_data:
-            best_ask_fast = float(price_data.get("price", 0))
-            price_data_bid = await asyncio.to_thread(clob_client.get_price, token_id, "sell")
-            best_bid_fast = float(price_data_bid.get("price", 0)) if price_data_bid else 0.0
-            if best_ask_fast > 0 and best_bid_fast > 0:
-                mid_price = (best_ask_fast + best_bid_fast) / 2.0
-                fast_spread_2 = best_ask_fast - best_bid_fast
-                if fast_spread_2 > MAX_SPREAD_PCT:
-                    return False, f"[Stage2] Spread {fast_spread_2*100:.2f}¢ confirmed wide"
-    except Exception as e:
-        log.debug(f"[LIQ] /price pre-flight unavailable: {e}, falling through to L2")
-
-    try:
+                    return False, f"CLOB spread {fast_spread*100:.2f}¢ too wide", 0.0
+        except Exception:
+            pass  
+        
         book = await asyncio.to_thread(clob_client.get_order_book, token_id)
-        if not book or not book.bids or not book.asks:
-            return False, "Empty orderbook"
-
-        best_bid = float(book.bids[0].price)
+        if not book or not book.asks:
+            return False, "Empty orderbook", 0.0
+        
+        best_bid = float(book.bids[0].price) if book.bids else 0.01
         best_ask = float(book.asks[0].price)
-        if best_bid <= 0 or best_ask <= 0:
-            return False, "Invalid TOB prices"
-
-        if mid_price is None:
-            mid_price = (best_bid + best_ask) / 2.0
-
         tob_spread = best_ask - best_bid
+        
+        if tob_spread >= 0.90:
+            return False, "CLOB shows stub quotes (use AMM pricing)", 0.0
+        
+        if not (0.01 <= best_ask <= 0.99):
+            return False, f"Invalid ask price: {best_ask}", 0.0
+        
         if tob_spread > MAX_SPREAD_PCT:
-            return False, f"[Stage3] TOB Spread {tob_spread*100:.2f}¢ too wide"
-
+            return False, f"CLOB spread {tob_spread*100:.2f}¢ > max", 0.0
+        
+        mid_price = (best_bid + best_ask) / 2.0
+        
         remaining_dollars = intended_bet
         total_shares_bought = 0.0
         levels_consumed = 0
-
+        
         for ask in book.asks:
             ask_price = float(ask.price)
             ask_size_shares = float(ask.size)
             ask_level_dollars = ask_price * ask_size_shares
             levels_consumed += 1
-
+            
             if remaining_dollars <= ask_level_dollars:
                 shares_at_level = remaining_dollars / ask_price
                 total_shares_bought += shares_at_level
@@ -821,123 +1047,241 @@ async def check_liquidity_and_spread(
             else:
                 total_shares_bought += ask_size_shares
                 remaining_dollars -= ask_level_dollars
-
-        if remaining_dollars > 0.01:
-            return False, f"Insufficient depth: ${remaining_dollars:.2f} unfilled after {levels_consumed} levels"
-
+            
+            if levels_consumed >= 10:
+                break
+        
         if total_shares_bought <= 0:
-            return False, "Zero shares calculated"
-
+            return False, "No depth available", 0.0
+        
+        fillable_dollars = intended_bet - remaining_dollars
+        
+        if remaining_dollars > 0.01:
+            if fillable_dollars < intended_bet * 0.25:
+                return False, f"Insufficient depth (only ${fillable_dollars:.2f} fillable)", 0.0
+            
+            scaled_bet = round(fillable_dollars * 0.95, 2)
+            
+            avg_exec_price = scaled_bet / (total_shares_bought * 0.95)
+            slippage = (avg_exec_price - mid_price) / mid_price
+            
+            if slippage > 0.03:  
+                return False, f"Slippage {slippage*100:.2f}% too high even scaled", 0.0
+            
+            return True, f"OK (CLOB scaled) | spread={tob_spread*100:.2f}¢ | impact={slippage*100:.2f}%", scaled_bet
+        
         avg_exec_price = intended_bet / total_shares_bought
-        slippage_from_mid = (avg_exec_price - mid_price) / mid_price
-        half_spread_cost = (best_ask - mid_price) / mid_price
-        incremental_impact = slippage_from_mid - half_spread_cost
-
-        MAX_TOTAL_SLIPPAGE_FROM_MID = 0.025
-        MAX_INCREMENTAL_IMPACT = 0.015
-
-        if slippage_from_mid > MAX_TOTAL_SLIPPAGE_FROM_MID:
-            return False, f"Total slippage from mid {slippage_from_mid*100:.2f}% exceeds {MAX_TOTAL_SLIPPAGE_FROM_MID*100:.0f}%"
-
-        if incremental_impact > MAX_INCREMENTAL_IMPACT:
-            return False, f"Market impact {incremental_impact*100:.2f}% above half-spread tolerance"
-
-        total_top3_liquidity = sum(float(ask.price) * float(ask.size) for ask in book.asks[:3])
-        if total_top3_liquidity < intended_bet * MIN_LIQUIDITY_MULTIPLIER:
-            return False, f"Top-3 depth ${total_top3_liquidity:.2f} < {MIN_LIQUIDITY_MULTIPLIER}× bet"
-
-        return True, (f"OK | spread={tob_spread*100:.2f}¢ | impact={slippage_from_mid*100:.2f}% | levels={levels_consumed}")
-
+        slippage = (avg_exec_price - mid_price) / mid_price
+        
+        if slippage > 0.025:  
+            scaled_bet = round(intended_bet * 0.8, 2)
+            return True, "OK (CLOB) | Scaled 20% for slippage", scaled_bet
+        
+        top3_depth = sum(float(ask.price) * float(ask.size) for ask in book.asks[:3])
+        if top3_depth < intended_bet * MIN_LIQUIDITY_MULTIPLIER:
+            scaled_bet = round(top3_depth * 0.8, 2)
+            if scaled_bet < 1.00:
+                return False, f"Insufficient depth (${top3_depth:.2f})", 0.0
+            
+            return True, f"OK (CLOB depth-limited) | spread={tob_spread*100:.2f}¢", scaled_bet
+        
+        return True, f"OK (CLOB) | spread={tob_spread*100:.2f}¢ | impact={slippage*100:.2f}% | levels={levels_consumed}", intended_bet
+    
     except Exception as e:
-        return False, f"L2 Check Error: {e}"
+        return False, f"Liquidity check error: {e}", 0.0
     
 # ============================================================
-# POLYMARKET RESOLUTION
+# PARALLEL POLYMARKET RESOLUTION (FIX 1)
 # ============================================================
-async def fetch_polymarket_resolution(session: aiohttp.ClientSession, slug: str) -> dict:
-    t_start   = time.time()
-    snapshots = []
-    log.info(f"[POLY-RESOLVE] Watching for official resolution: {slug} (poll every {RESOLVE_POLL_INTERVAL}s)")
-
-    for attempt in range(1, RESOLVE_POLL_MAX_TRIES + 1):
-        await asyncio.sleep(RESOLVE_POLL_INTERVAL)
-        elapsed = time.time() - t_start
-        try:
-            async with session.get(f"{GAMMA_API}/events", params={"slug": slug}, timeout=8) as r:
-                if r.status != 200: continue
-                data = await r.json()
-
-                for event in data:
-                    if event.get("slug", "") != slug: continue
+async def fetch_polymarket_resolution_v2(
+    session: aiohttp.ClientSession, 
+    slug: str,
+    strike_price: float,
+    end_date_str: str
+) -> dict:
+    
+    async def poll_polymarket():
+        POLL_INTERVAL = 10  
+        MAX_POLLS = 18  
+        
+        for attempt in range(1, MAX_POLLS + 1):
+            await asyncio.sleep(POLL_INTERVAL)
+            
+            try:
+                async with session.get(
+                    f"https://gamma-api.polymarket.com/events/slug/{slug}", 
+                    timeout=8
+                ) as r:
+                    if r.status == 429:
+                        await asyncio.sleep(30)
+                        continue
+                    
+                    if r.status != 200:
+                        continue
+                    
+                    event = await r.json()
                     markets = event.get("markets", [])
-                    if not markets: break
-
-                    market    = markets[0]
-                    is_closed = market.get("closed", False)
-                    is_active = market.get("active", True)
-                    raw_prices = json.loads(market.get("outcomePrices", "[]")) if isinstance(market.get("outcomePrices"), str) else market.get("outcomePrices")
-
-                    if not raw_prices or len(raw_prices) < 2: break
+                    if not markets:
+                        continue
+                    
+                    market = markets[0]
+                    
+                    raw_prices = market.get("outcomePrices", "[]")
+                    if isinstance(raw_prices, str):
+                        raw_prices = json.loads(raw_prices)
+                    
+                    if len(raw_prices) < 2:
+                        continue
+                    
                     p_up, p_down = float(raw_prices[0]), float(raw_prices[1])
-                    snapshots.append({"poll": attempt, "elapsed_secs": round(elapsed, 1), "p_up": p_up, "p_down": p_down})
-
-                    if p_up >= RESOLVE_CONFIRMED_THRESHOLD:
-                        return {"outcome": "UP", "p_up": p_up, "p_down": p_down, "is_closed": is_closed, "poll_count": attempt}
-                    if p_down >= RESOLVE_CONFIRMED_THRESHOLD:
-                        return {"outcome": "DOWN", "p_up": p_up, "p_down": p_down, "is_closed": is_closed, "poll_count": attempt}
-                    if is_closed and not is_active:
-                        outcome = "UP" if p_up > p_down else ("DOWN" if p_down > p_up else "TIE")
-                        return {"outcome": outcome, "p_up": p_up, "p_down": p_down, "is_closed": True, "poll_count": attempt}
-                    break
-        except Exception: pass
-
-    last_p_up   = snapshots[-1]["p_up"] if snapshots else 0.5
-    last_p_down = snapshots[-1]["p_down"] if snapshots else 0.5
-    return {"outcome": "TIMEOUT", "p_up": last_p_up, "p_down": last_p_down, "is_closed": False, "poll_count": len(snapshots)}
+                    
+                    if p_up >= 0.95:
+                        return {
+                            "outcome": "UP",
+                            "source": "POLYMARKET_API",
+                            "p_up": p_up,
+                            "p_down": p_down,
+                            "poll_count": attempt
+                        }
+                    
+                    if p_down >= 0.95:
+                        return {
+                            "outcome": "DOWN",
+                            "source": "POLYMARKET_API",
+                            "p_up": p_up,
+                            "p_down": p_down,
+                            "poll_count": attempt
+                        }
+                    
+                    if market.get("closed", False):
+                        outcome = "UP" if p_up > p_down else "DOWN"
+                        return {
+                            "outcome": outcome,
+                            "source": "POLYMARKET_CLOSED",
+                            "p_up": p_up,
+                            "p_down": p_down,
+                            "poll_count": attempt
+                        }
+            
+            except asyncio.TimeoutError:
+                pass
+            except Exception as e:
+                pass
+        
+        return None
+    
+    async def fetch_binance_resolution():
+        try:
+            end_dt = datetime.fromisoformat(end_date_str.replace("Z", "+00:00"))
+        except:
+            return None
+        
+        now = datetime.now(timezone.utc)
+        wait_seconds = (end_dt - now).total_seconds()
+        
+        if wait_seconds > 0:
+            await asyncio.sleep(wait_seconds + 30)  
+        
+        for attempt in range(1, 7):  
+            try:
+                start_dt = end_dt - timedelta(hours=1)
+                start_ts = int(start_dt.timestamp() * 1000)
+                
+                params = {
+                    "symbol": "BTCUSDT",
+                    "interval": "1h",
+                    "startTime": start_ts,
+                    "limit": 1
+                }
+                
+                async with session.get(
+                    "https://api.binance.com/api/v3/klines",
+                    params=params,
+                    timeout=5
+                ) as r:
+                    if r.status == 200:
+                        data = await r.json()
+                        if data:
+                            close_price = float(data[0][4]) 
+                            
+                            outcome = "UP" if close_price >= strike_price else "DOWN"
+                            
+                            return {
+                                "outcome": outcome,
+                                "source": "BINANCE_FALLBACK",
+                                "final_price": close_price,
+                                "strike_price": strike_price,
+                                "p_up": 1.0 if outcome == "UP" else 0.0,
+                                "p_down": 0.0 if outcome == "UP" else 1.0
+                            }
+            
+            except Exception:
+                pass
+            
+            if attempt < 6:
+                await asyncio.sleep(10)  
+        
+        return None
+    
+    poly_task = asyncio.create_task(poll_polymarket())
+    binance_task = asyncio.create_task(fetch_binance_resolution())
+    
+    done, pending = await asyncio.wait(
+        [poly_task, binance_task],
+        return_when=asyncio.FIRST_COMPLETED
+    )
+    
+    if poly_task in done:
+        poly_result = await poly_task
+        if poly_result is not None:
+            binance_task.cancel()
+            return poly_result
+    
+    binance_result = await binance_task
+    
+    if not poly_task.done():
+        poly_task.cancel()
+    
+    if binance_result is not None:
+        return binance_result
+    
+    return {
+        "outcome": "ERROR",
+        "source": "TOTAL_FAILURE",
+        "p_up": 0.5,
+        "p_down": 0.5
+    }
 
 async def resolve_market_outcome(session: aiohttp.ClientSession, slug: str, decision: str,
                                   strike: float, local_price_fallback: float, bet_size: float = 1.01,
                                   bought_price: float = 0.0):
     pred = active_predictions.get(slug)
-    if not pred or pred.get("status") == "CLOSING": return
+    if not pred or pred.get("status") not in ["OPEN", "CLOSING", "RESOLVING"]:
+        return
     global total_wins, total_losses, simulated_balance
 
     log.info(f"[RESOLVE] Market expired → {slug}  |  Our call: {decision}  |  Strike: ${strike:,.2f}")
-    final_price = local_price_fallback
     local_calc_outcome = "TIE"
 
     meta = await fetch_market_meta_from_slug(session, slug)
-    if meta:
-        end_time_str = meta["market"].get("endDate", "")
-        if end_time_str:
-            for _ in range(6):
-                try:
-                    end_dt   = datetime.fromisoformat(end_time_str.replace("Z", "+00:00"))
-                    start_dt = end_dt - timedelta(minutes=15)
-                    params   = {"symbol": "BTC", "eventStartTime": start_dt.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                                "variant": "fiveminute", "endDate": end_dt.strftime('%Y-%m-%dT%H:%M:%SZ')}
-                    async with session.get("https://polymarket.com/api/crypto/crypto-price", params=params, timeout=5) as r:
-                        if r.status == 200:
-                            data = await r.json()
-                            if "price" in data and data["price"]:
-                                final_price = float(data["price"])
-                                break
-                except Exception: pass
-                await asyncio.sleep(10)
+    end_date_str = meta["market"].get("endDate", "") if meta else ""
 
-    local_calc_outcome = "UP" if final_price > strike else ("DOWN" if final_price < strike else "TIE")
-    poly_res         = await fetch_polymarket_resolution(session, slug)
-    official_outcome = poly_res["outcome"]
+    resolution = await fetch_polymarket_resolution_v2(
+        session, slug, strike, end_date_str
+    )
 
-    if official_outcome == "TIMEOUT":
+    actual_outcome = resolution["outcome"]
+    resolution_source = resolution.get("source", "UNKNOWN")
+    final_price = resolution.get("final_price", local_price_fallback)
+    local_calc_outcome = "UP" if final_price >= strike else "DOWN"
+
+    if actual_outcome == "ERROR":
         actual_outcome = local_calc_outcome
-        match_status   = "⏱️ POLY TIMED OUT — used local calc"
-    elif official_outcome == local_calc_outcome:
-        actual_outcome = official_outcome
-        match_status   = "✅ MATCH"
+        match_status = "⚠️ FALLBACK (both APIs failed)"
+    elif actual_outcome == local_calc_outcome:
+        match_status = f"✅ MATCH ({resolution_source})"
     else:
-        actual_outcome = official_outcome
-        match_status   = f"⚠️ MISMATCH (local={local_calc_outcome} poly={official_outcome})"
+        match_status = f"⚠️ MISMATCH (local={local_calc_outcome} api={actual_outcome})"
 
     is_dust = bet_size < 1.00
     win_profit = round(bet_size * (1.0 / bought_price - 1.0), 4) if (0 < bought_price < 1) else bet_size
@@ -956,8 +1300,12 @@ async def resolve_market_outcome(session: aiohttp.ClientSession, slug: str, deci
     win_rate = (total_wins / max(1, total_wins + total_losses)) * 100
     log.info(f"[STATS] W:{total_wins} L:{total_losses} | WinRate:{win_rate:.2f}% | Daily PnL: ${risk_manager.current_daily_pnl:.2f} | Match: {match_status}")
 
+    # Extract the reason array and format it as a string
+    reason_str = " | ".join(pred.get("signals", [])) if isinstance(pred.get("signals"), list) else str(pred.get("signals", ""))
+
     await log_trade_to_db(slug, decision, strike, final_price, actual_outcome, result_str, win_rate, pnl_impact,
-                    local_calc_outcome=local_calc_outcome, official_outcome=official_outcome, match_status=match_status)
+                    local_calc_outcome=local_calc_outcome, official_outcome=actual_outcome, match_status=match_status,
+                    trigger_reason=reason_str)
 
     if "ml_data" in pred:
         ml_row = pred["ml_data"]
@@ -979,11 +1327,11 @@ def run_gatekeeper(ctx: dict, poly_data: dict, current_balance: float, current_c
         return False, f"Too early ({int(seconds_left)}s > {MAX_SECONDS_FOR_NEW_BET}s)", {}, {}
 
     regime = detect_market_regime(candle_history)
-    if regime in ["RANGING", "VOLATILE", "UNKNOWN"]:
+    if regime in ["RANGING", "UNKNOWN"]:
         return False, f"Market {regime} — skip", {}, {}
 
-    if ctx['atr'] < MIN_ATR_THRESHOLD:
-        return False, f"Dead market (ATR {ctx['atr']:.1f} < {MIN_ATR_THRESHOLD})", {}, {}
+    if ctx['atr'] < adaptive_atr_min:
+        return False, f"Dead market (ATR {ctx['atr']:.1f} < {adaptive_atr_min:.1f})", {}, {}
 
     ema_spread_pct = abs(ctx['ema_9'] - ctx['ema_21']) / ctx['ema_21']
     if ema_spread_pct < EMA_SQUEEZE_PCT:
@@ -997,18 +1345,46 @@ def run_gatekeeper(ctx: dict, poly_data: dict, current_balance: float, current_c
         return False, "Invalid strike price", {}, {}
 
     prob_up, prob_down = compute_directional_prob(ctx, strike, seconds_left)
-    ev_up   = compute_ev(prob_up, poly_data["up_prob"], current_balance)
-    ev_down = compute_ev(prob_down, poly_data["down_prob"], current_balance)
+    
+    kelly_up_temp = compute_ev_with_slippage(
+        prob_up, poly_data["up_prob"], current_balance, bet_size=2.50
+    )
+    kelly_down_temp = compute_ev_with_slippage(
+        prob_down, poly_data["down_prob"], current_balance, bet_size=2.50
+    )
+
+    ev_up = compute_ev_with_slippage(
+        prob_up, 
+        poly_data["up_prob"],
+        current_balance,
+        bet_size=kelly_up_temp["kelly_bet"],
+        estimated_spread_pct=0.02 
+    )
+    ev_down = compute_ev_with_slippage(
+        prob_down,
+        poly_data["down_prob"],
+        current_balance,
+        bet_size=kelly_down_temp["kelly_bet"],
+        estimated_spread_pct=0.02
+    )
 
     return True, f"Passed Gate [Regime: {regime}]", ev_up, ev_down
 
-# ============================================================================
-# PATCH 3: rule_engine_decide — Directional Vol/Flow Signal
-# ============================================================================
 def rule_engine_decide(ctx: dict, ev_up: dict, ev_down: dict,
                         poly_data: dict, current_candle: dict) -> dict:
     target_dir = "UP" if ev_up["ev_pct"] > ev_down["ev_pct"] else "DOWN"
     target_ev  = ev_up if target_dir == "UP" else ev_down
+
+    log.info(f"[EV] {target_dir} | "
+             f"Gross: {target_ev['ev_pct_gross']:+.2f}% | "
+             f"Slippage: -{target_ev['slippage_cost_pct']:.2f}% | "
+             f"Net: {target_ev['ev_pct']:+.2f}%")
+
+    if not target_ev.get("approved", False):
+        return {
+            "decision": "SKIP",
+            "reason": f"Net EV {target_ev['ev_pct']:.2f}% ≤ 0 after slippage"
+        }
 
     score = 0
     bonus_score = 0
@@ -1016,91 +1392,42 @@ def rule_engine_decide(ctx: dict, ev_up: dict, ev_down: dict,
 
     if (target_dir == "UP" and ctx['price'] > ctx['vwap']) or \
        (target_dir == "DOWN" and ctx['price'] < ctx['vwap']):
-        score += 1
-        reasons.append("VWAP Trend")
+        score += 1; reasons.append("VWAP Trend")
 
-    if (target_dir == "UP" and ctx['rsi'] > 51) or \
-       (target_dir == "DOWN" and ctx['rsi'] < 49):
-        score += 1
-        reasons.append("RSI Momentum")
+    if (target_dir == "UP" and ctx['rsi'] > 50) or \
+       (target_dir == "DOWN" and ctx['rsi'] < 50):
+        score += 1; reasons.append("RSI Momentum")
 
-    if ctx['current_volume'] > ctx['vol_sma_20'] * 1.2:
-        score += 1
-        reasons.append("Vol Spike")
+    if ctx['current_volume'] > ctx['vol_sma_20'] * 1.05:
+        score += 1; reasons.append("Vol Spike")
 
     cvd_delta = ctx['cvd_candle_delta']
-    CVD_ALIGN_THRESHOLD = 35_000 
-    if (target_dir == "UP" and cvd_delta > CVD_ALIGN_THRESHOLD) or \
-       (target_dir == "DOWN" and cvd_delta < -CVD_ALIGN_THRESHOLD):
-        score += 1
-        reasons.append(f"CVD Aligned (Δ${cvd_delta:+,.0f})")
-
-    CVD_CONTRA_THRESHOLD = 60_000
-    if (target_dir == "UP" and cvd_delta < -CVD_CONTRA_THRESHOLD) or \
-       (target_dir == "DOWN" and cvd_delta > CVD_CONTRA_THRESHOLD):
-        score -= 2
-        reasons.append(f"CVD_CONTRA (Δ${cvd_delta:+,.0f})")
-
-    cvd_signal, cvd_strength = detect_cvd_divergence(ctx, current_candle)
-    if (target_dir == "UP" and cvd_signal == "BEARISH_DIV") or \
-       (target_dir == "DOWN" and cvd_signal == "BULLISH_DIV"):
-        score -= 2
-        reasons.append(f"CVD_DIV_PATTERN (str={cvd_strength:.2f})")
-
-    if ctx['atr'] > 0 and ctx['body_size'] > ctx['atr'] * BODY_STRENGTH_MULTIPLIER:
-        bonus_score += 1
-        reasons.append("Strong Body")
-
-    if ctx['vwap'] > 0:
-        vwap_dist_pct = abs(ctx['vwap_distance']) / ctx['price']
-        if 0.001 < vwap_dist_pct < VWAP_OVEREXTEND_PCT:
-            bonus_score += 1
-            reasons.append("VWAP Distance")
-
-    if ctx.get('ema_9', 0) > 0 and ctx.get('ema_21', 0) > 0:
-        ema_aligned = (target_dir == "UP" and ctx['ema_9'] > ctx['ema_21']) or \
-                      (target_dir == "DOWN" and ctx['ema_9'] < ctx['ema_21'])
-        if ema_aligned:
-            bonus_score += 1
-            reasons.append("EMA Aligned")
+    if (target_dir == "UP" and cvd_delta > 10000) or \
+       (target_dir == "DOWN" and cvd_delta < -10000):
+        score += 1; reasons.append("CVD Aligned")
 
     secs_remaining = poly_data.get("seconds_remaining", 0)
 
-    if score >= 4 or (score >= 3 and bonus_score >= 1):
-        raw_bet = target_ev.get("kelly_bet", 0.0)
-        bet = get_time_adjusted_bet(raw_bet, secs_remaining)
-        if bet > 0:
-            return {
-                "decision": target_dir, "confidence": "High", "bet_size": bet,
-                "score": score, "bonus": bonus_score,
-                "reason": " | ".join(reasons), "needs_ai": False
-            }
+    if score >= 3:
+        confidence = "High"
+        needs_ai = False
+    elif score >= 1 and target_ev.get("ev_pct", 0.0) >= MIN_EV_PCT_TO_CALL_AI:
+        confidence = "Scout"
+        needs_ai = True
+    else:
+        return {"decision": "SKIP", "confidence": "Low", "score": score, "reason": "Insufficient signals"}
 
-    elif score >= 3 and target_ev.get("ev_pct", 0.0) >= EV_AI_BYPASS_THRESHOLD:
-        raw_bet = target_ev.get("kelly_bet", 0.0)
-        bet = get_time_adjusted_bet(raw_bet, secs_remaining)
-        reasons.append(f"EV_BYPASS (+{target_ev.get('ev_pct', 0.0):.1f}%)")
-        if bet > 0:
-            log.info(f"[BYPASS] Massive EV detected (+{target_ev.get('ev_pct', 0.0):.1f}%). Overriding AI.")
-            return {
-                "decision": target_dir, "confidence": "High", "bet_size": bet,
-                "score": score, "bonus": bonus_score,
-                "reason": " | ".join(reasons), "needs_ai": False
-            }
-
-    elif (score >= 3 or (score >= 2 and bonus_score >= 2)) and \
-          target_ev.get("ev_pct", 0.0) >= MIN_EV_PCT_TO_CALL_AI:
-        raw_bet = target_ev.get("kelly_bet", 0.0) * 0.5
-        bet = get_time_adjusted_bet(raw_bet, secs_remaining)
-        return {
-            "decision": target_dir, "confidence": "Borderline", "bet_size": bet,
-            "score": score, "bonus": bonus_score,
-            "reason": " | ".join(reasons), "needs_ai": True
-        }
-
+    raw_bet = target_ev.get("kelly_bet", 0.0)
+    bet = get_time_adjusted_bet(raw_bet, secs_remaining, confidence)
+    
     return {
-        "decision": "SKIP", "confidence": "Low", "score": score,
-        "reason": f"Only {score}/4 core + {bonus_score} bonus. Signals: {' | '.join(reasons) or 'None'}"
+        "decision": target_dir, 
+        "confidence": confidence, 
+        "bet_size": bet,
+        "score": score, 
+        "bonus": bonus_score, 
+        "reason": " | ".join(reasons), 
+        "needs_ai": needs_ai
     }
 
 # ============================================================
@@ -1110,49 +1437,77 @@ def _commit_decision(slug: str, result: dict, poly_data: dict, current_ev_pct: f
     strike   = poly_data.get("strike_price", 0.0)
     decision = result["decision"]
 
-    if decision in ["UP", "DOWN"] and result.get("bet_size", 0) >= 1.50:
-        committed_slugs.add(slug)
-        soft_skipped_slugs.discard(slug)
-        best_ev_seen.pop(slug, None)
+    if decision in ["UP", "DOWN"]:
+        if result.get("bet_size", 0) >= 1.00:
+            committed_slugs.add(slug)
+            soft_skipped_slugs.discard(slug)
+            best_ev_seen.pop(slug, None)
 
-        bought_price = poly_data["up_prob"] / 100.0 if decision == "UP" else poly_data["down_prob"] / 100.0
-        token_id = poly_data.get("token_id_up", "") if decision == "UP" else poly_data.get("token_id_down", "")
+            bought_price = poly_data["up_prob"] / 100.0 if decision == "UP" else poly_data["down_prob"] / 100.0
+            token_id = poly_data.get("token_id_up", "") if decision == "UP" else poly_data.get("token_id_down", "")
 
-        ml_data = {
-            "timestamp": datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S'),
-            "market_slug": slug, 
-            "direction": decision,
-            "price_vs_vwap_pct": round((ctx['price'] - ctx['vwap']) / ctx['vwap'] * 100, 4) if ctx else 0,
-            "rsi_14": round(ctx['rsi'], 1) if ctx else 50, 
-            "atr_14": round(ctx['atr'], 2) if ctx else 0,
-            "cvd_candle_delta": round(ctx['cvd_candle_delta'], 0) if ctx else 0,
-            "ev_pct": round(current_ev_pct, 2),
-            "rule_score": result.get("score", 0),
-            "bonus_score": result.get("bonus", 0),
-            "trigger_reason": result.get("reason", "UNKNOWN")
-        }
+            ml_data = {
+                "timestamp": datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S'),
+                "market_slug": slug, 
+                "direction": decision,
+                "price_vs_vwap_pct": round((ctx['price'] - ctx['vwap']) / ctx['vwap'] * 100, 4) if ctx else 0,
+                "rsi_14": round(ctx['rsi'], 1) if ctx else 50, 
+                "atr_14": round(ctx['atr'], 2) if ctx else 0,
+                "cvd_candle_delta": round(ctx['cvd_candle_delta'], 0) if ctx else 0,
+                "ev_pct": round(current_ev_pct, 2),
+                "rule_score": result.get("score", 0),
+                "bonus_score": result.get("bonus", 0),
+                "trigger_reason": result.get("reason", "UNKNOWN"),
+                "confidence_level": result.get("confidence", "Medium")  
+            }
 
-        active_predictions[slug] = {
-            "decision": decision, "strike": strike, "score": result.get("score", 0),
-            "bet_size": result.get("bet_size", 0.0), "bought_price": bought_price,
-            "token_id": token_id, "status": "OPEN", "entry_time": time.time(),
-            "signals": result.get("reason", "").split(" | "), "ml_data": ml_data
-        }
-        log.info(f"DECISION LOCKED: {decision} | Score: {result.get('score','?')}/4 | Bonus: {result.get('bonus',0)} | Bet: ${result.get('bet_size',0.0):.2f}")
-        asyncio.create_task(place_bet(slug, decision, result.get("bet_size", 0.0), poly_data))
+            active_predictions[slug] = {
+                "decision": decision, "strike": strike, "score": result.get("score", 0),
+                "bet_size": result.get("bet_size", 0.0), "bought_price": bought_price,
+                "token_id": token_id, "status": "OPEN", "entry_time": time.time(),
+                "signals": result.get("reason", "").split(" | "), "ml_data": ml_data
+            }
+            log.info(f"DECISION LOCKED: {decision} | Confidence: {result.get('confidence', '?')} | "
+                    f"Score: {result.get('score','?')}/4 | Bonus: {result.get('bonus',0)} | Bet: ${result.get('bet_size',0.0):.2f}")
+            fire_and_forget(place_bet(slug, decision, result.get("bet_size", 0.0), poly_data))
+        else:
+            log.warning(f"[DUST REJECT] {decision} on {slug} discarded. Bet size ${result.get('bet_size', 0):.2f} < $1.00 Minimum")
+            soft_skipped_slugs.add(slug)
     else:
+        log.info(f"[SKIP LOG] Market {slug} safely bypassed. Reason: {result.get('reason', 'None')}")
         soft_skipped_slugs.add(slug)
 
-# ============================================================================
-# PATCH 4: place_bet — Pipelined Execution
-# ============================================================================
 async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
     global clob_client, simulated_balance
     token_id = poly_data.get("token_id_up", "") if decision == "UP" else poly_data.get("token_id_down", "")
 
-    liq_ok, liq_msg = await check_liquidity_and_spread(token_id, bet_size)
+    liq_ok, liq_msg, executable_bet = await check_liquidity_and_spread_v2(
+        token_id=token_id,
+        intended_bet=bet_size,
+        poly_data=poly_data,
+        clob_client=clob_client,
+        session=None,
+        PAPER_TRADING=PAPER_TRADING,
+        MAX_SPREAD_PCT=MAX_SPREAD_PCT,
+        MIN_LIQUIDITY_MULTIPLIER=MIN_LIQUIDITY_MULTIPLIER
+    )
+
     if not liq_ok:
         log.warning(f"[REJECTED] {slug}: {liq_msg}")
+        active_predictions.pop(slug, None)
+        committed_slugs.discard(slug)
+        return
+
+    if executable_bet < bet_size:
+        log.info(f"[BET SCALED] {slug}: ${bet_size:.2f} → ${executable_bet:.2f}")
+        bet_size = executable_bet
+        
+        if slug in active_predictions:
+            active_predictions[slug]["bet_size"] = bet_size
+            active_predictions[slug]["ml_data"]["final_bet_size"] = bet_size
+
+    if bet_size < 1.00:
+        log.warning(f"[REJECTED] {slug}: Scaled bet ${bet_size:.2f} < $1.00 minimum")
         active_predictions.pop(slug, None)
         committed_slugs.discard(slug)
         return
@@ -1162,14 +1517,16 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
 
     risk_manager.trades_this_hour += 1
     market_prob = poly_data["up_prob"] if decision == "UP" else poly_data["down_prob"]
+    expected_price = market_prob / 100.0
 
-    log.info(f"🎯 BET PLACED [{'PAPER' if PAPER_TRADING else 'LIVE'}] {decision} on {slug} | Bet: ${bet_size:.2f} | Liq: {liq_msg}")
+    log.info(f"🎯 BET PLACED [{'PAPER' if PAPER_TRADING else 'LIVE'}] {decision} on {slug} | "
+            f"Bet: ${bet_size:.2f} | Expected: {expected_price:.4f} | Liq: {liq_msg}")
 
     if not PAPER_TRADING and not DRY_RUN and clob_client:
         def _sign_and_submit():
             from py_clob_client.clob_types import MarketOrderArgs, OrderType
             from py_clob_client.order_builder.constants import BUY
-            shares_to_buy = round(bet_size / (market_prob / 100.0), 2)
+            shares_to_buy = round(bet_size / expected_price, 2)
             order_args = MarketOrderArgs(token_id=token_id, amount=shares_to_buy, side=BUY)
             signed = clob_client.create_market_order(order_args)
             return clob_client.post_order(signed, OrderType.FAK)
@@ -1178,12 +1535,25 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
             resp = await asyncio.wait_for(asyncio.to_thread(_sign_and_submit), timeout=4.0)
 
             status = resp.get("status", "")
+            
+            actual_price = expected_price  
+            if "transactions" in resp and resp["transactions"]:
+                total_cost = sum(float(tx.get("price", 0)) * float(tx.get("size", 0)) for tx in resp["transactions"])
+                total_shares = sum(float(tx.get("size", 0)) for tx in resp["transactions"])
+                if total_shares > 0:
+                    actual_price = total_cost / total_shares
+            
             if status == "matched":
-                log.info(f"✅ ORDER MATCHED: {decision} on {slug} | ${bet_size:.2f}")
-            elif "insufficient" in (resp.get("errorMsg", "") or "").lower():
-                log.error(f"💸 INSUFFICIENT FUNDS for {slug}. Check USDC balance.")
-                active_predictions.pop(slug, None)
-                committed_slugs.discard(slug)
+                spread_cents = float(liq_msg.split("spread=")[1].split("¢")[0]) if "spread=" in liq_msg else 0
+                await log_execution_metrics(slug, decision, expected_price, actual_price, spread_cents, liq_msg)
+                
+                slippage_bps = ((actual_price - expected_price) / expected_price * 10000) if expected_price > 0 else 0
+                log.info(f"✅ ORDER MATCHED: {decision} on {slug} | ${bet_size:.2f} | "
+                        f"Fill: {actual_price:.4f} | Slippage: {slippage_bps:+.1f}bps")
+                
+                if slug in active_predictions:
+                    active_predictions[slug]["bought_price"] = actual_price
+                    
             else:
                 log.warning(f"⚠️ CLOB Rejected [{status}]: {resp.get('errorMsg', 'unknown')} | {slug}")
                 active_predictions.pop(slug, None)
@@ -1199,9 +1569,6 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
             active_predictions.pop(slug, None)
             committed_slugs.discard(slug)
 
-# ============================================================================
-# PATCH 5: execute_early_exit — Robust IOC with Retry
-# ============================================================================
 async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_reason: str, current_token_price: float):
     global simulated_balance, total_wins, total_losses
 
@@ -1342,102 +1709,122 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
                          slug: str, rule_decision: dict, ctx: dict):
     global ai_call_count, ai_consecutive_failures, ai_circuit_open_until, ai_call_in_flight
 
-    pre_filtered = deterministic_ai_filter(rule_decision, ctx, current_candle)
-    if pre_filtered["decision"] == "SKIP":
-        _commit_decision(slug, pre_filtered, poly_data, ev.get("ev_pct", 0.0), ctx)
-        return
+    async with ai_processing_lock:
+        if ai_call_in_flight == slug:
+            return  
+        ai_call_in_flight = slug
 
-    if time.time() < ai_circuit_open_until:
-        rule_decision["needs_ai"] = False
-        _commit_decision(slug, rule_decision, poly_data, ev.get("ev_pct", 0.0), ctx)
-        return
+    try:
+        pre_filtered = deterministic_ai_filter(rule_decision, ctx, current_candle)
+        if pre_filtered["decision"] == "SKIP":
+            _commit_decision(slug, pre_filtered, poly_data, ev.get("ev_pct", 0.0), ctx)
+            return
 
-    ai_call_in_flight = slug
-    ai_call_count += 1
-    log.info(f"[AI CONFIRM] Borderline score — asking {LOCAL_AI_MODEL} (call #{ai_call_count})...")
+        if time.time() < ai_circuit_open_until:
+            rule_decision["needs_ai"] = False
+            _commit_decision(slug, rule_decision, poly_data, ev.get("ev_pct", 0.0), ctx)
+            return
 
-    favored_dir = rule_decision["decision"]
-    regime = detect_market_regime(candle_history)
+        ai_call_count += 1
+        log.info(f"[AI CONFIRM] Borderline score — asking {LOCAL_AI_MODEL} (call #{ai_call_count})...")
 
-    if ctx['rsi'] > 65: rsi_desc = "Overbought (Strong Bullish)"
-    elif ctx['rsi'] > 51: rsi_desc = "Bullish"
-    elif ctx['rsi'] < 35: rsi_desc = "Oversold (Strong Bearish)"
-    elif ctx['rsi'] < 49: rsi_desc = "Bearish"
-    else: rsi_desc = "Neutral"
+        favored_dir = rule_decision["decision"]
+        regime = detect_market_regime(candle_history)
 
-    trend_desc = "Bullish (Short-term trend is UP)" if ctx['ema_9'] > ctx['ema_21'] else "Bearish (Short-term trend is DOWN)"
-    vwap_desc = "Bullish (Price is holding ABOVE VWAP)" if ctx['vwap_distance'] > 0 else "Bearish (Price is trapped BELOW VWAP)"
+        if ctx['rsi'] > 65: rsi_desc = "Overbought (Strong Bullish)"
+        elif ctx['rsi'] > 51: rsi_desc = "Bullish"
+        elif ctx['rsi'] < 35: rsi_desc = "Oversold (Strong Bearish)"
+        elif ctx['rsi'] < 49: rsi_desc = "Bearish"
+        else: rsi_desc = "Neutral"
 
-    if ctx['cvd_candle_delta'] > 15000: cvd_desc = "Strong Buying Pressure"
-    elif ctx['cvd_candle_delta'] < -15000: cvd_desc = "Strong Selling Pressure"
-    else: cvd_desc = "Neutral / Market Noise" 
+        trend_desc = "Bullish (Short-term trend is UP)" if ctx['ema_9'] > ctx['ema_21'] else "Bearish (Short-term trend is DOWN)"
+        vwap_desc = "Bullish (Price is holding ABOVE VWAP)" if ctx['vwap_distance'] > 0 else "Bearish (Price is trapped BELOW VWAP)"
 
-    prompt = (
-        f"You are a quantitative trading assistant. Evaluate this 15-minute BTC/USDT Polymarket position.\n\n"
-        f"PROPOSED DIRECTION: {favored_dir}\n"
-        f"TIME TO EXPIRY: {int(poly_data.get('seconds_remaining', 0))}s\n"
-        f"MARKET REGIME: {regime}\n\n"
-        f"TECHNICALS:\n"
-        f"  Momentum (RSI): {rsi_desc}\n"
-        f"  Trend (EMA): {trend_desc}\n"
-        f"  VWAP Status: {vwap_desc}\n"
-        f"  Order Flow (CVD): {cvd_desc}\n\n"
-        f"EDGE:\n"
-        f"  Expected Value: {ev.get('ev_pct', 0.0):+.2f}%\n"
-        f"  System Score: {rule_decision.get('score', 0)}/4 + {rule_decision.get('bonus', 0)} bonus\n\n"
-        f"Based on the technicals supporting the proposed direction, respond with ONLY one word: '{favored_dir}' to confirm or 'SKIP' to reject."
-    )
-    last_ai_interaction["prompt"] = prompt
-    last_ai_interaction["timestamp"] = datetime.now().strftime('%H:%M:%S')
+        if ctx['cvd_candle_delta'] > 15000: cvd_desc = "Strong Buying Pressure"
+        elif ctx['cvd_candle_delta'] < -15000: cvd_desc = "Strong Selling Pressure"
+        else: cvd_desc = "Neutral / Market Noise" 
 
-    payload = {
-        "model": LOCAL_AI_MODEL,
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.0,
-        "max_tokens": 10,
-        "keep_alive": -1,
-        "stream": False
-    }
-    ai_word = None
+        prompt = (
+            f"You are a ruthless quantitative risk manager evaluating a BTC/USDT Polymarket trade for Alpha Z.\n"
+            f"Your strict mandate is to protect capital. You must veto bad math, regardless of technical momentum.\n\n"
+            f"PROPOSED TRADE: {favored_dir}\n"
+            f"TIME TO EXPIRY: {int(poly_data.get('seconds_remaining', 0))}s\n"
+            f"MARKET REGIME: {regime}\n\n"
+            f"QUANTITATIVE EDGE (CRITICAL):\n"
+            f"  Expected Value (EV): {ev.get('ev_pct', 0.0):+.2f}%\n"
+            f"  System Score: {rule_decision.get('score', 0)}/4\n\n"
+            f"TECHNICAL CONTEXT:\n"
+            f"  RSI: {rsi_desc}\n"
+            f"  EMA Trend: {trend_desc}\n"
+            f"  VWAP: {vwap_desc}\n"
+            f"  CVD Flow: {cvd_desc}\n\n"
+            f"STRICT RULES:\n"
+            f"1. If Expected Value (EV) is negative (< 0.00%), you MUST output 'SKIP'.\n"
+            f"2. If System Score is less than 2, you MUST output 'SKIP'.\n"
+            f"3. If the technical context heavily contradicts the PROPOSED TRADE, output 'SKIP'.\n"
+            f"4. If and ONLY if EV is positive and technicals align, output '{favored_dir}'.\n\n"
+            f"Respond with exactly ONE WORD ('{favored_dir}' or 'SKIP'):"
+        )
+        last_ai_interaction["prompt"] = prompt
+        last_ai_interaction["timestamp"] = datetime.now().strftime('%H:%M:%S')
 
-    for attempt in range(1, AI_MAX_RETRIES + 1):
-        try:
-            async with session.post(LOCAL_AI_URL, json=payload,
-                                    timeout=aiohttp.ClientTimeout(total=AI_TIMEOUT_TOTAL)) as r:
-                r.raise_for_status()
-                raw_response = (await r.json())['choices'][0]['message']['content'].strip()
-                ai_word = favored_dir if favored_dir in raw_response.upper() else \
-                          ("SKIP" if "SKIP" in raw_response.upper() else None)
-                ai_consecutive_failures = 0
-                break
-        except Exception as e:
-            ai_consecutive_failures += 1
-            log.warning(f"[AI] Attempt {attempt} failed: {e}")
-            if attempt < AI_MAX_RETRIES:
-                await asyncio.sleep(AI_RETRY_DELAY)
+        payload = {
+            "model": LOCAL_AI_MODEL,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.0,
+            "max_tokens": 10,
+            "keep_alive": -1,
+            "stream": False
+        }
+        ai_word = None
 
-    if ai_consecutive_failures >= CB_FAILURE_THRESHOLD:
-        ai_circuit_open_until = time.time() + CB_COOLDOWN_SECS
-        log.error(f"[CIRCUIT] ⚡ Tripped. AI paused {CB_COOLDOWN_SECS}s.")
+        for attempt in range(1, AI_MAX_RETRIES + 1):
+            try:
+                async with session.post(LOCAL_AI_URL, json=payload,
+                                        timeout=aiohttp.ClientTimeout(total=AI_TIMEOUT_TOTAL)) as r:
+                    r.raise_for_status()
+                    raw_response = (await r.json())['choices'][0]['message']['content'].strip()
+                    ai_word = favored_dir if favored_dir in raw_response.upper() else \
+                              ("SKIP" if "SKIP" in raw_response.upper() else None)
+                    ai_consecutive_failures = 0
+                    break
+            except Exception as e:
+                ai_consecutive_failures += 1
+                log.warning(f"[AI] Attempt {attempt} failed: {e}")
+                if attempt < AI_MAX_RETRIES:
+                    await asyncio.sleep(AI_RETRY_DELAY)
 
-    if ai_word == favored_dir:
-        final = {**rule_decision, "reason": f"AI confirmed: {rule_decision['reason']}"}
-    else:
-        final = {**rule_decision, "decision": "SKIP", "bet_size": 0.0,
-                 "reason": "AI vetoed borderline signal"}
+        if ai_consecutive_failures >= CB_FAILURE_THRESHOLD:
+            cooldown = min(300, CB_COOLDOWN_SECS * (2 ** (ai_consecutive_failures - CB_FAILURE_THRESHOLD)))
+            ai_circuit_open_until = time.time() + cooldown
+            log.error(f"[CIRCUIT] ⚡ Tripped. AI paused {cooldown}s (exponential backoff).")
 
-    last_ai_interaction["response"] = ai_word or "FAILED"
-    _commit_decision(slug, final, poly_data, ev.get("ev_pct", 0.0), ctx)
-    ai_call_in_flight = ""
+        if ai_word == favored_dir:
+            final = {**rule_decision, "reason": f"AI confirmed: {rule_decision['reason']}"}
+        else:
+            final = {**rule_decision, "decision": "SKIP", "bet_size": 0.0,
+                     "reason": "AI vetoed borderline signal"}
+
+        last_ai_interaction["response"] = ai_word or "FAILED"
+        _commit_decision(slug, final, poly_data, ev.get("ev_pct", 0.0), ctx)
+        
+    finally:
+        async with ai_processing_lock:
+            if ai_call_in_flight == slug:
+                ai_call_in_flight = ""
 
 # ============================================================================
-# PATCH 6: evaluation_loop — Race Condition Fix
+# EVALUATION LOOP
 # ============================================================================
 async def evaluation_loop(session: aiohttp.ClientSession):
     global target_slug, ai_call_in_flight
 
     while True:
         await asyncio.sleep(EVAL_TICK_SECONDS)
+        
+        if len(candle_history) >= VOLATILITY_LOOKBACK and (int(time.time()) % 50 == 0):
+            update_adaptive_thresholds(candle_history)
+        
         if not candle_history or not live_candle:
             continue
 
@@ -1455,60 +1842,59 @@ async def evaluation_loop(session: aiohttp.ClientSession):
         }
 
         ctx = build_technical_context(current_candle, candle_history)
+        
+        # --- FIX: INDEPENDENT POSITION MONITOR ---
+        # Iterate over a copy of the keys so we can safely modify the dictionary
+        for slug in list(active_predictions.keys()):
+            pred = active_predictions[slug]
+            if pred.get("status") in ("CLOSING", "RESOLVING", "UNCERTAIN"):
+                continue
+                
+            poly_data_open = await get_polymarket_odds_cached(session, slug)
+            secs_left = poly_data_open.get("seconds_remaining", 0)
+            
+            # If market is missing/closed OR expired, force resolution
+            if not poly_data_open.get("market_found") or secs_left <= 0:
+                pred["status"] = "RESOLVING"
+                fire_and_forget(resolve_market_outcome(
+                    session, slug, pred["decision"], pred["strike"],
+                    current_price, pred.get("bet_size", 1.01), pred.get("bought_price", 0.0)
+                ))
+                continue
+                
+            # Early exit evaluation for this specific position
+            current_token_price = (
+                poly_data_open["up_prob"] / 100.0 if pred["decision"] == "UP"
+                else poly_data_open["down_prob"] / 100.0
+            )
+            tp_cents, sl_cents = get_dynamic_threshold(secs_left)
+            price_delta = current_token_price - pred["bought_price"]
+
+            if price_delta >= tp_cents:
+                pred["status"] = "CLOSING" 
+                asyncio.create_task(execute_early_exit(session, slug, f"TAKE_PROFIT (+{price_delta*100:.1f}¢)", current_token_price))
+            elif price_delta <= sl_cents:
+                pred["status"] = "CLOSING" 
+                asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS ({price_delta*100:.1f}¢)", current_token_price))
+        # -----------------------------------------
+
+        # --- TARGET HUNTING LOGIC ---
         poly_data = await get_polymarket_odds_cached(session, target_slug)
         secs = poly_data.get("seconds_remaining", 0)
 
+        # Increment target market if current one is unavailable or expired
         if not poly_data.get("market_found") or secs <= 0:
-            if target_slug in active_predictions and active_predictions[target_slug].get("status") != "CLOSING":
-                pred = active_predictions[target_slug]
-                pred["status"] = "RESOLVING"
-                asyncio.create_task(resolve_market_outcome(
-                    session, target_slug, pred["decision"], pred["strike"],
-                    current_price, pred.get("bet_size", 1.01), pred.get("bought_price", 0.0)
-                ))
-
             old_slug = target_slug
-            target_slug = increment_slug_by_15m(target_slug)
+            target_slug = increment_slug_by_interval(target_slug)
             committed_slugs.discard(old_slug)
             soft_skipped_slugs.discard(old_slug)
-            asyncio.create_task(fetch_price_to_beat_for_market(session, target_slug))
+            fire_and_forget(fetch_price_to_beat_for_market(session, target_slug))
             continue
 
-        if target_slug in active_predictions:
-            pred = active_predictions[target_slug]
-            pred_status = pred.get("status")
-
-            if pred_status in ("CLOSING", "RESOLVING", "UNCERTAIN"):
-                continue
-
-            if pred_status == "OPEN":
-                current_token_price = (
-                    poly_data["up_prob"] / 100.0 if pred["decision"] == "UP"
-                    else poly_data["down_prob"] / 100.0
-                )
-                tp_threshold, sl_threshold = get_dynamic_threshold(secs)
-                roi_pct = (current_token_price / pred["bought_price"]) - 1.0 \
-                    if pred["bought_price"] > 0 else 0
-
-                if roi_pct >= tp_threshold:
-                    pred["status"] = "CLOSING" 
-                    asyncio.create_task(
-                        execute_early_exit(session, target_slug,
-                                           f"TAKE_PROFIT ({roi_pct*100:.1f}%)",
-                                           current_token_price)
-                    )
-                    continue 
-
-                elif roi_pct <= sl_threshold:
-                    pred["status"] = "CLOSING" 
-                    asyncio.create_task(
-                        execute_early_exit(session, target_slug,
-                                           f"STOP_LOSS ({roi_pct*100:.1f}%)",
-                                           current_token_price)
-                    )
-                    continue
-
-        if target_slug in committed_slugs or ai_call_in_flight == target_slug:
+        async with ai_processing_lock:
+            is_processing_ai = (ai_call_in_flight == target_slug)
+        
+        if target_slug in committed_slugs or is_processing_ai:
             continue
 
         bal = simulated_balance if PAPER_TRADING else await fetch_live_balance(session)
@@ -1579,6 +1965,9 @@ async def prefill_history(session: aiohttp.ClientSession):
                 live_rsi.update(c)
                 
         log.info(f"[SYSTEM] Loaded {len(candle_history)} candles. VWAP={get_vwap():,.2f}")
+        
+        update_adaptive_thresholds(candle_history)
+        
     except Exception as e:
         log.error(f"Prefill failed: {e}")
         
@@ -1641,10 +2030,54 @@ async def main():
         )
 
 if __name__ == "__main__":
-    slug_in = input("[INPUT] Polymarket BTC 15m slug (Enter for auto): ").strip()
-    target_slug = extract_slug_from_market_url(slug_in) if slug_in else \
-                  f"btc-updown-15m-{((int(time.time()) // 900) + 1) * 900}"
-    print(f"[AUTO] Target: {target_slug}")
+    print("\n" + "="*70)
+    print("⚠️  CRITICAL: Market Type Selection")
+    print("="*70)
+    print("\n15-MINUTE MARKETS:")
+    print("  ❌ Spread: 98¢ (you lose 28% instantly)")
+    print("  ❌ Depth: $2-10")
+    print("  ❌ NOT RECOMMENDED - Market makers avoid these")
+    print("\n1-HOUR MARKETS:")
+    print("  ✅ Spread: 1-3¢")
+    print("  ✅ Depth: $500-2000")
+    print("  ✅ RECOMMENDED - Real liquidity")
+    print("\nDAILY MARKETS:")
+    print("  ✅ Spread: 0.5-2¢")
+    print("  ✅ Depth: $5K-20K")
+    print("  ✅ RECOMMENDED - Maximum liquidity")
+    print("\n" + "="*70 + "\n")
+    
+    market_type = input("Choose market type (1h/24h/15m): ").strip().lower()
+    
+    if market_type == "15m":
+        confirm = input("\n⚠️  WARNING: 15m markets have NO liquidity. Continue anyway? (yes/no): ").strip().lower()
+        if confirm != "yes":
+            print("Switching to 1h markets (recommended)")
+            market_type = "1h"
+    
+    now = int(time.time())
+    if market_type == "24h":
+        interval = 86400  
+        next_market = ((now // interval) + 1) * interval
+        slug_template = "btc-updown-24h"
+    elif market_type == "15m":
+        interval = 900  
+        next_market = ((now // interval) + 1) * interval
+        slug_template = "btc-updown-15m"
+    else:  
+        interval = 3600  
+        next_market = ((now // interval) + 1) * interval
+        slug_template = "btc-updown-1h"
+    
+    slug_in = input(f"\n[INPUT] Polymarket slug (Enter for auto {market_type}): ").strip()
+    target_slug = extract_slug_from_market_url(slug_in) if slug_in else f"{slug_template}-{next_market}"
+    
+    print(f"\n{'='*70}")
+    print(f"🎯 TARGET MARKET: {target_slug}")
+    print(f"{'='*70}\n")
+    print("Verifying liquidity before starting...")
+    print("(If you see '98¢ spread' errors, switch to 1h/24h markets)\n")
+    
     try:
         asyncio.run(main())
     except KeyboardInterrupt:

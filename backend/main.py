@@ -6,6 +6,7 @@ import asyncio
 import math
 import aiohttp
 import time
+from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from bot import core # type: ignore
@@ -120,10 +121,23 @@ async def get_current_balance() -> float:
         print(f"[BALANCE] Failed to fetch: {e}")
     return _live_balance_cache if _live_balance_cache > 0 else core.BANKROLL
 
+# In main.py (starting near line 114)
 def get_current_market_slug() -> str:
-    now = int(time.time())
-    current_boundary = (now // 900) * 900  # <--- Grabs the CURRENT 15m window
-    return f"btc-updown-15m-{current_boundary}"
+    """Generates the descriptive hourly slug for the current ET window"""
+    # Convert current time to ET (UTC-5)
+    now_utc = datetime.now(timezone.utc)
+    now_et = now_utc.astimezone(timezone(timedelta(hours=-5)))
+    
+    month = now_et.strftime('%B').lower()
+    day = now_et.day
+    hour_24 = now_et.hour
+    
+    # Convert 24h to 12h format for the slug (e.g., 14 -> 2pm)
+    hour_12 = hour_24 % 12
+    if hour_12 == 0: hour_12 = 12
+    ampm = 'am' if hour_24 < 12 else 'pm'
+    
+    return f"bitcoin-up-or-down-{month}-{day}-{hour_12}{ampm}-et"
 
 @app.on_event("startup")
 async def start_trading_engine():
@@ -348,7 +362,7 @@ async def live_data_feed(websocket: WebSocket):
             balance = await get_current_balance()
 
             now = int(time.time())
-            next_boundary = ((now // 900) + 1) * 900
+            next_boundary = ((now // 3600) + 1) * 3600  # Hourly markets
             time_left = next_boundary - now
 
             payload = {
@@ -371,4 +385,3 @@ async def live_data_feed(websocket: WebSocket):
             await websocket.send_json(payload)
             await asyncio.sleep(1)
     except Exception: pass
-
