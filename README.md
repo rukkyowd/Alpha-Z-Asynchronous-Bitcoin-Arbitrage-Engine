@@ -1,116 +1,130 @@
-# ⚡ Alpha-Z: Asynchronous Bitcoin Arbitrage Engine
-
-A high-performance, full-stack quantitative trading system that executes statistical arbitrage between Binance BTC/USDT spot price movements and Polymarket "Up/Down" binary markets.
-
-Built with an emphasis on low-latency execution and institutional-grade order flow analysis, Alpha-Z captures short-term price inefficiencies in 5-minute windows. 
+Here is a comprehensive, production-ready `README.md` for your repository. It captures the advanced quantitative architecture, the recent critical fixes we implemented, and the full stack setup (Python backend + Next.js frontend).
 
 ---
 
-## 🚀 Overview
+```markdown
+# ⚡ Alpha Z: Elite Asynchronous Bitcoin Arbitrage Engine
 
-Alpha-Z operates on a highly concurrent, asynchronous architecture. It monitors 1-minute BTC candle structures, True Daily Volume Weighted Average Price (VWAP), and Cumulative Volume Delta (CVD) to predict settlement outcomes. The backend engine streams live decisions to a React-based frontend dashboard for real-time performance tracking and Monte Carlo equity projections.
+Alpha Z is a high-performance, asynchronous quantitative trading engine designed explicitly for Polymarket's BTC/USD binary options (hourly and daily markets). It combines deterministic technical analysis, slippage-aware Expected Value (EV) modeling, and local Large Language Model (LLM) validation to execute +EV trades with strict risk management.
 
-### ✨ Key Features
+## 🚀 Key Features
 
-* **Sub-Second Data Ingestion:** Dual-track WebSockets for Binance K-Lines and aggregate trades ensure zero-lag price and volume updates.
-* **Order Flow Analysis:** Calculates real-time CVD to detect institutional buying or selling pressure, pinpointing high-probability divergences.
-* **Three-Stage Validation Pipeline:** 1. **Gatekeeper:** Evaluates liquidity, time decay, and mathematical Expected Value (EV).
-  2. **Rule Engine:** Scores setups based on momentum and technical indicators.
-  3. **High-Speed AI Validation:** Leverages optimized local LLMs (via Ollama) for final contextual verification. Tuned specifically for lightweight models (3B - 8B parameters) to ensure execution occurs within critical sub-5-second windows before alpha decays.
-* **Dynamic Risk Management:** Implements fractional Kelly Criterion sizing, daily PnL circuit breakers, and dynamic Take-Profit/Stop-Loss thresholds based on time-to-expiration.
-* **Robust Execution:** Uses Polymarket's CLOB with Immediate-Or-Cancel (IOC) partial fill handling and "dust" management.
+* **Slippage-Aware Kelly Sizing:** Dynamically calculates fractional Kelly Criterion bet sizes by factoring in real-time AMM spreads, CLOB depth, and estimated market impact.
+* **Parallel Resolution Engine:** Eliminates UMA oracle delays by simultaneously polling the Polymarket Gamma API and the Binance 1H candlestick close for instant, deterministic market settlement.
+* **Dual-Layer Signal Filtering:** * *Layer 1 (Deterministic):* Evaluates Streaming EMA, RSI Momentum, VWAP distance, and Cumulative Volume Delta (CVD) divergence.
+    * *Layer 2 (Generative AI):* Uses a local LLM (`llama3.2:3b`) acting as a ruthless quantitative risk manager to veto borderline setups based on strict mathematical rules.
+* **Elite Risk Management:** Enforces daily loss limits, maximum trades per hour, and dynamic early-exit thresholds (Take Profit / Stop Loss) based on time-to-expiry.
+* **Full-Stack Analytics Dashboard:** A Next.js frontend featuring a live price chart, dynamic equity curve, win-rate heatmaps, and real-time execution logs synced via WebSockets.
 
 ---
 
-## 🛠 Project Structure
+## 🏗️ System Architecture
 
-```text
-Alpha-Z-Asynchronous-Bitcoin-Arbitrage-Engine/
-├── backend/                 # Trading engine and FastAPI server
-│   ├── core.py              # Core logic, technical indicators, & Polymarket execution
-│   ├── main.py              # Backend API & WebSocket management
-│   ├── alpha_z_history.db   # SQLite (WAL mode) trade persistence
-│   └── requirements.txt     # Python dependencies
-└── frontend/                # React/Next.js performance dashboard
-    ├── package.json         # Node.js dependencies
-    └── (UI Components)      # Performance charts and live feeds
+### Backend (Python / `asyncio`)
+* **Data Ingestion:** Streams live 15m klines and aggregate trades from Binance via WebSockets.
+* **Execution:** Integrates with the Polymarket CLOB client for live/paper order routing.
+* **Local AI Engine:** Communicates with Ollama running locally to process fast, private inference.
+* **Database:** Uses a WAL-mode SQLite database (`alpha_z_history.db`) to track all trades, execution metrics, and AI attribution.
+
+### Frontend (Next.js / React)
+* **Real-time UI:** Built with TailwindCSS and Framer Motion for a sleek, terminal-like quant experience.
+* **Charting:** Utilizes TradingView's `lightweight-charts` for rendering BTC price action, VWAP, and equity curves.
+* **WebSocket Stream:** Listens to the Python backend to update live metrics, PnL, and AI reasoning logs instantly.
+
+---
+
+## 🛠️ Prerequisites
+
+Before running the engine, ensure you have the following installed:
+1.  [Python 3.10+](https://www.python.org/downloads/)
+2.  [Node.js 18+](https://nodejs.org/)
+3.  [Ollama](https://ollama.com/) (Must be running locally with the `llama3.2:3b-instruct-q4_K_M` model pulled)
+
+```bash
+# Pull the required local LLM model
+ollama run llama3.2:3b-instruct-q4_K_M
 
 ```
 
 ---
 
-## 🚦 Setup & Installation
+## ⚙️ Installation & Setup
 
-### Prerequisites
+### 1. Clone the Repository
 
-* Python 3.10+
-* Node.js (v16+)
-* [Ollama](https://ollama.com/) installed and running locally.
-* *Note: For the 5-minute trading windows, low-latency inference is required. We highly recommend using `llama3.1` (8B), `qwen2.5:7b`, or ultra-lightweight models like `llama3.2` (3B) rather than heavier 12B+ models to avoid timeout failures.*
+```bash
+git clone [https://github.com/rukkyowd/alpha-z-asynchronous-bitcoin-arbitrage-engine.git](https://github.com/rukkyowd/alpha-z-asynchronous-bitcoin-arbitrage-engine.git)
+cd alpha-z-asynchronous-bitcoin-arbitrage-engine
 
+```
 
-* Polymarket API Credentials (funded account on Polygon/Chain 137).
+### 2. Environment Configuration
 
-### 1. Backend Setup
+Create a `.env` file in the root of the `backend/` directory with the following configuration:
 
-Navigate to the backend directory, install dependencies, pull your preferred AI model, and configure your environment variables:
+```ini
+# --- TRADING MODE ---
+PAPER_TRADING=true
+DRY_RUN=true
+
+# --- POLYMARKET CREDENTIALS (If live trading) ---
+POLY_PRIVATE_KEY=your_wallet_private_key
+POLY_FUNDER=your_wallet_public_address
+POLY_SIG_TYPE=1
+
+```
+
+### 3. Backend Setup
 
 ```bash
 cd backend
 pip install -r requirements.txt
 
-# Pull the recommended high-speed reasoning model
-ollama pull llama3.1
+# Run the database migration/analysis tool (optional but recommended)
+python analyze_performance.py
 
-# Copy example environment variables to active .env
-cp env.example .env
-
-# Start the server
+# Start the trading engine and API server
 python main.py
 
 ```
 
-### 2. Frontend Setup
+### 4. Frontend Setup
 
-Navigate to the frontend directory to launch the performance dashboard:
+Open a new terminal window and navigate to the frontend directory:
 
 ```bash
 cd frontend
 npm install
+
+# Start the development server
 npm run dev
 
 ```
 
----
-
-## 📊 Technical Strategy
-
-Alpha-Z relies on a confluence of high-timeframe fairness and low-timeframe momentum:
-
-| Indicator / Logic | Purpose |
-| --- | --- |
-| **VWAP** | Identifies "fair value" to determine the broader session bias. |
-| **CVD Divergence** | Measures net market buy vs. sell volume to detect hidden exhaustion and institutional flow against price. |
-| **EMA Cross (9/21)** | Confirms short-term trend momentum leading into market expiration. |
-| **Log-Vol Math** | Calculates true mathematical probability based on historical log-returns to ensure positive Expected Value (EV). |
-| **Kelly Criterion** | Dynamically scales bet sizes based on signal conviction and account bankroll. |
+Navigate to `http://localhost:3000` to view the Elite Dashboard.
 
 ---
 
-## 🏆 Performance (Simulated Run)
+## 📊 Analytics & Reporting
 
-**Test Period:** Feb 20, 2026 – Feb 21, 2026
+Alpha Z includes a built-in Python script for deep performance attribution. Run the analysis tool to evaluate your edge:
 
-**Market:** Polymarket 5-Minute BTC/USD
+```bash
+cd backend
+python analyze_performance.py
 
-During a continuous 18-hour stress test, the Alpha-Z engine successfully demonstrated a significant predictive edge in volatile conditions:
+```
 
-* **Overall Win Rate:** **74.6%** (147 Wins / 50 Losses)
-* **Total Trades Executed:** 197
-* **Alpha Generation:** Maintained a profitable 57.1% win rate even on counter-trend (DOWN) predictions, proving the efficacy of the CVD and AI-validation pipeline.
+This generates an **Edge Attribution Report** (comparing AI-confirmed trades vs. System-only trades), a **Market Regime Breakdown**, and visualizes your **Equity Curve**.
 
 ---
 
 ## ⚠️ Disclaimer
 
-*This software is strictly for educational and research purposes. Trading cryptocurrency and binary options involves significant financial risk. The author is not responsible for any financial losses incurred through the use of this software. Always test with paper trading enabled.*
+**This software is for educational and research purposes only.** Cryptocurrency and binary options trading carry a high level of risk and may not be suitable for all investors. The developers are not responsible for any financial losses incurred while using this software. Always test thoroughly in `PAPER_TRADING=true` mode before deploying live capital.
+
+```
+
+Would you like me to also check your `requirements.txt` or `package.json` to ensure all the dependencies (like `pandas`, `matplotlib`, `lightweight-charts`, etc.) are properly listed for your new setup?
+
+```
