@@ -241,7 +241,7 @@ function EnhancedStatCard({ icon, label, value, trend, subtitle }: any) {
       <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-3"><div className="p-2 bg-zinc-900/80 rounded-lg">{icon}</div></div>
-        <div className={`text-2xl font-black mb-1 ${trendColors[trend]}`}>{value}</div>
+        <div className={`text-2xl font-black mb-1 ${trendColors[trend as keyof typeof trendColors]}`}>{value}</div>
         <div className="text-xs text-zinc-500 font-medium uppercase tracking-wide mb-1">{label}</div>
         {subtitle && <div className="text-[10px] text-zinc-600 font-mono">{subtitle}</div>}
       </div>
@@ -391,21 +391,57 @@ function TradeJournalTable({ trades, onReplay }: any) {
 }
 
 function AnalyticsView({ portfolio }: any) {
+  const attr = portfolio?.attribution;
+
   return (
     <motion.div key="analytics" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
       <div className="grid grid-cols-3 gap-6">
-        <Panel title="Risk Profile"><div className="space-y-4">
-          <div className="flex justify-between items-center"><span className="text-xs text-zinc-500 font-bold uppercase tracking-tighter">Value at Risk (95%)</span><span className="text-sm font-black text-rose-400">${portfolio?.metrics?.var_95 || "0.00"}</span></div>
-          <div className="flex justify-between items-center"><span className="text-xs text-zinc-500 font-bold uppercase tracking-tighter">Profit Expectancy</span><span className="text-sm font-black text-emerald-400">${portfolio?.metrics?.expectancy || "0.00"}</span></div>
-          <div className="flex justify-between items-center"><span className="text-xs text-zinc-500 font-bold uppercase tracking-tighter">Optimal Kelly</span><span className="text-sm font-black text-blue-400">{portfolio?.metrics?.kelly_optimal || "0.0%"}</span></div>
-        </div></Panel>
-        <Panel title="Flow Attribution"><div className="text-[10px] text-zinc-600 font-mono uppercase italic">Awaiting high-volume data...</div></Panel>
-        <Panel title="Engine Health"><div className="text-[10px] text-zinc-600 font-mono uppercase italic">Latency: 42ms | ML: ACTIVE</div></Panel>
+        <Panel title="Risk Profile">
+          <div className="space-y-4">
+            <div className="flex justify-between items-center"><span className="text-xs text-zinc-500 font-bold uppercase tracking-tighter">Value at Risk (95%)</span><span className="text-sm font-black text-rose-400">${portfolio?.metrics?.var_95 || "0.00"}</span></div>
+            <div className="flex justify-between items-center"><span className="text-xs text-zinc-500 font-bold uppercase tracking-tighter">Profit Expectancy</span><span className="text-sm font-black text-emerald-400">${portfolio?.metrics?.expectancy || "0.00"}</span></div>
+            <div className="flex justify-between items-center"><span className="text-xs text-zinc-500 font-bold uppercase tracking-tighter">Optimal Kelly</span><span className="text-sm font-black text-blue-400">{portfolio?.metrics?.kelly_optimal || "0.0%"}</span></div>
+          </div>
+        </Panel>
+
+        {/* --- UPDATED ATTRIBUTION PANEL --- */}
+        <Panel title="Flow Attribution">
+          {attr && (attr.ai_confirmed.trades > 0 || attr.system_only.trades > 0) ? (
+            <div className="space-y-4 mt-1">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-zinc-500 font-bold uppercase tracking-tighter">
+                  🤖 AI Confirmed ({attr.ai_confirmed.trades})
+                </span>
+                <span className="text-sm font-black text-blue-400">
+                  {attr.ai_confirmed.win_rate}% <span className={attr.ai_confirmed.pnl >= 0 ? "text-emerald-400" : "text-rose-400"}>
+                    ({attr.ai_confirmed.pnl >= 0 ? '+' : ''}${attr.ai_confirmed.pnl.toFixed(2)})
+                  </span>
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-zinc-500 font-bold uppercase tracking-tighter">
+                  ⚙️ System Only ({attr.system_only.trades})
+                </span>
+                <span className="text-sm font-black text-purple-400">
+                  {attr.system_only.win_rate}% <span className={attr.system_only.pnl >= 0 ? "text-emerald-400" : "text-rose-400"}>
+                    ({attr.system_only.pnl >= 0 ? '+' : ''}${attr.system_only.pnl.toFixed(2)})
+                  </span>
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="text-[10px] text-zinc-600 font-mono uppercase italic">Awaiting high-volume data...</div>
+          )}
+        </Panel>
+        {/* ---------------------------------- */}
+
+        <Panel title="Engine Health">
+          <div className="text-[10px] text-zinc-600 font-mono uppercase italic">Latency: 42ms | ML: ACTIVE</div>
+        </Panel>
       </div>
     </motion.div>
   );
 }
-
 function TradeReplayModal({ trade, onClose }: any) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -422,7 +458,7 @@ function TradeReplayModal({ trade, onClose }: any) {
         const data = await res.json();
         if (data.history?.length > 0) {
           candleSeries.setData(data.history.sort((a: any, b: any) => a.time - b.time));
-          candleSeries.setMarkers([{ time: timestamp as any, position: trade["AI Decision"] === 'UP' ? 'belowBar' : 'aboveBar', color: trade["AI Decision"] === 'UP' ? '#22c55e' : '#ef4444', shape: trade["AI Decision"] === 'UP' ? 'arrowUp' : 'arrowDown', text: `${trade["AI Decision"]}` }]);
+          (candleSeries as any).setMarkers([{ time: timestamp as any, position: trade["AI Decision"] === 'UP' ? 'belowBar' : 'aboveBar', color: trade["AI Decision"] === 'UP' ? '#22c55e' : '#ef4444', shape: trade["AI Decision"] === 'UP' ? 'arrowUp' : 'arrowDown', text: `${trade["AI Decision"]}` }]);
           chart.timeScale().fitContent();
         }
       } catch (e) { console.error("Replay error:", e); }

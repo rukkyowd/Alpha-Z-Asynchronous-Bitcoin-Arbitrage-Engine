@@ -94,7 +94,8 @@ def get_optimized_df():
                     pnl_impact as "PnL",
                     local_calc_outcome as "Local Calc", 
                     official_outcome as "Poly Official", 
-                    match_status as "Match Status"
+                    match_status as "Match Status",
+                    trigger_reason as "Trigger Reason"
                 FROM trades
             """
             cache_df = pd.read_sql_query(query, conn)
@@ -160,6 +161,36 @@ async def get_trading_metrics():
         if hasattr(core, "signal_tracker"):
             signal_perf = core.signal_tracker.get_signal_performance()
 
+        # --- NEW: AI EDGE ATTRIBUTION CALCULATION ---
+        attribution = {
+            "ai_confirmed": {"trades": 0, "win_rate": 0.0, "pnl": 0.0},
+            "system_only": {"trades": 0, "win_rate": 0.0, "pnl": 0.0}
+        }
+        
+        if "Trigger Reason" in df.columns:
+            valid_trades = df[df["Result"].isin(["WIN", "LOSS"])]
+            
+            # 1. AI Confirmed Trades
+            ai_trades = valid_trades[valid_trades["Trigger Reason"].str.contains("AI confirmed", na=False)]
+            if len(ai_trades) > 0:
+                ai_wins = len(ai_trades[ai_trades["Result"] == "WIN"])
+                attribution["ai_confirmed"] = {
+                    "trades": len(ai_trades),
+                    "win_rate": round((ai_wins / len(ai_trades)) * 100, 1),
+                    "pnl": round(ai_trades["PnL"].sum(), 2)
+                }
+                
+            # 2. System Only (EV Bypass) Trades
+            sys_trades = valid_trades[~valid_trades["Trigger Reason"].str.contains("AI confirmed|AI vetoed", na=False)]
+            if len(sys_trades) > 0:
+                sys_wins = len(sys_trades[sys_trades["Result"] == "WIN"])
+                attribution["system_only"] = {
+                    "trades": len(sys_trades),
+                    "win_rate": round((sys_wins / len(sys_trades)) * 100, 1),
+                    "pnl": round(sys_trades["PnL"].sum(), 2)
+                }
+        # ---------------------------------------------
+
         # RETURN DEFAULT ZEROED STATE IF NO TRADES EXIST YET
         response_data = {
             "metrics": {
@@ -188,7 +219,8 @@ async def get_trading_metrics():
                 max_drawdown=0.0
             ),
             "journal": [],
-            "signals": signal_perf # <--- SAFEGUARDED HERE
+            "signals": signal_perf, # <--- SAFEGUARDED HERE
+            "attribution": attribution
         }
         return sanitize_data(response_data)
         
@@ -283,7 +315,8 @@ async def get_trading_metrics():
                 max_drawdown=drawdown.min()
             ),
             "journal": df.tail(50).iloc[::-1].to_dict(orient="records"),
-            "signals": signal_perf
+            "signals": signal_perf,
+            "attribution": attribution
         }
         return sanitize_data(response_data)
         
