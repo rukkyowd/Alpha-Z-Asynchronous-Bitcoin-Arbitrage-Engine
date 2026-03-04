@@ -1,120 +1,129 @@
-# ⚡ Alpha Z: Elite Asynchronous Bitcoin Arbitrage Engine
+# Alpha-Z Asynchronous Bitcoin Arbitrage Engine
 
-Alpha Z is a high-performance, asynchronous quantitative trading engine designed explicitly for Polymarket's BTC/USD binary options (hourly and daily markets). It combines deterministic technical analysis, slippage-aware Expected Value (EV) modeling, and local Large Language Model (LLM) validation to execute +EV trades with strict risk management.
+Alpha-Z is a full-stack trading system for Polymarket BTC binary markets.
 
-## 🚀 Key Features
+- Backend: FastAPI + asyncio trading engine
+- Frontend: Next.js dashboard with live charts and logs
+- Data: Binance market streams + Polymarket odds/liquidity + SQLite trade history
 
-* **Slippage-Aware Kelly Sizing:** Dynamically calculates fractional Kelly Criterion bet sizes by factoring in real-time AMM spreads, CLOB depth, and estimated market impact.
-* **Parallel Resolution Engine:** Eliminates UMA oracle delays by simultaneously polling the Polymarket Gamma API and the Binance 1H candlestick close for instant, deterministic market settlement.
-* **Dual-Layer Signal Filtering:** * *Layer 1 (Deterministic):* Evaluates Streaming EMA, RSI Momentum, VWAP distance, and Cumulative Volume Delta (CVD) divergence.
-    * *Layer 2 (Generative AI):* Uses a local LLM (`llama3.2:3b`) acting as a ruthless quantitative risk manager to veto borderline setups based on strict mathematical rules.
-* **Elite Risk Management:** Enforces daily loss limits, maximum trades per hour, and dynamic early-exit thresholds (Take Profit / Stop Loss) based on time-to-expiry.
-* **Full-Stack Analytics Dashboard:** A Next.js frontend featuring a live price chart, dynamic equity curve, win-rate heatmaps, and real-time execution logs synced via WebSockets.
+## What It Does
 
----
+The engine continuously:
 
-## 🏗️ System Architecture
+1. Streams Binance price and trade-flow data.
+2. Pulls Polymarket market probabilities and liquidity.
+3. Computes EV/Kelly-adjusted bet sizing with risk and timing filters.
+4. Optionally routes borderline decisions through a local LLM validator.
+5. Tracks outcomes, attribution, and PnL in SQLite.
+6. Exposes live metrics and history to the dashboard.
 
-### Backend (Python / `asyncio`)
-* **Data Ingestion:** Streams live 15m klines and aggregate trades from Binance via WebSockets.
-* **Execution:** Integrates with the Polymarket CLOB client for live/paper order routing.
-* **Local AI Engine:** Communicates with Ollama running locally to process fast, private inference.
-* **Database:** Uses a WAL-mode SQLite database (`alpha_z_history.db`) to track all trades, execution metrics, and AI attribution.
+## Repository Structure
 
-### Frontend (Next.js / React)
-* **Real-time UI:** Built with TailwindCSS and Framer Motion for a sleek, terminal-like quant experience.
-* **Charting:** Utilizes TradingView's `lightweight-charts` for rendering BTC price action, VWAP, and equity curves.
-* **WebSocket Stream:** Listens to the Python backend to update live metrics, PnL, and AI reasoning logs instantly.
+- `backend/main.py`: FastAPI app and API/WebSocket endpoints.
+- `backend/bot/core.py`: Trading engine logic (signals, EV, sizing, execution, resolution).
+- `backend/requirements.txt`: Python dependencies.
+- `frontend/`: Next.js application.
+- `start_quant.bat`: Convenience launcher for backend + frontend on Windows.
 
----
+## Requirements
 
-## 🛠️ Prerequisites
+- Python 3.10+
+- Node.js 18+
+- npm
+- Ollama (for local AI validation path)
 
-Before running the engine, ensure you have the following installed:
-1.  [Python 3.10+](https://www.python.org/downloads/)
-2.  [Node.js 18+](https://nodejs.org/)
-3.  [Ollama](https://ollama.com/) (Must be running locally with the `llama3.2:3b-instruct-q4_K_M` model pulled)
+## Backend Setup
 
-```bash
-# Pull the required local LLM model
-ollama run llama3.2:3b-instruct-q4_K_M
+From the repository root:
 
+```powershell
+cd backend
+py -m venv .venv
+.\.venv\Scripts\activate
+py -m pip install --upgrade pip
+py -m pip install -r requirements.txt
 ```
 
----
-
-## ⚙️ Installation & Setup
-
-### 1. Clone the Repository
-
-```bash
-git clone [https://github.com/rukkyowd/alpha-z-asynchronous-bitcoin-arbitrage-engine.git](https://github.com/rukkyowd/alpha-z-asynchronous-bitcoin-arbitrage-engine.git)
-cd alpha-z-asynchronous-bitcoin-arbitrage-engine
-
-```
-
-### 2. Environment Configuration
-
-Create a `.env` file in the root of the `backend/` directory with the following configuration:
+Create `backend/.env`:
 
 ```ini
-# --- TRADING MODE ---
+# Trading mode
 PAPER_TRADING=true
 DRY_RUN=true
 
-# --- POLYMARKET CREDENTIALS (If live trading) ---
-POLY_PRIVATE_KEY=your_wallet_private_key
-POLY_FUNDER=your_wallet_public_address
+# Polymarket credentials (required for live trading)
+POLY_PRIVATE_KEY=
+POLY_FUNDER=
 POLY_SIG_TYPE=1
-
 ```
 
-### 3. Backend Setup
+Run backend API + engine:
 
-```bash
+```powershell
 cd backend
-pip install -r requirements.txt
-
-# Run the database migration/analysis tool (optional but recommended)
-python analyze_performance.py
-
-# Start the trading engine and API server
-python main.py
-
+py -m uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-### 4. Frontend Setup
+## Frontend Setup
 
-Open a new terminal window and navigate to the frontend directory:
-
-```bash
+```powershell
 cd frontend
 npm install
-
-# Start the development server
-npm run dev
-
+npm run dev -- -H 0.0.0.0
 ```
 
-Navigate to `http://localhost:3000` to view the Elite Dashboard.
+Open `http://localhost:3000`.
 
----
+The frontend auto-targets the host in the browser URL and uses backend port `8000` (see `frontend/config.ts`).
 
-## 📊 Analytics & Reporting
+## One-Click Windows Start
 
-Alpha Z includes a built-in Python script for deep performance attribution. Run the analysis tool to evaluate your edge:
-
-```bash
-cd backend
-python analyze_performance.py
-
+```powershell
+start_quant.bat
 ```
 
-This generates an **Edge Attribution Report** (comparing AI-confirmed trades vs. System-only trades), a **Market Regime Breakdown**, and visualizes your **Equity Curve**.
+This launches backend and frontend in separate command windows.
 
----
+## API and WebSocket
 
-## ⚠️ Disclaimer
+Backend base URL: `http://localhost:8000`
 
-**This software is for educational and research purposes only.** Cryptocurrency and binary options trading carry a high level of risk and may not be suitable for all investors. The developers are not responsible for any financial losses incurred while using this software. Always test thoroughly in `PAPER_TRADING=true` mode before deploying live capital.
+- `GET /api/metrics`: portfolio metrics, projections, equity curve, insights, journal, attribution.
+- `GET /api/history`: candle history used by charts.
+- `GET /api/analysis/post-mortem`: mismatch/slippage diagnostics.
+- `GET /api/history/replay?timestamp=<unix_seconds>`: replay window around a trade.
+- `WS /ws/live`: live price, VWAP, balance, logs, active trades, and candle snapshot.
 
+## Notes on AI Path
+
+The engine calls a local model endpoint at `http://localhost:11434/v1/chat/completions`.
+Default model in code: `llama3.2:3b-instruct-q4_K_M`.
+
+If Ollama is unavailable, deterministic logic still runs; AI-confirmation behavior will degrade gracefully.
+
+## Data Files
+
+When backend runs from `backend/`, it writes:
+
+- `alpha_z_history.db`: trades and execution metrics.
+- `trading_log.txt`: runtime logs.
+- `ai_training_data.csv`: ML feature/outcome rows.
+
+## Troubleshooting
+
+- Backend not reachable from frontend:
+  - Confirm backend is running on port `8000`.
+  - Confirm firewall allows local port `8000`.
+- `py` command not found:
+  - Use `python` instead of `py` if your install exposes `python`.
+- No live trades appearing:
+  - Check `PAPER_TRADING`, `DRY_RUN`, and market availability.
+  - Confirm Polymarket/Binance connectivity in backend logs.
+- AI timeouts:
+  - Ensure Ollama is running and model is pulled.
+
+## Disclaimer
+
+This software is for research and educational purposes.
+Trading digital assets and prediction markets carries significant financial risk.
+Use paper mode first and validate behavior before risking capital.
