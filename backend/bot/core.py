@@ -70,6 +70,19 @@ MAX_SECONDS_FOR_NEW_BET   = 3540
 MAX_CROWD_PROB_TO_CALL    = 94.0
 
 EV_REENGAGE_DELTA         = 0.5
+# Hybrid stop-loss controls (time-aware + confirmation + emergency cut)
+SL_EARLY_PHASE_SECS               = 1800
+SL_MID_PHASE_SECS                 = 900
+SL_NEAR_EXPIRY_SECS               = 300
+SL_LOOSEN_EARLY_MULT              = 1.30
+SL_LOOSEN_MID_MULT                = 1.15
+SL_TIGHTEN_NEAR_EXPIRY_MULT       = 0.85
+SL_CONFIRM_BREACH_EARLY           = 3
+SL_CONFIRM_BREACH_MID             = 2
+SL_CONFIRM_BREACH_LATE            = 1
+SL_RECOVERY_RESET_BUFFER          = 0.01
+EMERGENCY_SL_ABS_CENTS            = 0.20
+
 # OPTIMIZED: Lowered from 40K to 12K - more realistic for 15-min Bitcoin volume
 CVD_DIVERGENCE_THRESHOLD  = 12000.0  
 # OPTIMIZED: Lowered from 25K to 15K to prevent fighting active smart-money flow
@@ -1513,7 +1526,8 @@ def _commit_decision(slug: str, result: dict, poly_data: dict, current_ev_pct: f
                 "decision": decision, "strike": strike, "score": result.get("score", 0),
                 "bet_size": result.get("bet_size", 0.0), "bought_price": bought_price,
                 "token_id": token_id, "status": "OPEN", "entry_time": time.time(),
-                "signals": result.get("reason", "").split(" | "), "ml_data": ml_data
+                "signals": result.get("reason", "").split(" | "), "ml_data": ml_data,
+                "sl_breach_count": 0
             }
             log.info(f"DECISION LOCKED: {decision} | Confidence: {result.get('confidence', '?')} | "
                     f"Score: {result.get('score','?')}/4 | Bonus: {result.get('bonus',0)} | Bet: ${result.get('bet_size',0.0):.2f}")
@@ -1986,34 +2000,65 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             else:
                 current_atr = 50.0  # Default fallback
             
-            # ATR-based stops with minimum 1.67:1 reward/risk ratio
-            # Take profit: 2.5x ATR movement (converted to token price delta)
-            # Stop loss: 1.5x ATR movement
-            atr_normalized = current_atr / ctx['price']  # ATR as % of price
-            
-            # Convert ATR% to token price change expectation
-            tp_delta = atr_normalized * 2.5  # Take profit at 2.5 ATR move
-            sl_delta = atr_normalized * -1.5  # Stop loss at 1.5 ATR against us
-            
-            # Apply minimum thresholds to prevent micro-stops
-            tp_delta = max(tp_delta, 0.06)  # Minimum 6Â¢ profit target
-            sl_delta = min(sl_delta, -0.08)  # Minimum 8Â¢ stop (1.33:1 R:R floor)
-            
-            # For trades near expiry, tighten stops progressively
-            if secs_left < 300:  # Less than 5 minutes
+            # ATR-based baseline exits
+            atr_normalized = (current_atr / ctx['price']) if ctx.get('price', 0) > 0 else 0.0
+            tp_delta = max(atr_normalized * 2.5, 0.06)   # Min +6c target
+            sl_delta = min(atr_normalized * -1.5, -0.08) # Min -8c baseline stop
+
+            # Time-aware stop profile:
+            # - Early in cycle: wider stops to avoid chop-outs
+            # - Late in cycle: tighter stops for capital protection
+            if secs_left > SL_EARLY_PHASE_SECS:
+                sl_delta *= SL_LOOSEN_EARLY_MULT
+                sl_confirms_needed = SL_CONFIRM_BREACH_EARLY
+            elif secs_left > SL_MID_PHASE_SECS:
+                sl_delta *= SL_LOOSEN_MID_MULT
+                sl_confirms_needed = SL_CONFIRM_BREACH_MID
+            elif secs_left < SL_NEAR_EXPIRY_SECS:
                 tp_delta *= 0.7
-                sl_delta *= 0.85
-            
+                sl_delta *= SL_TIGHTEN_NEAR_EXPIRY_MULT
+                sl_confirms_needed = SL_CONFIRM_BREACH_LATE
+            else:
+                sl_confirms_needed = SL_CONFIRM_BREACH_MID
+
+            # Small settling window right after entry.
+            entry_age = time.time() - pred.get("entry_time", time.time())
+            if entry_age < 180:
+                sl_delta *= 1.10
+
+            # Hard emergency cut for tail-risk moves (no confirmation delay).
+            emergency_sl_delta = min(sl_delta * 2.5, -EMERGENCY_SL_ABS_CENTS)
             price_delta = current_token_price - pred["bought_price"]
 
             if price_delta >= tp_delta:
-                pred["status"] = "CLOSING" 
-                log.info(f"[TP HIT] {slug} | Target: +{tp_delta*100:.1f}Â¢ (2.5Ã—ATR) | Actual: +{price_delta*100:.1f}Â¢")
-                asyncio.create_task(execute_early_exit(session, slug, f"TAKE_PROFIT (ATR-based: +{price_delta*100:.1f}Â¢)", current_token_price))
-            elif price_delta <= sl_delta:
+                pred["sl_breach_count"] = 0
                 pred["status"] = "CLOSING"
-                log.info(f"[SL HIT] {slug} | Threshold: {sl_delta*100:.1f}Â¢ (1.5Ã—ATR) | Actual: {price_delta*100:.1f}Â¢")
-                asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS (ATR-based: {price_delta*100:.1f}Â¢)", current_token_price))
+                log.info(f"[TP HIT] {slug} | Target: +{tp_delta*100:.1f}c | Actual: +{price_delta*100:.1f}c")
+                asyncio.create_task(execute_early_exit(session, slug, f"TAKE_PROFIT (ATR-based: +{price_delta*100:.1f}c)", current_token_price))
+            elif price_delta <= emergency_sl_delta:
+                pred["sl_breach_count"] = 0
+                pred["status"] = "CLOSING"
+                log.info(f"[SL EMERGENCY] {slug} | Threshold: {emergency_sl_delta*100:.1f}c | Actual: {price_delta*100:.1f}c")
+                asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS_EMERGENCY ({price_delta*100:.1f}c)", current_token_price))
+            elif price_delta <= sl_delta:
+                pred["sl_breach_count"] = pred.get("sl_breach_count", 0) + 1
+                breach_count = pred["sl_breach_count"]
+                if breach_count >= sl_confirms_needed:
+                    pred["sl_breach_count"] = 0
+                    pred["status"] = "CLOSING"
+                    log.info(
+                        f"[SL HIT] {slug} | Threshold: {sl_delta*100:.1f}c | Actual: {price_delta*100:.1f}c | "
+                        f"Confirmed: {breach_count}/{sl_confirms_needed}"
+                    )
+                    asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS_CONFIRMED ({price_delta*100:.1f}c)", current_token_price))
+                else:
+                    log.info(
+                        f"[SL WATCH] {slug} | Breach {breach_count}/{sl_confirms_needed} | "
+                        f"Threshold: {sl_delta*100:.1f}c | Actual: {price_delta*100:.1f}c"
+                    )
+            elif pred.get("sl_breach_count", 0) > 0 and price_delta > (sl_delta + SL_RECOVERY_RESET_BUFFER):
+                pred["sl_breach_count"] = 0
+                log.info(f"[SL WATCH] {slug} | Breach counter reset after recovery.")
         # -----------------------------------------
 
         # --- TARGET HUNTING LOGIC ---
