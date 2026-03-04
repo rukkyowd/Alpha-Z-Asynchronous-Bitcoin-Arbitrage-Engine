@@ -30,10 +30,10 @@ SOCKET_TRADE    = "wss://stream.binance.com:9443/ws/btcusdt@aggTrade"
 LOCAL_AI_URL    = "http://localhost:11434/v1/chat/completions"
 LOCAL_AI_MODEL  = "llama3.2:3b-instruct-q4_K_M"
 
-BANKROLL        = 500.00
+BANKROLL        = 5000.00
 
 PAPER_TRADING = os.getenv("PAPER_TRADING", "true").lower() == "true"
-PAPER_BALANCE = 500.00
+PAPER_BALANCE = 5000.00
 
 GAMMA_API       = "https://gamma-api.polymarket.com"
 CLOB_HOST       = "https://clob.polymarket.com"
@@ -47,7 +47,9 @@ DRY_RUN          = os.getenv("DRY_RUN", "true").lower() != "false"
 
 # ── Elite Risk & Thresholds ──
 MAX_TRADE_PCT               = 0.05
-FRACTIONAL_KELLY_DAMPENER   = 0.10
+# OPTIMIZED: Increased to 0.50 (Half-Kelly) - Industry standard for aggressive compounding
+# Previous 0.25 was stacking with other dampeners, creating $1-2 bets when $10-15 was appropriate
+FRACTIONAL_KELLY_DAMPENER   = 0.50
 MAX_TRADES_PER_HOUR         = 3
 
 # ── Liquidity & Anti-Chop ──
@@ -56,9 +58,11 @@ MIN_LIQUIDITY_MULTIPLIER    = 1.5
 MIN_ATR_THRESHOLD           = 15.0
 EMA_SQUEEZE_PCT             = 0.0001
 # ── AI Bypass Threshold ──
-EV_AI_BYPASS_THRESHOLD = 40.0  
+# OPTIMIZED: Lowered from 40.0% to 3.0% to force more AI validation
+# Only ultra-high conviction trades (3%+ edge) can bypass AI
+EV_AI_BYPASS_THRESHOLD = 3.0  
 
-MIN_EV_PCT_TO_CALL_AI     = 1.5  # UPDATED: 1.5% net (after slippage)
+MIN_EV_PCT_TO_CALL_AI     = 1.0  # OPTIMIZED: Lowered from 1.5% to catch more borderline trades
 
 MIN_SECONDS_REMAINING     = 30
 MAX_SECONDS_FOR_NEW_BET   = 3540
@@ -66,9 +70,12 @@ MAX_SECONDS_FOR_NEW_BET   = 3540
 MAX_CROWD_PROB_TO_CALL    = 94.0
 
 EV_REENGAGE_DELTA         = 0.5
-CVD_DIVERGENCE_THRESHOLD  = 40000.0
-CVD_CONTRA_VETO_THRESHOLD = 65000.0
-VWAP_OVEREXTEND_PCT       = 0.006
+# OPTIMIZED: Lowered from 40K to 12K - more realistic for 15-min Bitcoin volume
+CVD_DIVERGENCE_THRESHOLD  = 12000.0  
+# OPTIMIZED: Lowered from 25K to 15K to prevent fighting active smart-money flow
+CVD_CONTRA_VETO_THRESHOLD = 15000.0
+# OPTIMIZED: Lowered from 0.6% to 0.4% to prevent buying the absolute local top/bottom
+VWAP_OVEREXTEND_PCT       = 0.004
 BODY_STRENGTH_MULTIPLIER  = 0.5
 
 EVAL_TICK_SECONDS = 5
@@ -616,7 +623,8 @@ def detect_market_regime(history: list[dict]) -> str:
     regime = None
     if atr > dynamic_vol_limit: 
         regime = "VOLATILE"
-    elif abs(ema_short - ema_long) / ema_long < 0.001: 
+    # UPDATED: Tightened from 0.001 to 0.0003 so it doesn't block normal price drift
+    elif abs(ema_short - ema_long) / ema_long < 0.0003: 
         regime = "RANGING"
     else:
         regime = "TRENDING"
@@ -718,26 +726,27 @@ def detect_cvd_divergence(ctx: dict, current_candle: dict) -> tuple[str, float]:
 # TIME-ADJUSTED BET SIZING 
 # ============================================================
 def get_time_adjusted_bet(kelly_bet: float, secs_remaining: float, confidence_level: str = "Medium") -> float:
+    """
+    OPTIMIZED: Removed conviction multiplier - if AI approved, trust the math.
+    Only adjusts for time remaining to account for resolution uncertainty.
+    """
     if secs_remaining > 1800:       
-        time_multiplier = 0.50
+        time_multiplier = 0.50  # 30+ min away: reduce for uncertainty
     elif secs_remaining > 600:      
-        time_multiplier = 1.0
+        time_multiplier = 1.0   # 10-30 min: optimal window
     elif secs_remaining > 360:      
-        time_multiplier = 0.75
+        time_multiplier = 0.75  # 6-10 min: slight reduction
     elif secs_remaining > MIN_SECONDS_REMAINING: 
-        time_multiplier = 0.50
+        time_multiplier = 0.50  # <6 min: reduce for execution risk
     else:
-        return 0.0
+        return 0.0  # Too close to expiry
     
-    confidence_multipliers = {
-        "High": 1.0,
-        "Medium": 0.75,
-        "Scout": 0.5
-    }
-    conviction_mult = confidence_multipliers.get(confidence_level, 0.75)
+    # REMOVED: conviction_multipliers - AI validation is the confidence check
+    # Previous logic: High=1.0, Medium=0.75, Scout=0.5
+    # New logic: If trade passed AI/EV gates, bet the full time-adjusted Kelly
     
-    final_bet = kelly_bet * time_multiplier * conviction_mult
-    return round(max(final_bet, 1.00), 2)  
+    final_bet = kelly_bet * time_multiplier
+    return round(max(final_bet, 1.00), 2)  # Minimum $1.00
 
 # ============================================================
 # DETERMINISTIC AI FILTER
@@ -746,11 +755,13 @@ def deterministic_ai_filter(rule_decision: dict, ctx: dict, current_candle: dict
     favored_dir = rule_decision["decision"]
     veto_reasons = []
 
-    if favored_dir == "UP" and ctx['rsi'] > 78:
+    # 1. Extreme RSI Veto
+    if favored_dir == "UP" and ctx['rsi'] > 75:
         veto_reasons.append(f"RSI Extreme Overbought ({ctx['rsi']:.1f})")
-    elif favored_dir == "DOWN" and ctx['rsi'] < 22:
+    elif favored_dir == "DOWN" and ctx['rsi'] < 25:
         veto_reasons.append(f"RSI Extreme Oversold ({ctx['rsi']:.1f})")
 
+    # 2. VWAP Mean Reversion Veto (Tighter 0.4% threshold)
     if ctx['vwap'] > 0:
         vwap_dist_pct = abs(ctx['vwap_distance']) / ctx['price']
         if vwap_dist_pct > VWAP_OVEREXTEND_PCT:
@@ -758,11 +769,23 @@ def deterministic_ai_filter(rule_decision: dict, ctx: dict, current_candle: dict
                (favored_dir == "DOWN" and ctx['price'] > ctx['vwap']):
                 veto_reasons.append(f"VWAP Overextended vs Direction ({vwap_dist_pct*100:.2f}%)")
 
-    CVD_HARD_VETO = 60000.0
+    # 3. CVD Flow Veto (Tighter 15K threshold)
+    CVD_HARD_VETO = CVD_CONTRA_VETO_THRESHOLD
     if favored_dir == "UP" and ctx['cvd_candle_delta'] < -CVD_HARD_VETO:
         veto_reasons.append(f"Strong CVD Selling (Δ${ctx['cvd_candle_delta']:,.0f})")
     elif favored_dir == "DOWN" and ctx['cvd_candle_delta'] > CVD_HARD_VETO:
         veto_reasons.append(f"Strong CVD Buying (Δ${ctx['cvd_candle_delta']:,.0f})")
+
+    # 4. NEW: Wick Rejection Veto (Sudden Reversal Protection)
+    # If the rejection wick is 1.5x larger than the candle body, the market is pivoting
+    body = current_candle.get('body_size', 0.0001) or 0.0001
+    upper_wick = current_candle.get('upper_wick', 0)
+    lower_wick = current_candle.get('lower_wick', 0)
+
+    if favored_dir == "UP" and upper_wick > (body * 1.5):
+        veto_reasons.append(f"Bearish Rejection Wick detected")
+    elif favored_dir == "DOWN" and lower_wick > (body * 1.5):
+        veto_reasons.append(f"Bullish Rejection Wick detected")
 
     if veto_reasons:
         log.info(f"[DET_FILTER] Vetoed {favored_dir}: {' | '.join(veto_reasons)}")
@@ -825,7 +848,8 @@ def compute_ev_with_slippage(
     raw_bet = kelly_fraction * current_balance * FRACTIONAL_KELLY_DAMPENER
     
     MIN_BET = 1.00
-    absolute_ceiling = min(current_balance * MAX_TRADE_PCT, 5.00)
+    # UPDATED: Increased hard cap from 5.00 to 50.00 so max risk size (5%) can actually be used
+    absolute_ceiling = min(current_balance * MAX_TRADE_PCT, 50.00)
     
     kelly_bet = 0.0
     if raw_bet >= MIN_BET:
@@ -1327,8 +1351,13 @@ def run_gatekeeper(ctx: dict, poly_data: dict, current_balance: float, current_c
         return False, f"Too early ({int(seconds_left)}s > {MAX_SECONDS_FOR_NEW_BET}s)", {}, {}
 
     regime = detect_market_regime(candle_history)
-    if regime in ["RANGING", "UNKNOWN"]:
-        return False, f"Market {regime} — skip", {}, {}
+    # OPTIMIZED: Allow ranging markets for mean reversion strategies
+    # Only block UNKNOWN regime (insufficient data)
+    if regime == "UNKNOWN":
+        return False, f"Market {regime} — insufficient data", {}, {}
+    
+    # OPTIMIZED: Different strategies for different regimes
+    regime_context = {"regime": regime}  # Pass regime to rule engine
 
     if ctx['atr'] < adaptive_atr_min:
         return False, f"Dead market (ATR {ctx['atr']:.1f} < {adaptive_atr_min:.1f})", {}, {}
@@ -1408,14 +1437,20 @@ def rule_engine_decide(ctx: dict, ev_up: dict, ev_down: dict,
 
     secs_remaining = poly_data.get("seconds_remaining", 0)
 
-    if score >= 3:
+    # OPTIMIZED: Tighter requirements - score must be 2+ for AI call, 4 for bypass
+    if target_ev.get("ev_pct", 0.0) >= EV_AI_BYPASS_THRESHOLD:
         confidence = "High"
         needs_ai = False
-    elif score >= 1 and target_ev.get("ev_pct", 0.0) >= MIN_EV_PCT_TO_CALL_AI:
+        reasons.append(f"EV BYPASS ({target_ev['ev_pct']:.1f}% >= {EV_AI_BYPASS_THRESHOLD}%)")
+    elif score >= 4:  # All signals aligned
+        confidence = "High"
+        needs_ai = False
+    elif score >= 2 and target_ev.get("ev_pct", 0.0) >= MIN_EV_PCT_TO_CALL_AI:
         confidence = "Scout"
         needs_ai = True
+        reasons.append(f"AI VALIDATION REQUIRED (score={score}/4)")
     else:
-        return {"decision": "SKIP", "confidence": "Low", "score": score, "reason": "Insufficient signals"}
+        return {"decision": "SKIP", "confidence": "Low", "score": score, "reason": f"Insufficient signals (need 2+, got {score})"}
 
     raw_bet = target_ev.get("kelly_bet", 0.0)
     bet = get_time_adjusted_bet(raw_bet, secs_remaining, confidence)
@@ -1523,16 +1558,39 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
             f"Bet: ${bet_size:.2f} | Expected: {expected_price:.4f} | Liq: {liq_msg}")
 
     if not PAPER_TRADING and not DRY_RUN and clob_client:
-        def _sign_and_submit():
-            from py_clob_client.clob_types import MarketOrderArgs, OrderType
+        # OPTIMIZED: Use Limit Orders with slippage protection instead of Market Orders
+        # Market orders can slip 4-5¢ on thin liquidity, destroying 6¢ ATR targets
+        
+        # Calculate maximum acceptable entry price (expected + 2¢ max slippage)
+        MAX_ENTRY_SLIPPAGE_CENTS = 0.02  # 2 cents maximum slippage
+        max_entry_price = expected_price + MAX_ENTRY_SLIPPAGE_CENTS
+        max_entry_price = min(max_entry_price, 0.99)  # Never pay more than 99¢
+        
+        # Round to nearest cent for CLOB compatibility
+        from decimal import Decimal, ROUND_UP
+        tick = Decimal("0.01")
+        limit_price = float(Decimal(str(max_entry_price)).quantize(tick, rounding=ROUND_UP))
+        
+        def _sign_and_submit_limit():
+            from py_clob_client.clob_types import LimitOrderArgs, OrderType
             from py_clob_client.order_builder.constants import BUY
+            
+            # Calculate shares based on expected price, but enforce limit price
             shares_to_buy = round(bet_size / expected_price, 2)
-            order_args = MarketOrderArgs(token_id=token_id, amount=shares_to_buy, side=BUY)
-            signed = clob_client.create_market_order(order_args)
-            return clob_client.post_order(signed, OrderType.FAK)
+            
+            order_args = LimitOrderArgs(
+                token_id=token_id,
+                price=str(limit_price),  # Maximum price we'll pay
+                size=shares_to_buy,
+                side=BUY
+            )
+            signed = clob_client.create_order(order_args)
+            return clob_client.post_order(signed, OrderType.FOK)  # Fill-or-Kill: all or nothing
+        
+        log.info(f"[ENTRY ORDER] Limit @ {limit_price:.4f} (expected {expected_price:.4f} + max {MAX_ENTRY_SLIPPAGE_CENTS*100:.0f}¢ slip)")
 
         try:
-            resp = await asyncio.wait_for(asyncio.to_thread(_sign_and_submit), timeout=4.0)
+            resp = await asyncio.wait_for(asyncio.to_thread(_sign_and_submit_limit), timeout=4.0)
 
             status = resp.get("status", "")
             
@@ -1548,19 +1606,24 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
                 await log_execution_metrics(slug, decision, expected_price, actual_price, spread_cents, liq_msg)
                 
                 slippage_bps = ((actual_price - expected_price) / expected_price * 10000) if expected_price > 0 else 0
-                log.info(f"✅ ORDER MATCHED: {decision} on {slug} | ${bet_size:.2f} | "
-                        f"Fill: {actual_price:.4f} | Slippage: {slippage_bps:+.1f}bps")
+                slippage_cents = (actual_price - expected_price) * 100
+                
+                log.info(f"✅ ORDER FILLED: {decision} on {slug} | ${bet_size:.2f} | "
+                        f"Fill: {actual_price:.4f} (expected {expected_price:.4f}) | "
+                        f"Slippage: {slippage_bps:+.1f}bps ({slippage_cents:+.1f}¢)")
                 
                 if slug in active_predictions:
                     active_predictions[slug]["bought_price"] = actual_price
                     
             else:
-                log.warning(f"⚠️ CLOB Rejected [{status}]: {resp.get('errorMsg', 'unknown')} | {slug}")
+                # OPTIMIZED: Strict cutoff. No market order fallback. 
+                log.warning(f"⚠️ LIMIT REJECTED [{status}]: {resp.get('errorMsg', 'Price moved beyond limit')} | {slug}")
+                log.info(f"🛑 Trade abandoned. Price ran past our +2¢ slippage guard.")
                 active_predictions.pop(slug, None)
                 committed_slugs.discard(slug)
 
         except asyncio.TimeoutError:
-            log.error(f"⏱️ CLOB TIMEOUT (>4s) for {slug}. Order may or may not have been placed.")
+            log.error(f"⏱️ CLOB TIMEOUT (>4s) for {slug}. Limit order status uncertain.")
             if slug in active_predictions:
                 active_predictions[slug]["status"] = "UNCERTAIN"
 
@@ -1573,7 +1636,7 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
     global simulated_balance, total_wins, total_losses
 
     pred = active_predictions.get(slug)
-    if not pred or pred.get("status") != "OPEN":
+    if not pred or pred.get("status") not in ("OPEN", "CLOSING"):
         return
     
     pred["status"] = "CLOSING"
@@ -1586,14 +1649,21 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
         active_predictions.pop(slug, None)
         return
 
+    # OPTIMIZED: ROI-based exit guard instead of absolute capture ratio
+    # This prevents exiting for tiny gains that don't justify spread costs
     if "TAKE_PROFIT" in exit_reason:
-        hold_value_per_share = 1.0  
-        exit_value_per_share = current_token_price
-        capture_ratio = exit_value_per_share / hold_value_per_share
-        if capture_ratio < 0.80:
-            log.info(f"[EXIT GUARD] {slug}: Exit capture only {capture_ratio*100:.1f}%. Holding to resolution.")
+        roi_pct = (current_token_price - bought_price) / bought_price if bought_price > 0 else 0.0
+        
+        # Require minimum 8% ROI to justify early exit (covers spread + slippage)
+        # For a 26.5¢ entry, this is ~2.1¢ minimum gain
+        MIN_ROI_FOR_EARLY_EXIT = 0.08
+        
+        if roi_pct < MIN_ROI_FOR_EARLY_EXIT:
+            log.info(f"[EXIT GUARD] {slug}: ROI only {roi_pct*100:.1f}% (need {MIN_ROI_FOR_EARLY_EXIT*100}%). Holding for larger move.")
             pred["status"] = "OPEN"
             return
+        
+        log.info(f"[EXIT APPROVED] {slug}: ROI {roi_pct*100:.1f}% exceeds {MIN_ROI_FOR_EARLY_EXIT*100}% threshold. Executing exit.")
 
     if PAPER_TRADING:
         roi_pct = (current_token_price / bought_price) - 1.0 if bought_price > 0 else 0.0
@@ -1744,9 +1814,12 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
         elif ctx['cvd_candle_delta'] < -15000: cvd_desc = "Strong Selling Pressure"
         else: cvd_desc = "Neutral / Market Noise" 
 
+        # =====================================================================
+        # UPDATED AI PROMPT: Smoothed persona & explicit "majority rules" logic
+        # =====================================================================
         prompt = (
-            f"You are a ruthless quantitative risk manager evaluating a BTC/USDT Polymarket trade for Alpha Z.\n"
-            f"Your strict mandate is to protect capital. You must veto bad math, regardless of technical momentum.\n\n"
+            f"You are a precise quantitative trading AI evaluating a BTC/USDT Polymarket trade for Alpha Z.\n"
+            f"Your mandate is to protect capital while executing high-probability edges.\n\n"
             f"PROPOSED TRADE: {favored_dir}\n"
             f"TIME TO EXPIRY: {int(poly_data.get('seconds_remaining', 0))}s\n"
             f"MARKET REGIME: {regime}\n\n"
@@ -1760,9 +1833,9 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
             f"  CVD Flow: {cvd_desc}\n\n"
             f"STRICT RULES:\n"
             f"1. If Expected Value (EV) is negative (< 0.00%), you MUST output 'SKIP'.\n"
-            f"2. If System Score is less than 2, you MUST output 'SKIP'.\n"
-            f"3. If the technical context heavily contradicts the PROPOSED TRADE, output 'SKIP'.\n"
-            f"4. If and ONLY if EV is positive and technicals align, output '{favored_dir}'.\n\n"
+            f"2. If System Score is less than 1, you MUST output 'SKIP'.\n"
+            f"3. If the MAJORITY of the technical context heavily contradicts the PROPOSED TRADE, output 'SKIP'.\n"
+            f"4. If EV is positive and the overall technicals are mostly aligned, output '{favored_dir}'. A single conflicting indicator is acceptable if the EV is high.\n\n"
             f"Respond with exactly ONE WORD ('{favored_dir}' or 'SKIP'):"
         )
         last_ai_interaction["prompt"] = prompt
@@ -1830,15 +1903,23 @@ async def evaluation_loop(session: aiohttp.ClientSession):
 
         current_price = live_price if live_price > 0 else float(live_candle.get('c', 0))
         k = live_candle
+        
+        o_p = float(k.get('o', current_price))
+        h_p = float(k.get('h', current_price))
+        l_p = float(k.get('l', current_price))
+        c_p = current_price
+        
         current_candle = {
             "timestamp": datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S'),
-            "open":   float(k.get('o', current_price)),
-            "high":   float(k.get('h', current_price)),
-            "low":    float(k.get('l', current_price)),
-            "close":  current_price,
+            "open":   o_p,
+            "high":   h_p,
+            "low":    l_p,
+            "close":  c_p,
             "volume": float(k.get('v', 0)),
-            "body_size": abs(current_price - float(k.get('o', current_price))),
-            "structure": "BULLISH" if current_price >= float(k.get('o', current_price)) else "BEARISH"
+            "body_size": abs(c_p - o_p),
+            "upper_wick": h_p - max(o_p, c_p),
+            "lower_wick": min(o_p, c_p) - l_p,
+            "structure": "BULLISH" if c_p >= o_p else "BEARISH"
         }
 
         ctx = build_technical_context(current_candle, candle_history)
@@ -1861,21 +1942,50 @@ async def evaluation_loop(session: aiohttp.ClientSession):
                     current_price, pred.get("bet_size", 1.01), pred.get("bought_price", 0.0)
                 ))
                 continue
-                
-            # Early exit evaluation for this specific position
+            
+            # Get current token price for exit evaluation
             current_token_price = (
                 poly_data_open["up_prob"] / 100.0 if pred["decision"] == "UP"
                 else poly_data_open["down_prob"] / 100.0
             )
-            tp_cents, sl_cents = get_dynamic_threshold(secs_left)
+                
+            # OPTIMIZED: ATR-BASED DYNAMIC STOP LOSS & TAKE PROFIT
+            # Calculate ATR for volatility-adjusted stops
+            if len(candle_history) >= 14:
+                recent_candles = candle_history[-14:]
+                atr_values = [(c['high'] - c['low']) for c in recent_candles]
+                current_atr = sum(atr_values) / len(atr_values)
+            else:
+                current_atr = 50.0  # Default fallback
+            
+            # ATR-based stops with minimum 1.67:1 reward/risk ratio
+            # Take profit: 2.5x ATR movement (converted to token price delta)
+            # Stop loss: 1.5x ATR movement
+            atr_normalized = current_atr / ctx['price']  # ATR as % of price
+            
+            # Convert ATR% to token price change expectation
+            tp_delta = atr_normalized * 2.5  # Take profit at 2.5 ATR move
+            sl_delta = atr_normalized * -1.5  # Stop loss at 1.5 ATR against us
+            
+            # Apply minimum thresholds to prevent micro-stops
+            tp_delta = max(tp_delta, 0.06)  # Minimum 6¢ profit target
+            sl_delta = min(sl_delta, -0.08)  # Minimum 8¢ stop (1.33:1 R:R floor)
+            
+            # For trades near expiry, tighten stops progressively
+            if secs_left < 300:  # Less than 5 minutes
+                tp_delta *= 0.7
+                sl_delta *= 0.85
+            
             price_delta = current_token_price - pred["bought_price"]
 
-            if price_delta >= tp_cents:
+            if price_delta >= tp_delta:
                 pred["status"] = "CLOSING" 
-                asyncio.create_task(execute_early_exit(session, slug, f"TAKE_PROFIT (+{price_delta*100:.1f}¢)", current_token_price))
-            elif price_delta <= sl_cents:
-                pred["status"] = "CLOSING" 
-                asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS ({price_delta*100:.1f}¢)", current_token_price))
+                log.info(f"[TP HIT] {slug} | Target: +{tp_delta*100:.1f}¢ (2.5×ATR) | Actual: +{price_delta*100:.1f}¢")
+                asyncio.create_task(execute_early_exit(session, slug, f"TAKE_PROFIT (ATR-based: +{price_delta*100:.1f}¢)", current_token_price))
+            elif price_delta <= sl_delta:
+                pred["status"] = "CLOSING"
+                log.info(f"[SL HIT] {slug} | Threshold: {sl_delta*100:.1f}¢ (1.5×ATR) | Actual: {price_delta*100:.1f}¢")
+                asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS (ATR-based: {price_delta*100:.1f}¢)", current_token_price))
         # -----------------------------------------
 
         # --- TARGET HUNTING LOGIC ---

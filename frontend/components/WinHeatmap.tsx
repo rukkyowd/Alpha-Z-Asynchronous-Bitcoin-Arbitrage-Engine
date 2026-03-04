@@ -144,7 +144,11 @@ export default function WinHeatmap({ data }: { data: any[] }) {
                     initial={{ opacity: 0, y: 10, scale: 0.9 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                    className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-50 pointer-events-none"
+                    className="absolute bottom-full mb-3 z-50 pointer-events-none"
+                    style={{
+                      left: '50%',
+                      transform: 'translateX(-50%)'
+                    }}
                   >
                     <div className="bg-zinc-950 border border-zinc-700 p-3 rounded-lg shadow-2xl text-[10px] whitespace-nowrap leading-relaxed min-w-[140px]">
                       <div className="font-bold text-blue-400 mb-2 flex items-center gap-2">
@@ -178,7 +182,7 @@ export default function WinHeatmap({ data }: { data: any[] }) {
                         )}
                       </div>
                       {/* Tooltip Arrow */}
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px]">
+                      <div className="absolute top-full -mt-[1px]" style={{ left: '50%', transform: 'translateX(-50%)' }}>
                         <div className="w-2 h-2 bg-zinc-950 border-r border-b border-zinc-700 transform rotate-45" />
                       </div>
                     </div>
