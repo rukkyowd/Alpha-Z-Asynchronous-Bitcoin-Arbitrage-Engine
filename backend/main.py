@@ -7,6 +7,7 @@ import math
 import aiohttp
 import time
 from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from bot import core # type: ignore
@@ -125,19 +126,19 @@ async def get_current_balance() -> float:
 # In main.py (starting near line 114)
 def get_current_market_slug() -> str:
     """Generates the descriptive hourly slug for the current ET window"""
-    # Convert current time to ET (UTC-5)
     now_utc = datetime.now(timezone.utc)
-    now_et = now_utc.astimezone(timezone(timedelta(hours=-5)))
-    
+    now_et = now_utc.astimezone(ZoneInfo("America/New_York"))
+
     month = now_et.strftime('%B').lower()
     day = now_et.day
     hour_24 = now_et.hour
-    
+
     # Convert 24h to 12h format for the slug (e.g., 14 -> 2pm)
     hour_12 = hour_24 % 12
-    if hour_12 == 0: hour_12 = 12
+    if hour_12 == 0:
+        hour_12 = 12
     ampm = 'am' if hour_24 < 12 else 'pm'
-    
+
     return f"bitcoin-up-or-down-{month}-{day}-{hour_12}{ampm}-et"
 
 @app.on_event("startup")
@@ -170,6 +171,8 @@ async def get_trading_metrics():
             "metrics": {
                 "win_rate": 0.0,
                 "total_trades": 0,
+                "total_wins": 0,
+                "total_losses": 0,
                 "max_drawdown": 0.0,
                 "current_pnl": round(current_effective_balance, 2),  
                 "sharpe": 0.0,
@@ -203,13 +206,15 @@ async def get_trading_metrics():
         # 1. DATA PREP
         df['dt'] = pd.to_datetime(df['Timestamp (UTC)'])
         df['hour'] = df['dt'].dt.hour
-        df['is_win'] = (df['Result'] == 'WIN').astype(int)
-        
+        df['result_upper'] = df['Result'].fillna("").astype(str).str.upper()
+        df['is_resolved'] = df['result_upper'].str.contains("WIN|LOSS", na=False)
+        df['is_win'] = df['result_upper'].str.contains("WIN", na=False).astype(int)
+
         if 'PnL' in df.columns:
             df["PnL"] = df["PnL"].astype(float)
         else:
-            df["PnL"] = df["Result"].apply(lambda x: 1.00 if x == "WIN" else (-1.01 if x == "LOSS" else 0.0))
-            
+            df["PnL"] = df["result_upper"].apply(lambda x: 1.00 if "WIN" in x else (-1.01 if "LOSS" in x else 0.0))
+
         df["Cum_PnL"] = df["PnL"].cumsum()
 
         # 2. EQUITY CALCULATIONS
@@ -219,15 +224,26 @@ async def get_trading_metrics():
         df['time'] = df['dt'].astype('int64') // 10**9
 
         # 3. STREAKS & DRAWDOWN
-        df['streak'] = df['is_win'].groupby((df['is_win'] != df['is_win'].shift()).cumsum()).cumcount() + 1
-        current_streak = int(df['streak'].iloc[-1])
-        is_winning_streak = bool(df['is_win'].iloc[-1] == 1)
+        resolved_trades = df[df['is_resolved']].copy()
+        if resolved_trades.empty:
+            current_streak = 0
+            is_winning_streak = False
+        else:
+            resolved_trades['streak'] = resolved_trades['is_win'].groupby(
+                (resolved_trades['is_win'] != resolved_trades['is_win'].shift()).cumsum()
+            ).cumcount() + 1
+            current_streak = int(resolved_trades['streak'].iloc[-1])
+            is_winning_streak = bool(resolved_trades['is_win'].iloc[-1] == 1)
+
         df["Running_Max"] = df["Equity"].cummax()
         drawdown = df["Equity"] - df["Running_Max"]
 
         # 4. STATS
-        total_trades = len(df)
-        win_rate = df['is_win'].mean()
+        total_trades = int(df['is_resolved'].sum())
+        total_wins = int(((df['is_win'] == 1) & df['is_resolved']).sum())
+        total_losses = max(total_trades - total_wins, 0)
+        win_rate = (total_wins / total_trades) if total_trades > 0 else 0.0
+
         avg_win = df[df['PnL'] > 0]['PnL'].mean() if not df[df['PnL'] > 0].empty else 1.0
         avg_loss = abs(df[df['PnL'] < 0]['PnL'].mean()) if not df[df['PnL'] < 0].empty else 1.01
         expectancy = (win_rate * avg_win) - ((1 - win_rate) * avg_loss)
@@ -245,16 +261,23 @@ async def get_trading_metrics():
         kelly_fraction = win_rate - ((1 - win_rate) / win_loss_ratio)
 
         # 6. HEATMAP
-        hourly_stats = df.groupby('hour')['Result'].value_counts().unstack(fill_value=0)
+        df['result_bucket'] = np.where(
+            df['result_upper'].str.contains("WIN", na=False),
+            "WIN",
+            np.where(df['result_upper'].str.contains("LOSS", na=False), "LOSS", "OTHER")
+        )
+        hourly_stats = df.groupby('hour')['result_bucket'].value_counts().unstack(fill_value=0)
         for h in range(24):
-            if h not in hourly_stats.index: hourly_stats.loc[h] = 0
+            if h not in hourly_stats.index:
+                hourly_stats.loc[h] = 0
         hourly_stats['total'] = hourly_stats.get('WIN', 0) + hourly_stats.get('LOSS', 0)
         hourly_stats['win_rate_pct'] = (hourly_stats.get('WIN', 0) / hourly_stats['total'] * 100).fillna(0)
         heatmap_data = [{"hour": int(h), "win_rate": round(wr, 1), "trades": int(t)}
                         for h, wr, t in zip(hourly_stats.index, hourly_stats['win_rate_pct'], hourly_stats['total'])]
-        
-        rolling_pnl = df["PnL"].rolling(window=5).sum().dropna()
-        var_95_calc = round(np.percentile(rolling_pnl, 5), 2) if len(rolling_pnl) > 5 else 0
+
+        pnl_for_risk = df.loc[df['is_resolved'], 'PnL']
+        if pnl_for_risk.empty:
+            pnl_for_risk = df['PnL']
 
         signal_perf = []
         if hasattr(core, "signal_tracker"):
@@ -267,11 +290,11 @@ async def get_trading_metrics():
         }
         
         if "Trigger Reason" in df.columns:
-            valid_trades = df[df["Result"].isin(["WIN", "LOSS"])]
+            valid_trades = df[df["is_resolved"]]
             
             ai_trades = valid_trades[valid_trades["Trigger Reason"].str.contains("AI confirmed", na=False)]
             if len(ai_trades) > 0:
-                ai_wins = len(ai_trades[ai_trades["Result"] == "WIN"])
+                ai_wins = int(ai_trades["result_upper"].str.contains("WIN", na=False).sum())
                 attribution["ai_confirmed"] = {
                     "trades": len(ai_trades),
                     "win_rate": round((ai_wins / len(ai_trades)) * 100, 1),
@@ -280,7 +303,7 @@ async def get_trading_metrics():
                 
             sys_trades = valid_trades[~valid_trades["Trigger Reason"].str.contains("AI confirmed|AI vetoed", na=False)]
             if len(sys_trades) > 0:
-                sys_wins = len(sys_trades[sys_trades["Result"] == "WIN"])
+                sys_wins = int(sys_trades["result_upper"].str.contains("WIN", na=False).sum())
                 attribution["system_only"] = {
                     "trades": len(sys_trades),
                     "win_rate": round((sys_wins / len(sys_trades)) * 100, 1),
@@ -293,10 +316,12 @@ async def get_trading_metrics():
             "metrics": {
                 "win_rate": round(win_rate * 100, 2),
                 "total_trades": total_trades,
+                "total_wins": total_wins,
+                "total_losses": total_losses,
                 "max_drawdown": round(drawdown.min(), 2),
                 "current_pnl": round(current_effective_balance, 2),  
-                "sharpe": round((df["PnL"].mean() / df["PnL"].std()) * np.sqrt(252), 2) if df["PnL"].std() > 0 else 0,
-                "var_95": round(np.percentile(df["PnL"], 5), 2) if total_trades > 5 else 0,
+                "sharpe": round((pnl_for_risk.mean() / pnl_for_risk.std()) * np.sqrt(252), 2) if len(pnl_for_risk) > 1 and pnl_for_risk.std() > 0 else 0,
+                "var_95": round(np.percentile(pnl_for_risk, 5), 2) if len(pnl_for_risk) > 5 else 0,
                 "expectancy": round(expectancy, 4),
                 "kelly_optimal": f"{round(kelly_fraction * 100, 1)}%",
                 "current_streak": current_streak,
@@ -419,3 +444,4 @@ async def live_data_feed(websocket: WebSocket):
             await websocket.send_json(payload)
             await asyncio.sleep(1)
     except Exception: pass
+

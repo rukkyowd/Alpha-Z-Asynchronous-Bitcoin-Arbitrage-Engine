@@ -17,7 +17,7 @@ from urllib.parse import urlparse
 from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
 from typing import Optional, Tuple
-from decimal import Decimal, ROUND_DOWN
+from decimal import Decimal, ROUND_DOWN, ROUND_UP
 
 load_dotenv()
 
@@ -45,19 +45,19 @@ POLY_SIG_TYPE    = int(os.getenv("POLY_SIG_TYPE", "1"))
 
 DRY_RUN          = os.getenv("DRY_RUN", "true").lower() != "false"
 
-# ── Elite Risk & Thresholds ──
+# â”€â”€ Elite Risk & Thresholds â”€â”€
 MAX_TRADE_PCT               = 0.05
 # OPTIMIZED: Increased to 0.50 (Half-Kelly) - Industry standard for aggressive compounding
 # Previous 0.25 was stacking with other dampeners, creating $1-2 bets when $10-15 was appropriate
 FRACTIONAL_KELLY_DAMPENER   = 0.50
 MAX_TRADES_PER_HOUR         = 3
 
-# ── Liquidity & Anti-Chop ──
+# â”€â”€ Liquidity & Anti-Chop â”€â”€
 MAX_SPREAD_PCT              = 0.05
 MIN_LIQUIDITY_MULTIPLIER    = 1.5
 MIN_ATR_THRESHOLD           = 15.0
 EMA_SQUEEZE_PCT             = 0.0001
-# ── AI Bypass Threshold ──
+# â”€â”€ AI Bypass Threshold â”€â”€
 # OPTIMIZED: Lowered from 40.0% to 3.0% to force more AI validation
 # Only ultra-high conviction trades (3%+ edge) can bypass AI
 EV_AI_BYPASS_THRESHOLD = 3.0  
@@ -132,14 +132,22 @@ class RiskManager:
         self.max_trade_pct = max_trade_pct
         self.current_daily_pnl = 0.0
         self.trades_this_hour = 0
-        self.current_hour = datetime.now(timezone.utc).hour
+        now_utc = datetime.now(timezone.utc)
+        self.current_hour = now_utc.hour
+        self.current_day = now_utc.date()
 
     def reset_stats(self):
         self.current_daily_pnl = 0.0
         self.trades_this_hour = 0
+        self.current_hour = datetime.now(timezone.utc).hour
         log.info("[RISK] Daily stats reset. New session started.")
 
     def can_trade(self, current_balance, trade_size):
+        now_utc = datetime.now(timezone.utc)
+        if now_utc.date() != self.current_day:
+            self.current_day = now_utc.date()
+            self.reset_stats()
+
         dynamic_loss_limit = current_balance * self.max_daily_loss_pct
 
         if self.current_daily_pnl <= -dynamic_loss_limit:
@@ -148,7 +156,7 @@ class RiskManager:
         if trade_size > (current_balance * self.max_trade_pct):
             return False, f"Trade size ${trade_size:.2f} exceeds max 5% risk."
 
-        now_hour = datetime.now(timezone.utc).hour
+        now_hour = now_utc.hour
         if now_hour != self.current_hour:
             self.trades_this_hour = 0
             self.current_hour = now_hour
@@ -730,23 +738,28 @@ def get_time_adjusted_bet(kelly_bet: float, secs_remaining: float, confidence_le
     OPTIMIZED: Removed conviction multiplier - if AI approved, trust the math.
     Only adjusts for time remaining to account for resolution uncertainty.
     """
-    if secs_remaining > 1800:       
+    if kelly_bet <= 0:
+        return 0.0
+
+    if secs_remaining > 1800:
         time_multiplier = 0.50  # 30+ min away: reduce for uncertainty
-    elif secs_remaining > 600:      
+    elif secs_remaining > 600:
         time_multiplier = 1.0   # 10-30 min: optimal window
-    elif secs_remaining > 360:      
+    elif secs_remaining > 360:
         time_multiplier = 0.75  # 6-10 min: slight reduction
-    elif secs_remaining > MIN_SECONDS_REMAINING: 
+    elif secs_remaining > MIN_SECONDS_REMAINING:
         time_multiplier = 0.50  # <6 min: reduce for execution risk
     else:
         return 0.0  # Too close to expiry
-    
+
     # REMOVED: conviction_multipliers - AI validation is the confidence check
     # Previous logic: High=1.0, Medium=0.75, Scout=0.5
     # New logic: If trade passed AI/EV gates, bet the full time-adjusted Kelly
-    
-    final_bet = kelly_bet * time_multiplier
-    return round(max(final_bet, 1.00), 2)  # Minimum $1.00
+
+    final_bet = round(kelly_bet * time_multiplier, 2)
+    if final_bet < 1.00:
+        return 0.0
+    return final_bet
 
 # ============================================================
 # DETERMINISTIC AI FILTER
@@ -772,9 +785,9 @@ def deterministic_ai_filter(rule_decision: dict, ctx: dict, current_candle: dict
     # 3. CVD Flow Veto (Tighter 15K threshold)
     CVD_HARD_VETO = CVD_CONTRA_VETO_THRESHOLD
     if favored_dir == "UP" and ctx['cvd_candle_delta'] < -CVD_HARD_VETO:
-        veto_reasons.append(f"Strong CVD Selling (Δ${ctx['cvd_candle_delta']:,.0f})")
+        veto_reasons.append(f"Strong CVD Selling (Î”${ctx['cvd_candle_delta']:,.0f})")
     elif favored_dir == "DOWN" and ctx['cvd_candle_delta'] > CVD_HARD_VETO:
-        veto_reasons.append(f"Strong CVD Buying (Δ${ctx['cvd_candle_delta']:,.0f})")
+        veto_reasons.append(f"Strong CVD Buying (Î”${ctx['cvd_candle_delta']:,.0f})")
 
     # 4. NEW: Wick Rejection Veto (Sudden Reversal Protection)
     # If the rejection wick is 1.5x larger than the candle body, the market is pivoting
@@ -1014,15 +1027,15 @@ async def check_liquidity_and_spread_v2(
             amm_spread = abs(1.0 - amm_price - complement)
             
             if amm_spread > MAX_SPREAD_PCT:
-                return False, f"AMM spread {amm_spread*100:.2f}¢ > max {MAX_SPREAD_PCT*100:.0f}¢", 0.0
+                return False, f"AMM spread {amm_spread*100:.2f}Â¢ > max {MAX_SPREAD_PCT*100:.0f}Â¢", 0.0
             
             ESTIMATED_AMM_DEPTH = 1000.0  
             
             if intended_bet > ESTIMATED_AMM_DEPTH * 0.5:
                 scaled_bet = round(ESTIMATED_AMM_DEPTH * 0.4, 2)
-                return True, f"OK (AMM scaled) | spread={amm_spread*100:.2f}¢", scaled_bet
+                return True, f"OK (AMM scaled) | spread={amm_spread*100:.2f}Â¢", scaled_bet
             
-            return True, f"OK (AMM) | spread={amm_spread*100:.2f}¢", intended_bet
+            return True, f"OK (AMM) | spread={amm_spread*100:.2f}Â¢", intended_bet
     
     try:
         try:
@@ -1030,7 +1043,7 @@ async def check_liquidity_and_spread_v2(
             if spread_data:
                 fast_spread = float(spread_data.get("spread", 0))
                 if fast_spread > MAX_SPREAD_PCT:
-                    return False, f"CLOB spread {fast_spread*100:.2f}¢ too wide", 0.0
+                    return False, f"CLOB spread {fast_spread*100:.2f}Â¢ too wide", 0.0
         except Exception:
             pass  
         
@@ -1049,7 +1062,7 @@ async def check_liquidity_and_spread_v2(
             return False, f"Invalid ask price: {best_ask}", 0.0
         
         if tob_spread > MAX_SPREAD_PCT:
-            return False, f"CLOB spread {tob_spread*100:.2f}¢ > max", 0.0
+            return False, f"CLOB spread {tob_spread*100:.2f}Â¢ > max", 0.0
         
         mid_price = (best_bid + best_ask) / 2.0
         
@@ -1092,7 +1105,7 @@ async def check_liquidity_and_spread_v2(
             if slippage > 0.03:  
                 return False, f"Slippage {slippage*100:.2f}% too high even scaled", 0.0
             
-            return True, f"OK (CLOB scaled) | spread={tob_spread*100:.2f}¢ | impact={slippage*100:.2f}%", scaled_bet
+            return True, f"OK (CLOB scaled) | spread={tob_spread*100:.2f}Â¢ | impact={slippage*100:.2f}%", scaled_bet
         
         avg_exec_price = intended_bet / total_shares_bought
         slippage = (avg_exec_price - mid_price) / mid_price
@@ -1107,9 +1120,9 @@ async def check_liquidity_and_spread_v2(
             if scaled_bet < 1.00:
                 return False, f"Insufficient depth (${top3_depth:.2f})", 0.0
             
-            return True, f"OK (CLOB depth-limited) | spread={tob_spread*100:.2f}¢", scaled_bet
+            return True, f"OK (CLOB depth-limited) | spread={tob_spread*100:.2f}Â¢", scaled_bet
         
-        return True, f"OK (CLOB) | spread={tob_spread*100:.2f}¢ | impact={slippage*100:.2f}% | levels={levels_consumed}", intended_bet
+        return True, f"OK (CLOB) | spread={tob_spread*100:.2f}Â¢ | impact={slippage*100:.2f}% | levels={levels_consumed}", intended_bet
     
     except Exception as e:
         return False, f"Liquidity check error: {e}", 0.0
@@ -1284,7 +1297,7 @@ async def resolve_market_outcome(session: aiohttp.ClientSession, slug: str, deci
         return
     global total_wins, total_losses, simulated_balance
 
-    log.info(f"[RESOLVE] Market expired → {slug}  |  Our call: {decision}  |  Strike: ${strike:,.2f}")
+    log.info(f"[RESOLVE] Market expired â†’ {slug}  |  Our call: {decision}  |  Strike: ${strike:,.2f}")
     local_calc_outcome = "TIE"
 
     meta = await fetch_market_meta_from_slug(session, slug)
@@ -1301,11 +1314,11 @@ async def resolve_market_outcome(session: aiohttp.ClientSession, slug: str, deci
 
     if actual_outcome == "ERROR":
         actual_outcome = local_calc_outcome
-        match_status = "⚠️ FALLBACK (both APIs failed)"
+        match_status = "âš ï¸ FALLBACK (both APIs failed)"
     elif actual_outcome == local_calc_outcome:
-        match_status = f"✅ MATCH ({resolution_source})"
+        match_status = f"âœ… MATCH ({resolution_source})"
     else:
-        match_status = f"⚠️ MISMATCH (local={local_calc_outcome} api={actual_outcome})"
+        match_status = f"âš ï¸ MISMATCH (local={local_calc_outcome} api={actual_outcome})"
 
     is_dust = bet_size < 1.00
     win_profit = round(bet_size * (1.0 / bought_price - 1.0), 4) if (0 < bought_price < 1) else bet_size
@@ -1354,7 +1367,7 @@ def run_gatekeeper(ctx: dict, poly_data: dict, current_balance: float, current_c
     # OPTIMIZED: Allow ranging markets for mean reversion strategies
     # Only block UNKNOWN regime (insufficient data)
     if regime == "UNKNOWN":
-        return False, f"Market {regime} — insufficient data", {}, {}
+        return False, f"Market {regime} â€” insufficient data", {}, {}
     
     # OPTIMIZED: Different strategies for different regimes
     regime_context = {"regime": regime}  # Pass regime to rule engine
@@ -1412,7 +1425,7 @@ def rule_engine_decide(ctx: dict, ev_up: dict, ev_down: dict,
     if not target_ev.get("approved", False):
         return {
             "decision": "SKIP",
-            "reason": f"Net EV {target_ev['ev_pct']:.2f}% ≤ 0 after slippage"
+            "reason": f"Net EV {target_ev['ev_pct']:.2f}% â‰¤ 0 after slippage"
         }
 
     score = 0
@@ -1485,7 +1498,7 @@ def _commit_decision(slug: str, result: dict, poly_data: dict, current_ev_pct: f
                 "timestamp": datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S'),
                 "market_slug": slug, 
                 "direction": decision,
-                "price_vs_vwap_pct": round((ctx['price'] - ctx['vwap']) / ctx['vwap'] * 100, 4) if ctx else 0,
+                "price_vs_vwap_pct": round((ctx['price'] - ctx['vwap']) / ctx['vwap'] * 100, 4) if ctx and ctx.get('vwap', 0) > 0 else 0,
                 "rsi_14": round(ctx['rsi'], 1) if ctx else 50, 
                 "atr_14": round(ctx['atr'], 2) if ctx else 0,
                 "cvd_candle_delta": round(ctx['cvd_candle_delta'], 0) if ctx else 0,
@@ -1534,7 +1547,7 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
         return
 
     if executable_bet < bet_size:
-        log.info(f"[BET SCALED] {slug}: ${bet_size:.2f} → ${executable_bet:.2f}")
+        log.info(f"[BET SCALED] {slug}: ${bet_size:.2f} â†’ ${executable_bet:.2f}")
         bet_size = executable_bet
         
         if slug in active_predictions:
@@ -1554,30 +1567,34 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
     market_prob = poly_data["up_prob"] if decision == "UP" else poly_data["down_prob"]
     expected_price = market_prob / 100.0
 
-    log.info(f"🎯 BET PLACED [{'PAPER' if PAPER_TRADING else 'LIVE'}] {decision} on {slug} | "
+    log.info(f"ðŸŽ¯ BET PLACED [{'PAPER' if PAPER_TRADING else 'LIVE'}] {decision} on {slug} | "
             f"Bet: ${bet_size:.2f} | Expected: {expected_price:.4f} | Liq: {liq_msg}")
 
     if not PAPER_TRADING and not DRY_RUN and clob_client:
         # OPTIMIZED: Use Limit Orders with slippage protection instead of Market Orders
-        # Market orders can slip 4-5¢ on thin liquidity, destroying 6¢ ATR targets
+        # Market orders can slip 4-5Â¢ on thin liquidity, destroying 6Â¢ ATR targets
         
-        # Calculate maximum acceptable entry price (expected + 2¢ max slippage)
+        # Calculate maximum acceptable entry price (expected + 2Â¢ max slippage)
         MAX_ENTRY_SLIPPAGE_CENTS = 0.02  # 2 cents maximum slippage
         max_entry_price = expected_price + MAX_ENTRY_SLIPPAGE_CENTS
-        max_entry_price = min(max_entry_price, 0.99)  # Never pay more than 99¢
+        max_entry_price = min(max_entry_price, 0.99)  # Never pay more than 99Â¢
         
         # Round to nearest cent for CLOB compatibility
-        from decimal import Decimal, ROUND_UP
         tick = Decimal("0.01")
         limit_price = float(Decimal(str(max_entry_price)).quantize(tick, rounding=ROUND_UP))
-        
+        shares_to_buy = float(
+            (Decimal(str(bet_size)) / Decimal(str(limit_price))).quantize(tick, rounding=ROUND_DOWN)
+        )
+        if shares_to_buy < 0.01:
+            log.warning(f"[REJECTED] {slug}: Bet ${bet_size:.2f} too small at limit price {limit_price:.4f}")
+            active_predictions.pop(slug, None)
+            committed_slugs.discard(slug)
+            return
+
         def _sign_and_submit_limit():
             from py_clob_client.clob_types import LimitOrderArgs, OrderType
             from py_clob_client.order_builder.constants import BUY
-            
-            # Calculate shares based on expected price, but enforce limit price
-            shares_to_buy = round(bet_size / expected_price, 2)
-            
+
             order_args = LimitOrderArgs(
                 token_id=token_id,
                 price=str(limit_price),  # Maximum price we'll pay
@@ -1587,7 +1604,7 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
             signed = clob_client.create_order(order_args)
             return clob_client.post_order(signed, OrderType.FOK)  # Fill-or-Kill: all or nothing
         
-        log.info(f"[ENTRY ORDER] Limit @ {limit_price:.4f} (expected {expected_price:.4f} + max {MAX_ENTRY_SLIPPAGE_CENTS*100:.0f}¢ slip)")
+        log.info(f"[ENTRY ORDER] Limit @ {limit_price:.4f} (expected {expected_price:.4f} + max {MAX_ENTRY_SLIPPAGE_CENTS*100:.0f}Â¢ slip)")
 
         try:
             resp = await asyncio.wait_for(asyncio.to_thread(_sign_and_submit_limit), timeout=4.0)
@@ -1602,33 +1619,33 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
                     actual_price = total_cost / total_shares
             
             if status == "matched":
-                spread_cents = float(liq_msg.split("spread=")[1].split("¢")[0]) if "spread=" in liq_msg else 0
+                spread_cents = float(liq_msg.split("spread=")[1].split("Â¢")[0]) if "spread=" in liq_msg else 0
                 await log_execution_metrics(slug, decision, expected_price, actual_price, spread_cents, liq_msg)
                 
                 slippage_bps = ((actual_price - expected_price) / expected_price * 10000) if expected_price > 0 else 0
                 slippage_cents = (actual_price - expected_price) * 100
                 
-                log.info(f"✅ ORDER FILLED: {decision} on {slug} | ${bet_size:.2f} | "
+                log.info(f"âœ… ORDER FILLED: {decision} on {slug} | ${bet_size:.2f} | "
                         f"Fill: {actual_price:.4f} (expected {expected_price:.4f}) | "
-                        f"Slippage: {slippage_bps:+.1f}bps ({slippage_cents:+.1f}¢)")
+                        f"Slippage: {slippage_bps:+.1f}bps ({slippage_cents:+.1f}Â¢)")
                 
                 if slug in active_predictions:
                     active_predictions[slug]["bought_price"] = actual_price
                     
             else:
                 # OPTIMIZED: Strict cutoff. No market order fallback. 
-                log.warning(f"⚠️ LIMIT REJECTED [{status}]: {resp.get('errorMsg', 'Price moved beyond limit')} | {slug}")
-                log.info(f"🛑 Trade abandoned. Price ran past our +2¢ slippage guard.")
+                log.warning(f"âš ï¸ LIMIT REJECTED [{status}]: {resp.get('errorMsg', 'Price moved beyond limit')} | {slug}")
+                log.info(f"ðŸ›‘ Trade abandoned. Price ran past our +2Â¢ slippage guard.")
                 active_predictions.pop(slug, None)
                 committed_slugs.discard(slug)
 
         except asyncio.TimeoutError:
-            log.error(f"⏱️ CLOB TIMEOUT (>4s) for {slug}. Limit order status uncertain.")
+            log.error(f"â±ï¸ CLOB TIMEOUT (>4s) for {slug}. Limit order status uncertain.")
             if slug in active_predictions:
                 active_predictions[slug]["status"] = "UNCERTAIN"
 
         except Exception as e:
-            log.error(f"✗ CLOB execution failed: {e}")
+            log.error(f"âœ— CLOB execution failed: {e}")
             active_predictions.pop(slug, None)
             committed_slugs.discard(slug)
 
@@ -1655,7 +1672,7 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
         roi_pct = (current_token_price - bought_price) / bought_price if bought_price > 0 else 0.0
         
         # Require minimum 8% ROI to justify early exit (covers spread + slippage)
-        # For a 26.5¢ entry, this is ~2.1¢ minimum gain
+        # For a 26.5Â¢ entry, this is ~2.1Â¢ minimum gain
         MIN_ROI_FOR_EARLY_EXIT = 0.08
         
         if roi_pct < MIN_ROI_FOR_EARLY_EXIT:
@@ -1676,7 +1693,7 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
         else:
             total_losses += 1
 
-        log.info(f"[EARLY EXIT] ⚡ {slug} | Reason: {exit_reason} | PnL: ${pnl_impact:+.4f}")
+        log.info(f"[EARLY EXIT] âš¡ {slug} | Reason: {exit_reason} | PnL: ${pnl_impact:+.4f}")
 
         if "ml_data" in pred:
             ml_row = pred["ml_data"]
@@ -1692,21 +1709,31 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
         active_predictions.pop(slug, None)
 
     elif not DRY_RUN and clob_client:
-        def _parse_shares_sold(resp: dict, expected_shares: float) -> float:
+        def _parse_fill_stats(resp: dict, expected_shares: float, fallback_price: float) -> tuple[float, float]:
+            txs = resp.get("transactions") or []
+            if txs:
+                total_shares = sum(float(tx.get("size", 0) or 0.0) for tx in txs)
+                total_cost = sum(
+                    float(tx.get("price", fallback_price) or fallback_price) * float(tx.get("size", 0) or 0.0)
+                    for tx in txs
+                )
+                if total_shares > 0:
+                    avg_fill_price = (total_cost / total_shares) if total_cost > 0 else fallback_price
+                    return total_shares, avg_fill_price
+
             if resp.get("status") == "matched":
-                return expected_shares
+                return expected_shares, fallback_price
             if "matchedAmount" in resp:
                 val = float(resp["matchedAmount"])
-                if val > 0: return val
-            if "transactions" in resp:
-                total = sum(float(tx.get("size", 0)) for tx in resp["transactions"])
-                if total > 0: return total
+                if val > 0:
+                    return val, fallback_price
             if "takerAmount" in resp:
                 val = float(resp.get("takerAmount", 0))
-                if val > 0: return val
-            return 0.0
+                if val > 0:
+                    return val, fallback_price
+            return 0.0, fallback_price
 
-        async def _attempt_ioc_sell(floor_price: float) -> tuple[bool, float]:
+        async def _attempt_ioc_sell(floor_price: float) -> tuple[bool, float, float]:
             from py_clob_client.clob_types import LimitOrderArgs, OrderType
             from py_clob_client.order_builder.constants import SELL
 
@@ -1727,28 +1754,29 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
 
             try:
                 resp = await asyncio.wait_for(asyncio.to_thread(_sign_and_post), timeout=4.0)
-                shares_sold = _parse_shares_sold(resp, shares_owned)
-                return shares_sold > 0, shares_sold
+                shares_sold, avg_fill_price = _parse_fill_stats(resp, shares_owned, floor_rounded)
+                return shares_sold > 0, shares_sold, avg_fill_price
             except asyncio.TimeoutError:
                 log.warning(f"[EXIT] IOC timed out for {slug}")
-                return False, 0.0
+                return False, 0.0, 0.0
 
         floor_price_1 = current_token_price * 0.98
-        success, shares_sold = await _attempt_ioc_sell(floor_price_1)
+        success, shares_sold, avg_fill_price = await _attempt_ioc_sell(floor_price_1)
 
         if not success:
             log.warning(f"[EXIT] IOC attempt 1 failed for {slug}. Retrying at wider floor...")
             await asyncio.sleep(0.5) 
             floor_price_2 = current_token_price * 0.96
-            success, shares_sold = await _attempt_ioc_sell(floor_price_2)
+            success, shares_sold, avg_fill_price = await _attempt_ioc_sell(floor_price_2)
 
         if shares_sold > 0:
             fraction_sold = min(shares_sold / shares_owned, 1.0)
             realized_bet_size = bet_size * fraction_sold
-            pnl_impact = realized_bet_size * ((current_token_price / bought_price) - 1.0)
+            effective_exit_price = avg_fill_price if avg_fill_price > 0 else current_token_price
+            pnl_impact = realized_bet_size * ((effective_exit_price / bought_price) - 1.0)
             risk_manager.current_daily_pnl += pnl_impact
 
-            log.info(f"✅ IOC EXIT: {slug} | Sold {fraction_sold*100:.1f}% | Realized PnL: ${pnl_impact:+.2f} | Reason: {exit_reason}")
+            log.info(f"âœ… IOC EXIT: {slug} | Sold {fraction_sold*100:.1f}% | Realized PnL: ${pnl_impact:+.2f} | Reason: {exit_reason}")
 
             if "ml_data" in pred:
                 ml_row = pred["ml_data"]
@@ -1757,7 +1785,7 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
                 await log_ml_data(ml_row)
 
             await log_trade_to_db(
-                slug, pred["decision"], pred["strike"], live_price, "EARLY_EXIT",
+                slug, pred["decision"], pred["strike"], effective_exit_price, "EARLY_EXIT",
                 "WIN" if pnl_impact > 0 else "LOSS", 0.0, pnl_impact,
                 local_calc_outcome=exit_reason,
                 official_outcome="FULL_SELL" if fraction_sold >= 0.99 else "PARTIAL_SELL"
@@ -1771,7 +1799,7 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
                 pred["status"] = "OPEN"
                 log.info(f"[EXIT] Partial fill. {remaining_shares:.3f} shares remain open.")
         else:
-            log.error(f"⛔ IOC FAILED after 2 attempts for {slug}. Will hold to resolution.")
+            log.error(f"â›” IOC FAILED after 2 attempts for {slug}. Will hold to resolution.")
             pred["status"] = "OPEN"
 
 async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, history: list,
@@ -1796,7 +1824,7 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
             return
 
         ai_call_count += 1
-        log.info(f"[AI CONFIRM] Borderline score — asking {LOCAL_AI_MODEL} (call #{ai_call_count})...")
+        log.info(f"[AI CONFIRM] Borderline score â€” asking {LOCAL_AI_MODEL} (call #{ai_call_count})...")
 
         favored_dir = rule_decision["decision"]
         regime = detect_market_regime(candle_history)
@@ -1870,7 +1898,7 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
         if ai_consecutive_failures >= CB_FAILURE_THRESHOLD:
             cooldown = min(300, CB_COOLDOWN_SECS * (2 ** (ai_consecutive_failures - CB_FAILURE_THRESHOLD)))
             ai_circuit_open_until = time.time() + cooldown
-            log.error(f"[CIRCUIT] ⚡ Tripped. AI paused {cooldown}s (exponential backoff).")
+            log.error(f"[CIRCUIT] âš¡ Tripped. AI paused {cooldown}s (exponential backoff).")
 
         if ai_word == favored_dir:
             final = {**rule_decision, "reason": f"AI confirmed: {rule_decision['reason']}"}
@@ -1968,8 +1996,8 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             sl_delta = atr_normalized * -1.5  # Stop loss at 1.5 ATR against us
             
             # Apply minimum thresholds to prevent micro-stops
-            tp_delta = max(tp_delta, 0.06)  # Minimum 6¢ profit target
-            sl_delta = min(sl_delta, -0.08)  # Minimum 8¢ stop (1.33:1 R:R floor)
+            tp_delta = max(tp_delta, 0.06)  # Minimum 6Â¢ profit target
+            sl_delta = min(sl_delta, -0.08)  # Minimum 8Â¢ stop (1.33:1 R:R floor)
             
             # For trades near expiry, tighten stops progressively
             if secs_left < 300:  # Less than 5 minutes
@@ -1980,12 +2008,12 @@ async def evaluation_loop(session: aiohttp.ClientSession):
 
             if price_delta >= tp_delta:
                 pred["status"] = "CLOSING" 
-                log.info(f"[TP HIT] {slug} | Target: +{tp_delta*100:.1f}¢ (2.5×ATR) | Actual: +{price_delta*100:.1f}¢")
-                asyncio.create_task(execute_early_exit(session, slug, f"TAKE_PROFIT (ATR-based: +{price_delta*100:.1f}¢)", current_token_price))
+                log.info(f"[TP HIT] {slug} | Target: +{tp_delta*100:.1f}Â¢ (2.5Ã—ATR) | Actual: +{price_delta*100:.1f}Â¢")
+                asyncio.create_task(execute_early_exit(session, slug, f"TAKE_PROFIT (ATR-based: +{price_delta*100:.1f}Â¢)", current_token_price))
             elif price_delta <= sl_delta:
                 pred["status"] = "CLOSING"
-                log.info(f"[SL HIT] {slug} | Threshold: {sl_delta*100:.1f}¢ (1.5×ATR) | Actual: {price_delta*100:.1f}¢")
-                asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS (ATR-based: {price_delta*100:.1f}¢)", current_token_price))
+                log.info(f"[SL HIT] {slug} | Threshold: {sl_delta*100:.1f}Â¢ (1.5Ã—ATR) | Actual: {price_delta*100:.1f}Â¢")
+                asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS (ATR-based: {price_delta*100:.1f}Â¢)", current_token_price))
         # -----------------------------------------
 
         # --- TARGET HUNTING LOGIC ---
@@ -2024,7 +2052,7 @@ async def evaluation_loop(session: aiohttp.ClientSession):
                     continue
                 else:
                     soft_skipped_slugs.discard(target_slug)
-                    log.info(f"[EV MEMORY] Re-engaging {target_slug} — EV improved to {current_best_ev:.2f}%")
+                    log.info(f"[EV MEMORY] Re-engaging {target_slug} â€” EV improved to {current_best_ev:.2f}%")
 
             best_ev_seen[target_slug] = max(current_best_ev, prev_best_ev)
         else:
@@ -2034,12 +2062,14 @@ async def evaluation_loop(session: aiohttp.ClientSession):
         result = rule_engine_decide(ctx, ev_up, ev_down, poly_data, current_candle)
 
         if result["decision"] in ["UP", "DOWN"]:
+            selected_ev = ev_up if result["decision"] == "UP" else ev_down
+            counter_ev = ev_down if result["decision"] == "UP" else ev_up
             if not result.get("needs_ai"):
-                _commit_decision(target_slug, result, poly_data, ev_up.get("ev_pct", 0.0), ctx)
+                _commit_decision(target_slug, result, poly_data, selected_ev.get("ev_pct", 0.0), ctx)
             else:
                 asyncio.create_task(call_local_ai(
                     session, current_candle, candle_history,
-                    poly_data, ev_up, ev_down, 50.0,
+                    poly_data, selected_ev, counter_ev, 50.0,
                     target_slug, result, ctx
                 ))
         else:
@@ -2141,26 +2171,26 @@ async def main():
 
 if __name__ == "__main__":
     print("\n" + "="*70)
-    print("⚠️  CRITICAL: Market Type Selection")
+    print("âš ï¸  CRITICAL: Market Type Selection")
     print("="*70)
     print("\n15-MINUTE MARKETS:")
-    print("  ❌ Spread: 98¢ (you lose 28% instantly)")
-    print("  ❌ Depth: $2-10")
-    print("  ❌ NOT RECOMMENDED - Market makers avoid these")
+    print("  âŒ Spread: 98Â¢ (you lose 28% instantly)")
+    print("  âŒ Depth: $2-10")
+    print("  âŒ NOT RECOMMENDED - Market makers avoid these")
     print("\n1-HOUR MARKETS:")
-    print("  ✅ Spread: 1-3¢")
-    print("  ✅ Depth: $500-2000")
-    print("  ✅ RECOMMENDED - Real liquidity")
+    print("  âœ… Spread: 1-3Â¢")
+    print("  âœ… Depth: $500-2000")
+    print("  âœ… RECOMMENDED - Real liquidity")
     print("\nDAILY MARKETS:")
-    print("  ✅ Spread: 0.5-2¢")
-    print("  ✅ Depth: $5K-20K")
-    print("  ✅ RECOMMENDED - Maximum liquidity")
+    print("  âœ… Spread: 0.5-2Â¢")
+    print("  âœ… Depth: $5K-20K")
+    print("  âœ… RECOMMENDED - Maximum liquidity")
     print("\n" + "="*70 + "\n")
     
     market_type = input("Choose market type (1h/24h/15m): ").strip().lower()
     
     if market_type == "15m":
-        confirm = input("\n⚠️  WARNING: 15m markets have NO liquidity. Continue anyway? (yes/no): ").strip().lower()
+        confirm = input("\nâš ï¸  WARNING: 15m markets have NO liquidity. Continue anyway? (yes/no): ").strip().lower()
         if confirm != "yes":
             print("Switching to 1h markets (recommended)")
             market_type = "1h"
@@ -2183,10 +2213,10 @@ if __name__ == "__main__":
     target_slug = extract_slug_from_market_url(slug_in) if slug_in else f"{slug_template}-{next_market}"
     
     print(f"\n{'='*70}")
-    print(f"🎯 TARGET MARKET: {target_slug}")
+    print(f"ðŸŽ¯ TARGET MARKET: {target_slug}")
     print(f"{'='*70}\n")
     print("Verifying liquidity before starting...")
-    print("(If you see '98¢ spread' errors, switch to 1h/24h markets)\n")
+    print("(If you see '98Â¢ spread' errors, switch to 1h/24h markets)\n")
     
     try:
         asyncio.run(main())
