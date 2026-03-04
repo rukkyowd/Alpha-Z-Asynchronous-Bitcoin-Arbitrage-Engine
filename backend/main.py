@@ -155,43 +155,17 @@ async def get_trading_metrics():
     current_effective_balance = await get_current_balance()
     current_time_sec = int(time.time())
 
+    # --- EMPTY STATE (No Trades Yet) ---
     if df is None or df.empty:
-        # Safe fetch for signals to prevent another potential AttributeError
         signal_perf = {}
         if hasattr(core, "signal_tracker"):
             signal_perf = core.signal_tracker.get_signal_performance()
 
-        # --- NEW: AI EDGE ATTRIBUTION CALCULATION ---
-        attribution = {
+        empty_attribution = {
             "ai_confirmed": {"trades": 0, "win_rate": 0.0, "pnl": 0.0},
             "system_only": {"trades": 0, "win_rate": 0.0, "pnl": 0.0}
         }
-        
-        if "Trigger Reason" in df.columns:
-            valid_trades = df[df["Result"].isin(["WIN", "LOSS"])]
-            
-            # 1. AI Confirmed Trades
-            ai_trades = valid_trades[valid_trades["Trigger Reason"].str.contains("AI confirmed", na=False)]
-            if len(ai_trades) > 0:
-                ai_wins = len(ai_trades[ai_trades["Result"] == "WIN"])
-                attribution["ai_confirmed"] = {
-                    "trades": len(ai_trades),
-                    "win_rate": round((ai_wins / len(ai_trades)) * 100, 1),
-                    "pnl": round(ai_trades["PnL"].sum(), 2)
-                }
-                
-            # 2. System Only (EV Bypass) Trades
-            sys_trades = valid_trades[~valid_trades["Trigger Reason"].str.contains("AI confirmed|AI vetoed", na=False)]
-            if len(sys_trades) > 0:
-                sys_wins = len(sys_trades[sys_trades["Result"] == "WIN"])
-                attribution["system_only"] = {
-                    "trades": len(sys_trades),
-                    "win_rate": round((sys_wins / len(sys_trades)) * 100, 1),
-                    "pnl": round(sys_trades["PnL"].sum(), 2)
-                }
-        # ---------------------------------------------
 
-        # RETURN DEFAULT ZEROED STATE IF NO TRADES EXIST YET
         response_data = {
             "metrics": {
                 "win_rate": 0.0,
@@ -201,7 +175,7 @@ async def get_trading_metrics():
                 "sharpe": 0.0,
                 "var_95": 0.0,
                 "expectancy": 0.0,
-                "kelly_optimal": "0.0%",  # <--- FIXED HERE
+                "kelly_optimal": "0.0%",  
                 "current_streak": 0,
                 "is_winning_streak": False
             },
@@ -219,18 +193,18 @@ async def get_trading_metrics():
                 max_drawdown=0.0
             ),
             "journal": [],
-            "signals": signal_perf, # <--- SAFEGUARDED HERE
-            "attribution": attribution
+            "signals": signal_perf,
+            "attribution": empty_attribution
         }
         return sanitize_data(response_data)
         
+    # --- POPULATED STATE (We have trades) ---
     try:
         # 1. DATA PREP
         df['dt'] = pd.to_datetime(df['Timestamp (UTC)'])
         df['hour'] = df['dt'].dt.hour
         df['is_win'] = (df['Result'] == 'WIN').astype(int)
         
-        # SMART PNL: Use actual logged Kelly bets, fallback to hardcoded if old CSV
         if 'PnL' in df.columns:
             df["PnL"] = df["PnL"].astype(float)
         else:
@@ -282,10 +256,37 @@ async def get_trading_metrics():
         rolling_pnl = df["PnL"].rolling(window=5).sum().dropna()
         var_95_calc = round(np.percentile(rolling_pnl, 5), 2) if len(rolling_pnl) > 5 else 0
 
-        # Safe fetch for signals here too
         signal_perf = []
         if hasattr(core, "signal_tracker"):
             signal_perf = core.signal_tracker.get_signal_performance()
+
+        # --- AI EDGE ATTRIBUTION CALCULATION ---
+        attribution = {
+            "ai_confirmed": {"trades": 0, "win_rate": 0.0, "pnl": 0.0},
+            "system_only": {"trades": 0, "win_rate": 0.0, "pnl": 0.0}
+        }
+        
+        if "Trigger Reason" in df.columns:
+            valid_trades = df[df["Result"].isin(["WIN", "LOSS"])]
+            
+            ai_trades = valid_trades[valid_trades["Trigger Reason"].str.contains("AI confirmed", na=False)]
+            if len(ai_trades) > 0:
+                ai_wins = len(ai_trades[ai_trades["Result"] == "WIN"])
+                attribution["ai_confirmed"] = {
+                    "trades": len(ai_trades),
+                    "win_rate": round((ai_wins / len(ai_trades)) * 100, 1),
+                    "pnl": round(ai_trades["PnL"].sum(), 2)
+                }
+                
+            sys_trades = valid_trades[~valid_trades["Trigger Reason"].str.contains("AI confirmed|AI vetoed", na=False)]
+            if len(sys_trades) > 0:
+                sys_wins = len(sys_trades[sys_trades["Result"] == "WIN"])
+                attribution["system_only"] = {
+                    "trades": len(sys_trades),
+                    "win_rate": round((sys_wins / len(sys_trades)) * 100, 1),
+                    "pnl": round(sys_trades["PnL"].sum(), 2)
+                }
+        # ---------------------------------------------
 
         # 7. FINAL RESPONSE
         response_data = {
@@ -324,7 +325,7 @@ async def get_trading_metrics():
         import traceback
         print(traceback.format_exc())
         return {"error": str(e)}
-    
+
 @app.get("/api/history")
 async def get_candle_history():
     try:
