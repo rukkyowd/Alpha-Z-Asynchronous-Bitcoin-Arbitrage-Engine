@@ -100,6 +100,11 @@ TP_EARLY_EXIT_WINDOW_SECS         = 180
 # Force immediate TP on extreme windfalls, even outside the TP time gate.
 FORCE_TP_ROI_PCT                  = 0.70  # 70% ROI
 FORCE_TP_DELTA_ABS                = 0.35  # +35c token-price delta
+# Profit-lock while TP is held: if gains retrace too much before TP window,
+# exit early to prevent winner->loser round-trips.
+TP_RETRACE_EXIT_FRAC              = 0.45  # allow up to 45% giveback from peak
+TP_RETRACE_EXIT_MIN_DELTA         = 0.05  # or at least 5c from peak
+TP_LOCK_MIN_PROFIT_DELTA          = 0.02  # always keep at least +2c once TP armed
 
 # Same-slug re-entry controls
 MAX_REENTRIES_PER_SLUG            = 1
@@ -460,6 +465,44 @@ last_ai_interaction = {"prompt": "No AI calls yet.", "response": "N/A", "timesta
 adaptive_atr_min: float = MIN_ATR_THRESHOLD
 adaptive_cvd_threshold: float = CVD_DIVERGENCE_THRESHOLD
 
+# Live strategy telemetry exposed to the UI.
+latest_edge_snapshot: dict = {
+    "slug": "",
+    "direction": "UNKNOWN",
+    "up_math_prob": 0.0,
+    "down_math_prob": 0.0,
+    "up_poly_prob": 0.0,
+    "down_poly_prob": 0.0,
+    "up_edge": 0.0,
+    "down_edge": 0.0,
+    "best_edge": 0.0,
+    "best_ev_pct": 0.0,
+}
+latest_signal_alignment: dict = {
+    "direction": "UNKNOWN",
+    "score": 0,
+    "max_score": 4,
+    "vwap": False,
+    "rsi": False,
+    "volume": False,
+    "cvd": False,
+}
+latest_cvd_snapshot: dict = {
+    "delta": 0.0,
+    "one_min_delta": 0.0,
+    "threshold": CVD_DIVERGENCE_THRESHOLD,
+    "divergence": "NONE",
+    "divergence_strength": 0.0,
+}
+latest_execution_timing: dict = {
+    "signal_generation_ms": 0.0,
+    "ai_inference_ms": 0.0,
+    "clob_request_ms": 0.0,
+    "confirmation_ms": 0.0,
+    "total_ms": 0.0,
+    "updated_at": 0.0,
+}
+
 # ============================================================
 # UTILITIES
 # ============================================================
@@ -580,6 +623,96 @@ def get_dynamic_threshold(secs_remaining: float) -> tuple[float, float]:
         return 0.15, -0.20     
     else: 
         return 0.25, -0.30     
+
+def build_signal_alignment(ctx: dict, target_dir: str) -> dict:
+    vwap_ok = (target_dir == "UP" and ctx.get('price', 0.0) > ctx.get('vwap', 0.0)) or \
+              (target_dir == "DOWN" and ctx.get('price', 0.0) < ctx.get('vwap', 0.0))
+    rsi_ok = (target_dir == "UP" and ctx.get('rsi', 50.0) > 50) or \
+             (target_dir == "DOWN" and ctx.get('rsi', 50.0) < 50)
+    vol_ok = ctx.get('current_volume', 0.0) > (ctx.get('vol_sma_20', 0.0) * 1.05)
+    cvd_delta = ctx.get('cvd_candle_delta', 0.0)
+    cvd_ok = (target_dir == "UP" and cvd_delta > 10000) or \
+             (target_dir == "DOWN" and cvd_delta < -10000)
+    score = int(vwap_ok) + int(rsi_ok) + int(vol_ok) + int(cvd_ok)
+    return {
+        "direction": target_dir,
+        "score": score,
+        "max_score": 4,
+        "vwap": bool(vwap_ok),
+        "rsi": bool(rsi_ok),
+        "volume": bool(vol_ok),
+        "cvd": bool(cvd_ok),
+    }
+
+def update_execution_timing(
+    signal_ms: float | None = None,
+    ai_ms: float | None = None,
+    clob_ms: float | None = None,
+    confirmation_ms: float | None = None,
+):
+    global latest_execution_timing
+    if signal_ms is not None:
+        latest_execution_timing["signal_generation_ms"] = max(0.0, round(float(signal_ms), 1))
+    if ai_ms is not None:
+        latest_execution_timing["ai_inference_ms"] = max(0.0, round(float(ai_ms), 1))
+    if clob_ms is not None:
+        latest_execution_timing["clob_request_ms"] = max(0.0, round(float(clob_ms), 1))
+    if confirmation_ms is not None:
+        latest_execution_timing["confirmation_ms"] = max(0.0, round(float(confirmation_ms), 1))
+
+    total = (
+        float(latest_execution_timing.get("signal_generation_ms", 0.0))
+        + float(latest_execution_timing.get("ai_inference_ms", 0.0))
+        + float(latest_execution_timing.get("clob_request_ms", 0.0))
+        + float(latest_execution_timing.get("confirmation_ms", 0.0))
+    )
+    latest_execution_timing["total_ms"] = round(total, 1)
+    latest_execution_timing["updated_at"] = time.time()
+
+def get_drawdown_guard_snapshot(current_balance: float) -> dict:
+    max_bet_cap = min(float(current_balance) * float(risk_manager.max_trade_pct), 50.0)
+    daily_loss_cap = float(current_balance) * float(risk_manager.max_daily_loss_pct)
+    current_dd = abs(min(float(risk_manager.current_daily_pnl), 0.0))
+    remaining_dd_room = max(0.0, daily_loss_cap - current_dd)
+    room_ratio = (remaining_dd_room / daily_loss_cap) if daily_loss_cap > 0 else 1.0
+
+    if KILL_SWITCH:
+        regime = "PAUSED"
+    elif room_ratio < 0.30:
+        regime = "DEFENSIVE"
+    elif room_ratio < 0.60:
+        regime = "CAUTIOUS"
+    else:
+        regime = "NORMAL"
+
+    text = (
+        f"Current Risk Regime: {regime}. "
+        f"Bankroll: ${float(current_balance):,.2f}. "
+        f"Max Bet Cap: ${max_bet_cap:,.2f}. "
+        f"Fractional Kelly Dampener Active ({FRACTIONAL_KELLY_DAMPENER:.2f}x)."
+    )
+
+    return {
+        "regime": regime,
+        "bankroll": round(float(current_balance), 2),
+        "max_bet_cap": round(max_bet_cap, 2),
+        "daily_loss_cap": round(daily_loss_cap, 2),
+        "drawdown_used": round(current_dd, 2),
+        "drawdown_room_left": round(remaining_dd_room, 2),
+        "fractional_kelly_dampener": FRACTIONAL_KELLY_DAMPENER,
+        "max_trade_pct": float(risk_manager.max_trade_pct),
+        "max_daily_loss_pct": float(risk_manager.max_daily_loss_pct),
+        "text": text,
+    }
+
+def get_live_strategy_snapshot(current_balance: float) -> dict:
+    return {
+        "edge_tracker": dict(latest_edge_snapshot),
+        "signal_alignment": dict(latest_signal_alignment),
+        "execution_latency": dict(latest_execution_timing),
+        "cvd_gauge": dict(latest_cvd_snapshot),
+        "drawdown_guard": get_drawdown_guard_snapshot(current_balance),
+    }
 
 def build_market_family_prefix(seed_slug: str) -> str:
     if not seed_slug: return ""
@@ -1082,6 +1215,9 @@ def compute_ev_with_slippage(
         "ev_pct_gross": round(gross_ev_pct, 2),  
         "kelly_bet": kelly_bet,
         "slippage_cost_pct": round(slippage_cost_pct * 100, 2),
+        "true_prob_pct": round(true_prob_pct, 2),
+        "market_prob_pct": round(market_prob_pct, 2),
+        "token_price": round(token_price, 4),
         "edge": round(edge, 2),
         "approved": net_ev_pct > 0  
     }
@@ -1606,6 +1742,7 @@ def run_gatekeeper(
     current_candle: dict,
     history_snapshot: list[dict] | None = None,
 ) -> tuple:
+    global latest_edge_snapshot, latest_signal_alignment
     if not poly_data["market_found"]: 
         return False, "No Polymarket data", {}, {}
 
@@ -1662,6 +1799,25 @@ def run_gatekeeper(
         bet_size=kelly_down_temp["kelly_bet"],
         estimated_spread_pct=0.02
     )
+
+    target_dir = "UP" if ev_up["ev_pct"] > ev_down["ev_pct"] else "DOWN"
+    latest_signal_alignment = build_signal_alignment(ctx, target_dir)
+    up_edge = prob_up - float(poly_data.get("up_prob", 0.0))
+    down_edge = prob_down - float(poly_data.get("down_prob", 0.0))
+    best_edge = up_edge if target_dir == "UP" else down_edge
+    best_ev_pct = float(ev_up.get("ev_pct", 0.0)) if target_dir == "UP" else float(ev_down.get("ev_pct", 0.0))
+    latest_edge_snapshot = {
+        "slug": target_slug,
+        "direction": target_dir,
+        "up_math_prob": round(prob_up, 2),
+        "down_math_prob": round(prob_down, 2),
+        "up_poly_prob": round(float(poly_data.get("up_prob", 0.0)), 2),
+        "down_poly_prob": round(float(poly_data.get("down_prob", 0.0)), 2),
+        "up_edge": round(up_edge, 2),
+        "down_edge": round(down_edge, 2),
+        "best_edge": round(best_edge, 2),
+        "best_ev_pct": round(best_ev_pct, 2),
+    }
 
     return True, f"Passed Gate [Regime: {regime}]", ev_up, ev_down
 
@@ -1839,7 +1995,10 @@ async def _commit_decision(
                     "signals": result.get("reason", "").split(" | "), "ml_data": ml_data,
                     "sl_breach_count": 0, "entry_underlying_price": ctx.get("price", live_price) if ctx else live_price,
                     "mark_price": bought_price,
-                    "tp_gate_logged": False
+                    "tp_gate_logged": False,
+                    "tp_armed": False,
+                    "tp_peak_delta": 0.0,
+                    "tp_lock_floor_delta": 0.0
                 }
             log.info(f"DECISION LOCKED: {decision} | Confidence: {result.get('confidence', '?')} | "
                     f"Score: {result.get('score','?')}/4 | Bonus: {result.get('bonus',0)} | Bet: ${result.get('bet_size',0.0):.2f}")
@@ -1853,6 +2012,7 @@ async def _commit_decision(
 
 async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
     global clob_client, simulated_balance
+    bet_start_ts = time.perf_counter()
     token_id = poly_data.get("token_id_up", "") if decision == "UP" else poly_data.get("token_id_down", "")
 
     if KILL_SWITCH:
@@ -1951,7 +2111,9 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
         log.info(f"[ENTRY ORDER] Limit @ {limit_price:.4f} (expected {expected_price:.4f} + max {MAX_ENTRY_SLIPPAGE_CENTS*100:.0f}c slip)")
 
         try:
+            clob_req_start = time.perf_counter()
             resp = await asyncio.wait_for(asyncio.to_thread(_sign_and_submit_limit), timeout=4.0)
+            clob_req_ms = (time.perf_counter() - clob_req_start) * 1000.0
 
             status = resp.get("status", "")
             
@@ -1961,6 +2123,7 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
                 total_shares = sum(float(tx.get("size", 0)) for tx in resp["transactions"])
                 if total_shares > 0:
                     actual_price = total_cost / total_shares
+            confirm_start = time.perf_counter()
             
             if status == "matched":
                 spread_cents = float(liq_msg.split("spread=")[1].split("c")[0]) if "spread=" in liq_msg else 0
@@ -1976,6 +2139,8 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
                 async with state_lock:
                     if slug in active_predictions:
                         active_predictions[slug]["bought_price"] = actual_price
+                confirm_ms = (time.perf_counter() - confirm_start) * 1000.0
+                update_execution_timing(clob_ms=clob_req_ms, confirmation_ms=confirm_ms)
                     
             else:
                 # OPTIMIZED: Strict cutoff. No market order fallback. 
@@ -1984,18 +2149,28 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
                 async with state_lock:
                     active_predictions.pop(slug, None)
                 committed_slugs.discard(slug)
+                confirm_ms = (time.perf_counter() - confirm_start) * 1000.0
+                update_execution_timing(clob_ms=clob_req_ms, confirmation_ms=confirm_ms)
 
         except asyncio.TimeoutError:
+            clob_req_ms = (time.perf_counter() - bet_start_ts) * 1000.0
+            update_execution_timing(clob_ms=clob_req_ms, confirmation_ms=0.0)
             log.error(f"[TIMEOUT] CLOB TIMEOUT (>4s) for {slug}. Limit order status uncertain.")
             async with state_lock:
                 if slug in active_predictions:
                     active_predictions[slug]["status"] = "UNCERTAIN"
 
         except Exception as e:
+            clob_req_ms = (time.perf_counter() - bet_start_ts) * 1000.0
+            update_execution_timing(clob_ms=clob_req_ms, confirmation_ms=0.0)
             log.error(f"[ERROR] CLOB execution failed: {e}")
             async with state_lock:
                 active_predictions.pop(slug, None)
             committed_slugs.discard(slug)
+    else:
+        # Paper mode still records path latency so strategy profiling remains realistic.
+        paper_path_ms = (time.perf_counter() - bet_start_ts) * 1000.0
+        update_execution_timing(clob_ms=paper_path_ms, confirmation_ms=0.0)
 
 async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_reason: str, current_token_price: float):
     global simulated_balance, total_wins, total_losses
@@ -2301,6 +2476,7 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
                         last_ai_response_ms if ai_response_ema_ms <= 0
                         else (0.7 * ai_response_ema_ms + 0.3 * last_ai_response_ms)
                     )
+                    update_execution_timing(ai_ms=last_ai_response_ms)
                     break
             except Exception as e:
                 ai_consecutive_failures += 1
@@ -2340,7 +2516,7 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
 # EVALUATION LOOP
 # ============================================================================
 async def evaluation_loop(session: aiohttp.ClientSession):
-    global target_slug, ai_call_in_flight, kill_switch_last_log_ts
+    global target_slug, ai_call_in_flight, kill_switch_last_log_ts, latest_cvd_snapshot
 
     while True:
         await asyncio.sleep(EVAL_TICK_SECONDS)
@@ -2379,6 +2555,14 @@ async def evaluation_loop(session: aiohttp.ClientSession):
         }
 
         ctx = build_technical_context(current_candle, history_snapshot)
+        cvd_divergence, cvd_divergence_strength = detect_cvd_divergence(ctx, current_candle)
+        latest_cvd_snapshot = {
+            "delta": round(float(ctx.get("cvd_candle_delta", 0.0)), 2),
+            "one_min_delta": round(float(ctx.get("cvd_1min", 0.0)), 2),
+            "threshold": round(float(adaptive_cvd_threshold), 2),
+            "divergence": cvd_divergence,
+            "divergence_strength": round(float(cvd_divergence_strength), 3),
+        }
 
         # --- FIX: INDEPENDENT POSITION MONITOR ---
         for slug, pred in predictions_snapshot:
@@ -2493,6 +2677,13 @@ async def evaluation_loop(session: aiohttp.ClientSession):
                     live_pred = active_predictions.get(slug)
                     if live_pred and live_pred.get("status") == "OPEN":
                         live_pred["sl_breach_count"] = 0
+                        # Arm TP lock and track best unrealized profit so we can protect it.
+                        live_pred["tp_armed"] = True
+                        peak_delta = max(float(live_pred.get("tp_peak_delta", 0.0)), price_delta)
+                        live_pred["tp_peak_delta"] = peak_delta
+                        retrace_budget = max(TP_RETRACE_EXIT_MIN_DELTA, peak_delta * TP_RETRACE_EXIT_FRAC)
+                        lock_floor = max(TP_LOCK_MIN_PROFIT_DELTA, peak_delta - retrace_budget)
+                        live_pred["tp_lock_floor_delta"] = max(float(live_pred.get("tp_lock_floor_delta", 0.0)), lock_floor)
                         if tp_gate_hold and not force_tp:
                             if not live_pred.get("tp_gate_logged", False):
                                 live_pred["tp_gate_logged"] = True
@@ -2516,7 +2707,34 @@ async def evaluation_loop(session: aiohttp.ClientSession):
 
             # --- EMERGENCY SL BLOCK HAS BEEN DELETED ---
 
-            elif not disable_sl and price_delta <= sl_delta:
+            if price_delta < tp_delta and secs_left > TP_EARLY_EXIT_WINDOW_SECS:
+                # If TP was hit earlier, do not allow deep giveback while waiting for expiry window.
+                lock_exit = False
+                lock_reason = ""
+                async with state_lock:
+                    live_pred = active_predictions.get(slug)
+                    if live_pred and live_pred.get("status") == "OPEN" and live_pred.get("tp_armed", False):
+                        peak_delta = float(live_pred.get("tp_peak_delta", 0.0))
+                        if peak_delta > 0:
+                            retrace_budget = max(TP_RETRACE_EXIT_MIN_DELTA, peak_delta * TP_RETRACE_EXIT_FRAC)
+                            lock_floor = max(TP_LOCK_MIN_PROFIT_DELTA, peak_delta - retrace_budget)
+                            if lock_floor > float(live_pred.get("tp_lock_floor_delta", 0.0)):
+                                live_pred["tp_lock_floor_delta"] = lock_floor
+                            else:
+                                lock_floor = float(live_pred.get("tp_lock_floor_delta", 0.0))
+
+                            if price_delta <= lock_floor:
+                                live_pred["status"] = "CLOSING"
+                                lock_exit = True
+                                lock_reason = (
+                                    f"TP_LOCK_RETRACE (peak +{peak_delta*100:.1f}c -> "
+                                    f"now +{price_delta*100:.1f}c, floor +{lock_floor*100:.1f}c)"
+                                )
+                if lock_exit:
+                    log.info(f"[TP LOCK] {slug} | {lock_reason}")
+                    asyncio.create_task(execute_early_exit(session, slug, lock_reason, current_token_price))
+
+            if not disable_sl and price_delta <= sl_delta:
                 breach_count = 0
                 sl_confirmed = False
                 async with state_lock:
@@ -2587,6 +2805,7 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             log.info(f"[RISK] {rm_msg}")
             continue
 
+        signal_gen_start = time.perf_counter()
         should_call, skip_msg, ev_up, ev_down = run_gatekeeper(
             ctx,
             poly_data,
@@ -2612,6 +2831,7 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             continue
 
         result = rule_engine_decide(ctx, ev_up, ev_down, poly_data, current_candle)
+        update_execution_timing(signal_ms=(time.perf_counter() - signal_gen_start) * 1000.0)
 
         if result["decision"] in ["UP", "DOWN"]:
             selected_ev = ev_up if result["decision"] == "UP" else ev_down

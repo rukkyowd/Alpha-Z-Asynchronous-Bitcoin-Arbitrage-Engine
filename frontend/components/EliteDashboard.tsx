@@ -104,6 +104,54 @@ const DEFAULT_LIVE_DATA = {
   logs: [],
   regime: "UNKNOWN",
   atr: 0,
+  strategy: {
+    edge_tracker: {
+      slug: "",
+      direction: "UNKNOWN",
+      up_math_prob: 0,
+      down_math_prob: 0,
+      up_poly_prob: 0,
+      down_poly_prob: 0,
+      up_edge: 0,
+      down_edge: 0,
+      best_edge: 0,
+      best_ev_pct: 0,
+    },
+    signal_alignment: {
+      direction: "UNKNOWN",
+      score: 0,
+      max_score: 4,
+      vwap: false,
+      rsi: false,
+      volume: false,
+      cvd: false,
+    },
+    execution_latency: {
+      signal_generation_ms: 0,
+      ai_inference_ms: 0,
+      clob_request_ms: 0,
+      confirmation_ms: 0,
+      total_ms: 0,
+      updated_at: 0,
+    },
+    cvd_gauge: {
+      delta: 0,
+      one_min_delta: 0,
+      threshold: 12000,
+      divergence: "NONE",
+      divergence_strength: 0,
+    },
+    drawdown_guard: {
+      regime: "NORMAL",
+      text: "",
+      bankroll: 0,
+      max_bet_cap: 0,
+      drawdown_used: 0,
+      drawdown_room_left: 0,
+      max_trade_pct: 0.05,
+      max_daily_loss_pct: 0.2,
+    },
+  },
 };
 
 function parseUtcTimestamp(raw: string): Date | null {
@@ -312,7 +360,19 @@ export default function EliteDashboard() {
         }
         lastPriceRef.current = safeNumber(data.price);
 
-        setLiveData(data);
+        setLiveData({
+          ...DEFAULT_LIVE_DATA,
+          ...data,
+          strategy: {
+            ...DEFAULT_LIVE_DATA.strategy,
+            ...(data?.strategy || {}),
+            edge_tracker: { ...DEFAULT_LIVE_DATA.strategy.edge_tracker, ...(data?.strategy?.edge_tracker || {}) },
+            signal_alignment: { ...DEFAULT_LIVE_DATA.strategy.signal_alignment, ...(data?.strategy?.signal_alignment || {}) },
+            execution_latency: { ...DEFAULT_LIVE_DATA.strategy.execution_latency, ...(data?.strategy?.execution_latency || {}) },
+            cvd_gauge: { ...DEFAULT_LIVE_DATA.strategy.cvd_gauge, ...(data?.strategy?.cvd_gauge || {}) },
+            drawdown_guard: { ...DEFAULT_LIVE_DATA.strategy.drawdown_guard, ...(data?.strategy?.drawdown_guard || {}) },
+          },
+        });
         setLiveLoading(false);
       } catch (error) {
         console.error("WebSocket payload parse error:", error);
@@ -609,7 +669,7 @@ export default function EliteDashboard() {
             />
           )}
           {activeTab === "journal" && <JournalView portfolio={portfolio} setReplayTrade={setReplayTrade} timeMode={timeMode} />}
-          {activeTab === "analytics" && <AnalyticsView portfolio={portfolio} engineHealth={engineHealth} />}
+          {activeTab === "analytics" && <AnalyticsView portfolio={portfolio} engineHealth={engineHealth} liveData={liveData} />}
         </AnimatePresence>
       </main>
 
@@ -752,7 +812,167 @@ function Panel({ title, children, className = "" }: { title: string; children: R
   );
 }
 
+function ArbitrageGapPanel({ edge }: { edge: any }) {
+  const upMath = safeNumber(edge?.up_math_prob);
+  const downMath = safeNumber(edge?.down_math_prob);
+  const upPoly = safeNumber(edge?.up_poly_prob);
+  const downPoly = safeNumber(edge?.down_poly_prob);
+  const upGap = safeNumber(edge?.up_edge);
+  const downGap = safeNumber(edge?.down_edge);
+  const bestDir = String(edge?.direction || "UNKNOWN");
+  const bestEdge = safeNumber(edge?.best_edge);
+
+  const row = (label: string, mathProb: number, polyProb: number, gap: number) => (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between text-[10px] uppercase tracking-wide">
+        <span className="font-bold text-zinc-400">{label}</span>
+        <span className={`font-mono font-bold ${gap >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+          Gap {gap >= 0 ? "+" : ""}
+          {gap.toFixed(2)}%
+        </span>
+      </div>
+      <div className="space-y-1">
+        <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
+          <div className="h-full rounded-full bg-blue-500/70" style={{ width: `${clamp(mathProb, 0, 100)}%` }} />
+        </div>
+        <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
+          <div className="h-full rounded-full bg-fuchsia-500/70" style={{ width: `${clamp(polyProb, 0, 100)}%` }} />
+        </div>
+      </div>
+      <div className="flex items-center justify-between font-mono text-[10px] text-zinc-500">
+        <span>Math {mathProb.toFixed(1)}%</span>
+        <span>Poly {polyProb.toFixed(1)}%</span>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2">
+        <span className="text-xs font-bold uppercase tracking-wide text-zinc-500">Best Edge</span>
+        <span className={`text-sm font-black ${bestEdge >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+          {bestDir} {bestEdge >= 0 ? "+" : ""}
+          {bestEdge.toFixed(2)}%
+        </span>
+      </div>
+      {row("UP", upMath, upPoly, upGap)}
+      {row("DOWN", downMath, downPoly, downGap)}
+      <div className="flex items-center gap-3 text-[10px] text-zinc-500">
+        <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-blue-500/80" /> Math Prob</span>
+        <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-fuchsia-500/80" /> Poly Prob</span>
+      </div>
+    </div>
+  );
+}
+
+function SignalAlignmentMatrix({ signal }: { signal: any }) {
+  const score = safeNumber(signal?.score);
+  const maxScore = Math.max(1, safeNumber(signal?.max_score, 4));
+  const direction = String(signal?.direction || "UNKNOWN");
+  const cells = [
+    { key: "vwap", label: "VWAP", ok: Boolean(signal?.vwap) },
+    { key: "rsi", label: "RSI", ok: Boolean(signal?.rsi) },
+    { key: "volume", label: "VOL", ok: Boolean(signal?.volume) },
+    { key: "cvd", label: "CVD", ok: Boolean(signal?.cvd) },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2">
+        <span className="text-xs font-bold uppercase tracking-wide text-zinc-500">Direction</span>
+        <span className={`text-sm font-black ${direction === "UP" ? "text-emerald-400" : direction === "DOWN" ? "text-rose-400" : "text-zinc-400"}`}>
+          {direction} • {score}/{maxScore}
+        </span>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        {cells.map((cell) => (
+          <div key={cell.key} className={`rounded-lg border px-3 py-2 ${cell.ok ? "border-emerald-500/40 bg-emerald-500/10" : "border-rose-500/40 bg-rose-500/10"}`}>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wide text-zinc-400">{cell.label}</span>
+              <span className={`text-xs font-black ${cell.ok ? "text-emerald-400" : "text-rose-400"}`}>{cell.ok ? "PASS" : "FAIL"}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LatencyWaterfallPanel({ latency }: { latency: any }) {
+  const signalMs = safeNumber(latency?.signal_generation_ms);
+  const aiMs = safeNumber(latency?.ai_inference_ms);
+  const clobMs = safeNumber(latency?.clob_request_ms);
+  const confirmMs = safeNumber(latency?.confirmation_ms);
+  const totalMs = Math.max(1, safeNumber(latency?.total_ms, signalMs + aiMs + clobMs + confirmMs));
+  const segments = [
+    { label: "Signal", ms: signalMs, cls: "bg-blue-500/70" },
+    { label: "AI", ms: aiMs, cls: "bg-amber-500/70" },
+    { label: "CLOB", ms: clobMs, cls: "bg-fuchsia-500/70" },
+    { label: "Confirm", ms: confirmMs, cls: "bg-emerald-500/70" },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="h-4 overflow-hidden rounded-full border border-zinc-800 bg-zinc-950/70">
+        <div className="flex h-full w-full">
+          {segments.map((seg) => (
+            <div key={seg.label} className={seg.cls} style={{ width: `${clamp((seg.ms / totalMs) * 100, 0, 100)}%` }} />
+          ))}
+        </div>
+      </div>
+      <div className="space-y-2">
+        {segments.map((seg) => (
+          <div key={seg.label} className="flex items-center justify-between text-[11px]">
+            <span className="text-zinc-500">{seg.label}</span>
+            <span className="font-mono text-zinc-300">{seg.ms.toFixed(0)} ms</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center justify-between border-t border-zinc-800 pt-2 text-xs">
+        <span className="text-zinc-500">Total</span>
+        <span className="font-mono font-bold text-zinc-200">{totalMs.toFixed(0)} ms</span>
+      </div>
+    </div>
+  );
+}
+
+function CvdPressureGauge({ cvd }: { cvd: any }) {
+  const delta = safeNumber(cvd?.delta);
+  const threshold = Math.max(1, safeNumber(cvd?.threshold, 12000));
+  const normalized = clamp(Math.abs(delta) / threshold, 0, 1);
+  const isPositive = delta >= 0;
+  const divergence = String(cvd?.divergence || "NONE").toUpperCase();
+  const divergenceStrength = safeNumber(cvd?.divergence_strength);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-end gap-4">
+        <div className="relative h-36 w-10 overflow-hidden rounded-md border border-zinc-800 bg-zinc-950">
+          <div
+            className={`absolute bottom-0 left-0 w-full ${isPositive ? "bg-emerald-500/70" : "bg-rose-500/70"}`}
+            style={{ height: `${normalized * 100}%` }}
+          />
+        </div>
+        <div className="space-y-1">
+          <div className={`font-mono text-sm font-black ${isPositive ? "text-emerald-400" : "text-rose-400"}`}>
+            {isPositive ? "+" : ""}
+            {delta.toFixed(0)}
+          </div>
+          <div className="text-[11px] text-zinc-500">Threshold {threshold.toFixed(0)}</div>
+          <div className="text-[11px] text-zinc-500">1m Flow {safeNumber(cvd?.one_min_delta).toFixed(0)}</div>
+        </div>
+      </div>
+      {divergence !== "NONE" && (
+        <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-300">
+          ⚠ DIV: {divergence} ({(divergenceStrength * 100).toFixed(0)}%)
+        </div>
+      )}
+    </div>
+  );
+}
+
 function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMode }: any) {
+  const strategy = liveData?.strategy || DEFAULT_LIVE_DATA.strategy;
   return (
     <motion.div key="terminal" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="grid grid-cols-12 gap-6">
       <div className="col-span-12 space-y-6 xl:col-span-8">
@@ -772,6 +992,15 @@ function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMo
         </Panel>
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+          <Panel title="Arbitrage Gap (Math vs Poly)">
+            <ArbitrageGapPanel edge={strategy.edge_tracker} />
+          </Panel>
+          <Panel title="Execution Latency Waterfall">
+            <LatencyWaterfallPanel latency={strategy.execution_latency} />
+          </Panel>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           <Panel title="Equity Curve">{portfolio ? <EquityCurve data={portfolio?.equity_curve || []} /> : <SkeletonBox className="h-48 w-full" />}</Panel>
           <Panel title="Monte Carlo Projection">{portfolio ? <GrowthChart data={portfolio?.projections?.paths || []} /> : <SkeletonBox className="h-48 w-full" />}</Panel>
         </div>
@@ -783,6 +1012,12 @@ function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMo
       </div>
 
       <div className="col-span-12 space-y-6 xl:col-span-4">
+        <Panel title="Signal Alignment Matrix">
+          <SignalAlignmentMatrix signal={strategy.signal_alignment} />
+        </Panel>
+        <Panel title="Smart Money Flow (CVD)">
+          <CvdPressureGauge cvd={strategy.cvd_gauge} />
+        </Panel>
         <Panel title="Active Positions">
           <ActiveTradesPanel trades={liveData.active_trades} currentUnderlying={safeNumber(liveData.price)} />
         </Panel>
@@ -1114,10 +1349,12 @@ function TooltipLabel({ label, tooltip }: { label: string; tooltip: string }) {
   );
 }
 
-function AnalyticsView({ portfolio, engineHealth }: { portfolio: any; engineHealth: EngineHealth }) {
+function AnalyticsView({ portfolio, engineHealth, liveData }: { portfolio: any; engineHealth: EngineHealth; liveData: any }) {
   const attr = portfolio?.attribution;
   const aiStatus = String(engineHealth?.ai_status || "ACTIVE").toUpperCase();
   const aiStatusClass = aiStatus === "DEGRADED" ? "text-red-400" : aiStatus === "SLOW" ? "text-amber-400" : "text-emerald-400";
+  const drawdownGuard = liveData?.strategy?.drawdown_guard || {};
+  const dailyPnl = Array.isArray(portfolio?.daily_pnl) ? portfolio.daily_pnl : [];
 
   return (
     <motion.div key="analytics" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
@@ -1135,6 +1372,9 @@ function AnalyticsView({ portfolio, engineHealth }: { portfolio: any; engineHeal
             <div className="flex items-center justify-between gap-3">
               <TooltipLabel label="Optimal Kelly" tooltip="Suggested bankroll percentage to risk per trade from historical win rate and payoff ratio." />
               <span className="text-sm font-black text-blue-400">{portfolio?.metrics?.kelly_optimal || "0.0%"}</span>
+            </div>
+            <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-3 text-[11px] leading-relaxed text-zinc-300">
+              {String(drawdownGuard?.text || "Drawdown guard status is syncing...")}
             </div>
           </div>
         </Panel>
@@ -1204,7 +1444,55 @@ function AnalyticsView({ portfolio, engineHealth }: { portfolio: any; engineHeal
           </div>
         </Panel>
       </div>
+
+      <Panel title="Daily P&L Bars">
+        <DailyPnlBarChart rows={dailyPnl} />
+      </Panel>
     </motion.div>
+  );
+}
+
+function DailyPnlBarChart({ rows }: { rows: any[] }) {
+  if (!rows || rows.length === 0) {
+    return <div className="text-xs text-zinc-500">No daily P&L records yet.</div>;
+  }
+
+  const maxAbs = Math.max(1, ...rows.map((r) => Math.abs(safeNumber(r?.pnl))));
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-1 gap-2">
+        {rows.map((row) => {
+          const pnl = safeNumber(row?.pnl);
+          const pct = clamp((Math.abs(pnl) / maxAbs) * 100, 2, 100);
+          const isPos = pnl >= 0;
+          return (
+            <div key={String(row?.date)} className="grid grid-cols-[56px_1fr_90px] items-center gap-3 text-xs">
+              <div className="font-mono text-zinc-500">{String(row?.day || "").toUpperCase()}</div>
+              <div className="h-5 overflow-hidden rounded border border-zinc-800 bg-zinc-950">
+                <div className={`h-full ${isPos ? "bg-emerald-500/70" : "bg-rose-500/70"}`} style={{ width: `${pct}%` }} />
+              </div>
+              <div className={`text-right font-mono font-bold ${isPos ? "text-emerald-400" : "text-rose-400"}`}>
+                {isPos ? "+" : ""}${pnl.toFixed(2)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="grid grid-cols-7 gap-1 border-t border-zinc-800 pt-3">
+        {rows.slice(-35).map((row) => {
+          const pnl = safeNumber(row?.pnl);
+          const absRatio = Math.abs(pnl) / maxAbs;
+          const shade = clamp(Math.round(absRatio * 3), 0, 3);
+          const cls =
+            pnl > 0 ? ["bg-emerald-900/30", "bg-emerald-800/40", "bg-emerald-700/50", "bg-emerald-600/70"][shade] :
+            pnl < 0 ? ["bg-rose-900/30", "bg-rose-800/40", "bg-rose-700/50", "bg-rose-600/70"][shade] :
+            "bg-zinc-800/40";
+          return (
+            <div key={`cal-${String(row?.date)}`} className={`h-5 rounded border border-zinc-800 ${cls}`} title={`${row?.date}: ${pnl >= 0 ? "+" : ""}$${pnl.toFixed(2)}`} />
+          );
+        })}
+      </div>
+    </div>
   );
 }
 

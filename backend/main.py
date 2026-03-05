@@ -290,6 +290,7 @@ async def get_trading_metrics():
                 max_drawdown=0.0
             ),
             "journal": [],
+            "daily_pnl": [],
             "signals": signal_perf,
             "attribution": empty_attribution
         }
@@ -310,6 +311,7 @@ async def get_trading_metrics():
             df["PnL"] = df["result_upper"].apply(lambda x: 1.00 if "WIN" in x else (-1.01 if "LOSS" in x else 0.0))
 
         df["Cum_PnL"] = df["PnL"].cumsum()
+        df["trade_date"] = df["dt"].dt.date
 
         # 2. EQUITY CALCULATIONS
         total_historical_pnl = df["PnL"].sum()
@@ -368,6 +370,22 @@ async def get_trading_metrics():
         hourly_stats['win_rate_pct'] = (hourly_stats.get('WIN', 0) / hourly_stats['total'] * 100).fillna(0)
         heatmap_data = [{"hour": int(h), "win_rate": round(wr, 1), "trades": int(t)}
                         for h, wr, t in zip(hourly_stats.index, hourly_stats['win_rate_pct'], hourly_stats['total'])]
+
+        daily_rollup = (
+            df.groupby("trade_date", as_index=False)
+            .agg(pnl=("PnL", "sum"), trades=("PnL", "count"))
+            .sort_values("trade_date")
+            .tail(21)
+        )
+        daily_pnl = [
+            {
+                "date": str(row.trade_date),
+                "day": pd.to_datetime(row.trade_date).strftime("%a"),
+                "pnl": round(float(row.pnl), 2),
+                "trades": int(row.trades),
+            }
+            for row in daily_rollup.itertuples(index=False)
+        ]
 
         pnl_for_risk = df.loc[df['is_resolved'], 'PnL']
         if pnl_for_risk.empty:
@@ -435,6 +453,7 @@ async def get_trading_metrics():
                 max_drawdown=drawdown.min()
             ),
             "journal": df.tail(50).iloc[::-1].to_dict(orient="records"),
+            "daily_pnl": daily_pnl,
             "signals": signal_perf,
             "attribution": attribution
         }
@@ -530,6 +549,7 @@ async def live_data_feed(websocket: WebSocket):
                     atr = sum(atr_components) / len(atr_components)
 
             balance = await get_current_balance()
+            strategy_snapshot = core.get_live_strategy_snapshot(balance)
 
             now = int(time.time())
             next_boundary = ((now // 3600) + 1) * 3600  # Hourly markets
@@ -546,6 +566,7 @@ async def live_data_feed(websocket: WebSocket):
                 "active_trades": active_trades,
                 "regime": regime,
                 "atr": round(atr, 2),
+                "strategy": strategy_snapshot,
                 "candle": {
                     "time": int(k.get('t', time.time()*1000)/1000),
                     "open": float(k.get('o', price)),
