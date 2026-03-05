@@ -91,6 +91,10 @@ SL_CONFIRM_BREACH_EARLY           = 12   # Require 60 seconds of sustained drop
 SL_CONFIRM_BREACH_MID             = 8    # Require 40 seconds of sustained drop
 SL_CONFIRM_BREACH_LATE            = 6    # Require 30 seconds of sustained drop
 SL_RECOVERY_RESET_BUFFER          = 0.01
+# Keep SL reachable for low-priced entries (e.g., 10-20c tokens).
+# This caps SL by a percentage of entry so it cannot require an impossible drop.
+SL_ENTRY_REL_MAX_LOSS_PCT         = 0.55
+SL_ENTRY_REL_MIN_CENTS            = 0.03
 # Only allow take-profit early exits near expiry; otherwise hold winners.
 TP_EARLY_EXIT_WINDOW_SECS         = 180
 # Force immediate TP on extreme windfalls, even outside the TP time gate.
@@ -2432,6 +2436,15 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             entry_age = time.time() - pred.get("entry_time", time.time())
             if entry_age < 180:
                 sl_delta *= 1.20 # Give the trade 3 minutes to breathe
+
+            # Cap SL by entry price so low-priced tokens have a reachable stop.
+            # Example: if bought at 0.12, do not require a 0.14+ drop (impossible).
+            entry_based_sl = -max(SL_ENTRY_REL_MIN_CENTS, bought_price * SL_ENTRY_REL_MAX_LOSS_PCT)
+            # Keep at least ~1c theoretical room to avoid below-zero targets.
+            reachable_floor = -(max(bought_price - 0.01, 0.0))
+            if reachable_floor < 0:
+                entry_based_sl = max(entry_based_sl, reachable_floor)
+            sl_delta = max(sl_delta, entry_based_sl)
 
             # Remove the emergency SL variable entirely
             price_delta = current_token_price - bought_price
