@@ -15,6 +15,7 @@ import csv
 from collections import deque
 from urllib.parse import urlparse
 from datetime import datetime, timezone, timedelta
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from typing import Optional, Tuple
 from decimal import Decimal, ROUND_DOWN, ROUND_UP
@@ -124,23 +125,14 @@ CVD_ADAPTIVE_MULTIPLIER = 1.5
 # ASYNC ML DATA LOGGER
 # ============================================================
 ML_FILE = "ai_training_data.csv"
+ML_QUEUE_MAX = 5000
+DB_QUEUE_MAX = 10000
 
 async def log_ml_data(row: dict):
-    async with ml_write_lock:
-        def _sync_write():
-            file_exists = os.path.isfile(ML_FILE)
-            is_empty = not file_exists or os.path.getsize(ML_FILE) == 0
-            
-            try:
-                with open(ML_FILE, mode="a", newline="", encoding="utf-8") as f:
-                    writer = csv.DictWriter(f, fieldnames=row.keys())
-                    if is_empty:
-                        writer.writeheader()
-                    writer.writerow(row)
-            except Exception as e:
-                print(f"[ML LOG ERROR] Failed to write data: {e}", file=sys.stderr)
-        
-        await asyncio.to_thread(_sync_write)
+    try:
+        await ml_queue.put(dict(row))
+    except Exception as e:
+        log.error(f"[ML LOG ERROR] Queue put failed: {e}")
 
 # ============================================================
 # ELITE RISK MANAGEMENT ENGINE
@@ -310,52 +302,80 @@ async def get_historical_pnl() -> float:
                 cursor = conn.execute("SELECT SUM(pnl_impact) FROM trades")
                 result = cursor.fetchone()[0]
                 return float(result) if result else 0.0
-        except Exception:
+        except Exception as e:
+            log.debug(f"[DB] get_historical_pnl failed, defaulting to 0: {e}")
             return 0.0
     return await asyncio.to_thread(_sync_fetch)
 
 async def log_trade_to_db(slug, decision, strike, final_price, actual_outcome, result, win_rate,
                      pnl_impact, local_calc_outcome="", official_outcome="", match_status="",
                      trigger_reason=""):
-    def _sync_write():
-        try:
-            from contextlib import closing
-            timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
-            
-            with closing(sqlite3.connect(DB_FILE, timeout=5.0)) as conn:
-                with conn:  
+    timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+    payload = (
+        timestamp, slug, decision, strike, final_price, actual_outcome,
+        result, win_rate, pnl_impact, local_calc_outcome, official_outcome, match_status, trigger_reason
+    )
+    try:
+        await db_queue.put({"type": "trade", "payload": payload})
+    except Exception as e:
+        log.error(f"[DB ERROR] Queue put failed: {e}")
+
+async def log_execution_metrics(slug: str, direction: str, expected_price: float, 
+                                actual_price: float, spread_cents: float, liq_check: str):
+    timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+    slippage_bps = ((actual_price - expected_price) / expected_price * 10000) if expected_price > 0 else 0
+    payload = (timestamp, slug, direction, expected_price, actual_price, slippage_bps, spread_cents, liq_check)
+    try:
+        await db_queue.put({"type": "exec", "payload": payload})
+    except Exception as e:
+        log.error(f"[EXEC METRICS ERROR] Queue put failed: {e}")
+
+async def ml_writer_worker():
+    file_exists = os.path.isfile(ML_FILE)
+    is_empty = not file_exists or os.path.getsize(ML_FILE) == 0
+    header_written = not is_empty
+    with open(ML_FILE, mode="a", newline="", encoding="utf-8") as f:
+        while True:
+            row = await ml_queue.get()
+            try:
+                writer = csv.DictWriter(f, fieldnames=row.keys())
+                if not header_written:
+                    writer.writeheader()
+                    header_written = True
+                writer.writerow(row)
+                f.flush()
+            except Exception as e:
+                log.error(f"[ML LOG ERROR] Worker write failed: {e}")
+            finally:
+                ml_queue.task_done()
+
+async def db_writer_worker():
+    conn = sqlite3.connect(DB_FILE, timeout=5.0)
+    try:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        while True:
+            item = await db_queue.get()
+            try:
+                if item["type"] == "trade":
                     conn.execute("""
                         INSERT INTO trades (
                             timestamp, slug, decision, strike, final_price, actual_outcome,
                             result, win_rate, pnl_impact, local_calc_outcome, official_outcome, match_status, trigger_reason
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (
-                        timestamp, slug, decision, strike, final_price, actual_outcome,
-                        result, win_rate, pnl_impact, local_calc_outcome, official_outcome, match_status, trigger_reason
-                    ))
-        except Exception as e:
-            print(f"[DB ERROR] Failed to write trade: {e}", file=sys.stderr)
-            
-    await asyncio.to_thread(_sync_write)
-
-async def log_execution_metrics(slug: str, direction: str, expected_price: float, 
-                                actual_price: float, spread_cents: float, liq_check: str):
-    def _sync_write():
-        try:
-            from contextlib import closing
-            timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
-            slippage_bps = ((actual_price - expected_price) / expected_price * 10000) if expected_price > 0 else 0
-            
-            with closing(sqlite3.connect(DB_FILE, timeout=5.0)) as conn:
-                with conn: 
+                    """, item["payload"])
+                elif item["type"] == "exec":
                     conn.execute("""
-                        INSERT INTO execution_metrics 
+                        INSERT INTO execution_metrics
                         (timestamp, slug, direction, expected_price, actual_price, slippage_bps, spread_cents, liquidity_check)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (timestamp, slug, direction, expected_price, actual_price, slippage_bps, spread_cents, liq_check))
-        except Exception as e:
-            print(f"[EXEC METRICS ERROR] {e}", file=sys.stderr)
-    await asyncio.to_thread(_sync_write)
+                    """, item["payload"])
+                conn.commit()
+            except Exception as e:
+                log.error(f"[DB ERROR] Worker write failed: {e}")
+            finally:
+                db_queue.task_done()
+    finally:
+        conn.close()
 
 # ============================================================
 # STATE
@@ -364,7 +384,10 @@ ai_call_count           = 0
 ai_consecutive_failures = 0
 ai_circuit_open_until   = 0.0
 background_tasks = set()
-ml_write_lock = asyncio.Lock()
+ml_queue = asyncio.Queue(maxsize=ML_QUEUE_MAX)
+db_queue = asyncio.Queue(maxsize=DB_QUEUE_MAX)
+state_lock = asyncio.Lock()
+api_semaphore = asyncio.Semaphore(5)
 
 candle_history: list[dict] = []
 target_slug: str    = ""
@@ -387,6 +410,8 @@ strike_price_cache: dict = {}
 clob_client = None
 live_price: float = 0.0
 live_candle: dict = {}
+last_closed_kline_ms: int = 0
+last_agg_trade_ms: int = 0
 
 cvd_total:        float = 0.0
 cvd_1min_buffer:  deque  = deque()
@@ -414,6 +439,12 @@ def fire_and_forget(coro):
     task = asyncio.create_task(coro)
     background_tasks.add(task)
     task.add_done_callback(background_tasks.discard)
+
+@asynccontextmanager
+async def api_get(session: aiohttp.ClientSession, url: str, **kwargs):
+    async with api_semaphore:
+        async with session.get(url, **kwargs) as resp:
+            yield resp
 
 def _record_full_exit_for_reentry(slug: str, pred: dict, exit_reason: str):
     stats = slug_reentry_state.setdefault(slug, {
@@ -497,7 +528,8 @@ def _parse_seconds_remaining(end_date_str: str) -> float:
     try:
         end_dt = datetime.fromisoformat(end_date_str.replace("Z", "+00:00"))
         return (end_dt - datetime.now(timezone.utc)).total_seconds()
-    except Exception:
+    except Exception as e:
+        log.debug(f"[TIME] Failed to parse end date '{end_date_str}': {e}")
         return -1.0
 
 def increment_slug_by_interval(slug: str) -> str:
@@ -522,7 +554,8 @@ def increment_slug_by_interval(slug: str) -> str:
         new_ampm = next_dt.strftime('%p').lower()
         
         return f"bitcoin-up-or-down-{new_month}-{new_day}-{new_hour}{new_ampm}-et"
-    except Exception:
+    except Exception as e:
+        log.debug(f"[SLUG] increment_slug_by_interval failed for {slug}: {e}")
         return slug
     
 def parse_candle(raw: dict, override_close: float = 0.0) -> dict:
@@ -551,7 +584,8 @@ async def fetch_live_balance(session: aiohttp.ClientSession) -> float:
         resp = await asyncio.to_thread(clob_client.get_balance_allowance, params=params)
         fetched = int(resp.get("balance", 0)) / 1_000_000
         return fetched if fetched > 0 else BANKROLL
-    except Exception:
+    except Exception as e:
+        log.debug(f"[BALANCE] fetch_live_balance failed, using fallback bankroll: {e}")
         return BANKROLL
 
 async def warmup_ai(session: aiohttp.ClientSession):
@@ -703,20 +737,26 @@ def update_vwap(candle: dict):
     vwap_cum_vol += candle['volume']
     cvd_snapshot_at_candle_open = cvd_total
 
-def process_agg_trade(msg: dict):
-    global cvd_total, cvd_1min_buffer, last_cvd_1min, live_price
+async def process_agg_trade(msg: dict):
+    global cvd_total, cvd_1min_buffer, last_cvd_1min, live_price, last_agg_trade_ms
     qty = float(msg['q'])
     is_buyer_maker = msg['m']
+    trade_price = float(msg['p'])
+    trade_ts = int(msg.get('T', 0) or 0)
     delta = -qty if is_buyer_maker else qty
-    cvd_total += delta
-    cvd_1min_buffer.append((time.time(), delta))
-    live_price = float(msg['p'])
 
-    cutoff = time.time() - 60
-    while cvd_1min_buffer and cvd_1min_buffer[0][0] < cutoff:
-        cvd_1min_buffer.popleft()
+    async with state_lock:
+        cvd_total += delta
+        cvd_1min_buffer.append((time.time(), delta))
+        live_price = trade_price
+        if trade_ts > 0:
+            last_agg_trade_ms = max(last_agg_trade_ms, trade_ts)
 
-    last_cvd_1min = sum(d for _, d in cvd_1min_buffer)
+        cutoff = time.time() - 60
+        while cvd_1min_buffer and cvd_1min_buffer[0][0] < cutoff:
+            cvd_1min_buffer.popleft()
+
+        last_cvd_1min = sum(d for _, d in cvd_1min_buffer)
 
 def detect_market_regime(history: list[dict]) -> str:
     if len(history) < 30:
@@ -986,14 +1026,16 @@ def compute_ev_with_slippage(
 # ============================================================
 async def fetch_market_meta_from_slug(session: aiohttp.ClientSession, slug: str) -> dict | None:
     try:
-        async with session.get(f"{GAMMA_API}/events/slug/{slug}", timeout=5) as r:
+        async with api_get(session, f"{GAMMA_API}/events/slug/{slug}", timeout=5) as r:
             if r.status != 200: return None
             event = await r.json()
             markets = event.get("markets", [])
             active_market = next((m for m in markets if m.get("active") and not m.get("closed")), None)
             if not active_market: return None
             return {"title": active_market.get("question", event.get("title", "")), "market": active_market}
-    except: return None
+    except Exception as e:
+        log.debug(f"[META] fetch_market_meta_from_slug failed for {slug}: {e}")
+        return None
 
 async def fetch_price_to_beat_for_market(session: aiohttp.ClientSession, slug: str) -> float:
     if slug in strike_price_cache:
@@ -1013,7 +1055,7 @@ async def fetch_price_to_beat_for_market(session: aiohttp.ClientSession, slug: s
                 start_ts = int(start_dt.timestamp() * 1000)
 
                 params = {"symbol": "BTCUSDT", "interval": "1h", "startTime": start_ts, "limit": 1}
-                async with session.get("https://api.binance.com/api/v3/klines", params=params, timeout=5) as r:
+                async with api_get(session, "https://api.binance.com/api/v3/klines", params=params, timeout=5) as r:
                     if r.status == 200:
                         data = await r.json()
                         if data:
@@ -1045,7 +1087,7 @@ async def fetch_price_to_beat_for_market(session: aiohttp.ClientSession, slug: s
         params = {"symbol": "BTC", "eventStartTime": start_dt.strftime('%Y-%m-%dT%H:%M:%SZ'),
                   "variant": variant, "endDate": end_dt.strftime('%Y-%m-%dT%H:%M:%SZ')}
                   
-        async with session.get("https://polymarket.com/api/crypto/crypto-price", params=params, timeout=5) as r:
+        async with api_get(session, "https://polymarket.com/api/crypto/crypto-price", params=params, timeout=5) as r:
             if r.status == 200:
                 data = await r.json()
                 if data.get("openPrice"):
@@ -1054,7 +1096,6 @@ async def fetch_price_to_beat_for_market(session: aiohttp.ClientSession, slug: s
                     return strike
     except Exception as e: 
         log.debug(f"Failed to fetch strike price from API fallback: {e}")
-        pass
         
     return 0.0
 
@@ -1073,7 +1114,7 @@ async def get_polymarket_odds_cached(session: aiohttp.ClientSession, slug: str) 
 async def _fetch_polymarket_odds(session: aiohttp.ClientSession, slug: str) -> dict:
     if not slug: return {"market_found": False}
     try:
-        async with session.get(f"{GAMMA_API}/events", params={"slug": slug}, timeout=6) as r:
+        async with api_get(session, f"{GAMMA_API}/events", params={"slug": slug}, timeout=6) as r:
             data = await r.json()
             for event in data:
                 if event.get("slug", "") != slug: continue
@@ -1091,7 +1132,8 @@ async def _fetch_polymarket_odds(session: aiohttp.ClientSession, slug: str) -> d
                     "token_id_up": token_ids[0], "token_id_down": token_ids[1],
                     "strike_price": strike_price
                 }
-    except Exception: pass
+    except Exception as e:
+        log.debug(f"[ODDS] _fetch_polymarket_odds failed for {slug}: {e}")
     return {"market_found": False}
 
 # ============================================================================
@@ -1146,8 +1188,8 @@ async def check_liquidity_and_spread_v2(
                 fast_spread = float(spread_data.get("spread", 0))
                 if fast_spread > MAX_SPREAD_PCT:
                     return False, f"CLOB spread {fast_spread*100:.2f}c too wide", 0.0
-        except Exception:
-            pass  
+        except Exception as e:
+            log.debug(f"[LIQ] Fast spread fetch failed for {token_id}: {e}")
         
         book = await asyncio.to_thread(clob_client.get_order_book, token_id)
         if not book or not book.asks:
@@ -1247,7 +1289,8 @@ async def fetch_polymarket_resolution_v2(
             await asyncio.sleep(POLL_INTERVAL)
             
             try:
-                async with session.get(
+                async with api_get(
+                    session,
                     f"https://gamma-api.polymarket.com/events/slug/{slug}", 
                     timeout=8
                 ) as r:
@@ -1303,16 +1346,17 @@ async def fetch_polymarket_resolution_v2(
                         }
             
             except asyncio.TimeoutError:
-                pass
+                log.debug(f"[RESOLVE] Polymarket poll timeout for {slug} (attempt {attempt}/{MAX_POLLS})")
             except Exception as e:
-                pass
+                log.debug(f"[RESOLVE] Polymarket poll failed for {slug} (attempt {attempt}/{MAX_POLLS}): {e}")
         
         return None
     
     async def fetch_binance_resolution():
         try:
             end_dt = datetime.fromisoformat(end_date_str.replace("Z", "+00:00"))
-        except:
+        except Exception as e:
+            log.debug(f"[RESOLVE] Invalid end_date for {slug}: {e}")
             return None
         
         now = datetime.now(timezone.utc)
@@ -1333,7 +1377,8 @@ async def fetch_polymarket_resolution_v2(
                     "limit": 1
                 }
                 
-                async with session.get(
+                async with api_get(
+                    session,
                     "https://api.binance.com/api/v3/klines",
                     params=params,
                     timeout=5
@@ -1354,8 +1399,8 @@ async def fetch_polymarket_resolution_v2(
                                 "p_down": 0.0 if outcome == "UP" else 1.0
                             }
             
-            except Exception:
-                pass
+            except Exception as e:
+                log.debug(f"[RESOLVE] Binance fallback fetch failed for {slug} (attempt {attempt}/6): {e}")
             
             if attempt < 6:
                 await asyncio.sleep(10)  
@@ -1394,9 +1439,11 @@ async def fetch_polymarket_resolution_v2(
 async def resolve_market_outcome(session: aiohttp.ClientSession, slug: str, decision: str,
                                   strike: float, local_price_fallback: float, bet_size: float = 1.01,
                                   bought_price: float = 0.0):
-    pred = active_predictions.get(slug)
-    if not pred or pred.get("status") not in ["OPEN", "CLOSING", "RESOLVING"]:
-        return
+    async with state_lock:
+        live_pred = active_predictions.get(slug)
+        if not live_pred or live_pred.get("status") not in ["OPEN", "CLOSING", "RESOLVING"]:
+            return
+        pred = dict(live_pred)
     global total_wins, total_losses, simulated_balance
 
     log.info(f"[RESOLVE] Market expired -> {slug}  |  Our call: {decision}  |  Strike: ${strike:,.2f}")
@@ -1447,14 +1494,21 @@ async def resolve_market_outcome(session: aiohttp.ClientSession, slug: str, deci
                     trigger_reason=reason_str)
 
     if "ml_data" in pred:
-        ml_row = pred["ml_data"]
+        ml_row = dict(pred["ml_data"])
         ml_row["outcome_binary"] = 1 if "WIN" in result_str else 0
         ml_row["actual_pnl"] = pnl_impact
         await log_ml_data(ml_row)
 
-    active_predictions.pop(slug, None)
+    async with state_lock:
+        active_predictions.pop(slug, None)
 
-def run_gatekeeper(ctx: dict, poly_data: dict, current_balance: float, current_candle: dict) -> tuple:
+def run_gatekeeper(
+    ctx: dict,
+    poly_data: dict,
+    current_balance: float,
+    current_candle: dict,
+    history_snapshot: list[dict] | None = None,
+) -> tuple:
     if not poly_data["market_found"]: 
         return False, "No Polymarket data", {}, {}
 
@@ -1465,7 +1519,7 @@ def run_gatekeeper(ctx: dict, poly_data: dict, current_balance: float, current_c
     if seconds_left > MAX_SECONDS_FOR_NEW_BET: 
         return False, f"Too early ({int(seconds_left)}s > {MAX_SECONDS_FOR_NEW_BET}s)", {}, {}
 
-    regime = detect_market_regime(candle_history)
+    regime = detect_market_regime(history_snapshot if history_snapshot is not None else candle_history)
     # OPTIMIZED: Allow ranging markets for mean reversion strategies
     # Only block UNKNOWN regime (insufficient data)
     if regime == "UNKNOWN":
@@ -1583,7 +1637,13 @@ def rule_engine_decide(ctx: dict, ev_up: dict, ev_down: dict,
 # ============================================================
 # EXECUTION & AI PIPELINE
 # ============================================================
-def _commit_decision(slug: str, result: dict, poly_data: dict, current_ev_pct: float = 0.0, ctx: dict = None):
+async def _commit_decision(
+    slug: str,
+    result: dict,
+    poly_data: dict,
+    current_ev_pct: float = 0.0,
+    ctx: dict = None
+):
     strike   = poly_data.get("strike_price", 0.0)
     decision = result["decision"]
 
@@ -1611,13 +1671,14 @@ def _commit_decision(slug: str, result: dict, poly_data: dict, current_ev_pct: f
                 "confidence_level": result.get("confidence", "Medium")  
             }
 
-            active_predictions[slug] = {
-                "decision": decision, "strike": strike, "score": result.get("score", 0),
-                "bet_size": result.get("bet_size", 0.0), "bought_price": bought_price,
-                "token_id": token_id, "status": "OPEN", "entry_time": time.time(),
-                "signals": result.get("reason", "").split(" | "), "ml_data": ml_data,
-                "sl_breach_count": 0
-            }
+            async with state_lock:
+                active_predictions[slug] = {
+                    "decision": decision, "strike": strike, "score": result.get("score", 0),
+                    "bet_size": result.get("bet_size", 0.0), "bought_price": bought_price,
+                    "token_id": token_id, "status": "OPEN", "entry_time": time.time(),
+                    "signals": result.get("reason", "").split(" | "), "ml_data": ml_data,
+                    "sl_breach_count": 0
+                }
             log.info(f"DECISION LOCKED: {decision} | Confidence: {result.get('confidence', '?')} | "
                     f"Score: {result.get('score','?')}/4 | Bonus: {result.get('bonus',0)} | Bet: ${result.get('bet_size',0.0):.2f}")
             fire_and_forget(place_bet(slug, decision, result.get("bet_size", 0.0), poly_data))
@@ -1645,26 +1706,29 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
 
     if not liq_ok:
         log.warning(f"[REJECTED] {slug}: {liq_msg}")
-        active_predictions.pop(slug, None)
+        async with state_lock:
+            active_predictions.pop(slug, None)
         committed_slugs.discard(slug)
         return
 
     if executable_bet < bet_size:
         log.info(f"[BET SCALED] {slug}: ${bet_size:.2f} -> ${executable_bet:.2f}")
         bet_size = executable_bet
-        
-        if slug in active_predictions:
-            active_predictions[slug]["bet_size"] = bet_size
-            active_predictions[slug]["ml_data"]["final_bet_size"] = bet_size
+        async with state_lock:
+            if slug in active_predictions:
+                active_predictions[slug]["bet_size"] = bet_size
+                active_predictions[slug]["ml_data"]["final_bet_size"] = bet_size
 
     if bet_size < 1.00:
         log.warning(f"[REJECTED] {slug}: Scaled bet ${bet_size:.2f} < $1.00 minimum")
-        active_predictions.pop(slug, None)
+        async with state_lock:
+            active_predictions.pop(slug, None)
         committed_slugs.discard(slug)
         return
 
-    if slug in active_predictions:
-        active_predictions[slug]["ml_data"]["spread_eval"] = liq_msg
+    async with state_lock:
+        if slug in active_predictions:
+            active_predictions[slug]["ml_data"]["spread_eval"] = liq_msg
 
     risk_manager.trades_this_hour += 1
     market_prob = poly_data["up_prob"] if decision == "UP" else poly_data["down_prob"]
@@ -1690,7 +1754,8 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
         )
         if shares_to_buy < 0.01:
             log.warning(f"[REJECTED] {slug}: Bet ${bet_size:.2f} too small at limit price {limit_price:.4f}")
-            active_predictions.pop(slug, None)
+            async with state_lock:
+                active_predictions.pop(slug, None)
             committed_slugs.discard(slug)
             return
 
@@ -1731,43 +1796,51 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
                 log.info(f"[OK] ORDER FILLED: {decision} on {slug} | ${bet_size:.2f} | "
                         f"Fill: {actual_price:.4f} (expected {expected_price:.4f}) | "
                         f"Slippage: {slippage_bps:+.1f}bps ({slippage_cents:+.1f}c)")
-                
-                if slug in active_predictions:
-                    active_predictions[slug]["bought_price"] = actual_price
+
+                async with state_lock:
+                    if slug in active_predictions:
+                        active_predictions[slug]["bought_price"] = actual_price
                     
             else:
                 # OPTIMIZED: Strict cutoff. No market order fallback. 
                 log.warning(f"[WARN] LIMIT REJECTED [{status}]: {resp.get('errorMsg', 'Price moved beyond limit')} | {slug}")
                 log.info(f"[STOP] Trade abandoned. Price ran past our +2c slippage guard.")
-                active_predictions.pop(slug, None)
+                async with state_lock:
+                    active_predictions.pop(slug, None)
                 committed_slugs.discard(slug)
 
         except asyncio.TimeoutError:
             log.error(f"[TIMEOUT] CLOB TIMEOUT (>4s) for {slug}. Limit order status uncertain.")
-            if slug in active_predictions:
-                active_predictions[slug]["status"] = "UNCERTAIN"
+            async with state_lock:
+                if slug in active_predictions:
+                    active_predictions[slug]["status"] = "UNCERTAIN"
 
         except Exception as e:
             log.error(f"[ERROR] CLOB execution failed: {e}")
-            active_predictions.pop(slug, None)
+            async with state_lock:
+                active_predictions.pop(slug, None)
             committed_slugs.discard(slug)
 
 async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_reason: str, current_token_price: float):
     global simulated_balance, total_wins, total_losses
 
-    pred = active_predictions.get(slug)
-    if not pred or pred.get("status") not in ("OPEN", "CLOSING"):
-        return
-    
-    pred["status"] = "CLOSING"
+    async with state_lock:
+        live_pred = active_predictions.get(slug)
+        if not live_pred or live_pred.get("status") not in ("OPEN", "CLOSING"):
+            return
+        live_pred["status"] = "CLOSING"
+        pred = dict(live_pred)
 
     bet_size = pred["bet_size"]
     bought_price = pred["bought_price"]
     shares_owned = bet_size / bought_price if bought_price > 0 else 0.0
 
     if shares_owned < 0.01:
-        _record_full_exit_for_reentry(slug, pred, f"DUST_EXIT:{exit_reason}")
-        active_predictions.pop(slug, None)
+        async with state_lock:
+            live_pred = active_predictions.get(slug)
+            if live_pred:
+                _record_full_exit_for_reentry(slug, live_pred, f"DUST_EXIT:{exit_reason}")
+            active_predictions.pop(slug, None)
         return
 
     # OPTIMIZED: ROI-based exit guard instead of absolute capture ratio
@@ -1781,7 +1854,10 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
         
         if roi_pct < MIN_ROI_FOR_EARLY_EXIT:
             log.info(f"[EXIT GUARD] {slug}: ROI only {roi_pct*100:.1f}% (need {MIN_ROI_FOR_EARLY_EXIT*100}%). Holding for larger move.")
-            pred["status"] = "OPEN"
+            async with state_lock:
+                live_pred = active_predictions.get(slug)
+                if live_pred:
+                    live_pred["status"] = "OPEN"
             return
         
         log.info(f"[EXIT APPROVED] {slug}: ROI {roi_pct*100:.1f}% exceeds {MIN_ROI_FOR_EARLY_EXIT*100}% threshold. Executing exit.")
@@ -1800,7 +1876,7 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
         log.info(f"[EARLY EXIT] [FAST] {slug} | Reason: {exit_reason} | PnL: ${pnl_impact:+.4f}")
 
         if "ml_data" in pred:
-            ml_row = pred["ml_data"]
+            ml_row = dict(pred["ml_data"])
             ml_row["outcome_binary"] = 1 if result_str == "WIN" else 0
             ml_row["actual_pnl"] = pnl_impact
             await log_ml_data(ml_row)
@@ -1810,8 +1886,11 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
             result_str, (total_wins / max(1, total_wins + total_losses) * 100),
             pnl_impact, local_calc_outcome=exit_reason, official_outcome="SOLD"
         )
-        _record_full_exit_for_reentry(slug, pred, exit_reason)
-        active_predictions.pop(slug, None)
+        async with state_lock:
+            live_pred = active_predictions.get(slug)
+            if live_pred:
+                _record_full_exit_for_reentry(slug, live_pred, exit_reason)
+            active_predictions.pop(slug, None)
 
     elif not DRY_RUN and clob_client:
         def _parse_fill_stats(resp: dict, expected_shares: float, fallback_price: float) -> tuple[float, float]:
@@ -1884,7 +1963,7 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
             log.info(f"[OK] IOC EXIT: {slug} | Sold {fraction_sold*100:.1f}% | Realized PnL: ${pnl_impact:+.2f} | Reason: {exit_reason}")
 
             if "ml_data" in pred:
-                ml_row = pred["ml_data"]
+                ml_row = dict(pred["ml_data"])
                 ml_row["outcome_binary"] = 1 if pnl_impact > 0 else 0
                 ml_row["actual_pnl"] = pnl_impact
                 await log_ml_data(ml_row)
@@ -1898,15 +1977,24 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
 
             remaining_shares = max(0.0, shares_owned - shares_sold)
             if remaining_shares < 0.01:
-                _record_full_exit_for_reentry(slug, pred, exit_reason)
-                active_predictions.pop(slug, None)
+                async with state_lock:
+                    live_pred = active_predictions.get(slug)
+                    if live_pred:
+                        _record_full_exit_for_reentry(slug, live_pred, exit_reason)
+                    active_predictions.pop(slug, None)
             else:
-                pred["bet_size"] = remaining_shares * bought_price
-                pred["status"] = "OPEN"
+                async with state_lock:
+                    live_pred = active_predictions.get(slug)
+                    if live_pred:
+                        live_pred["bet_size"] = remaining_shares * bought_price
+                        live_pred["status"] = "OPEN"
                 log.info(f"[EXIT] Partial fill. {remaining_shares:.3f} shares remain open.")
         else:
             log.error(f"[BLOCK] IOC FAILED after 2 attempts for {slug}. Will hold to resolution.")
-            pred["status"] = "OPEN"
+            async with state_lock:
+                live_pred = active_predictions.get(slug)
+                if live_pred:
+                    live_pred["status"] = "OPEN"
 
 async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, history: list,
                          poly_data: dict, ev: dict, counter_ev: dict, math_prob: float,
@@ -1921,19 +2009,19 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
     try:
         pre_filtered = deterministic_ai_filter(rule_decision, ctx, current_candle)
         if pre_filtered["decision"] == "SKIP":
-            _commit_decision(slug, pre_filtered, poly_data, ev.get("ev_pct", 0.0), ctx)
+            await _commit_decision(slug, pre_filtered, poly_data, ev.get("ev_pct", 0.0), ctx)
             return
 
         if time.time() < ai_circuit_open_until:
             rule_decision["needs_ai"] = False
-            _commit_decision(slug, rule_decision, poly_data, ev.get("ev_pct", 0.0), ctx)
+            await _commit_decision(slug, rule_decision, poly_data, ev.get("ev_pct", 0.0), ctx)
             return
 
         ai_call_count += 1
         log.info(f"[AI CONFIRM] Borderline score - asking {LOCAL_AI_MODEL} (call #{ai_call_count})...")
 
         favored_dir = rule_decision["decision"]
-        regime = detect_market_regime(candle_history)
+        regime = detect_market_regime(history)
 
         if ctx['rsi'] > 65: rsi_desc = "Overbought (Strong Bullish)"
         elif ctx['rsi'] > 51: rsi_desc = "Bullish"
@@ -2013,7 +2101,7 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
                      "reason": "AI vetoed borderline signal"}
 
         last_ai_interaction["response"] = ai_word or "FAILED"
-        _commit_decision(slug, final, poly_data, ev.get("ev_pct", 0.0), ctx)
+        await _commit_decision(slug, final, poly_data, ev.get("ev_pct", 0.0), ctx)
         
     finally:
         async with ai_processing_lock:
@@ -2028,21 +2116,27 @@ async def evaluation_loop(session: aiohttp.ClientSession):
 
     while True:
         await asyncio.sleep(EVAL_TICK_SECONDS)
-        
-        if len(candle_history) >= VOLATILITY_LOOKBACK and (int(time.time()) % 50 == 0):
-            update_adaptive_thresholds(candle_history)
-        
-        if not candle_history or not live_candle:
+
+        async with state_lock:
+            history_snapshot = list(candle_history)
+            live_candle_snapshot = dict(live_candle) if live_candle else {}
+            live_price_snapshot = live_price
+            predictions_snapshot = [(slug, dict(pred)) for slug, pred in active_predictions.items()]
+
+        if len(history_snapshot) >= VOLATILITY_LOOKBACK and (int(time.time()) % 50 == 0):
+            update_adaptive_thresholds(history_snapshot)
+
+        if not history_snapshot or not live_candle_snapshot:
             continue
 
-        current_price = live_price if live_price > 0 else float(live_candle.get('c', 0))
-        k = live_candle
-        
+        current_price = live_price_snapshot if live_price_snapshot > 0 else float(live_candle_snapshot.get('c', 0))
+        k = live_candle_snapshot
+
         o_p = float(k.get('o', current_price))
         h_p = float(k.get('h', current_price))
         l_p = float(k.get('l', current_price))
         c_p = current_price
-        
+
         current_candle = {
             "timestamp": datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S'),
             "open":   o_p,
@@ -2056,42 +2150,60 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             "structure": "BULLISH" if c_p >= o_p else "BEARISH"
         }
 
-        ctx = build_technical_context(current_candle, candle_history)
-        
+        ctx = build_technical_context(current_candle, history_snapshot)
+
         # --- FIX: INDEPENDENT POSITION MONITOR ---
-        # Iterate over a copy of the keys so we can safely modify the dictionary
-        for slug in list(active_predictions.keys()):
-            pred = active_predictions[slug]
+        for slug, pred in predictions_snapshot:
             if pred.get("status") in ("CLOSING", "RESOLVING", "UNCERTAIN"):
                 continue
-                
+
             poly_data_open = await get_polymarket_odds_cached(session, slug)
             secs_left = poly_data_open.get("seconds_remaining", 0)
-            
+
             # If market is missing/closed OR expired, force resolution
             if not poly_data_open.get("market_found") or secs_left <= 0:
-                pred["status"] = "RESOLVING"
-                fire_and_forget(resolve_market_outcome(
-                    session, slug, pred["decision"], pred["strike"],
-                    current_price, pred.get("bet_size", 1.01), pred.get("bought_price", 0.0)
-                ))
+                resolve_decision = pred.get("decision", "")
+                resolve_strike = pred.get("strike", 0.0)
+                resolve_bet_size = pred.get("bet_size", 1.01)
+                resolve_bought_price = pred.get("bought_price", 0.0)
+                should_resolve = False
+                async with state_lock:
+                    live_pred = active_predictions.get(slug)
+                    if live_pred and live_pred.get("status") not in ("RESOLVING", "UNCERTAIN"):
+                        live_pred["status"] = "RESOLVING"
+                        resolve_decision = live_pred.get("decision", resolve_decision)
+                        resolve_strike = live_pred.get("strike", resolve_strike)
+                        resolve_bet_size = live_pred.get("bet_size", resolve_bet_size)
+                        resolve_bought_price = live_pred.get("bought_price", resolve_bought_price)
+                        should_resolve = True
+                if should_resolve:
+                    fire_and_forget(resolve_market_outcome(
+                        session, slug, resolve_decision, resolve_strike,
+                        current_price, resolve_bet_size, resolve_bought_price
+                    ))
                 continue
-            
+
+            if pred.get("decision") not in ("UP", "DOWN"):
+                continue
+            bought_price = float(pred.get("bought_price", 0.0))
+            if bought_price <= 0:
+                continue
+
             # Get current token price for exit evaluation
             current_token_price = (
                 poly_data_open["up_prob"] / 100.0 if pred["decision"] == "UP"
                 else poly_data_open["down_prob"] / 100.0
             )
-                
+
             # OPTIMIZED: ATR-BASED DYNAMIC STOP LOSS & TAKE PROFIT
             # Calculate ATR for volatility-adjusted stops
-            if len(candle_history) >= 14:
-                recent_candles = candle_history[-14:]
+            if len(history_snapshot) >= 14:
+                recent_candles = history_snapshot[-14:]
                 atr_values = [(c['high'] - c['low']) for c in recent_candles]
                 current_atr = sum(atr_values) / len(atr_values)
             else:
                 current_atr = 50.0  # Default fallback
-            
+
             # FIXED: ATR volatility modifier for token-probability stops.
             # Keep TP/SL in token cents space and scale by volatility.
             volatility_modifier = current_atr / 150.0
@@ -2128,34 +2240,57 @@ async def evaluation_loop(session: aiohttp.ClientSession):
                 sl_delta *= 1.20 # Give the trade 3 minutes to breathe
 
             # Remove the emergency SL variable entirely
-            price_delta = current_token_price - pred["bought_price"]
+            price_delta = current_token_price - bought_price
 
             if price_delta >= tp_delta:
-                pred["sl_breach_count"] = 0
-                pred["status"] = "CLOSING"
-                log.info(f"[TP HIT] {slug} | Target: +{tp_delta*100:.1f}c | Actual: +{price_delta*100:.1f}c")
-                asyncio.create_task(execute_early_exit(session, slug, f"TAKE_PROFIT (ATR-based: +{price_delta*100:.1f}c)", current_token_price))
+                should_exit = False
+                async with state_lock:
+                    live_pred = active_predictions.get(slug)
+                    if live_pred and live_pred.get("status") == "OPEN":
+                        live_pred["sl_breach_count"] = 0
+                        live_pred["status"] = "CLOSING"
+                        should_exit = True
+                if should_exit:
+                    log.info(f"[TP HIT] {slug} | Target: +{tp_delta*100:.1f}c | Actual: +{price_delta*100:.1f}c")
+                    asyncio.create_task(execute_early_exit(session, slug, f"TAKE_PROFIT (ATR-based: +{price_delta*100:.1f}c)", current_token_price))
 
             # --- EMERGENCY SL BLOCK HAS BEEN DELETED ---
 
             elif not disable_sl and price_delta <= sl_delta:
-                pred["sl_breach_count"] = pred.get("sl_breach_count", 0) + 1
-                breach_count = pred["sl_breach_count"]
-                if breach_count >= sl_confirms_needed:
-                    pred["status"] = "CLOSING"
+                breach_count = 0
+                sl_confirmed = False
+                async with state_lock:
+                    live_pred = active_predictions.get(slug)
+                    if live_pred and live_pred.get("status") == "OPEN":
+                        live_pred["sl_breach_count"] = live_pred.get("sl_breach_count", 0) + 1
+                        breach_count = live_pred["sl_breach_count"]
+                        if breach_count >= sl_confirms_needed:
+                            live_pred["status"] = "CLOSING"
+                            sl_confirmed = True
+                if sl_confirmed:
                     log.info(
                         f"[SL HIT] {slug} | Threshold: {sl_delta*100:.1f}c | Actual: {price_delta*100:.1f}c | "
                         f"Confirmed: {breach_count}/{sl_confirms_needed}"
                     )
                     asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS_CONFIRMED ({price_delta*100:.1f}c)", current_token_price))
-                else:
+                elif breach_count > 0:
                     log.info(
                         f"[SL WATCH] {slug} | Breach {breach_count}/{sl_confirms_needed} | "
                         f"Threshold: {sl_delta*100:.1f}c | Actual: {price_delta*100:.1f}c"
                     )
-            elif pred.get("sl_breach_count", 0) > 0 and price_delta > (sl_delta + SL_RECOVERY_RESET_BUFFER):
-                pred["sl_breach_count"] = 0
-                log.info(f"[SL WATCH] {slug} | AMM liquidity recovered. Breach counter reset.")
+            elif price_delta > (sl_delta + SL_RECOVERY_RESET_BUFFER):
+                did_reset = False
+                async with state_lock:
+                    live_pred = active_predictions.get(slug)
+                    if (
+                        live_pred
+                        and live_pred.get("status") == "OPEN"
+                        and live_pred.get("sl_breach_count", 0) > 0
+                    ):
+                        live_pred["sl_breach_count"] = 0
+                        did_reset = True
+                if did_reset:
+                    log.info(f"[SL WATCH] {slug} | AMM liquidity recovered. Breach counter reset.")
         # -----------------------------------------
 
         # --- TARGET HUNTING LOGIC ---
@@ -2184,7 +2319,13 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             log.info(f"[RISK] {rm_msg}")
             continue
 
-        should_call, skip_msg, ev_up, ev_down = run_gatekeeper(ctx, poly_data, bal, current_candle)
+        should_call, skip_msg, ev_up, ev_down = run_gatekeeper(
+            ctx,
+            poly_data,
+            bal,
+            current_candle,
+            history_snapshot=history_snapshot,
+        )
 
         if should_call:
             current_best_ev = max(ev_up.get("ev_pct", 0), ev_down.get("ev_pct", 0))
@@ -2219,10 +2360,10 @@ async def evaluation_loop(session: aiohttp.ClientSession):
                 continue
 
             if not result.get("needs_ai"):
-                _commit_decision(target_slug, result, poly_data, selected_ev.get("ev_pct", 0.0), ctx)
+                await _commit_decision(target_slug, result, poly_data, selected_ev.get("ev_pct", 0.0), ctx)
             else:
                 asyncio.create_task(call_local_ai(
-                    session, current_candle, candle_history,
+                    session, current_candle, history_snapshot,
                     poly_data, selected_ev, counter_ev, 50.0,
                     target_slug, result, ctx
                 ))
@@ -2231,14 +2372,14 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             soft_skipped_slugs.add(target_slug)
 
 async def prefill_history(session: aiohttp.ClientSession):
-    global vwap_cum_pv, vwap_cum_vol, vwap_date, cvd_snapshot_at_candle_open
+    global vwap_cum_pv, vwap_cum_vol, vwap_date, cvd_snapshot_at_candle_open, last_closed_kline_ms
     now = datetime.now(timezone.utc)
     start_time_ms = int(now.replace(hour=0, minute=0, second=0).timestamp() * 1000)
 
     log.info(f"[SYSTEM] Fetching {MAX_HISTORY} context candles from Binance...")
     try:
         params = {"symbol": "BTCUSDT", "interval": "15m", "limit": MAX_HISTORY}
-        async with session.get("https://api.binance.com/api/v3/klines", params=params) as r:
+        async with api_get(session, "https://api.binance.com/api/v3/klines", params=params) as r:
             data = await r.json()
             for k in data:
                 candle_time_ms = int(k[0])
@@ -2253,10 +2394,12 @@ async def prefill_history(session: aiohttp.ClientSession):
                     vwap_cum_pv += ((h+l+c)/3.0) * v
                     vwap_cum_vol += v
 
-                candle_history.append(candle)
-                live_ema_9.update(c)
-                live_ema_21.update(c)
-                live_rsi.update(c)
+                async with state_lock:
+                    candle_history.append(candle)
+                    live_ema_9.update(c)
+                    live_ema_21.update(c)
+                    live_rsi.update(c)
+                    last_closed_kline_ms = max(last_closed_kline_ms, candle_time_ms)
                 
         log.info(f"[SYSTEM] Loaded {len(candle_history)} candles. VWAP={get_vwap():,.2f}")
         
@@ -2264,33 +2407,129 @@ async def prefill_history(session: aiohttp.ClientSession):
         
     except Exception as e:
         log.error(f"Prefill failed: {e}")
-        
-async def kline_stream_loop():
-    global live_candle, live_price
+
+async def backfill_missing_klines(session: aiohttp.ClientSession):
+    global last_closed_kline_ms
+    if last_closed_kline_ms <= 0:
+        return
+    params = {
+        "symbol": "BTCUSDT",
+        "interval": "15m",
+        "startTime": last_closed_kline_ms + 1,
+        "limit": 20,
+    }
+    try:
+        async with api_get(session, "https://api.binance.com/api/v3/klines", params=params, timeout=6) as r:
+            if r.status != 200:
+                log.debug(f"[KLINE REST] Backfill HTTP {r.status}")
+                return
+            rows = await r.json()
+        if not rows:
+            return
+
+        added = 0
+        for row in rows:
+            candle_time_ms = int(row[0])
+            if candle_time_ms <= last_closed_kline_ms:
+                continue
+
+            o, h, l, c, v = float(row[1]), float(row[2]), float(row[3]), float(row[4]), float(row[5])
+            candle_time_str = datetime.fromtimestamp(candle_time_ms / 1000, tz=timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+            candle = {
+                "timestamp": candle_time_str,
+                "open": o, "high": h, "low": l, "close": c, "volume": v,
+                "body_size": abs(c - o),
+                "structure": "BULLISH" if c > o else "BEARISH",
+            }
+            async with state_lock:
+                candle_history.append(candle)
+                if len(candle_history) > MAX_HISTORY:
+                    candle_history.pop(0)
+                update_vwap(candle)
+                live_ema_9.update(c)
+                live_ema_21.update(c)
+                live_rsi.update(c)
+                last_closed_kline_ms = max(last_closed_kline_ms, candle_time_ms)
+            added += 1
+
+        if added > 0:
+            log.info(f"[KLINE REST] Backfilled {added} missing closed candles after reconnect.")
+    except Exception as e:
+        log.debug(f"[KLINE REST] Backfill failed: {e}")
+
+async def backfill_missing_agg_trades(session: aiohttp.ClientSession):
+    async with state_lock:
+        last_seen_trade_ms = last_agg_trade_ms
+    if last_seen_trade_ms <= 0:
+        return
+    next_start = last_seen_trade_ms + 1
+    total_backfilled = 0
+
+    try:
+        for _ in range(3):  # cap catch-up workload per reconnect
+            params = {"symbol": "BTCUSDT", "startTime": next_start, "limit": 1000}
+            async with api_get(session, "https://api.binance.com/api/v3/aggTrades", params=params, timeout=6) as r:
+                if r.status != 200:
+                    log.debug(f"[TRADE REST] Backfill HTTP {r.status}")
+                    break
+                trades = await r.json()
+            if not trades:
+                break
+
+            max_ts = next_start
+            for trade in trades:
+                trade_ts = int(trade.get("T", 0) or 0)
+                max_ts = max(max_ts, trade_ts)
+                if trade_ts < next_start:
+                    continue
+                await process_agg_trade(trade)
+                total_backfilled += 1
+
+            if len(trades) < 1000:
+                break
+            next_start = max_ts + 1
+
+        if total_backfilled > 0:
+            log.info(f"[TRADE REST] Backfilled {total_backfilled} agg trades after reconnect.")
+    except Exception as e:
+        log.debug(f"[TRADE REST] Backfill failed: {e}")
+
+async def kline_stream_loop(session: aiohttp.ClientSession):
+    global live_candle, live_price, last_closed_kline_ms
     while True:
         try:
             async with websockets.connect(SOCKET_KLINE) as ws:
+                await backfill_missing_klines(session)
                 async for msg in ws:
                     k = json.loads(msg)['k']
-                    live_candle = k
-                    if live_price == 0.0: live_price = float(k['c'])
+                    async with state_lock:
+                        live_candle = k
+                        if live_price == 0.0:
+                            live_price = float(k['c'])
                     if k['x']:
-                        candle_history.append(parse_candle(k, live_price))
-                        if len(candle_history) > MAX_HISTORY: candle_history.pop(0)
-                        update_vwap(candle_history[-1])
                         closed_price = float(k['c'])
-                        live_ema_9.update(closed_price)
-                        live_ema_21.update(closed_price)
-                        live_rsi.update(closed_price)
+                        async with state_lock:
+                            candle_history.append(parse_candle(k, live_price))
+                            if len(candle_history) > MAX_HISTORY:
+                                candle_history.pop(0)
+                            update_vwap(candle_history[-1])
+                            live_ema_9.update(closed_price)
+                            live_ema_21.update(closed_price)
+                            live_rsi.update(closed_price)
+                            k_ms = int(k.get('t', 0) or 0)
+                            if k_ms > 0:
+                                last_closed_kline_ms = max(last_closed_kline_ms, k_ms)
         except Exception as e:
             log.warning(f"[KLINE WS] Disconnected: {e}. Reconnecting...")
             await asyncio.sleep(3)
 
-async def agg_trade_listener():
+async def agg_trade_listener(session: aiohttp.ClientSession):
     while True:
         try:
             async with websockets.connect(SOCKET_TRADE) as ws:
-                async for msg in ws: process_agg_trade(json.loads(msg))
+                await backfill_missing_agg_trades(session)
+                async for msg in ws:
+                    await process_agg_trade(json.loads(msg))
         except Exception as e:
             log.warning(f"[TRADE WS] Disconnected: {e}. Reconnecting...")
             await asyncio.sleep(3)
@@ -2318,9 +2557,11 @@ async def main():
         await prefill_history(session)
         await warmup_ai(session)
         await asyncio.gather(
-            kline_stream_loop(),
-            agg_trade_listener(),
-            evaluation_loop(session)
+            kline_stream_loop(session),
+            agg_trade_listener(session),
+            evaluation_loop(session),
+            ml_writer_worker(),
+            db_writer_worker(),
         )
 
 if __name__ == "__main__":
