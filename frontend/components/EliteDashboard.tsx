@@ -189,6 +189,8 @@ export default function EliteDashboard() {
   const lastPriceRef = useRef(0);
   const lastLogRef = useRef<string>("");
   const toastIdRef = useRef(1);
+  const healthSupportedRef = useRef(true);
+  const controlSupportedRef = useRef(true);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -339,19 +341,41 @@ export default function EliteDashboard() {
   }, []);
 
   const fetchEngineHealth = useCallback(async () => {
+    if (!healthSupportedRef.current) {
+      return;
+    }
     try {
       const res = await fetch(`${getHttpUrl()}/api/engine/health`);
+      if (res.status === 404) {
+        healthSupportedRef.current = false;
+        addToast("warning", "Health Endpoint Missing", "Backend does not expose /api/engine/health yet.");
+        return;
+      }
+      if (!res.ok) {
+        return;
+      }
       const data = await res.json();
       setEngineHealth({ ...DEFAULT_ENGINE_HEALTH, ...data });
     } catch (error) {
       console.error("Engine health fetch error:", error);
     }
-  }, []);
+  }, [addToast]);
 
   const fetchEngineControl = useCallback(
     async (syncDraft = false) => {
+      if (!controlSupportedRef.current) {
+        return;
+      }
       try {
         const res = await fetch(`${getHttpUrl()}/api/engine/control`);
+        if (res.status === 404) {
+          controlSupportedRef.current = false;
+          addToast("warning", "Control Endpoint Missing", "Backend does not expose /api/engine/control yet.");
+          return;
+        }
+        if (!res.ok) {
+          return;
+        }
         const data = await res.json();
         const nextControl: EngineControl = {
           kill_switch: Boolean(data?.kill_switch),
@@ -367,7 +391,7 @@ export default function EliteDashboard() {
         console.error("Engine control fetch error:", error);
       }
     },
-    [showControls, controlDirty],
+    [showControls, controlDirty, addToast],
   );
 
   useEffect(() => {
@@ -410,6 +434,10 @@ export default function EliteDashboard() {
   }, [liveData.logs, addToast, playNotification]);
 
   const saveControls = useCallback(async () => {
+    if (!controlSupportedRef.current) {
+      addToast("error", "Controls Unsupported", "Current backend does not support runtime control updates.");
+      return;
+    }
     setSavingControl(true);
     try {
       const res = await fetch(`${getHttpUrl()}/api/engine/control`, {
