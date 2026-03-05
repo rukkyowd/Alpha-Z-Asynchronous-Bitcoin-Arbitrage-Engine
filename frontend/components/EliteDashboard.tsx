@@ -227,9 +227,12 @@ function RegimeBadge({ regime, atr }: { regime: string; atr: number }) {
     VOLATILE: 'bg-red-500/10 text-red-400 border-red-500/30',
     UNKNOWN: 'bg-zinc-700/10 text-zinc-500 border-zinc-700/30'
   };
+  const normalizedRegime = String(regime || "").trim().toUpperCase();
+  const safeRegime = (normalizedRegime in colors ? normalizedRegime : "UNKNOWN") as keyof typeof colors;
+  const showAtr = Number.isFinite(atr) && atr > 0;
   return (
-    <div className={`px-4 py-2 rounded-full border text-xs font-bold ${colors[regime as keyof typeof colors] || colors.UNKNOWN}`}>
-      {regime} {atr > 0 && <span className="opacity-60">• ATR ${atr.toFixed(0)}</span>}
+    <div className={`px-4 py-2 rounded-full border text-xs font-bold ${colors[safeRegime]}`}>
+      {safeRegime} {showAtr && <span className="opacity-60">• ATR ${atr.toFixed(0)}</span>}
     </div>
   );
 }

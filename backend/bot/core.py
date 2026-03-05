@@ -56,19 +56,28 @@ MAX_TRADES_PER_HOUR         = 3
 # -- Liquidity & Anti-Chop --
 MAX_SPREAD_PCT              = 0.05
 MIN_LIQUIDITY_MULTIPLIER    = 1.5
+# Paper-mode liquidity simulation (to avoid optimistic paper fills).
+PAPER_SIM_FALLBACK_SPREAD_PCT = 0.03
+PAPER_SIM_ESTIMATED_DEPTH_USD = 75.0
+PAPER_SIM_SCALE_HAIRCUT       = 0.95
 MIN_ATR_THRESHOLD           = 15.0
-EMA_SQUEEZE_PCT             = 0.0001
-# -- AI Bypass Threshold --
-# OPTIMIZED: Lowered from 40.0% to 3.0% to force more AI validation
-# Only ultra-high conviction trades (3%+ edge) can bypass AI
-EV_AI_BYPASS_THRESHOLD = 3.0  
+EMA_SQUEEZE_PCT             = 0.00005
+# -- AI / EV Guardrails --
+# EV can only bypass AI when technical alignment is already strong.
+EV_AI_BYPASS_THRESHOLD = 3.0
+MIN_SCORE_TO_TRADE = 1
+SCORE1_MIN_EV_PCT = 15.0
+SCORE0_MIN_EV_PCT = 35.0
+SCORE0_MAX_TOKEN_PRICE = 0.35
+EV_BYPASS_MIN_SCORE = 3
+EV_BYPASS_MIN_TOKEN_PRICE = 0.20
 
 MIN_EV_PCT_TO_CALL_AI     = 1.0  # OPTIMIZED: Lowered from 1.5% to catch more borderline trades
 
 MIN_SECONDS_REMAINING     = 30
 MAX_SECONDS_FOR_NEW_BET   = 3540
 
-MAX_CROWD_PROB_TO_CALL    = 94.0
+MAX_CROWD_PROB_TO_CALL    = 96.0
 
 EV_REENGAGE_DELTA         = 0.5
 # Hybrid stop-loss controls (Anti-Wick Patch)
@@ -82,6 +91,11 @@ SL_CONFIRM_BREACH_EARLY           = 12   # Require 60 seconds of sustained drop
 SL_CONFIRM_BREACH_MID             = 8    # Require 40 seconds of sustained drop
 SL_CONFIRM_BREACH_LATE            = 6    # Require 30 seconds of sustained drop
 SL_RECOVERY_RESET_BUFFER          = 0.01
+# Only allow take-profit early exits near expiry; otherwise hold winners.
+TP_EARLY_EXIT_WINDOW_SECS         = 180
+# Force immediate TP on extreme windfalls, even outside the TP time gate.
+FORCE_TP_ROI_PCT                  = 0.70  # 70% ROI
+FORCE_TP_DELTA_ABS                = 0.35  # +35c token-price delta
 
 # Same-slug re-entry controls
 MAX_REENTRIES_PER_SLUG            = 1
@@ -106,6 +120,11 @@ AI_TIMEOUT_TOTAL    = 30
 AI_MAX_RETRIES      = 1
 AI_RETRY_DELAY      = 2
 AI_MAX_TOKENS       = 120
+# AI re-query controls (anti-spam / anti-overfitting on one slug)
+AI_VETO_COOLDOWN_SECS = 60
+AI_VETO_MIN_EV_IMPROVEMENT_PCT = 4.0
+AI_VETO_OVERRIDE_EV_JUMP_PCT = 20.0
+AI_MAX_CALLS_PER_SLUG = 6
 
 CB_FAILURE_THRESHOLD = 5  
 CB_COOLDOWN_SECS     = 30  
@@ -402,6 +421,7 @@ committed_slugs: set = set()
 soft_skipped_slugs: set = set()
 best_ev_seen: dict = {}
 slug_reentry_state: dict = {}
+slug_ai_state: dict = {}
 
 ai_call_in_flight: str = ""
 ai_processing_lock = asyncio.Lock()  
@@ -507,6 +527,43 @@ def check_reentry_eligibility(slug: str, direction: str, ev_pct: float) -> tuple
         return False, f"EV improvement not met ({ev_pct:.2f}% < {min_required_ev:.2f}%)"
 
     return True, "eligible"
+
+def _get_slug_ai_state(slug: str) -> dict:
+    return slug_ai_state.setdefault(slug, {
+        "ai_calls": 0,
+        "last_veto_ts": 0.0,
+        "last_veto_ev_pct": 0.0,
+    })
+
+def check_ai_requery_eligibility(slug: str, ev_pct: float) -> tuple[bool, str]:
+    state = _get_slug_ai_state(slug)
+    calls = int(state.get("ai_calls", 0))
+    if calls >= AI_MAX_CALLS_PER_SLUG:
+        return False, f"AI cap reached ({calls}/{AI_MAX_CALLS_PER_SLUG})"
+
+    last_veto_ts = float(state.get("last_veto_ts", 0.0))
+    if last_veto_ts > 0:
+        elapsed = time.time() - last_veto_ts
+        last_veto_ev_pct = float(state.get("last_veto_ev_pct", 0.0))
+        if elapsed < AI_VETO_COOLDOWN_SECS:
+            override_ev = last_veto_ev_pct + AI_VETO_OVERRIDE_EV_JUMP_PCT
+            if ev_pct < override_ev:
+                return False, f"AI veto cooldown active ({int(AI_VETO_COOLDOWN_SECS - elapsed)}s left)"
+        else:
+            min_ev = last_veto_ev_pct + AI_VETO_MIN_EV_IMPROVEMENT_PCT
+            if ev_pct < min_ev:
+                return False, f"AI recheck EV delta not met ({ev_pct:.2f}% < {min_ev:.2f}%)"
+
+    return True, "eligible"
+
+def record_ai_attempt(slug: str):
+    state = _get_slug_ai_state(slug)
+    state["ai_calls"] = int(state.get("ai_calls", 0)) + 1
+
+def record_ai_veto(slug: str, ev_pct: float):
+    state = _get_slug_ai_state(slug)
+    state["last_veto_ts"] = time.time()
+    state["last_veto_ev_pct"] = float(ev_pct)
 
 def get_dynamic_threshold(secs_remaining: float) -> tuple[float, float]:
     if secs_remaining <= 120: 
@@ -1149,61 +1206,70 @@ async def check_liquidity_and_spread_v2(
     MAX_SPREAD_PCT: float = 0.05,
     MIN_LIQUIDITY_MULTIPLIER: float = 1.5
 ) -> Tuple[bool, str, float]:
-    
-    if PAPER_TRADING or clob_client is None:
-        return True, "Paper bypass", intended_bet
-    
+    amm_spread = None
     if poly_data and poly_data.get("market_found"):
-        up_prob = poly_data.get("up_prob", 0.0)  
-        down_prob = poly_data.get("down_prob", 0.0)  
-        
+        up_prob = poly_data.get("up_prob", 0.0)
+        down_prob = poly_data.get("down_prob", 0.0)
+
         if token_id == poly_data.get("token_id_up", ""):
-            amm_price = up_prob / 100.0  
-            complement = down_prob / 100.0  
+            amm_price = up_prob / 100.0
+            complement = down_prob / 100.0
         elif token_id == poly_data.get("token_id_down", ""):
             amm_price = down_prob / 100.0
             complement = up_prob / 100.0
         else:
             amm_price = 0.0
             complement = 0.0
-        
+
         if 0.01 < amm_price < 0.99 and 0.01 < complement < 0.99:
             amm_spread = abs(1.0 - amm_price - complement)
-            
-            if amm_spread > MAX_SPREAD_PCT:
-                return False, f"AMM spread {amm_spread*100:.2f}c > max {MAX_SPREAD_PCT*100:.0f}c", 0.0
-            
-            ESTIMATED_AMM_DEPTH = 1000.0  
-            
-            if intended_bet > ESTIMATED_AMM_DEPTH * 0.5:
-                scaled_bet = round(ESTIMATED_AMM_DEPTH * 0.4, 2)
-                return True, f"OK (AMM scaled) | spread={amm_spread*100:.2f}c", scaled_bet
-            
-            return True, f"OK (AMM) | spread={amm_spread*100:.2f}c", intended_bet
-    
+
+    if PAPER_TRADING:
+        sim_spread = amm_spread if amm_spread is not None else PAPER_SIM_FALLBACK_SPREAD_PCT
+        if sim_spread > MAX_SPREAD_PCT:
+            return False, f"Paper sim spread {sim_spread*100:.2f}c > max {MAX_SPREAD_PCT*100:.0f}c", 0.0
+
+        max_fillable = PAPER_SIM_ESTIMATED_DEPTH_USD / max(MIN_LIQUIDITY_MULTIPLIER, 1.0)
+        if intended_bet > max_fillable:
+            scaled_bet = round(max_fillable * PAPER_SIM_SCALE_HAIRCUT, 2)
+            if scaled_bet < 1.0:
+                return False, f"Paper sim depth too thin (max fill ${max_fillable:.2f})", 0.0
+            return True, (
+                f"Paper sim scaled | spread={sim_spread*100:.2f}c | depth~${PAPER_SIM_ESTIMATED_DEPTH_USD:.0f}"
+            ), scaled_bet
+
+        return True, (
+            f"Paper sim OK | spread={sim_spread*100:.2f}c | depth~${PAPER_SIM_ESTIMATED_DEPTH_USD:.0f}"
+        ), intended_bet
+
+    if clob_client is None:
+        return False, "Live trading requires initialized CLOB client", 0.0
+
+    clob_error = None
     try:
         try:
             spread_data = await asyncio.to_thread(clob_client.get_spread, token_id)
             if spread_data:
                 fast_spread = float(spread_data.get("spread", 0))
                 if fast_spread > MAX_SPREAD_PCT:
-                    return False, f"CLOB spread {fast_spread*100:.2f}c too wide", 0.0
+                    # Advisory only; orderbook remains the source of truth.
+                    log.debug(f"[LIQ] Fast CLOB spread high for {token_id}: {fast_spread*100:.2f}c")
         except Exception as e:
             log.debug(f"[LIQ] Fast spread fetch failed for {token_id}: {e}")
         
         book = await asyncio.to_thread(clob_client.get_order_book, token_id)
         if not book or not book.asks:
-            return False, "Empty orderbook", 0.0
+            raise RuntimeError("CLOB orderbook unavailable")
         
         best_bid = float(book.bids[0].price) if book.bids else 0.01
         best_ask = float(book.asks[0].price)
         tob_spread = best_ask - best_bid
         
         if tob_spread >= 0.90:
-            return False, "CLOB shows stub quotes (use AMM pricing)", 0.0
+            raise RuntimeError("CLOB shows stub quotes")
         
         if not (0.01 <= best_ask <= 0.99):
-            return False, f"Invalid ask price: {best_ask}", 0.0
+            raise RuntimeError(f"Invalid CLOB ask price: {best_ask}")
         
         if tob_spread > MAX_SPREAD_PCT:
             return False, f"CLOB spread {tob_spread*100:.2f}c > max", 0.0
@@ -1269,7 +1335,30 @@ async def check_liquidity_and_spread_v2(
         return True, f"OK (CLOB) | spread={tob_spread*100:.2f}c | impact={slippage*100:.2f}% | levels={levels_consumed}", intended_bet
     
     except Exception as e:
-        return False, f"Liquidity check error: {e}", 0.0
+        clob_error = str(e)
+        log.debug(f"[LIQ] CLOB primary check failed for {token_id}: {e}. Falling back to AMM.")
+
+    if amm_spread is not None:
+        if amm_spread > MAX_SPREAD_PCT:
+            return False, (
+                f"AMM fallback spread {amm_spread*100:.2f}c > max {MAX_SPREAD_PCT*100:.0f}c "
+                f"(CLOB unavailable: {clob_error})"
+            ), 0.0
+
+        ESTIMATED_AMM_DEPTH = 1000.0
+        if intended_bet > ESTIMATED_AMM_DEPTH * 0.5:
+            scaled_bet = round(ESTIMATED_AMM_DEPTH * 0.4, 2)
+            return True, (
+                f"OK (AMM fallback scaled) | spread={amm_spread*100:.2f}c "
+                f"(CLOB unavailable: {clob_error})"
+            ), scaled_bet
+
+        return True, (
+            f"OK (AMM fallback) | spread={amm_spread*100:.2f}c "
+            f"(CLOB unavailable: {clob_error})"
+        ), intended_bet
+
+    return False, f"Liquidity unavailable (CLOB: {clob_error}; no AMM fallback)", 0.0
     
 # ============================================================
 # PARALLEL POLYMARKET RESOLUTION (FIX 1)
@@ -1605,21 +1694,73 @@ def rule_engine_decide(ctx: dict, ev_up: dict, ev_down: dict,
         score += 1; reasons.append("CVD Aligned")
 
     secs_remaining = poly_data.get("seconds_remaining", 0)
+    target_ev_pct = target_ev.get("ev_pct", 0.0)
+    target_token_price = (
+        poly_data.get("up_prob", 0.0) / 100.0 if target_dir == "UP"
+        else poly_data.get("down_prob", 0.0) / 100.0
+    )
+    allow_score0_extreme_ev = (
+        score == 0
+        and target_ev_pct >= SCORE0_MIN_EV_PCT
+        and target_token_price <= SCORE0_MAX_TOKEN_PRICE
+    )
 
-    # OPTIMIZED: Tighter requirements - score must be 2+ for AI call, 4 for bypass
-    if target_ev.get("ev_pct", 0.0) >= EV_AI_BYPASS_THRESHOLD:
-        confidence = "High"
-        needs_ai = False
-        reasons.append(f"EV BYPASS ({target_ev['ev_pct']:.1f}% >= {EV_AI_BYPASS_THRESHOLD}%)")
+    # Hard floor: never place trades with weak technical alignment.
+    if score < MIN_SCORE_TO_TRADE and not allow_score0_extreme_ev:
+        return {
+            "decision": "SKIP",
+            "confidence": "Low",
+            "score": score,
+            "reason": f"Insufficient technical confirmation ({score}/4 < {MIN_SCORE_TO_TRADE}/4)"
+        }
+
+    # Score 1 trades are allowed only when EV is significantly strong, and still require AI.
+    if score == 1 and target_ev_pct < SCORE1_MIN_EV_PCT:
+        return {
+            "decision": "SKIP",
+            "confidence": "Low",
+            "score": score,
+            "reason": f"Score 1 requires EV >= {SCORE1_MIN_EV_PCT:.2f}% (got {target_ev_pct:.2f}%)"
+        }
+
+    if allow_score0_extreme_ev:
+        confidence = "Scout"
+        needs_ai = True
+        reasons.append(
+            f"EXTREME EV OVERRIDE (score=0/4, EV={target_ev_pct:.1f}%, px={target_token_price:.3f})"
+        )
     elif score >= 4:  # All signals aligned
         confidence = "High"
         needs_ai = False
-    elif score >= 2 and target_ev.get("ev_pct", 0.0) >= MIN_EV_PCT_TO_CALL_AI:
+    elif (
+        target_ev_pct >= EV_AI_BYPASS_THRESHOLD
+        and score >= EV_BYPASS_MIN_SCORE
+        and target_token_price >= EV_BYPASS_MIN_TOKEN_PRICE
+    ):
+        confidence = "High"
+        needs_ai = False
+        reasons.append(
+            f"EV BYPASS ({target_ev_pct:.1f}% >= {EV_AI_BYPASS_THRESHOLD}%, "
+            f"score={score}/4, px={target_token_price:.3f})"
+        )
+    elif target_ev_pct >= EV_AI_BYPASS_THRESHOLD:
+        confidence = "Scout"
+        needs_ai = True
+        reasons.append(
+            f"HIGH EV requires AI (score={score}/4, px={target_token_price:.3f}; "
+            f"bypass needs score>={EV_BYPASS_MIN_SCORE}, px>={EV_BYPASS_MIN_TOKEN_PRICE:.2f})"
+        )
+    elif target_ev_pct >= MIN_EV_PCT_TO_CALL_AI:
         confidence = "Scout"
         needs_ai = True
         reasons.append(f"AI VALIDATION REQUIRED (score={score}/4)")
     else:
-        return {"decision": "SKIP", "confidence": "Low", "score": score, "reason": f"Insufficient signals (need 2+, got {score})"}
+        return {
+            "decision": "SKIP",
+            "confidence": "Low",
+            "score": score,
+            "reason": f"Net EV {target_ev_pct:.2f}% below AI trigger ({MIN_EV_PCT_TO_CALL_AI:.2f}%)"
+        }
 
     raw_bet = target_ev.get("kelly_bet", 0.0)
     bet = get_time_adjusted_bet(raw_bet, secs_remaining, confidence)
@@ -1677,7 +1818,8 @@ async def _commit_decision(
                     "bet_size": result.get("bet_size", 0.0), "bought_price": bought_price,
                     "token_id": token_id, "status": "OPEN", "entry_time": time.time(),
                     "signals": result.get("reason", "").split(" | "), "ml_data": ml_data,
-                    "sl_breach_count": 0
+                    "sl_breach_count": 0,
+                    "tp_gate_logged": False
                 }
             log.info(f"DECISION LOCKED: {decision} | Confidence: {result.get('confidence', '?')} | "
                     f"Score: {result.get('score','?')}/4 | Bonus: {result.get('bonus',0)} | Bet: ${result.get('bet_size',0.0):.2f}")
@@ -1692,6 +1834,13 @@ async def _commit_decision(
 async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
     global clob_client, simulated_balance
     token_id = poly_data.get("token_id_up", "") if decision == "UP" else poly_data.get("token_id_down", "")
+
+    if not PAPER_TRADING and clob_client is None:
+        log.error(f"[REJECTED] {slug}: Live mode but CLOB client is not initialized")
+        async with state_lock:
+            active_predictions.pop(slug, None)
+        committed_slugs.discard(slug)
+        return
 
     liq_ok, liq_msg, executable_bet = await check_liquidity_and_spread_v2(
         token_id=token_id,
@@ -2017,8 +2166,13 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
             await _commit_decision(slug, rule_decision, poly_data, ev.get("ev_pct", 0.0), ctx)
             return
 
+        record_ai_attempt(slug)
         ai_call_count += 1
-        log.info(f"[AI CONFIRM] Borderline score - asking {LOCAL_AI_MODEL} (call #{ai_call_count})...")
+        slug_ai_calls = _get_slug_ai_state(slug).get("ai_calls", 0)
+        log.info(
+            f"[AI CONFIRM] Borderline score - asking {LOCAL_AI_MODEL} "
+            f"(global call #{ai_call_count}, slug {slug_ai_calls}/{AI_MAX_CALLS_PER_SLUG})..."
+        )
 
         favored_dir = rule_decision["decision"]
         regime = detect_market_regime(history)
@@ -2036,6 +2190,13 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
         elif ctx['cvd_candle_delta'] < -15000: cvd_desc = "Strong Selling Pressure"
         else: cvd_desc = "Neutral / Market Noise" 
 
+        decision_score = int(rule_decision.get("score", 0))
+        target_ev_pct = float(ev.get("ev_pct", 0.0))
+        target_token_price = (
+            poly_data.get("up_prob", 0.0) / 100.0 if favored_dir == "UP"
+            else poly_data.get("down_prob", 0.0) / 100.0
+        )
+
         # =====================================================================
         # UPDATED AI PROMPT: Smoothed persona & explicit "majority rules" logic
         # =====================================================================
@@ -2048,17 +2209,21 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
             f"QUANTITATIVE EDGE (CRITICAL):\n"
             f"  Expected Value (EV): {ev.get('ev_pct', 0.0):+.2f}%\n"
             f"  System Score: {rule_decision.get('score', 0)}/4\n\n"
+            f"  Token Price: {target_token_price:.3f}\n\n"
             f"TECHNICAL CONTEXT:\n"
             f"  RSI: {rsi_desc}\n"
             f"  EMA Trend: {trend_desc}\n"
             f"  VWAP: {vwap_desc}\n"
             f"  CVD Flow: {cvd_desc}\n\n"
             f"STRICT RULES:\n"
-            f"1. If Expected Value (EV) is negative (< 0.00%), you MUST output 'SKIP'.\n"
-            f"2. If System Score is less than 1, you MUST output 'SKIP'.\n"
-            f"3. If the MAJORITY of the technical context heavily contradicts the PROPOSED TRADE, output 'SKIP'.\n"
-            f"4. If EV is positive and the overall technicals are mostly aligned, output '{favored_dir}'. A single conflicting indicator is acceptable if the EV is high.\n\n"
-            f"Respond with exactly ONE WORD ('{favored_dir}' or 'SKIP'):"
+            f"1. If Expected Value (EV) is negative (< 0.00%), output 'SKIP'.\n"
+            f"2. If score=0 and EV < {SCORE0_MIN_EV_PCT:.2f}%, output 'SKIP'.\n"
+            f"3. If score=1 and EV < {SCORE1_MIN_EV_PCT:.2f}%, output 'SKIP'.\n"
+            f"4. If score=0 but EV >= {SCORE0_MIN_EV_PCT:.2f}% AND token price <= {SCORE0_MAX_TOKEN_PRICE:.2f}, "
+            f"you MAY approve '{favored_dir}' when technicals are not strongly contradictory.\n"
+            f"5. If EV is strongly positive and technicals are mixed (not strongly opposite), prefer '{favored_dir}'.\n\n"
+            f"OUTPUT FORMAT (REQUIRED): FINAL:{favored_dir} or FINAL:SKIP\n"
+            f"Return only one line."
         )
         last_ai_interaction["prompt"] = prompt
         last_ai_interaction["timestamp"] = datetime.now().strftime('%H:%M:%S')
@@ -2072,6 +2237,27 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
             "stream": False
         }
         ai_word = None
+        raw_response = ""
+
+        def _parse_ai_decision(text: str, favored: str) -> str | None:
+            text_up = (text or "").upper()
+
+            # Preferred strict format: FINAL:UP / FINAL:DOWN / FINAL:SKIP
+            m = re.search(r"\bFINAL\s*[:=]\s*(UP|DOWN|SKIP)\b", text_up)
+            if m:
+                token = m.group(1)
+                if token in (favored, "SKIP"):
+                    return token
+                return "SKIP"
+
+            # Fallback: first explicit keyword token.
+            tokens = re.findall(r"\b(UP|DOWN|SKIP)\b", text_up)
+            if not tokens:
+                return None
+            first = tokens[0]
+            if first in (favored, "SKIP"):
+                return first
+            return "SKIP"
 
         for attempt in range(1, AI_MAX_RETRIES + 1):
             try:
@@ -2079,8 +2265,7 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
                                         timeout=aiohttp.ClientTimeout(total=AI_TIMEOUT_TOTAL)) as r:
                     r.raise_for_status()
                     raw_response = (await r.json())['choices'][0]['message']['content'].strip()
-                    ai_word = favored_dir if favored_dir in raw_response.upper() else \
-                              ("SKIP" if "SKIP" in raw_response.upper() else None)
+                    ai_word = _parse_ai_decision(raw_response, favored_dir)
                     ai_consecutive_failures = 0
                     break
             except Exception as e:
@@ -2094,9 +2279,18 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
             ai_circuit_open_until = time.time() + cooldown
             log.error(f"[CIRCUIT] Tripped. AI paused {cooldown}s (exponential backoff).")
 
+        if ai_word is None:
+            # Fail-open on parse ambiguity for valid borderline setups; do not auto-veto malformed outputs.
+            if decision_score >= 1 and target_ev_pct >= MIN_EV_PCT_TO_CALL_AI:
+                log.warning(f"[AI] Unparseable response; defaulting to {favored_dir}. Raw: {raw_response!r}")
+                ai_word = favored_dir
+            else:
+                ai_word = "SKIP"
+
         if ai_word == favored_dir:
             final = {**rule_decision, "reason": f"AI confirmed: {rule_decision['reason']}"}
         else:
+            record_ai_veto(slug, ev.get("ev_pct", 0.0))
             final = {**rule_decision, "decision": "SKIP", "bet_size": 0.0,
                      "reason": "AI vetoed borderline signal"}
 
@@ -2244,12 +2438,30 @@ async def evaluation_loop(session: aiohttp.ClientSession):
 
             if price_delta >= tp_delta:
                 should_exit = False
+                tp_gate_hold = secs_left > TP_EARLY_EXIT_WINDOW_SECS
+                roi_pct_now = ((current_token_price - bought_price) / bought_price) if bought_price > 0 else 0.0
+                force_tp = (roi_pct_now >= FORCE_TP_ROI_PCT) or (price_delta >= FORCE_TP_DELTA_ABS)
                 async with state_lock:
                     live_pred = active_predictions.get(slug)
                     if live_pred and live_pred.get("status") == "OPEN":
                         live_pred["sl_breach_count"] = 0
-                        live_pred["status"] = "CLOSING"
-                        should_exit = True
+                        if tp_gate_hold and not force_tp:
+                            if not live_pred.get("tp_gate_logged", False):
+                                live_pred["tp_gate_logged"] = True
+                                log.info(
+                                    f"[TP HOLD] {slug} | TP reached (+{price_delta*100:.1f}c) "
+                                    f"but holding until <= {TP_EARLY_EXIT_WINDOW_SECS}s to expiry "
+                                    f"(now {int(secs_left)}s)"
+                                )
+                        else:
+                            live_pred["status"] = "CLOSING"
+                            should_exit = True
+                            live_pred["tp_gate_logged"] = False
+                            if tp_gate_hold and force_tp:
+                                log.info(
+                                    f"[TP FORCE] {slug} | Extreme gain override: "
+                                    f"ROI {roi_pct_now*100:.1f}% / Delta +{price_delta*100:.1f}c"
+                                )
                 if should_exit:
                     log.info(f"[TP HIT] {slug} | Target: +{tp_delta*100:.1f}c | Actual: +{price_delta*100:.1f}c")
                     asyncio.create_task(execute_early_exit(session, slug, f"TAKE_PROFIT (ATR-based: +{price_delta*100:.1f}c)", current_token_price))
@@ -2304,6 +2516,7 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             committed_slugs.discard(old_slug)
             soft_skipped_slugs.discard(old_slug)
             slug_reentry_state.pop(old_slug, None)
+            slug_ai_state.pop(old_slug, None)
             fire_and_forget(fetch_price_to_beat_for_market(session, target_slug))
             continue
 
@@ -2362,6 +2575,11 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             if not result.get("needs_ai"):
                 await _commit_decision(target_slug, result, poly_data, selected_ev.get("ev_pct", 0.0), ctx)
             else:
+                ai_ok, ai_msg = check_ai_requery_eligibility(target_slug, selected_ev.get("ev_pct", 0.0))
+                if not ai_ok:
+                    log.info(f"[AI GATE] Skipped {target_slug}: {ai_msg}")
+                    soft_skipped_slugs.add(target_slug)
+                    continue
                 asyncio.create_task(call_local_ai(
                     session, current_candle, history_snapshot,
                     poly_data, selected_ev, counter_ev, 50.0,
@@ -2542,6 +2760,9 @@ async def main():
     historical_pnl = await get_historical_pnl()
     simulated_balance = PAPER_BALANCE + historical_pnl
     log.info(f"[INIT] Simulated balance initialized: ${simulated_balance:.2f} (base: ${PAPER_BALANCE} + historical: ${historical_pnl:.2f})")
+
+    if not PAPER_TRADING and not POLY_PRIVATE_KEY:
+        raise RuntimeError("PAPER_TRADING=false requires POLY_PRIVATE_KEY to be set")
     
     if POLY_PRIVATE_KEY:
         try:
@@ -2552,6 +2773,8 @@ async def main():
             log.info("[CLOB] Client initialized successfully.")
         except Exception as e:
             log.error(f"CLOB Init Failed: {e}")
+            if not PAPER_TRADING:
+                raise
 
     async with aiohttp.ClientSession() as session:
         await prefill_history(session)

@@ -416,8 +416,25 @@ async def live_data_feed(websocket: WebSocket):
     await websocket.accept()
     try:
         while True:
-            current_logs = list(core.recent_logs)
-            k = core.live_candle if isinstance(core.live_candle, dict) else {}
+            async with core.state_lock:
+                current_logs = list(core.recent_logs)
+                k = core.live_candle if isinstance(core.live_candle, dict) else {}
+                price = core.live_price
+                active_trades = dict(core.active_predictions)
+                history_snapshot = list(core.candle_history)
+
+            regime = core.detect_market_regime(history_snapshot) if history_snapshot else "UNKNOWN"
+            atr = 0.0
+            if history_snapshot:
+                atr_window = history_snapshot[-14:]
+                atr_components = [
+                    max(float(c.get("high", 0.0)) - float(c.get("low", 0.0)), 0.0)
+                    for c in atr_window
+                    if isinstance(c, dict)
+                ]
+                if atr_components:
+                    atr = sum(atr_components) / len(atr_components)
+
             balance = await get_current_balance()
 
             now = int(time.time())
@@ -425,20 +442,22 @@ async def live_data_feed(websocket: WebSocket):
             time_left = next_boundary - now
 
             payload = {
-                "price": core.live_price,
+                "price": price,
                 "seconds_remaining": int(time_left),
                 "logs": current_logs,
                 "ai_log": core.last_ai_interaction,
                 "vwap": round(core.get_vwap(), 2), 
                 "balance": round(balance, 2),
                 "is_paper": core.PAPER_TRADING,
-                "active_trades": core.active_predictions, 
+                "active_trades": active_trades,
+                "regime": regime,
+                "atr": round(atr, 2),
                 "candle": {
                     "time": int(k.get('t', time.time()*1000)/1000),
-                    "open": float(k.get('o', core.live_price)),
-                    "high": float(k.get('h', core.live_price)),
-                    "low": float(k.get('l', core.live_price)),
-                    "close": core.live_price
+                    "open": float(k.get('o', price)),
+                    "high": float(k.get('h', price)),
+                    "low": float(k.get('l', price)),
+                    "close": price
                 }
             }
             await websocket.send_json(payload)
