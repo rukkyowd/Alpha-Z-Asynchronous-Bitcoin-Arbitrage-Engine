@@ -112,6 +112,9 @@ REENTRY_COOLDOWN_SECS             = 120
 REENTRY_MIN_EV_IMPROVEMENT_AFTER_SL_PCT = 1.5
 REENTRY_MIN_EV_IMPROVEMENT_AFTER_TP_PCT = 0.0
 REENTRY_SAME_DIR_SL_EV_BYPASS_PCT = 1.5
+# Safety: after a stop-loss on a slug, do not re-enter in the same direction.
+# This prevents repeated wrong-side bets during strong one-way markets.
+REENTRY_BLOCK_SAME_DIRECTION_AFTER_SL = True
 
 # OPTIMIZED: Lowered from 40K to 12K - more realistic for 15-min Bitcoin volume
 CVD_DIVERGENCE_THRESHOLD  = 12000.0  
@@ -148,6 +151,12 @@ STRIKE_PRICE_CACHE_TTL = 300
 VOLATILITY_LOOKBACK = 96  
 ATR_PERCENTILE = 0.30  
 CVD_ADAPTIVE_MULTIPLIER = 1.5  
+
+# Probability guardrails for directional model calibration.
+# Keep non-extreme bounds, but avoid the old 15% floor that created false edges
+# against very low-priced market probabilities (e.g., 3-6c tokens).
+MODEL_PROB_FLOOR_PCT = 2.0
+MODEL_PROB_CEIL_PCT = 98.0
 
 # ============================================================
 # ASYNC ML DATA LOGGER
@@ -565,6 +574,8 @@ def check_reentry_eligibility(slug: str, direction: str, ev_pct: float) -> tuple
     last_exit_reason = str(stats.get("last_exit_reason", ""))
     last_exit_dir = str(stats.get("last_exit_dir", ""))
     if "STOP_LOSS" in last_exit_reason and direction == last_exit_dir:
+        if REENTRY_BLOCK_SAME_DIRECTION_AFTER_SL:
+            return False, f"same-direction re-entry blocked after stop-loss ({direction})"
         if ev_pct < (last_entry_ev_pct + REENTRY_SAME_DIR_SL_EV_BYPASS_PCT):
             return False, f"same-direction re-entry blocked after stop-loss ({direction})"
 
@@ -1046,7 +1057,7 @@ def compute_directional_prob(ctx: dict, strike: float, secs_remaining: float) ->
     total_bias = rsi_bias + cvd_bias + structure_bias
     total_bias = max(-14.0, min(14.0, total_bias))
 
-    prob_up = max(15.0, min(85.0, prob_up_base + total_bias))
+    prob_up = max(MODEL_PROB_FLOOR_PCT, min(MODEL_PROB_CEIL_PCT, prob_up_base + total_bias))
     prob_down = 100.0 - prob_up
 
     return round(prob_up, 2), round(prob_down, 2)
@@ -1107,6 +1118,7 @@ def get_time_adjusted_bet(kelly_bet: float, secs_remaining: float, confidence_le
 def deterministic_ai_filter(rule_decision: dict, ctx: dict, current_candle: dict) -> dict:
     favored_dir = rule_decision["decision"]
     veto_reasons = []
+    score = int(rule_decision.get("score", 0))
 
     # 1. Extreme RSI Veto
     if favored_dir == "UP" and ctx['rsi'] > 75:
@@ -1139,6 +1151,37 @@ def deterministic_ai_filter(rule_decision: dict, ctx: dict, current_candle: dict
         veto_reasons.append(f"Bearish Rejection Wick detected")
     elif favored_dir == "DOWN" and lower_wick > (body * 1.5):
         veto_reasons.append(f"Bullish Rejection Wick detected")
+
+    # 5. Contra-trend guard (low-conviction only):
+    # Prevent fading obvious directional structure on borderline setups.
+    if score <= 2:
+        strike = float(current_candle.get("strike_price", 0.0) or 0.0)
+        price = float(ctx.get("price", 0.0) or 0.0)
+        ema_9 = float(ctx.get("ema_9", 0.0) or 0.0)
+        ema_21 = float(ctx.get("ema_21", 0.0) or 0.0)
+        rsi = float(ctx.get("rsi", 50.0) or 50.0)
+        cvd = float(ctx.get("cvd_candle_delta", 0.0) or 0.0)
+
+        bull_signals = 0
+        bear_signals = 0
+        if strike > 0:
+            bull_signals += int(price > strike)
+            bear_signals += int(price < strike)
+        bull_signals += int(ema_9 > ema_21)
+        bear_signals += int(ema_9 < ema_21)
+        bull_signals += int(rsi > 52.0)
+        bear_signals += int(rsi < 48.0)
+        bull_signals += int(cvd > 0.0)
+        bear_signals += int(cvd < 0.0)
+
+        if favored_dir == "DOWN" and bull_signals >= 3:
+            veto_reasons.append(
+                f"Contra-trend guard: bullish structure ({bull_signals}/4) blocks DOWN"
+            )
+        elif favored_dir == "UP" and bear_signals >= 3:
+            veto_reasons.append(
+                f"Contra-trend guard: bearish structure ({bear_signals}/4) blocks UP"
+            )
 
     if veto_reasons:
         log.info(f"[DET_FILTER] Vetoed {favored_dir}: {' | '.join(veto_reasons)}")
@@ -2359,7 +2402,9 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
         ai_call_in_flight = slug
 
     try:
-        pre_filtered = deterministic_ai_filter(rule_decision, ctx, current_candle)
+        candle_for_filter = dict(current_candle)
+        candle_for_filter["strike_price"] = float(poly_data.get("strike_price", 0.0) or 0.0)
+        pre_filtered = deterministic_ai_filter(rule_decision, ctx, candle_for_filter)
         if pre_filtered["decision"] == "SKIP":
             await _commit_decision(slug, pre_filtered, poly_data, ev.get("ev_pct", 0.0), ctx)
             return
