@@ -1,11 +1,16 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { createChart, AreaSeries, ColorType } from "lightweight-charts";
+import { createChart, AreaSeries, ColorType, type IChartApi, type UTCTimestamp } from "lightweight-charts";
 
-export default function EquityCurve({ data }: { data: { time: number; value: number }[] }) {
+type EquityPoint = {
+  time: number;
+  value: number;
+};
+
+export default function EquityCurve({ data }: { data: EquityPoint[] }) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<any>(null);
+  const chartRef = useRef<IChartApi | null>(null);
 
   useEffect(() => {
     if (!chartContainerRef.current || !data || data.length === 0) return;
@@ -35,7 +40,15 @@ export default function EquityCurve({ data }: { data: { time: number; value: num
       lineWidth: 2,
     });
 
-    series.setData(data);
+    const normalizedData = data.map((point) => {
+      const seconds = point.time > 1_000_000_000_000 ? Math.floor(point.time / 1000) : Math.floor(point.time);
+      return {
+        time: seconds as UTCTimestamp,
+        value: point.value,
+      };
+    });
+
+    series.setData(normalizedData);
     chartRef.current = chart;
 
     const handleResize = () => {

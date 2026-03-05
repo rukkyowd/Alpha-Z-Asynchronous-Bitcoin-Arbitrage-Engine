@@ -406,6 +406,10 @@ async def db_writer_worker():
 ai_call_count           = 0
 ai_consecutive_failures = 0
 ai_circuit_open_until   = 0.0
+last_ai_response_ms: float = 0.0
+ai_response_ema_ms: float = 0.0
+KILL_SWITCH: bool = False
+kill_switch_last_log_ts: float = 0.0
 background_tasks = set()
 ml_queue = asyncio.Queue(maxsize=ML_QUEUE_MAX)
 db_queue = asyncio.Queue(maxsize=DB_QUEUE_MAX)
@@ -1789,6 +1793,17 @@ async def _commit_decision(
     current_ev_pct: float = 0.0,
     ctx: dict = None
 ):
+    if KILL_SWITCH and result.get("decision") in ("UP", "DOWN"):
+        log.info(f"[KILL SWITCH] Blocking new trade on {slug}")
+        skipped = {
+            **result,
+            "decision": "SKIP",
+            "bet_size": 0.0,
+            "reason": "KILL SWITCH enabled",
+        }
+        await _commit_decision(slug, skipped, poly_data, current_ev_pct, ctx)
+        return
+
     strike   = poly_data.get("strike_price", 0.0)
     decision = result["decision"]
 
@@ -1822,7 +1837,8 @@ async def _commit_decision(
                     "bet_size": result.get("bet_size", 0.0), "bought_price": bought_price,
                     "token_id": token_id, "status": "OPEN", "entry_time": time.time(),
                     "signals": result.get("reason", "").split(" | "), "ml_data": ml_data,
-                    "sl_breach_count": 0,
+                    "sl_breach_count": 0, "entry_underlying_price": ctx.get("price", live_price) if ctx else live_price,
+                    "mark_price": bought_price,
                     "tp_gate_logged": False
                 }
             log.info(f"DECISION LOCKED: {decision} | Confidence: {result.get('confidence', '?')} | "
@@ -1838,6 +1854,13 @@ async def _commit_decision(
 async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict):
     global clob_client, simulated_balance
     token_id = poly_data.get("token_id_up", "") if decision == "UP" else poly_data.get("token_id_down", "")
+
+    if KILL_SWITCH:
+        log.info(f"[KILL SWITCH] Bet placement aborted for {slug}")
+        async with state_lock:
+            active_predictions.pop(slug, None)
+        committed_slugs.discard(slug)
+        return
 
     if not PAPER_TRADING and clob_client is None:
         log.error(f"[REJECTED] {slug}: Live mode but CLOB client is not initialized")
@@ -2153,6 +2176,7 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
                          poly_data: dict, ev: dict, counter_ev: dict, math_prob: float,
                          slug: str, rule_decision: dict, ctx: dict):
     global ai_call_count, ai_consecutive_failures, ai_circuit_open_until, ai_call_in_flight
+    global last_ai_response_ms, ai_response_ema_ms
 
     async with ai_processing_lock:
         if ai_call_in_flight == slug:
@@ -2265,12 +2289,18 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
 
         for attempt in range(1, AI_MAX_RETRIES + 1):
             try:
+                ai_req_start = time.perf_counter()
                 async with session.post(LOCAL_AI_URL, json=payload,
                                         timeout=aiohttp.ClientTimeout(total=AI_TIMEOUT_TOTAL)) as r:
                     r.raise_for_status()
                     raw_response = (await r.json())['choices'][0]['message']['content'].strip()
                     ai_word = _parse_ai_decision(raw_response, favored_dir)
                     ai_consecutive_failures = 0
+                    last_ai_response_ms = (time.perf_counter() - ai_req_start) * 1000.0
+                    ai_response_ema_ms = (
+                        last_ai_response_ms if ai_response_ema_ms <= 0
+                        else (0.7 * ai_response_ema_ms + 0.3 * last_ai_response_ms)
+                    )
                     break
             except Exception as e:
                 ai_consecutive_failures += 1
@@ -2310,7 +2340,7 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
 # EVALUATION LOOP
 # ============================================================================
 async def evaluation_loop(session: aiohttp.ClientSession):
-    global target_slug, ai_call_in_flight
+    global target_slug, ai_call_in_flight, kill_switch_last_log_ts
 
     while True:
         await asyncio.sleep(EVAL_TICK_SECONDS)
@@ -2392,6 +2422,11 @@ async def evaluation_loop(session: aiohttp.ClientSession):
                 poly_data_open["up_prob"] / 100.0 if pred["decision"] == "UP"
                 else poly_data_open["down_prob"] / 100.0
             )
+            async with state_lock:
+                live_pred = active_predictions.get(slug)
+                if live_pred and live_pred.get("status") in ("OPEN", "CLOSING"):
+                    live_pred["mark_price"] = current_token_price
+                    live_pred["live_underlying_price"] = current_price
 
             # OPTIMIZED: ATR-BASED DYNAMIC STOP LOSS & TAKE PROFIT
             # Calculate ATR for volatility-adjusted stops
@@ -2519,6 +2554,13 @@ async def evaluation_loop(session: aiohttp.ClientSession):
         # -----------------------------------------
 
         # --- TARGET HUNTING LOGIC ---
+        if KILL_SWITCH:
+            now_ts = time.time()
+            if now_ts - kill_switch_last_log_ts >= 30:
+                log.info("[KILL SWITCH] Trading paused. Managing open positions only.")
+                kill_switch_last_log_ts = now_ts
+            continue
+
         poly_data = await get_polymarket_odds_cached(session, target_slug)
         secs = poly_data.get("seconds_remaining", 0)
 

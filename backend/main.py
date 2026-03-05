@@ -6,13 +6,17 @@ import asyncio
 import math
 import aiohttp
 import time
+import tracemalloc
 from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
-from fastapi import FastAPI, WebSocket
+from typing import Optional
+from fastapi import FastAPI, WebSocket, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from bot import core # type: ignore
 
 app = FastAPI()
+tracemalloc.start()
 
 app.add_middleware(
     CORSMiddleware,
@@ -28,6 +32,13 @@ last_csv_mtime = 0
 _live_balance_cache: float = 0.0
 _live_balance_ts: float = 0.0
 BALANCE_CACHE_TTL = 15.0 
+
+
+class EngineControlUpdate(BaseModel):
+    kill_switch: Optional[bool] = None
+    paper_trading: Optional[bool] = None
+    max_trade_pct: Optional[float] = None
+    max_daily_loss_pct: Optional[float] = None
 
 def sanitize_data(data):
     if isinstance(data, dict):
@@ -141,6 +152,55 @@ def get_current_market_slug() -> str:
 
     return f"bitcoin-up-or-down-{month}-{day}-{hour_12}{ampm}-et"
 
+
+def get_engine_control_snapshot() -> dict:
+    return {
+        "kill_switch": bool(getattr(core, "KILL_SWITCH", False)),
+        "paper_trading": bool(core.PAPER_TRADING),
+        "max_trade_pct": float(core.risk_manager.max_trade_pct),
+        "max_daily_loss_pct": float(core.risk_manager.max_daily_loss_pct),
+    }
+
+
+def get_engine_health_snapshot() -> dict:
+    now_ms = int(time.time() * 1000)
+    last_feed_ms = max(int(getattr(core, "last_agg_trade_ms", 0) or 0), int(getattr(core, "last_closed_kline_ms", 0) or 0))
+    feed_stale_ms = max(0, now_ms - last_feed_ms) if last_feed_ms > 0 else 0
+    ws_latency_ms = min(5000, feed_stale_ms) if feed_stale_ms > 0 else 0
+    mem_current, mem_peak = tracemalloc.get_traced_memory()
+    mem_current_mb = mem_current / (1024 * 1024)
+    mem_peak_mb = mem_peak / (1024 * 1024)
+    ai_ms = float(getattr(core, "last_ai_response_ms", 0.0) or 0.0)
+    ai_ema_ms = float(getattr(core, "ai_response_ema_ms", 0.0) or 0.0)
+
+    if ai_ema_ms > 5000:
+        ai_status = "DEGRADED"
+    elif ai_ema_ms > 2500:
+        ai_status = "SLOW"
+    else:
+        ai_status = "ACTIVE"
+
+    api_capacity = 5
+    sem_val = getattr(core.api_semaphore, "_value", api_capacity)
+    api_inflight = max(0, api_capacity - int(sem_val))
+    api_saturation = round((api_inflight / api_capacity) * 100, 1)
+
+    return {
+        "ws_latency_ms": int(ws_latency_ms),
+        "feed_stale_ms": int(feed_stale_ms),
+        "memory_mb": round(mem_current_mb, 2),
+        "memory_peak_mb": round(mem_peak_mb, 2),
+        "ai_response_ms": round(ai_ms, 1),
+        "ai_response_ema_ms": round(ai_ema_ms, 1),
+        "ai_status": ai_status,
+        "ai_in_flight": bool(getattr(core, "ai_call_in_flight", "")),
+        "ai_failures": int(getattr(core, "ai_consecutive_failures", 0) or 0),
+        "api_inflight": api_inflight,
+        "api_capacity": api_capacity,
+        "api_saturation_pct": api_saturation,
+        "kill_switch": bool(getattr(core, "KILL_SWITCH", False)),
+    }
+
 @app.on_event("startup")
 async def start_trading_engine():
     core.target_slug = get_current_market_slug()
@@ -149,6 +209,40 @@ async def start_trading_engine():
     
     print(f"Starting Quant Engine: {core.target_slug} | Prefix: {core.market_family_prefix}")
     asyncio.create_task(core.main())
+
+
+@app.get("/api/engine/health")
+async def get_engine_health():
+    return sanitize_data(get_engine_health_snapshot())
+
+
+@app.get("/api/engine/control")
+async def get_engine_control():
+    return sanitize_data(get_engine_control_snapshot())
+
+
+@app.post("/api/engine/control")
+async def update_engine_control(update: EngineControlUpdate):
+    if update.paper_trading is not None and not update.paper_trading:
+        if not core.POLY_PRIVATE_KEY:
+            raise HTTPException(status_code=400, detail="Cannot switch to LIVE: POLY_PRIVATE_KEY is missing")
+        if core.clob_client is None:
+            raise HTTPException(status_code=400, detail="Cannot switch to LIVE: CLOB client is not initialized")
+
+    async with core.state_lock:
+        if update.kill_switch is not None:
+            core.KILL_SWITCH = bool(update.kill_switch)
+        if update.paper_trading is not None:
+            core.PAPER_TRADING = bool(update.paper_trading)
+        if update.max_trade_pct is not None:
+            core.risk_manager.max_trade_pct = max(0.005, min(float(update.max_trade_pct), 0.5))
+        if update.max_daily_loss_pct is not None:
+            core.risk_manager.max_daily_loss_pct = max(0.01, min(float(update.max_daily_loss_pct), 0.8))
+
+    return sanitize_data({
+        "ok": True,
+        "control": get_engine_control_snapshot(),
+    })
 
 @app.get("/api/metrics")
 async def get_trading_metrics():
