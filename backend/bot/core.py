@@ -83,6 +83,12 @@ SL_CONFIRM_BREACH_LATE            = 1
 SL_RECOVERY_RESET_BUFFER          = 0.01
 EMERGENCY_SL_ABS_CENTS            = 0.20
 
+# Same-slug re-entry controls
+MAX_REENTRIES_PER_SLUG            = 1
+REENTRY_COOLDOWN_SECS             = 120
+REENTRY_MIN_EV_IMPROVEMENT_AFTER_SL_PCT = 1.5
+REENTRY_MIN_EV_IMPROVEMENT_AFTER_TP_PCT = 0.0
+
 # OPTIMIZED: Lowered from 40K to 12K - more realistic for 15-min Bitcoin volume
 CVD_DIVERGENCE_THRESHOLD  = 12000.0  
 # OPTIMIZED: Lowered from 25K to 15K to prevent fighting active smart-money flow
@@ -372,6 +378,7 @@ simulated_balance = PAPER_BALANCE
 committed_slugs: set = set()
 soft_skipped_slugs: set = set()
 best_ev_seen: dict = {}
+slug_reentry_state: dict = {}
 
 ai_call_in_flight: str = ""
 ai_processing_lock = asyncio.Lock()  
@@ -407,6 +414,67 @@ def fire_and_forget(coro):
     task = asyncio.create_task(coro)
     background_tasks.add(task)
     task.add_done_callback(background_tasks.discard)
+
+def _record_full_exit_for_reentry(slug: str, pred: dict, exit_reason: str):
+    stats = slug_reentry_state.setdefault(slug, {
+        "closed_trades": 0,
+        "last_exit_ts": 0.0,
+        "last_exit_reason": "",
+        "last_exit_dir": "",
+        "last_entry_ev_pct": 0.0,
+    })
+
+    try:
+        last_ev = float(pred.get("ml_data", {}).get("ev_pct", 0.0))
+    except (TypeError, ValueError):
+        last_ev = 0.0
+
+    stats["closed_trades"] = int(stats.get("closed_trades", 0)) + 1
+    stats["last_exit_ts"] = time.time()
+    stats["last_exit_reason"] = exit_reason
+    stats["last_exit_dir"] = pred.get("decision", "")
+    stats["last_entry_ev_pct"] = last_ev
+
+    max_total_trades = 1 + MAX_REENTRIES_PER_SLUG
+    if stats["closed_trades"] < max_total_trades:
+        committed_slugs.discard(slug)
+        soft_skipped_slugs.discard(slug)
+        best_ev_seen.pop(slug, None)
+    else:
+        committed_slugs.add(slug)
+
+def check_reentry_eligibility(slug: str, direction: str, ev_pct: float) -> tuple[bool, str]:
+    stats = slug_reentry_state.get(slug)
+    if not stats:
+        return True, "fresh slug"
+
+    max_total_trades = 1 + MAX_REENTRIES_PER_SLUG
+    closed_trades = int(stats.get("closed_trades", 0))
+    if closed_trades >= max_total_trades:
+        return False, f"re-entry cap reached ({closed_trades}/{max_total_trades})"
+
+    last_exit_ts = float(stats.get("last_exit_ts", 0.0))
+    if last_exit_ts > 0:
+        elapsed = time.time() - last_exit_ts
+        if elapsed < REENTRY_COOLDOWN_SECS:
+            return False, f"cooldown active ({int(REENTRY_COOLDOWN_SECS - elapsed)}s left)"
+
+    last_exit_reason = str(stats.get("last_exit_reason", ""))
+    last_exit_dir = str(stats.get("last_exit_dir", ""))
+    if "STOP_LOSS" in last_exit_reason and direction == last_exit_dir:
+        return False, f"same-direction re-entry blocked after stop-loss ({direction})"
+
+    last_entry_ev_pct = float(stats.get("last_entry_ev_pct", 0.0))
+    ev_step = (
+        REENTRY_MIN_EV_IMPROVEMENT_AFTER_SL_PCT
+        if "STOP_LOSS" in last_exit_reason
+        else REENTRY_MIN_EV_IMPROVEMENT_AFTER_TP_PCT
+    )
+    min_required_ev = last_entry_ev_pct + ev_step
+    if ev_pct < min_required_ev:
+        return False, f"EV improvement not met ({ev_pct:.2f}% < {min_required_ev:.2f}%)"
+
+    return True, "eligible"
 
 def get_dynamic_threshold(secs_remaining: float) -> tuple[float, float]:
     if secs_remaining <= 120: 
@@ -1677,6 +1745,7 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
     shares_owned = bet_size / bought_price if bought_price > 0 else 0.0
 
     if shares_owned < 0.01:
+        _record_full_exit_for_reentry(slug, pred, f"DUST_EXIT:{exit_reason}")
         active_predictions.pop(slug, None)
         return
 
@@ -1720,6 +1789,7 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
             result_str, (total_wins / max(1, total_wins + total_losses) * 100),
             pnl_impact, local_calc_outcome=exit_reason, official_outcome="SOLD"
         )
+        _record_full_exit_for_reentry(slug, pred, exit_reason)
         active_predictions.pop(slug, None)
 
     elif not DRY_RUN and clob_client:
@@ -1807,6 +1877,7 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
 
             remaining_shares = max(0.0, shares_owned - shares_sold)
             if remaining_shares < 0.01:
+                _record_full_exit_for_reentry(slug, pred, exit_reason)
                 active_predictions.pop(slug, None)
             else:
                 pred["bet_size"] = remaining_shares * bought_price
@@ -2071,6 +2142,7 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             target_slug = increment_slug_by_interval(target_slug)
             committed_slugs.discard(old_slug)
             soft_skipped_slugs.discard(old_slug)
+            slug_reentry_state.pop(old_slug, None)
             fire_and_forget(fetch_price_to_beat_for_market(session, target_slug))
             continue
 
@@ -2109,6 +2181,16 @@ async def evaluation_loop(session: aiohttp.ClientSession):
         if result["decision"] in ["UP", "DOWN"]:
             selected_ev = ev_up if result["decision"] == "UP" else ev_down
             counter_ev = ev_down if result["decision"] == "UP" else ev_up
+
+            reentry_ok, reentry_msg = check_reentry_eligibility(
+                target_slug,
+                result["decision"],
+                selected_ev.get("ev_pct", 0.0)
+            )
+            if not reentry_ok:
+                log.info(f"[REENTRY] Skipped: {reentry_msg}")
+                continue
+
             if not result.get("needs_ai"):
                 _commit_decision(target_slug, result, poly_data, selected_ev.get("ev_pct", 0.0), ctx)
             else:
