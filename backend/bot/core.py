@@ -70,25 +70,24 @@ MAX_SECONDS_FOR_NEW_BET   = 3540
 MAX_CROWD_PROB_TO_CALL    = 94.0
 
 EV_REENGAGE_DELTA         = 0.5
-# Hybrid stop-loss controls (time-aware + confirmation + emergency cut)
+# Hybrid stop-loss controls (Anti-Wick Patch)
 SL_EARLY_PHASE_SECS               = 1800
-SL_MID_PHASE_SECS                 = 900
+SL_MID_PHASE_SECS                 = 600
 SL_NEAR_EXPIRY_SECS               = 300
-SL_LOOSEN_EARLY_MULT              = 1.30
-SL_LOOSEN_MID_MULT                = 1.15
-SL_TIGHTEN_NEAR_EXPIRY_MULT       = 0.85
-SL_CONFIRM_BREACH_EARLY           = 3
-SL_CONFIRM_BREACH_MID             = 2
-SL_CONFIRM_BREACH_LATE            = 1
+SL_LOOSEN_EARLY_MULT              = 1.50
+SL_LOOSEN_MID_MULT                = 1.20
+# OPTIMIZED: Massively increased confirmations to ignore AMM liquidity vacuums
+SL_CONFIRM_BREACH_EARLY           = 12   # Require 60 seconds of sustained drop
+SL_CONFIRM_BREACH_MID             = 8    # Require 40 seconds of sustained drop
+SL_CONFIRM_BREACH_LATE            = 6    # Require 30 seconds of sustained drop
 SL_RECOVERY_RESET_BUFFER          = 0.01
-EMERGENCY_SL_ABS_CENTS            = 0.20
 
 # Same-slug re-entry controls
 MAX_REENTRIES_PER_SLUG            = 1
 REENTRY_COOLDOWN_SECS             = 120
 REENTRY_MIN_EV_IMPROVEMENT_AFTER_SL_PCT = 1.5
 REENTRY_MIN_EV_IMPROVEMENT_AFTER_TP_PCT = 0.0
-REENTRY_SAME_DIR_SL_EV_BYPASS_PCT = 4.0
+REENTRY_SAME_DIR_SL_EV_BYPASS_PCT = 1.5
 
 # OPTIMIZED: Lowered from 40K to 12K - more realistic for 15-min Bitcoin volume
 CVD_DIVERGENCE_THRESHOLD  = 12000.0  
@@ -620,9 +619,19 @@ class StreamingEMA:
 class StreamingRSI:
     def __init__(self, period: int = 14):
         self.period = period
-        self.gains = deque(maxlen=period)
-        self.losses = deque(maxlen=period)
+        self.seed_gains = deque(maxlen=period)
+        self.seed_losses = deque(maxlen=period)
+        self.avg_gain = None
+        self.avg_loss = None
         self.last_price = None
+
+    def _rsi_from_avgs(self, avg_gain: float, avg_loss: float) -> float:
+        if avg_gain == 0 and avg_loss == 0:
+            return 50.0
+        if avg_loss == 0:
+            return 100.0
+        rs = avg_gain / avg_loss
+        return 100.0 - (100.0 / (1.0 + rs))
 
     def update(self, price: float) -> float:
         if self.last_price is None:
@@ -630,37 +639,47 @@ class StreamingRSI:
             return 50.0
 
         change = price - self.last_price
-        self.gains.append(max(change, 0))
-        self.losses.append(max(-change, 0))
+        gain = max(change, 0.0)
+        loss = max(-change, 0.0)
         self.last_price = price
 
-        if len(self.gains) < self.period:
-            return 50.0
+        # Seed with simple averages for the first RSI value.
+        if self.avg_gain is None or self.avg_loss is None:
+            self.seed_gains.append(gain)
+            self.seed_losses.append(loss)
+            if len(self.seed_gains) < self.period:
+                return 50.0
+            self.avg_gain = sum(self.seed_gains) / self.period
+            self.avg_loss = sum(self.seed_losses) / self.period
+            return self._rsi_from_avgs(self.avg_gain, self.avg_loss)
 
-        avg_gain = sum(self.gains) / self.period
-        avg_loss = sum(self.losses) / self.period
-        if avg_loss == 0:
-            return 100.0
-        rs = avg_gain / avg_loss
-        return 100.0 - (100.0 / (1.0 + rs))
+        # Wilder smoothing (RMA): decay prior averages, add current gain/loss.
+        self.avg_gain = ((self.avg_gain * (self.period - 1)) + gain) / self.period
+        self.avg_loss = ((self.avg_loss * (self.period - 1)) + loss) / self.period
+        return self._rsi_from_avgs(self.avg_gain, self.avg_loss)
 
     def peek(self, price: float) -> float:
         if self.last_price is None:
             return 50.0
 
         change = price - self.last_price
-        temp_gains = list(self.gains) + [max(change, 0)]
-        temp_losses = list(self.losses) + [max(-change, 0)]
+        gain = max(change, 0.0)
+        loss = max(-change, 0.0)
 
-        if len(temp_gains) < self.period:
-            return 50.0
+        # During warm-up, simulate the first seeded RSI value.
+        if self.avg_gain is None or self.avg_loss is None:
+            temp_gains = list(self.seed_gains) + [gain]
+            temp_losses = list(self.seed_losses) + [loss]
+            if len(temp_gains) < self.period:
+                return 50.0
+            temp_avg_gain = sum(temp_gains[-self.period:]) / self.period
+            temp_avg_loss = sum(temp_losses[-self.period:]) / self.period
+            return self._rsi_from_avgs(temp_avg_gain, temp_avg_loss)
 
-        avg_gain = sum(temp_gains[-self.period:]) / self.period
-        avg_loss = sum(temp_losses[-self.period:]) / self.period
-        if avg_loss == 0:
-            return 100.0
-        rs = avg_gain / avg_loss
-        return 100.0 - (100.0 / (1.0 + rs))
+        # After warm-up, simulate one Wilder-smoothed step without mutating state.
+        temp_avg_gain = ((self.avg_gain * (self.period - 1)) + gain) / self.period
+        temp_avg_loss = ((self.avg_loss * (self.period - 1)) + loss) / self.period
+        return self._rsi_from_avgs(temp_avg_gain, temp_avg_loss)
 
 live_ema_9  = StreamingEMA(period=9)
 live_ema_21 = StreamingEMA(period=21)
@@ -1414,8 +1433,8 @@ async def resolve_market_outcome(session: aiohttp.ClientSession, slug: str, deci
     risk_manager.current_daily_pnl += pnl_impact
 
     if "signals" in pred: signal_tracker.log_resolution(pred["signals"], result_str, pnl_impact)
-    if result_str == "WIN": total_wins += 1
-    elif result_str == "LOSS": total_losses += 1
+    if "WIN" in result_str: total_wins += 1
+    elif "LOSS" in result_str: total_losses += 1
 
     win_rate = (total_wins / max(1, total_wins + total_losses)) * 100
     log.info(f"[STATS] W:{total_wins} L:{total_losses} | WinRate:{win_rate:.2f}% | Daily PnL: ${risk_manager.current_daily_pnl:.2f} | Match: {match_status}")
@@ -1871,7 +1890,7 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
                 await log_ml_data(ml_row)
 
             await log_trade_to_db(
-                slug, pred["decision"], pred["strike"], effective_exit_price, "EARLY_EXIT",
+                slug, pred["decision"], pred["strike"], live_price, "EARLY_EXIT",
                 "WIN" if pnl_impact > 0 else "LOSS", 0.0, pnl_impact,
                 local_calc_outcome=exit_reason,
                 official_outcome="FULL_SELL" if fraction_sold >= 0.99 else "PARTIAL_SELL"
@@ -2073,23 +2092,32 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             else:
                 current_atr = 50.0  # Default fallback
             
-            # ATR-based baseline exits
-            atr_normalized = (current_atr / ctx['price']) if ctx.get('price', 0) > 0 else 0.0
-            tp_delta = max(atr_normalized * 2.5, 0.06)   # Min +6c target
-            sl_delta = min(atr_normalized * -1.5, -0.08) # Min -8c baseline stop
+            # FIXED: ATR volatility modifier for token-probability stops.
+            # Keep TP/SL in token cents space and scale by volatility.
+            volatility_modifier = current_atr / 150.0
+            volatility_modifier = max(0.6, min(volatility_modifier, 1.8))
+            tp_delta = 0.08 * volatility_modifier   # Base +8c TP scaled by vol
+            sl_delta = -0.10 * volatility_modifier  # Base -10c SL scaled by vol
+            tp_delta = max(tp_delta, 0.06)          # Absolute 6c floor
+            sl_delta = min(sl_delta, -0.08)         # Absolute 8c floor
 
-            # Time-aware stop profile:
-            # - Early in cycle: wider stops to avoid chop-outs
-            # - Late in cycle: tighter stops for capital protection
+            # Time-aware stop profile: "Iron Hands" implementation
+            disable_sl = False
             if secs_left > SL_EARLY_PHASE_SECS:
                 sl_delta *= SL_LOOSEN_EARLY_MULT
                 sl_confirms_needed = SL_CONFIRM_BREACH_EARLY
             elif secs_left > SL_MID_PHASE_SECS:
                 sl_delta *= SL_LOOSEN_MID_MULT
                 sl_confirms_needed = SL_CONFIRM_BREACH_MID
+            elif secs_left < 180: # Less than 3 minutes left
+                # "DEATH ZONE": Gamma is massive. Token prices whip wildly.
+                # A stop loss here guarantees a terrible fill. We hold to resolution.
+                disable_sl = True
+                sl_confirms_needed = 999
             elif secs_left < SL_NEAR_EXPIRY_SECS:
                 tp_delta *= 0.7
-                sl_delta *= SL_TIGHTEN_NEAR_EXPIRY_MULT
+                # Do NOT tighten SL near expiry. Volatility is peaking. Widen it.
+                sl_delta *= 1.50
                 sl_confirms_needed = SL_CONFIRM_BREACH_LATE
             else:
                 sl_confirms_needed = SL_CONFIRM_BREACH_MID
@@ -2097,10 +2125,9 @@ async def evaluation_loop(session: aiohttp.ClientSession):
             # Small settling window right after entry.
             entry_age = time.time() - pred.get("entry_time", time.time())
             if entry_age < 180:
-                sl_delta *= 1.10
+                sl_delta *= 1.20 # Give the trade 3 minutes to breathe
 
-            # Hard emergency cut for tail-risk moves (no confirmation delay).
-            emergency_sl_delta = min(sl_delta * 2.5, -EMERGENCY_SL_ABS_CENTS)
+            # Remove the emergency SL variable entirely
             price_delta = current_token_price - pred["bought_price"]
 
             if price_delta >= tp_delta:
@@ -2108,16 +2135,13 @@ async def evaluation_loop(session: aiohttp.ClientSession):
                 pred["status"] = "CLOSING"
                 log.info(f"[TP HIT] {slug} | Target: +{tp_delta*100:.1f}c | Actual: +{price_delta*100:.1f}c")
                 asyncio.create_task(execute_early_exit(session, slug, f"TAKE_PROFIT (ATR-based: +{price_delta*100:.1f}c)", current_token_price))
-            elif price_delta <= emergency_sl_delta:
-                pred["sl_breach_count"] = 0
-                pred["status"] = "CLOSING"
-                log.info(f"[SL EMERGENCY] {slug} | Threshold: {emergency_sl_delta*100:.1f}c | Actual: {price_delta*100:.1f}c")
-                asyncio.create_task(execute_early_exit(session, slug, f"STOP_LOSS_EMERGENCY ({price_delta*100:.1f}c)", current_token_price))
-            elif price_delta <= sl_delta:
+
+            # --- EMERGENCY SL BLOCK HAS BEEN DELETED ---
+
+            elif not disable_sl and price_delta <= sl_delta:
                 pred["sl_breach_count"] = pred.get("sl_breach_count", 0) + 1
                 breach_count = pred["sl_breach_count"]
                 if breach_count >= sl_confirms_needed:
-                    pred["sl_breach_count"] = 0
                     pred["status"] = "CLOSING"
                     log.info(
                         f"[SL HIT] {slug} | Threshold: {sl_delta*100:.1f}c | Actual: {price_delta*100:.1f}c | "
@@ -2131,7 +2155,7 @@ async def evaluation_loop(session: aiohttp.ClientSession):
                     )
             elif pred.get("sl_breach_count", 0) > 0 and price_delta > (sl_delta + SL_RECOVERY_RESET_BUFFER):
                 pred["sl_breach_count"] = 0
-                log.info(f"[SL WATCH] {slug} | Breach counter reset after recovery.")
+                log.info(f"[SL WATCH] {slug} | AMM liquidity recovered. Breach counter reset.")
         # -----------------------------------------
 
         # --- TARGET HUNTING LOGIC ---
@@ -2190,7 +2214,8 @@ async def evaluation_loop(session: aiohttp.ClientSession):
                 selected_ev.get("ev_pct", 0.0)
             )
             if not reentry_ok:
-                log.info(f"[REENTRY] Skipped: {reentry_msg}")
+                log.info(f"[REENTRY] Skipped {target_slug}: {reentry_msg}")
+                soft_skipped_slugs.add(target_slug)
                 continue
 
             if not result.get("needs_ai"):
