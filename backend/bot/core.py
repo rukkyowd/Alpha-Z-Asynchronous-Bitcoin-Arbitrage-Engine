@@ -2688,11 +2688,10 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
                 ai_unavailable_reason = "AI unavailable (timeout/network)"
                 log.warning(f"[AI] {ai_unavailable_reason}; defaulting to SKIP. Last error: {last_ai_error}")
                 ai_word = "SKIP"
-            # Fail-open on parse ambiguity for valid borderline setups (non-transport failures).
-            elif decision_score >= 1 and target_ev_pct >= MIN_EV_PCT_TO_CALL_AI:
-                log.warning(f"[AI] Unparseable response; defaulting to {favored_dir}. Raw: {raw_response!r}")
-                ai_word = favored_dir
+            # Fail-closed on parse ambiguity as well (no implicit directional fallback).
             else:
+                ai_unavailable_reason = "AI unparseable response"
+                log.warning(f"[AI] {ai_unavailable_reason}; defaulting to SKIP. Raw: {raw_response!r}")
                 ai_word = "SKIP"
 
         if ai_word == favored_dir:
