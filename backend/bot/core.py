@@ -15,7 +15,7 @@ import csv
 from collections import deque
 from urllib.parse import urlparse
 from datetime import datetime, timezone, timedelta
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, closing
 from dotenv import load_dotenv
 from typing import Optional, Tuple
 from decimal import Decimal, ROUND_DOWN, ROUND_UP
@@ -34,7 +34,7 @@ LOCAL_AI_MODEL  = "llama3.2:3b-instruct-q4_K_M"
 BANKROLL        = 5000.00
 
 PAPER_TRADING = os.getenv("PAPER_TRADING", "true").lower() == "true"
-PAPER_BALANCE = 5000.00
+PAPER_BALANCE = float(os.getenv("PAPER_BALANCE", f"{BANKROLL}"))
 
 GAMMA_API       = "https://gamma-api.polymarket.com"
 CLOB_HOST       = "https://clob.polymarket.com"
@@ -44,7 +44,8 @@ POLY_PRIVATE_KEY = os.getenv("POLY_PRIVATE_KEY", "")
 POLY_FUNDER      = os.getenv("POLY_FUNDER", "")
 POLY_SIG_TYPE    = int(os.getenv("POLY_SIG_TYPE", "1"))
 
-DRY_RUN          = os.getenv("DRY_RUN", "true").lower() != "false"
+# DRY_RUN only applies to live mode. Paper mode is always non-live execution.
+DRY_RUN          = PAPER_TRADING or (os.getenv("DRY_RUN", "true").lower() != "false")
 
 # -- Elite Risk & Thresholds --
 MAX_TRADE_PCT               = 0.05
@@ -120,6 +121,7 @@ REENTRY_BLOCK_SAME_DIRECTION_AFTER_SL = True
 CVD_DIVERGENCE_THRESHOLD  = 12000.0  
 # OPTIMIZED: Lowered from 25K to 15K to prevent fighting active smart-money flow
 CVD_CONTRA_VETO_THRESHOLD = 15000.0
+CVD_SCALE_FACTOR          = 50_000.0
 # Strong trend lock: when trend is clearly established and CVD confirms,
 # block counter-trend directional bets.
 TREND_LOCK_ENABLED = True
@@ -209,7 +211,7 @@ class RiskManager:
             return False, f"Daily loss limit (-${dynamic_loss_limit:.2f}) reached."
 
         if trade_size > (current_balance * self.max_trade_pct):
-            return False, f"Trade size ${trade_size:.2f} exceeds max 5% risk."
+            return False, f"Trade size ${trade_size:.2f} exceeds max {self.max_trade_pct*100:.1f}% risk."
 
         now_hour = now_utc.hour
         if now_hour != self.current_hour:
@@ -278,14 +280,12 @@ _deque_handler.setFormatter(_fmt)
 
 log = logging.getLogger("alpha_z_engine")
 log.setLevel(logging.INFO)
+log.addHandler(_file_handler)
 log.addHandler(_stream_handler)
 log.addHandler(_deque_handler)
 log.propagate = False
 
 def ui_log(msg: str, level: str = "info"):
-    timestamp = datetime.now().strftime('%H:%M:%S')
-    formatted_msg = f"[{timestamp}] [{level.upper()}] {msg}"
-    recent_logs.append(formatted_msg)
     if level == "info": log.info(msg)
     elif level == "warning": log.warning(msg)
     elif level == "error": log.error(msg)
@@ -299,7 +299,6 @@ DB_FILE = "alpha_z_history.db"
 
 async def init_db():
     def _sync_init():
-        from contextlib import closing
         with closing(sqlite3.connect(DB_FILE)) as conn:
             with conn: 
                 conn.execute("PRAGMA journal_mode=WAL;")
@@ -378,14 +377,25 @@ async def ml_writer_worker():
     file_exists = os.path.isfile(ML_FILE)
     is_empty = not file_exists or os.path.getsize(ML_FILE) == 0
     header_written = not is_empty
+    fieldnames = None
+    writer = None
     with open(ML_FILE, mode="a", newline="", encoding="utf-8") as f:
         while True:
             row = await ml_queue.get()
             try:
-                writer = csv.DictWriter(f, fieldnames=row.keys())
-                if not header_written:
-                    writer.writeheader()
-                    header_written = True
+                if fieldnames is None:
+                    fieldnames = list(row.keys())
+                    writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+                    if not header_written:
+                        writer.writeheader()
+                        header_written = True
+
+                if writer is None:
+                    writer = csv.DictWriter(f, fieldnames=fieldnames or list(row.keys()), extrasaction="ignore")
+
+                if set(row.keys()) != set(fieldnames or []):
+                    row = {k: row.get(k, "") for k in (fieldnames or [])}
+
                 writer.writerow(row)
                 f.flush()
             except Exception as e:
@@ -394,32 +404,50 @@ async def ml_writer_worker():
                 ml_queue.task_done()
 
 async def db_writer_worker():
-    conn = sqlite3.connect(DB_FILE, timeout=5.0)
+    conn = sqlite3.connect(DB_FILE, timeout=5.0, check_same_thread=False)
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA synchronous=NORMAL;")
+    conn.commit()
+
+    def _sync_write_batch(items: list[dict]):
+        for item in items:
+            if item["type"] == "trade":
+                conn.execute("""
+                    INSERT INTO trades (
+                        timestamp, slug, decision, strike, final_price, actual_outcome,
+                        result, win_rate, pnl_impact, local_calc_outcome, official_outcome, match_status, trigger_reason
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, item["payload"])
+            elif item["type"] == "exec":
+                conn.execute("""
+                    INSERT INTO execution_metrics
+                    (timestamp, slug, direction, expected_price, actual_price, slippage_bps, spread_cents, liquidity_check)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, item["payload"])
+        conn.commit()
+
     try:
-        conn.execute("PRAGMA journal_mode=WAL;")
         while True:
-            item = await db_queue.get()
+            first_item = await db_queue.get()
+            batch = [first_item]
+            while len(batch) < 50:
+                try:
+                    batch.append(db_queue.get_nowait())
+                except asyncio.QueueEmpty:
+                    break
+
             try:
-                if item["type"] == "trade":
-                    conn.execute("""
-                        INSERT INTO trades (
-                            timestamp, slug, decision, strike, final_price, actual_outcome,
-                            result, win_rate, pnl_impact, local_calc_outcome, official_outcome, match_status, trigger_reason
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, item["payload"])
-                elif item["type"] == "exec":
-                    conn.execute("""
-                        INSERT INTO execution_metrics
-                        (timestamp, slug, direction, expected_price, actual_price, slippage_bps, spread_cents, liquidity_check)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    """, item["payload"])
-                conn.commit()
+                await asyncio.to_thread(_sync_write_batch, batch)
             except Exception as e:
                 log.error(f"[DB ERROR] Worker write failed: {e}")
             finally:
-                db_queue.task_done()
+                for _ in batch:
+                    db_queue.task_done()
     finally:
-        conn.close()
+        try:
+            await asyncio.to_thread(conn.close)
+        except Exception:
+            pass
 
 # ============================================================
 # STATE
@@ -437,7 +465,7 @@ db_queue = asyncio.Queue(maxsize=DB_QUEUE_MAX)
 state_lock = asyncio.Lock()
 api_semaphore = asyncio.Semaphore(5)
 
-candle_history: list[dict] = []
+candle_history: deque[dict] = deque(maxlen=MAX_HISTORY)
 target_slug: str    = ""
 market_family_prefix: str = ""
 total_wins          = 0
@@ -649,8 +677,9 @@ def build_signal_alignment(ctx: dict, target_dir: str) -> dict:
              (target_dir == "DOWN" and ctx.get('rsi', 50.0) < 50)
     vol_ok = ctx.get('current_volume', 0.0) > (ctx.get('vol_sma_20', 0.0) * 1.05)
     cvd_delta = ctx.get('cvd_candle_delta', 0.0)
-    cvd_ok = (target_dir == "UP" and cvd_delta > 10000) or \
-             (target_dir == "DOWN" and cvd_delta < -10000)
+    cvd_threshold = max(CVD_DIVERGENCE_THRESHOLD, adaptive_cvd_threshold)
+    cvd_ok = (target_dir == "UP" and cvd_delta > cvd_threshold) or \
+             (target_dir == "DOWN" and cvd_delta < -cvd_threshold)
     score = int(vwap_ok) + int(rsi_ok) + int(vol_ok) + int(cvd_ok)
     return {
         "direction": target_dir,
@@ -805,7 +834,7 @@ def increment_slug_by_interval(slug: str) -> str:
     month_str, day, hour, ampm = match.groups()
     
     try:
-        current_year = datetime.now().year
+        current_year = datetime.now(timezone.utc).year
         dt_str = f"{month_str} {day} {current_year} {hour}{ampm}"
         dt = datetime.strptime(dt_str, "%B %d %Y %I%p")
         
@@ -840,7 +869,10 @@ def extract_slug_from_market_url(raw_input: str) -> str:
     return cleaned.strip("/").lower()
 
 async def fetch_live_balance(session: aiohttp.ClientSession) -> float:
-    if clob_client is None: return BANKROLL
+    if PAPER_TRADING:
+        return max(float(simulated_balance), float(PAPER_BALANCE))
+    if clob_client is None:
+        return BANKROLL
     try:
         from py_clob_client.clob_types import BalanceAllowanceParams, AssetType
         params = BalanceAllowanceParams(signature_type=POLY_SIG_TYPE, asset_type=AssetType.COLLATERAL)
@@ -856,6 +888,8 @@ async def warmup_ai(session: aiohttp.ClientSession):
     payload = {
         "model": LOCAL_AI_MODEL,
         "messages": [{"role": "user", "content": "hello"}],
+        "temperature": 0.0,
+        "max_tokens": 8,
         "keep_alive": -1
     }
     try:
@@ -985,15 +1019,24 @@ live_rsi    = StreamingRSI(period=14)
 def get_vwap() -> float:
     return (vwap_cum_pv / vwap_cum_vol) if vwap_cum_vol > 0 else 0.0
 
+def reset_vwap_and_cvd_for_new_day(today_str: str | None = None):
+    global vwap_cum_pv, vwap_cum_vol, vwap_date, cvd_total
+    day_key = today_str or datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    if vwap_date == day_key:
+        return
+
+    vwap_cum_pv, vwap_cum_vol = 0.0, 0.0
+    cvd_total = 0.0
+    vwap_date = day_key
+    log.info(f"[VWAP] Reset for new day: {day_key} (CVD also reset)")
+
 def update_vwap(candle: dict):
-    global vwap_cum_pv, vwap_cum_vol, vwap_date, cvd_snapshot_at_candle_open, cvd_total
+    global vwap_cum_pv, vwap_cum_vol, cvd_snapshot_at_candle_open, vwap_date
     today_str = datetime.now(timezone.utc).strftime('%Y-%m-%d')
-    
     if vwap_date != today_str:
+        # Keep this function VWAP-scoped; CVD resets are explicit via reset_vwap_and_cvd_for_new_day().
         vwap_cum_pv, vwap_cum_vol = 0.0, 0.0
-        cvd_total = 0.0  
         vwap_date = today_str
-        log.info(f"[VWAP] Reset for new day: {today_str} (CVD also reset)")
 
     typical_price = (candle['high'] + candle['low'] + candle['close']) / 3.0
     vwap_cum_pv  += typical_price * candle['volume']
@@ -1025,8 +1068,9 @@ def detect_market_regime(history: list[dict]) -> str:
     if len(history) < 30:
         return "UNKNOWN"
     closes = [c['close'] for c in history[-30:]]
-    ema_short = sum(closes[-10:]) / 10
-    ema_long  = sum(closes) / 30
+    # Simple moving averages used for coarse regime classification.
+    sma_short = sum(closes[-10:]) / 10
+    sma_long  = sum(closes) / 30
     atr_vals = [c.get('body_size', 0) + c.get('upper_wick', 0) + c.get('lower_wick', 0) for c in history[-14:]]
     atr = sum(atr_vals) / len(atr_vals) if atr_vals else 0
 
@@ -1037,7 +1081,7 @@ def detect_market_regime(history: list[dict]) -> str:
     if atr > dynamic_vol_limit: 
         regime = "VOLATILE"
     # UPDATED: Tightened from 0.001 to 0.0003 so it doesn't block normal price drift
-    elif abs(ema_short - ema_long) / ema_long < 0.0003: 
+    elif abs(sma_short - sma_long) / sma_long < 0.0003: 
         regime = "RANGING"
     else:
         regime = "TRENDING"
@@ -1096,7 +1140,6 @@ def compute_directional_prob(ctx: dict, strike: float, secs_remaining: float) ->
     rsi_bias = max(-8.5, min(8.5, rsi_bias))
 
     cvd_delta = ctx['cvd_candle_delta']
-    CVD_SCALE_FACTOR = 50_000.0
     cvd_bias = max(-5.0, min(5.0, (cvd_delta / CVD_SCALE_FACTOR) * 5.0))
     if abs(cvd_delta) < 35_000:
         cvd_bias = cvd_bias * (abs(cvd_delta) / 35_000) 
@@ -1850,7 +1893,7 @@ def run_gatekeeper(
     if seconds_left > MAX_SECONDS_FOR_NEW_BET: 
         return False, f"Too early ({int(seconds_left)}s > {MAX_SECONDS_FOR_NEW_BET}s)", {}, {}
 
-    regime = detect_market_regime(history_snapshot if history_snapshot is not None else candle_history)
+    regime = detect_market_regime(history_snapshot if history_snapshot is not None else list(candle_history))
     ctx["market_regime"] = regime
     # OPTIMIZED: Allow ranging markets for mean reversion strategies
     # Only block UNKNOWN regime (insufficient data)
@@ -1993,8 +2036,9 @@ def rule_engine_decide(ctx: dict, ev_up: dict, ev_down: dict,
         score += 1; reasons.append("Vol Spike")
 
     cvd_delta = ctx['cvd_candle_delta']
-    if (target_dir == "UP" and cvd_delta > 10000) or \
-       (target_dir == "DOWN" and cvd_delta < -10000):
+    cvd_threshold = max(CVD_DIVERGENCE_THRESHOLD, adaptive_cvd_threshold)
+    if (target_dir == "UP" and cvd_delta > cvd_threshold) or \
+       (target_dir == "DOWN" and cvd_delta < -cvd_threshold):
         score += 1; reasons.append("CVD Aligned")
 
     secs_remaining = poly_data.get("seconds_remaining", 0)
@@ -3058,6 +3102,7 @@ async def prefill_history(session: aiohttp.ClientSession):
     global vwap_cum_pv, vwap_cum_vol, vwap_date, cvd_snapshot_at_candle_open, last_closed_kline_ms
     now = datetime.now(timezone.utc)
     start_time_ms = int(now.replace(hour=0, minute=0, second=0).timestamp() * 1000)
+    reset_vwap_and_cvd_for_new_day(now.strftime('%Y-%m-%d'))
 
     log.info(f"[SYSTEM] Fetching {MAX_HISTORY} context candles from Binance...")
     try:
@@ -3086,7 +3131,7 @@ async def prefill_history(session: aiohttp.ClientSession):
                 
         log.info(f"[SYSTEM] Loaded {len(candle_history)} candles. VWAP={get_vwap():,.2f}")
         
-        update_adaptive_thresholds(candle_history)
+        update_adaptive_thresholds(list(candle_history))
         
     except Exception as e:
         log.error(f"Prefill failed: {e}")
@@ -3126,8 +3171,7 @@ async def backfill_missing_klines(session: aiohttp.ClientSession):
             }
             async with state_lock:
                 candle_history.append(candle)
-                if len(candle_history) > MAX_HISTORY:
-                    candle_history.pop(0)
+                reset_vwap_and_cvd_for_new_day()
                 update_vwap(candle)
                 live_ema_9.update(c)
                 live_ema_21.update(c)
@@ -3193,8 +3237,7 @@ async def kline_stream_loop(session: aiohttp.ClientSession):
                         closed_price = float(k['c'])
                         async with state_lock:
                             candle_history.append(parse_candle(k, live_price))
-                            if len(candle_history) > MAX_HISTORY:
-                                candle_history.pop(0)
+                            reset_vwap_and_cvd_for_new_day()
                             update_vwap(candle_history[-1])
                             live_ema_9.update(closed_price)
                             live_ema_21.update(closed_price)
