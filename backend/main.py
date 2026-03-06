@@ -7,12 +7,15 @@ import math
 import aiohttp
 import time
 import tracemalloc
+import traceback
 from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 from typing import Optional
 from fastapi import FastAPI, WebSocket, HTTPException
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from starlette.websockets import WebSocketDisconnect, WebSocketState
 from bot import core # type: ignore
 
 app = FastAPI()
@@ -32,6 +35,13 @@ last_csv_mtime = 0
 _live_balance_cache: float = 0.0
 _live_balance_ts: float = 0.0
 BALANCE_CACHE_TTL = 15.0 
+WS_PUSH_INTERVAL_SECS = 0.25
+WS_PORTFOLIO_PUSH_INTERVAL_SECS = 2.0
+WS_HISTORY_PUSH_INTERVAL_SECS = 1.5
+
+_portfolio_ws_cache: dict | None = None
+_portfolio_ws_cache_ts: float = 0.0
+_portfolio_ws_lock = asyncio.Lock()
 
 
 class EngineControlUpdate(BaseModel):
@@ -115,6 +125,37 @@ def get_optimized_df():
     except Exception as e:
         print(f"[DB READ ERROR] {e}")
         return cache_df # Return the last known good cache if the read fails
+
+def get_execution_metrics_recent(limit: int = 300) -> list[dict]:
+    if not os.path.exists("alpha_z_history.db"):
+        return []
+    try:
+        with sqlite3.connect("alpha_z_history.db", timeout=5.0) as conn:
+            query = """
+                SELECT
+                    timestamp,
+                    slug,
+                    direction,
+                    expected_price,
+                    actual_price,
+                    slippage_bps,
+                    spread_cents,
+                    liquidity_check
+                FROM execution_metrics
+                ORDER BY id DESC
+                LIMIT ?
+            """
+            df_exec = pd.read_sql_query(query, conn, params=(int(limit),))
+        if df_exec.empty:
+            return []
+        df_exec = df_exec.iloc[::-1].reset_index(drop=True)
+        ts = pd.to_datetime(df_exec["timestamp"], errors="coerce", utc=True)
+        df_exec["time"] = (ts.view("int64") // 10**9).astype("int64")
+        df_exec.loc[ts.isna(), "time"] = 0
+        return df_exec.to_dict(orient="records")
+    except Exception as e:
+        print(f"[EXEC DB READ ERROR] {e}")
+        return []
     
 async def get_current_balance() -> float:
     global _live_balance_cache, _live_balance_ts
@@ -133,6 +174,96 @@ async def get_current_balance() -> float:
     except Exception as e:
         print(f"[BALANCE] Failed to fetch: {e}")
     return _live_balance_cache if _live_balance_cache > 0 else core.BANKROLL
+
+
+def _safe_epoch_seconds(timestamp_value) -> int:
+    if timestamp_value is None:
+        return 0
+    if isinstance(timestamp_value, (int, float)):
+        ts = float(timestamp_value)
+        if ts > 10_000_000_000:  # milliseconds
+            return int(ts / 1000)
+        return int(ts)
+    if isinstance(timestamp_value, datetime):
+        dt = timestamp_value if timestamp_value.tzinfo else timestamp_value.replace(tzinfo=timezone.utc)
+        return int(dt.timestamp())
+    raw = str(timestamp_value).strip()
+    if not raw:
+        return 0
+    try:
+        dt = datetime.strptime(raw, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+        return int(dt.timestamp())
+    except Exception:
+        pass
+    try:
+        dt = pd.to_datetime(raw, utc=True, errors="coerce")
+        if pd.isna(dt):
+            return 0
+        return int(dt.timestamp())
+    except Exception:
+        return 0
+
+
+def format_candle_history_snapshot(history_snapshot: list, limit: int = 240) -> list[dict]:
+    if not history_snapshot:
+        return []
+    dedup: dict[int, dict] = {}
+    for candle in history_snapshot[-(limit * 2):]:
+        if not isinstance(candle, dict):
+            continue
+        ts = _safe_epoch_seconds(candle.get("timestamp"))
+        if ts <= 0:
+            continue
+        dedup[ts] = {
+            "time": ts,
+            "open": float(candle.get("open", 0.0) or 0.0),
+            "high": float(candle.get("high", 0.0) or 0.0),
+            "low": float(candle.get("low", 0.0) or 0.0),
+            "close": float(candle.get("close", 0.0) or 0.0),
+        }
+    if not dedup:
+        return []
+    return [dedup[t] for t in sorted(dedup.keys())][-limit:]
+
+
+def compact_portfolio_snapshot(snapshot: dict) -> dict:
+    if not isinstance(snapshot, dict):
+        return {}
+    metrics = snapshot.get("metrics", {}) or {}
+    projections = snapshot.get("projections", {}) or {}
+    return {
+        "metrics": metrics,
+        "signals": snapshot.get("signals", []) or [],
+        "attribution": snapshot.get("attribution", {}) or {},
+        "insights": (snapshot.get("insights", []) or [])[:3],
+        "heatmap": snapshot.get("heatmap", []) or [],
+        "daily_pnl": (snapshot.get("daily_pnl", []) or [])[-21:],
+        "equity_curve": (snapshot.get("equity_curve", []) or [])[-500:],
+        "journal": (snapshot.get("journal", []) or [])[:30],
+        "execution_metrics": (snapshot.get("execution_metrics", []) or [])[-120:],
+        "projections": {
+            "median_180d": projections.get("median_180d", 0.0),
+            "paths": projections.get("paths", []) or [],
+        },
+    }
+
+
+async def get_portfolio_snapshot_for_ws(ttl_secs: float = WS_PORTFOLIO_PUSH_INTERVAL_SECS) -> dict:
+    global _portfolio_ws_cache, _portfolio_ws_cache_ts
+    now = time.time()
+    if _portfolio_ws_cache is not None and (now - _portfolio_ws_cache_ts) < ttl_secs:
+        return _portfolio_ws_cache
+
+    async with _portfolio_ws_lock:
+        now = time.time()
+        if _portfolio_ws_cache is not None and (now - _portfolio_ws_cache_ts) < ttl_secs:
+            return _portfolio_ws_cache
+        snapshot = await get_trading_metrics()
+        if not isinstance(snapshot, dict):
+            snapshot = {}
+        _portfolio_ws_cache = snapshot
+        _portfolio_ws_cache_ts = now
+        return snapshot
 
 # In main.py (starting near line 114)
 def get_current_market_slug() -> str:
@@ -247,6 +378,7 @@ async def update_engine_control(update: EngineControlUpdate):
 @app.get("/api/metrics")
 async def get_trading_metrics():
     df = get_optimized_df()
+    execution_metrics = get_execution_metrics_recent(300)
     current_effective_balance = await get_current_balance()
     current_time_sec = int(time.time())
 
@@ -291,6 +423,7 @@ async def get_trading_metrics():
             ),
             "journal": [],
             "daily_pnl": [],
+            "execution_metrics": execution_metrics,
             "signals": signal_perf,
             "attribution": empty_attribution
         }
@@ -454,6 +587,7 @@ async def get_trading_metrics():
             ),
             "journal": df.tail(50).iloc[::-1].to_dict(orient="records"),
             "daily_pnl": daily_pnl,
+            "execution_metrics": execution_metrics,
             "signals": signal_perf,
             "attribution": attribution
         }
@@ -528,7 +662,12 @@ async def get_replay_history(timestamp: int):
 async def live_data_feed(websocket: WebSocket):
     await websocket.accept()
     try:
+        last_portfolio_push_ts = 0.0
+        last_history_push_ts = 0.0
+        last_portfolio_sig = None
         while True:
+            if websocket.client_state != WebSocketState.CONNECTED:
+                break
             async with core.state_lock:
                 current_logs = list(core.recent_logs)
                 k = core.live_candle if isinstance(core.live_candle, dict) else {}
@@ -550,10 +689,35 @@ async def live_data_feed(websocket: WebSocket):
 
             balance = await get_current_balance()
             strategy_snapshot = core.get_live_strategy_snapshot(balance)
+            engine_health_snapshot = get_engine_health_snapshot()
+            engine_control_snapshot = get_engine_control_snapshot()
 
             now = int(time.time())
             next_boundary = ((now // 3600) + 1) * 3600  # Hourly markets
             time_left = next_boundary - now
+
+            now_ts = time.time()
+            history_payload = None
+            if (now_ts - last_history_push_ts) >= WS_HISTORY_PUSH_INTERVAL_SECS:
+                history_payload = format_candle_history_snapshot(history_snapshot, limit=180)
+                last_history_push_ts = now_ts
+
+            portfolio_payload = None
+            if (now_ts - last_portfolio_push_ts) >= WS_PORTFOLIO_PUSH_INTERVAL_SECS:
+                full_snapshot = await get_portfolio_snapshot_for_ws()
+                compact_snapshot = compact_portfolio_snapshot(full_snapshot)
+                metrics = compact_snapshot.get("metrics", {}) if isinstance(compact_snapshot, dict) else {}
+                portfolio_sig = (
+                    metrics.get("current_pnl", 0.0),
+                    metrics.get("total_trades", 0),
+                    metrics.get("total_wins", 0),
+                    metrics.get("total_losses", 0),
+                    metrics.get("current_streak", 0),
+                )
+                if portfolio_sig != last_portfolio_sig:
+                    portfolio_payload = compact_snapshot
+                    last_portfolio_sig = portfolio_sig
+                last_portfolio_push_ts = now_ts
 
             payload = {
                 "price": price,
@@ -567,6 +731,8 @@ async def live_data_feed(websocket: WebSocket):
                 "regime": regime,
                 "atr": round(atr, 2),
                 "strategy": strategy_snapshot,
+                "engine_health": engine_health_snapshot,
+                "engine_control": engine_control_snapshot,
                 "candle": {
                     "time": int(k.get('t', time.time()*1000)/1000),
                     "open": float(k.get('o', price)),
@@ -575,7 +741,16 @@ async def live_data_feed(websocket: WebSocket):
                     "close": price
                 }
             }
-            await websocket.send_json(payload)
-            await asyncio.sleep(1)
-    except Exception: pass
+            if history_payload is not None:
+                payload["history"] = history_payload
+            if portfolio_payload is not None:
+                payload["portfolio"] = portfolio_payload
+            # WebSocket path does not get FastAPI response encoding, so normalize manually.
+            await websocket.send_json(jsonable_encoder(sanitize_data(payload)))
+            await asyncio.sleep(WS_PUSH_INTERVAL_SECS)
+    except WebSocketDisconnect:
+        return
+    except Exception as e:
+        print(f"[WS /ws/live] {e}")
+        traceback.print_exc()
 

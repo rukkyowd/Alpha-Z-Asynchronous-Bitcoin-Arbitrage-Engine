@@ -1,9 +1,23 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { createChart, CandlestickSeries, LineSeries, ColorType } from "lightweight-charts";
-import { getHttpUrl } from "../config"; // Adjust path if your config file is located elsewhere
 
-export default function PriceChart({ candle, vwap }: { candle: any; vwap: number }) {
+function getChartHeight(): number {
+  if (typeof window !== "undefined" && window.innerWidth < 768) {
+    return 260;
+  }
+  return 350;
+}
+
+export default function PriceChart({
+  candle,
+  history,
+  vwap,
+}: {
+  candle: any;
+  history?: any[];
+  vwap: number;
+}) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<any>(null);
   const candlestickSeriesRef = useRef<any>(null);
@@ -21,7 +35,7 @@ export default function PriceChart({ candle, vwap }: { candle: any; vwap: number
       grid: { vertLines: { color: "#18181b" }, horzLines: { color: "#18181b" } },
       timeScale: { timeVisible: true, secondsVisible: false, borderColor: "#27272a" },
       rightPriceScale: { borderColor: "#27272a" },
-      height: 350,
+      height: getChartHeight(),
     });
 
     // 2. Add Series
@@ -42,27 +56,12 @@ export default function PriceChart({ candle, vwap }: { candle: any; vwap: number
     candlestickSeriesRef.current = candleSeries;
     vwapSeriesRef.current = vwapSeries;
 
-    // 3. THE BOOT SEQUENCE: Load History
-    const loadHistory = async () => {
-      try {
-        // Now dynamically uses your current IP (Localhost or Tailscale)
-        const res = await fetch(`${getHttpUrl()}/api/history`);
-        const data = await res.json();
-      
-        if (data.history && data.history.length > 0) {
-          const sanitizedHistory = data.history.sort((a: any, b: any) => a.time - b.time);
-          candlestickSeriesRef.current.setData(sanitizedHistory);
-          
-          // Unlock the chart to accept live ticks
-          isHistoryLoaded.current = true;
-        }
-      } catch (e) {
-        console.error("Failed to load chart history", e);
-      }
-    };
-    loadHistory();
-
-    const handleResize = () => chart.applyOptions({ width: chartContainerRef.current?.clientWidth });
+    const handleResize = () =>
+      chart.applyOptions({
+        width: chartContainerRef.current?.clientWidth,
+        height: getChartHeight(),
+      });
+    handleResize();
     window.addEventListener("resize", handleResize);
 
     return () => {
@@ -71,22 +70,50 @@ export default function PriceChart({ candle, vwap }: { candle: any; vwap: number
     };
   }, []);
 
+  useEffect(() => {
+    if (!candlestickSeriesRef.current || !Array.isArray(history) || history.length === 0) {
+      return;
+    }
+    const sanitizedHistory = history
+      .filter((bar) => bar && bar.time !== undefined)
+      .map((bar) => ({
+        time: Number(bar.time),
+        open: Number(bar.open),
+        high: Number(bar.high),
+        low: Number(bar.low),
+        close: Number(bar.close),
+      }))
+      .sort((a, b) => a.time - b.time);
+    if (sanitizedHistory.length === 0) {
+      return;
+    }
+    candlestickSeriesRef.current.setData(sanitizedHistory);
+    isHistoryLoaded.current = true;
+  }, [history]);
+
   // 4. Handle Live Updates safely
   useEffect(() => {
-    // Drop live ticks into the void if history hasn't been painted yet
-    if (!isHistoryLoaded.current) return;
+    if (!candlestickSeriesRef.current || !candle?.time) return;
 
-    if (candlestickSeriesRef.current && candle?.time) {
+    // Bootstrap with current candle if history has not arrived yet.
+    if (!isHistoryLoaded.current) {
+      candlestickSeriesRef.current.setData([candle]);
+      isHistoryLoaded.current = true;
+    } else {
       candlestickSeriesRef.current.update(candle);
-      
-      if (vwap && vwapSeriesRef.current) {
-        vwapSeriesRef.current.update({
-          time: candle.time,
-          value: vwap
-        });
-      }
+    }
+
+    if (vwap && vwapSeriesRef.current) {
+      vwapSeriesRef.current.update({
+        time: candle.time,
+        value: vwap,
+      });
     }
   }, [candle, vwap]);
 
-  return <div ref={chartContainerRef} className="w-full h-full min-h-[350px]" />;
+  return (
+    <div className="relative h-full w-full min-h-[260px] sm:min-h-[350px]">
+      <div ref={chartContainerRef} className="h-full w-full min-h-[260px] sm:min-h-[350px]" />
+    </div>
+  );
 }

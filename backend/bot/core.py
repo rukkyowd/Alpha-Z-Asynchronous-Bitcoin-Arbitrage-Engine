@@ -95,8 +95,8 @@ SL_RECOVERY_RESET_BUFFER          = 0.01
 # This caps SL by a percentage of entry so it cannot require an impossible drop.
 SL_ENTRY_REL_MAX_LOSS_PCT         = 0.55
 SL_ENTRY_REL_MIN_CENTS            = 0.03
-# Only allow take-profit early exits near expiry; otherwise hold winners.
-TP_EARLY_EXIT_WINDOW_SECS         = 180
+# Allow take-profit exits earlier in the hour to reduce winner-to-loser reversals.
+TP_EARLY_EXIT_WINDOW_SECS         = 900
 # Force immediate TP on extreme windfalls, even outside the TP time gate.
 FORCE_TP_ROI_PCT                  = 0.70  # 70% ROI
 FORCE_TP_DELTA_ABS                = 0.35  # +35c token-price delta
@@ -120,11 +120,18 @@ REENTRY_BLOCK_SAME_DIRECTION_AFTER_SL = True
 CVD_DIVERGENCE_THRESHOLD  = 12000.0  
 # OPTIMIZED: Lowered from 25K to 15K to prevent fighting active smart-money flow
 CVD_CONTRA_VETO_THRESHOLD = 15000.0
+# Strong trend lock: when trend is clearly established and CVD confirms,
+# block counter-trend directional bets.
+TREND_LOCK_ENABLED = True
+TREND_LOCK_MIN_EMA_SPREAD_PCT = 0.0012
+TREND_LOCK_MIN_VWAP_DIST_PCT = 0.0010
+TREND_LOCK_CVD_CONFIRM_THRESHOLD = 15000.0
 # OPTIMIZED: Lowered from 0.6% to 0.4% to prevent buying the absolute local top/bottom
 VWAP_OVEREXTEND_PCT       = 0.004
 BODY_STRENGTH_MULTIPLIER  = 0.5
 
 EVAL_TICK_SECONDS = 5
+OPEN_POSITION_EVAL_TICK_SECONDS = 1
 MAX_HISTORY     = 120
 
 AI_TIMEOUT_CONNECT  = 5
@@ -716,12 +723,59 @@ def get_drawdown_guard_snapshot(current_balance: float) -> dict:
         "text": text,
     }
 
+def get_system_locks_snapshot() -> dict:
+    now_ts = time.time()
+    locks: list[dict] = []
+
+    for slug, stats in slug_reentry_state.items():
+        last_exit_ts = float(stats.get("last_exit_ts", 0.0) or 0.0)
+        if last_exit_ts <= 0:
+            continue
+        remaining = REENTRY_COOLDOWN_SECS - (now_ts - last_exit_ts)
+        if remaining > 0:
+            locks.append({
+                "slug": slug,
+                "type": "reentry",
+                "label": "Re-entry cooldown",
+                "remaining_secs": int(remaining),
+            })
+
+    for slug, state in slug_ai_state.items():
+        last_veto_ts = float(state.get("last_veto_ts", 0.0) or 0.0)
+        if last_veto_ts <= 0:
+            continue
+        remaining = AI_VETO_COOLDOWN_SECS - (now_ts - last_veto_ts)
+        if remaining > 0:
+            locks.append({
+                "slug": slug,
+                "type": "ai_veto",
+                "label": "AI veto cooldown",
+                "remaining_secs": int(remaining),
+            })
+
+    locks.sort(key=lambda item: item.get("remaining_secs", 0), reverse=True)
+    locks = locks[:12]
+
+    ai_circuit_remaining = max(0, int((ai_circuit_open_until or 0.0) - now_ts))
+    return {
+        "locks": locks,
+        "ai_circuit_open": ai_circuit_remaining > 0,
+        "ai_circuit_remaining_secs": ai_circuit_remaining,
+        "ai_failures": int(ai_consecutive_failures or 0),
+        "ai_in_flight": bool(ai_call_in_flight),
+    }
+
 def get_live_strategy_snapshot(current_balance: float) -> dict:
     return {
         "edge_tracker": dict(latest_edge_snapshot),
         "signal_alignment": dict(latest_signal_alignment),
         "execution_latency": dict(latest_execution_timing),
         "cvd_gauge": dict(latest_cvd_snapshot),
+        "adaptive_thresholds": {
+            "atr_min": round(float(adaptive_atr_min), 2),
+            "cvd_threshold": round(float(adaptive_cvd_threshold), 2),
+        },
+        "system_locks": get_system_locks_snapshot(),
         "drawdown_guard": get_drawdown_guard_snapshot(current_balance),
     }
 
@@ -1797,6 +1851,7 @@ def run_gatekeeper(
         return False, f"Too early ({int(seconds_left)}s > {MAX_SECONDS_FOR_NEW_BET}s)", {}, {}
 
     regime = detect_market_regime(history_snapshot if history_snapshot is not None else candle_history)
+    ctx["market_regime"] = regime
     # OPTIMIZED: Allow ranging markets for mean reversion strategies
     # Only block UNKNOWN regime (insufficient data)
     if regime == "UNKNOWN":
@@ -1868,6 +1923,48 @@ def rule_engine_decide(ctx: dict, ev_up: dict, ev_down: dict,
                         poly_data: dict, current_candle: dict) -> dict:
     target_dir = "UP" if ev_up["ev_pct"] > ev_down["ev_pct"] else "DOWN"
     target_ev  = ev_up if target_dir == "UP" else ev_down
+
+    # Strong trend direction lock: do not fight a confirmed trend.
+    if TREND_LOCK_ENABLED:
+        regime = str(ctx.get("market_regime", "UNKNOWN"))
+        price = float(ctx.get("price", 0.0) or 0.0)
+        ema_9 = float(ctx.get("ema_9", 0.0) or 0.0)
+        ema_21 = float(ctx.get("ema_21", 0.0) or 0.0)
+        vwap_distance = float(ctx.get("vwap_distance", 0.0) or 0.0)
+        cvd_delta = float(ctx.get("cvd_candle_delta", 0.0) or 0.0)
+
+        ema_spread_pct = abs(ema_9 - ema_21) / max(abs(ema_21), 1e-9)
+        vwap_dist_pct = abs(vwap_distance) / max(abs(price), 1e-9)
+
+        trend_dir = None
+        if ema_9 > ema_21 and vwap_distance > 0:
+            trend_dir = "UP"
+        elif ema_9 < ema_21 and vwap_distance < 0:
+            trend_dir = "DOWN"
+
+        strong_trend = (
+            regime == "TRENDING"
+            and trend_dir in ("UP", "DOWN")
+            and ema_spread_pct >= TREND_LOCK_MIN_EMA_SPREAD_PCT
+            and vwap_dist_pct >= TREND_LOCK_MIN_VWAP_DIST_PCT
+        )
+        cvd_confirms = (
+            (trend_dir == "UP" and cvd_delta >= TREND_LOCK_CVD_CONFIRM_THRESHOLD)
+            or (trend_dir == "DOWN" and cvd_delta <= -TREND_LOCK_CVD_CONFIRM_THRESHOLD)
+        )
+
+        if strong_trend and cvd_confirms and target_dir != trend_dir:
+            return {
+                "decision": "SKIP",
+                "confidence": "Low",
+                "score": 0,
+                "reason": (
+                    f"Trend lock veto: {trend_dir} trend confirmed "
+                    f"(EMA spread {ema_spread_pct*100:.3f}%, "
+                    f"VWAP dist {vwap_dist_pct*100:.3f}%, "
+                    f"CVD {cvd_delta:+.0f})"
+                ),
+            }
 
     log.info(f"[EV] {target_dir} | "
              f"Gross: {target_ev['ev_pct_gross']:+.2f}% | "
@@ -2486,6 +2583,9 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
         }
         ai_word = None
         raw_response = ""
+        had_transport_error = False
+        last_ai_error = ""
+        ai_unavailable_reason = None
 
         def _parse_ai_decision(text: str, favored: str) -> str | None:
             text_up = (text or "").upper()
@@ -2515,6 +2615,8 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
                     r.raise_for_status()
                     raw_response = (await r.json())['choices'][0]['message']['content'].strip()
                     ai_word = _parse_ai_decision(raw_response, favored_dir)
+                    had_transport_error = False
+                    last_ai_error = ""
                     ai_consecutive_failures = 0
                     last_ai_response_ms = (time.perf_counter() - ai_req_start) * 1000.0
                     ai_response_ema_ms = (
@@ -2524,6 +2626,8 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
                     update_execution_timing(ai_ms=last_ai_response_ms)
                     break
             except Exception as e:
+                had_transport_error = True
+                last_ai_error = f"{type(e).__name__}: {e}"
                 ai_consecutive_failures += 1
                 log.warning(f"[AI] Attempt {attempt} failed: {e}")
                 if attempt < AI_MAX_RETRIES:
@@ -2535,8 +2639,13 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
             log.error(f"[CIRCUIT] Tripped. AI paused {cooldown}s (exponential backoff).")
 
         if ai_word is None:
-            # Fail-open on parse ambiguity for valid borderline setups; do not auto-veto malformed outputs.
-            if decision_score >= 1 and target_ev_pct >= MIN_EV_PCT_TO_CALL_AI:
+            # Fail-closed on timeout/network/API errors.
+            if had_transport_error:
+                ai_unavailable_reason = "AI unavailable (timeout/network)"
+                log.warning(f"[AI] {ai_unavailable_reason}; defaulting to SKIP. Last error: {last_ai_error}")
+                ai_word = "SKIP"
+            # Fail-open on parse ambiguity for valid borderline setups (non-transport failures).
+            elif decision_score >= 1 and target_ev_pct >= MIN_EV_PCT_TO_CALL_AI:
                 log.warning(f"[AI] Unparseable response; defaulting to {favored_dir}. Raw: {raw_response!r}")
                 ai_word = favored_dir
             else:
@@ -2547,7 +2656,7 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
         else:
             record_ai_veto(slug, ev.get("ev_pct", 0.0))
             final = {**rule_decision, "decision": "SKIP", "bet_size": 0.0,
-                     "reason": "AI vetoed borderline signal"}
+                     "reason": ai_unavailable_reason or "AI vetoed borderline signal"}
 
         last_ai_interaction["response"] = ai_word or "FAILED"
         await _commit_decision(slug, final, poly_data, ev.get("ev_pct", 0.0), ctx)
@@ -2564,7 +2673,9 @@ async def evaluation_loop(session: aiohttp.ClientSession):
     global target_slug, ai_call_in_flight, kill_switch_last_log_ts, latest_cvd_snapshot
 
     while True:
-        await asyncio.sleep(EVAL_TICK_SECONDS)
+        async with state_lock:
+            has_open_positions = any(pred.get("status") == "OPEN" for pred in active_predictions.values())
+        await asyncio.sleep(OPEN_POSITION_EVAL_TICK_SECONDS if has_open_positions else EVAL_TICK_SECONDS)
 
         async with state_lock:
             history_snapshot = list(candle_history)
@@ -2712,6 +2823,40 @@ async def evaluation_loop(session: aiohttp.ClientSession):
 
             # Remove the emergency SL variable entirely
             price_delta = current_token_price - bought_price
+            async with state_lock:
+                live_pred = active_predictions.get(slug)
+                if live_pred and live_pred.get("status") in ("OPEN", "CLOSING"):
+                    live_pred["current_token_price"] = current_token_price
+                    live_pred["tp_delta"] = tp_delta
+                    live_pred["sl_delta"] = sl_delta
+                    live_pred["tp_token_price"] = bought_price + tp_delta
+                    live_pred["sl_token_price"] = max(0.0, bought_price + sl_delta)
+                    live_pred["sl_disabled"] = bool(disable_sl)
+                    live_pred["tp_window_secs"] = int(TP_EARLY_EXIT_WINDOW_SECS)
+                    live_pred["seconds_remaining"] = int(secs_left)
+
+            # Hard guard: once TP has armed, do not allow the trade to flip to a loss
+            # while waiting for the TP time gate. Exit immediately at break-even breach.
+            tp_guard_exit = False
+            tp_guard_reason = ""
+            if price_delta <= 0 and secs_left > TP_EARLY_EXIT_WINDOW_SECS:
+                async with state_lock:
+                    live_pred = active_predictions.get(slug)
+                    if (
+                        live_pred
+                        and live_pred.get("status") == "OPEN"
+                        and live_pred.get("tp_armed", False)
+                    ):
+                        peak_delta = float(live_pred.get("tp_peak_delta", 0.0))
+                        live_pred["status"] = "CLOSING"
+                        tp_guard_exit = True
+                        tp_guard_reason = (
+                            f"TP_LOCK_BREAKEVEN_GUARD (peak +{peak_delta*100:.1f}c -> now +{price_delta*100:.1f}c)"
+                        )
+            if tp_guard_exit:
+                log.info(f"[TP GUARD] {slug} | {tp_guard_reason}")
+                asyncio.create_task(execute_early_exit(session, slug, tp_guard_reason, current_token_price))
+                continue
 
             if price_delta >= tp_delta:
                 should_exit = False

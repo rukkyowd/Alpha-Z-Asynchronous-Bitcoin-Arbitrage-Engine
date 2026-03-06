@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AlertTriangle,
   BarChart3,
+  Bell,
   BookOpen,
   CheckCircle2,
   Clock,
@@ -14,9 +15,12 @@ import {
   Play,
   RefreshCcw,
   Settings2,
+  SlidersHorizontal,
   Target,
   TrendingDown,
   TrendingUp,
+  Volume2,
+  VolumeX,
   Wifi,
   WifiOff,
   X,
@@ -63,14 +67,32 @@ type ToastItem = {
   level: ToastLevel;
   title: string;
   message: string;
+  ts: number;
+};
+
+type AudioEventKey = "trade_entered" | "stop_loss" | "take_profit" | "circuit_breaker";
+
+type AlertSettings = {
+  volume: number;
+  sound_trade_entered: boolean;
+  sound_stop_loss: boolean;
+  sound_take_profit: boolean;
+  sound_circuit_breaker: boolean;
 };
 
 const PAGE_SIZE = 20;
 const WS_RECONNECT_SECONDS = 3;
 const TOAST_DURATION_MS = 4200;
-const METRICS_POLL_MS = 10_000;
-const HEALTH_POLL_MS = 5_000;
-const CONTROL_POLL_MS = 15_000;
+const OFFLINE_FALLBACK_POLL_MS = 4_000;
+const ALERT_SETTINGS_STORAGE_KEY = "elite-alert-settings-v1";
+
+const DEFAULT_ALERT_SETTINGS: AlertSettings = {
+  volume: 0.25,
+  sound_trade_entered: true,
+  sound_stop_loss: true,
+  sound_take_profit: true,
+  sound_circuit_breaker: true,
+};
 
 const DEFAULT_ENGINE_CONTROL: EngineControl = {
   kill_switch: false,
@@ -98,6 +120,7 @@ const DEFAULT_ENGINE_HEALTH: EngineHealth = {
 const DEFAULT_LIVE_DATA = {
   price: 0,
   vwap: 0,
+  history: [],
   active_trades: {},
   candle: null,
   is_paper: true,
@@ -140,6 +163,17 @@ const DEFAULT_LIVE_DATA = {
       threshold: 12000,
       divergence: "NONE",
       divergence_strength: 0,
+    },
+    adaptive_thresholds: {
+      atr_min: 0,
+      cvd_threshold: 12000,
+    },
+    system_locks: {
+      locks: [],
+      ai_circuit_open: false,
+      ai_circuit_remaining_secs: 0,
+      ai_failures: 0,
+      ai_in_flight: false,
     },
     drawdown_guard: {
       regime: "NORMAL",
@@ -193,6 +227,26 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
+function normalizeSignedInt(value: number): number {
+  const rounded = Math.round(value);
+  return Object.is(rounded, -0) ? 0 : rounded;
+}
+
+function formatSignedInt(value: number): string {
+  const normalized = normalizeSignedInt(value);
+  if (normalized > 0) {
+    return `+${normalized}`;
+  }
+  return `${normalized}`;
+}
+
+function formatDuration(seconds: number): string {
+  const total = Math.max(0, Math.floor(seconds));
+  const mm = Math.floor(total / 60);
+  const ss = total % 60;
+  return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+}
+
 function getOutcomeFromPnl(pnl: number): "WIN" | "LOSS" | "TIE" {
   if (pnl > 0) {
     return "WIN";
@@ -221,8 +275,26 @@ export default function EliteDashboard() {
   const [showControls, setShowControls] = useState(false);
   const [controlDirty, setControlDirty] = useState(false);
   const [savingControl, setSavingControl] = useState(false);
+  const [showAlertSettings, setShowAlertSettings] = useState(false);
+  const [showNotificationCenter, setShowNotificationCenter] = useState(false);
 
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [notificationHistory, setNotificationHistory] = useState<ToastItem[]>([]);
+  const [alertSettings, setAlertSettings] = useState<AlertSettings>(() => {
+    if (typeof window === "undefined") {
+      return DEFAULT_ALERT_SETTINGS;
+    }
+    try {
+      const raw = window.localStorage.getItem(ALERT_SETTINGS_STORAGE_KEY);
+      if (!raw) {
+        return DEFAULT_ALERT_SETTINGS;
+      }
+      const parsed = JSON.parse(raw);
+      return { ...DEFAULT_ALERT_SETTINGS, ...(parsed || {}) };
+    } catch {
+      return DEFAULT_ALERT_SETTINGS;
+    }
+  });
 
   const [timeMode, setTimeMode] = useState<TimeMode>(() => {
     if (typeof window === "undefined") {
@@ -239,6 +311,8 @@ export default function EliteDashboard() {
   const toastIdRef = useRef(1);
   const healthSupportedRef = useRef(true);
   const controlSupportedRef = useRef(true);
+  const showControlsRef = useRef(showControls);
+  const controlDirtyRef = useRef(controlDirty);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -246,21 +320,46 @@ export default function EliteDashboard() {
     }
   }, [timeMode]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(ALERT_SETTINGS_STORAGE_KEY, JSON.stringify(alertSettings));
+    }
+  }, [alertSettings]);
+
+  useEffect(() => {
+    showControlsRef.current = showControls;
+  }, [showControls]);
+
+  useEffect(() => {
+    controlDirtyRef.current = controlDirty;
+  }, [controlDirty]);
+
   const addToast = useCallback((level: ToastLevel, title: string, message: string) => {
     const id = toastIdRef.current++;
-    setToasts((prev) => [...prev, { id, level, title, message }]);
+    const event: ToastItem = { id, level, title, message, ts: Date.now() };
+    setToasts((prev) => [...prev, event]);
+    setNotificationHistory((prev) => [event, ...prev].slice(0, 10));
     window.setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, TOAST_DURATION_MS);
   }, []);
 
-  const playNotification = useCallback(() => {
+  const playNotification = useCallback((event: AudioEventKey) => {
+    const keyMap: Record<AudioEventKey, keyof AlertSettings> = {
+      trade_entered: "sound_trade_entered",
+      stop_loss: "sound_stop_loss",
+      take_profit: "sound_take_profit",
+      circuit_breaker: "sound_circuit_breaker",
+    };
+    if (!alertSettings[keyMap[event]] || alertSettings.volume <= 0) {
+      return;
+    }
     const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3");
-    audio.volume = 0.25;
+    audio.volume = clamp(alertSettings.volume, 0, 1);
     audio.play().catch(() => {
       // Ignore autoplay restrictions.
     });
-  }, []);
+  }, [alertSettings]);
 
   const clearReconnectTimers = useCallback(() => {
     if (reconnectTimeoutRef.current) {
@@ -360,19 +459,75 @@ export default function EliteDashboard() {
         }
         lastPriceRef.current = safeNumber(data.price);
 
-        setLiveData({
+        if (data.portfolio && !data.portfolio.error) {
+          setPortfolio(data.portfolio);
+          setMetricsLoading(false);
+        }
+
+        if (data.engine_health && typeof data.engine_health === "object") {
+          healthSupportedRef.current = true;
+          setEngineHealth({ ...DEFAULT_ENGINE_HEALTH, ...data.engine_health });
+        }
+
+        if (data.engine_control && typeof data.engine_control === "object") {
+          controlSupportedRef.current = true;
+          const nextControl: EngineControl = {
+            kill_switch: Boolean(data.engine_control.kill_switch),
+            paper_trading: Boolean(data.engine_control.paper_trading),
+            max_trade_pct: safeNumber(data.engine_control.max_trade_pct, 0.05),
+            max_daily_loss_pct: safeNumber(data.engine_control.max_daily_loss_pct, 0.2),
+          };
+          setEngineControl(nextControl);
+          if (!showControlsRef.current || !controlDirtyRef.current) {
+            setControlDraft(nextControl);
+          }
+        }
+
+        setLiveData((prev: any) => ({
           ...DEFAULT_LIVE_DATA,
+          ...(prev || {}),
           ...data,
           strategy: {
             ...DEFAULT_LIVE_DATA.strategy,
+            ...(prev?.strategy || {}),
             ...(data?.strategy || {}),
-            edge_tracker: { ...DEFAULT_LIVE_DATA.strategy.edge_tracker, ...(data?.strategy?.edge_tracker || {}) },
-            signal_alignment: { ...DEFAULT_LIVE_DATA.strategy.signal_alignment, ...(data?.strategy?.signal_alignment || {}) },
-            execution_latency: { ...DEFAULT_LIVE_DATA.strategy.execution_latency, ...(data?.strategy?.execution_latency || {}) },
-            cvd_gauge: { ...DEFAULT_LIVE_DATA.strategy.cvd_gauge, ...(data?.strategy?.cvd_gauge || {}) },
-            drawdown_guard: { ...DEFAULT_LIVE_DATA.strategy.drawdown_guard, ...(data?.strategy?.drawdown_guard || {}) },
+            edge_tracker: {
+              ...DEFAULT_LIVE_DATA.strategy.edge_tracker,
+              ...(prev?.strategy?.edge_tracker || {}),
+              ...(data?.strategy?.edge_tracker || {}),
+            },
+            signal_alignment: {
+              ...DEFAULT_LIVE_DATA.strategy.signal_alignment,
+              ...(prev?.strategy?.signal_alignment || {}),
+              ...(data?.strategy?.signal_alignment || {}),
+            },
+            execution_latency: {
+              ...DEFAULT_LIVE_DATA.strategy.execution_latency,
+              ...(prev?.strategy?.execution_latency || {}),
+              ...(data?.strategy?.execution_latency || {}),
+            },
+            cvd_gauge: {
+              ...DEFAULT_LIVE_DATA.strategy.cvd_gauge,
+              ...(prev?.strategy?.cvd_gauge || {}),
+              ...(data?.strategy?.cvd_gauge || {}),
+            },
+            adaptive_thresholds: {
+              ...DEFAULT_LIVE_DATA.strategy.adaptive_thresholds,
+              ...(prev?.strategy?.adaptive_thresholds || {}),
+              ...(data?.strategy?.adaptive_thresholds || {}),
+            },
+            system_locks: {
+              ...DEFAULT_LIVE_DATA.strategy.system_locks,
+              ...(prev?.strategy?.system_locks || {}),
+              ...(data?.strategy?.system_locks || {}),
+            },
+            drawdown_guard: {
+              ...DEFAULT_LIVE_DATA.strategy.drawdown_guard,
+              ...(prev?.strategy?.drawdown_guard || {}),
+              ...(data?.strategy?.drawdown_guard || {}),
+            },
           },
-        });
+        }));
         setLiveLoading(false);
       } catch (error) {
         console.error("WebSocket payload parse error:", error);
@@ -458,16 +613,21 @@ export default function EliteDashboard() {
     fetchMetrics();
     fetchEngineHealth();
     fetchEngineControl(true);
-
-    const metricsInterval = setInterval(fetchMetrics, METRICS_POLL_MS);
-    const healthInterval = setInterval(fetchEngineHealth, HEALTH_POLL_MS);
-    const controlInterval = setInterval(() => fetchEngineControl(false), CONTROL_POLL_MS);
-    return () => {
-      clearInterval(metricsInterval);
-      clearInterval(healthInterval);
-      clearInterval(controlInterval);
-    };
   }, [fetchMetrics, fetchEngineHealth, fetchEngineControl]);
+
+  useEffect(() => {
+    if (wsStatus === "LIVE") {
+      return;
+    }
+    const fallbackInterval = setInterval(() => {
+      fetchMetrics();
+      fetchEngineHealth();
+      fetchEngineControl(false);
+    }, OFFLINE_FALLBACK_POLL_MS);
+    return () => {
+      clearInterval(fallbackInterval);
+    };
+  }, [wsStatus, fetchMetrics, fetchEngineHealth, fetchEngineControl]);
 
   useEffect(() => {
     const logs = Array.isArray(liveData.logs) ? liveData.logs : [];
@@ -482,16 +642,39 @@ export default function EliteDashboard() {
 
     if (latestLog.includes("[BET] BET PLACED")) {
       addToast("success", "Trade Placed", "A new position was opened.");
-      playNotification();
+      playNotification("trade_entered");
     } else if (latestLog.includes("[SL HIT]") || latestLog.includes("STOP_LOSS_CONFIRMED")) {
       addToast("error", "Stop Loss Hit", "A position was exited by stop loss.");
-      playNotification();
+      playNotification("stop_loss");
     } else if (latestLog.includes("[TP HIT]")) {
       addToast("info", "Take Profit Hit", "A position reached take-profit conditions.");
+      playNotification("take_profit");
+    } else if (latestLog.includes("[CIRCUIT]")) {
+      addToast("error", "AI Circuit Breaker", "AI validation is temporarily locked out.");
+      playNotification("circuit_breaker");
     } else if (latestLog.includes("[KILL SWITCH]")) {
       addToast("warning", "Kill Switch Active", "New trade entries are paused.");
     }
-  }, [liveData.logs, addToast, playNotification]);
+
+    const shouldRefreshUi =
+      latestLog.includes("[BET] BET PLACED") ||
+      latestLog.includes("[SL HIT]") ||
+      latestLog.includes("STOP_LOSS_CONFIRMED") ||
+      latestLog.includes("[TP HIT]") ||
+      latestLog.includes("[EARLY EXIT]") ||
+      latestLog.includes("[CIRCUIT]") ||
+      latestLog.includes("[KILL SWITCH]") ||
+      latestLog.includes("[RESOLVE]") ||
+      latestLog.includes("[STATS]");
+
+    if (shouldRefreshUi && wsStatus !== "LIVE") {
+      fetchMetrics();
+      fetchEngineHealth();
+      if (latestLog.includes("[KILL SWITCH]")) {
+        fetchEngineControl(false);
+      }
+    }
+  }, [liveData.logs, addToast, playNotification, fetchMetrics, fetchEngineHealth, fetchEngineControl, wsStatus]);
 
   const saveControls = useCallback(async () => {
     if (!controlSupportedRef.current) {
@@ -529,9 +712,9 @@ export default function EliteDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100 font-sans selection:bg-blue-500/30">
-      <nav className="fixed left-0 top-0 z-50 flex h-full w-20 flex-col items-center gap-8 border-r border-zinc-800/50 bg-zinc-950/80 py-8 backdrop-blur-xl shadow-2xl">
+      <nav className="fixed bottom-0 left-0 right-0 top-auto z-50 flex h-16 w-full items-center justify-around border-t border-zinc-800/60 bg-zinc-950/90 px-2 backdrop-blur-xl shadow-2xl lg:left-0 lg:right-auto lg:top-0 lg:h-full lg:w-20 lg:flex-col lg:items-center lg:justify-start lg:gap-8 lg:border-r lg:border-t-0 lg:bg-zinc-950/80 lg:px-0 lg:py-8">
         <motion.div
-          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-500 text-sm font-black text-white shadow-lg shadow-blue-500/30"
+          className="hidden h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-500 text-sm font-black text-white shadow-lg shadow-blue-500/30 lg:flex"
           whileHover={{ scale: 1.05, rotate: 5 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -542,8 +725,8 @@ export default function EliteDashboard() {
         <NavIcon icon={<BarChart3 size={20} />} active={activeTab === "analytics"} onClick={() => setActiveTab("analytics")} label="Analytics" />
       </nav>
 
-      <main className="px-10 py-10 pl-32">
-        <header className="mb-10 flex flex-wrap items-start justify-between gap-5">
+      <main className="px-4 py-5 pb-24 sm:px-6 sm:py-6 sm:pb-24 lg:px-10 lg:py-10 lg:pb-10 lg:pl-32">
+        <header className="mb-6 flex flex-col gap-4 sm:mb-8 lg:mb-10 lg:flex-row lg:items-start lg:justify-between">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div>
               <div className="mb-2 flex items-center gap-3">
@@ -560,7 +743,7 @@ export default function EliteDashboard() {
                 <SkeletonBox className="h-14 w-80" />
               ) : (
                 <motion.div
-                  className={`text-5xl font-black tabular-nums ${isPnlPositive ? "text-white" : "text-red-400"}`}
+                  className={`text-4xl font-black tabular-nums sm:text-5xl ${isPnlPositive ? "text-white" : "text-red-400"}`}
                   key={metrics?.current_pnl}
                   initial={{ scale: 1.03, opacity: 0.85 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -591,13 +774,32 @@ export default function EliteDashboard() {
             </div>
           </motion.div>
 
-          <div className="flex flex-col items-end gap-3">
-            <div className="flex items-center gap-2">
+          <div className="relative flex w-full flex-col items-start gap-3 sm:items-end lg:w-auto">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={() => setTimeMode((prev) => (prev === "UTC" ? "LOCAL" : "UTC"))}
-                className="rounded-lg border border-zinc-700/70 bg-zinc-900/70 px-3 py-1.5 text-[11px] font-bold tracking-wide text-zinc-300 transition hover:border-zinc-500 hover:text-white"
+                className="rounded-lg border border-zinc-700/70 bg-zinc-900/70 px-2.5 py-1.5 text-[10px] font-bold tracking-wide text-zinc-300 transition hover:border-zinc-500 hover:text-white sm:px-3 sm:text-[11px]"
               >
                 {timeMode === "UTC" ? "UTC" : "LOCAL"}
+              </button>
+              <button
+                onClick={() => setShowNotificationCenter((prev) => !prev)}
+                className="relative rounded-lg border border-zinc-700/70 bg-zinc-900/70 p-2 text-zinc-300 transition hover:border-zinc-500 hover:text-white"
+                title="Notification History"
+              >
+                <Bell size={14} />
+                {notificationHistory.length > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-500 px-1 text-[9px] font-black text-white">
+                    {notificationHistory.length}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setShowAlertSettings(true)}
+                className="flex items-center gap-1.5 rounded-lg border border-zinc-700/70 bg-zinc-900/70 px-2.5 py-1.5 text-[10px] font-bold tracking-wide text-zinc-300 transition hover:border-zinc-500 hover:text-white sm:px-3 sm:text-[11px]"
+              >
+                <SlidersHorizontal size={14} />
+                Alerts
               </button>
               <button
                 onClick={() => {
@@ -605,12 +807,20 @@ export default function EliteDashboard() {
                   setControlDirty(false);
                   setShowControls(true);
                 }}
-                className="flex items-center gap-1.5 rounded-lg border border-zinc-700/70 bg-zinc-900/70 px-3 py-1.5 text-[11px] font-bold tracking-wide text-zinc-300 transition hover:border-zinc-500 hover:text-white"
+                className="flex items-center gap-1.5 rounded-lg border border-zinc-700/70 bg-zinc-900/70 px-2.5 py-1.5 text-[10px] font-bold tracking-wide text-zinc-300 transition hover:border-zinc-500 hover:text-white sm:px-3 sm:text-[11px]"
               >
                 <Settings2 size={14} />
                 Controls
               </button>
             </div>
+            {showNotificationCenter && (
+              <NotificationCenter
+                items={notificationHistory}
+                timeMode={timeMode}
+                onClear={() => setNotificationHistory([])}
+                onClose={() => setShowNotificationCenter(false)}
+              />
+            )}
             <StatusBadge status={wsStatus} reconnectIn={reconnectIn} onReconnect={forceReconnect} />
             <RegimeBadge regime={liveData.regime} atr={safeNumber(liveData.atr)} />
           </div>
@@ -678,6 +888,16 @@ export default function EliteDashboard() {
       </AnimatePresence>
 
       <AnimatePresence>
+        {showAlertSettings && (
+          <AlertSettingsDrawer
+            settings={alertSettings}
+            setSettings={setAlertSettings}
+            onClose={() => setShowAlertSettings(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {showControls && (
           <ControlModal
             draft={controlDraft}
@@ -701,14 +921,15 @@ function NavIcon({ icon, active, onClick, label }: any) {
   return (
     <motion.button
       onClick={onClick}
-      className={`group relative flex h-14 w-14 items-center justify-center rounded-xl transition-all ${
+      className={`group relative flex h-12 w-20 flex-col items-center justify-center gap-0.5 rounded-xl transition-all lg:h-14 lg:w-14 ${
         active ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" : "bg-zinc-900/50 text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
       }`}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
     >
       {icon}
-      <div className="pointer-events-none absolute left-full ml-4 whitespace-nowrap rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-medium opacity-0 transition-opacity group-hover:opacity-100">
+      <span className="text-[9px] font-semibold uppercase tracking-wide lg:hidden">{label}</span>
+      <div className="pointer-events-none absolute left-full ml-4 hidden whitespace-nowrap rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-medium opacity-0 transition-opacity group-hover:opacity-100 lg:block">
         {label}
       </div>
     </motion.button>
@@ -719,7 +940,7 @@ function StatusBadge({ status, reconnectIn, onReconnect }: { status: WsStatus; r
   const isLive = status === "LIVE";
   const icon = isLive ? <Wifi size={14} /> : <WifiOff size={14} />;
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
       <motion.div
         className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold tracking-wide ${
           isLive ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-red-500/30 bg-red-500/10 text-red-400"
@@ -804,10 +1025,10 @@ function SkeletonCard() {
 function Panel({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
   return (
     <motion.div className={`overflow-hidden rounded-2xl border border-zinc-800/50 bg-zinc-900/30 backdrop-blur-sm ${className}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="border-b border-zinc-800/50 bg-zinc-900/50 px-5 py-3">
+      <div className="border-b border-zinc-800/50 bg-zinc-900/50 px-3 py-2 sm:px-5 sm:py-3">
         <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">{title}</h3>
       </div>
-      <div className="p-5">{children}</div>
+      <div className="p-3 sm:p-5">{children}</div>
     </motion.div>
   );
 }
@@ -938,35 +1159,146 @@ function LatencyWaterfallPanel({ latency }: { latency: any }) {
 
 function CvdPressureGauge({ cvd }: { cvd: any }) {
   const delta = safeNumber(cvd?.delta);
+  const oneMinFlow = safeNumber(cvd?.one_min_delta);
   const threshold = Math.max(1, safeNumber(cvd?.threshold, 12000));
   const normalized = clamp(Math.abs(delta) / threshold, 0, 1);
+  const magnitudePct = normalized * 100;
   const isPositive = delta >= 0;
+  const isNeutral = normalizeSignedInt(delta) === 0;
   const divergence = String(cvd?.divergence || "NONE").toUpperCase();
   const divergenceStrength = safeNumber(cvd?.divergence_strength);
+  const pressureLabel = isNeutral ? "Neutral" : isPositive ? "Buy Pressure" : "Sell Pressure";
+  const pressureClass = isNeutral ? "text-zinc-300" : isPositive ? "text-emerald-300" : "text-rose-300";
+  const fillClass = isNeutral ? "bg-zinc-500/40" : isPositive ? "bg-emerald-500/80" : "bg-rose-500/80";
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-[52px,1fr] items-center gap-4">
+        <div className="relative h-40 w-12 overflow-hidden rounded-xl border border-zinc-700/80 bg-zinc-950/90 shadow-inner">
+          <div className="absolute inset-x-1 top-1 h-1/4 rounded-md bg-zinc-900/70" />
+          <div className="absolute inset-x-1 bottom-1 h-1/4 rounded-md bg-zinc-900/70" />
+          <div className="absolute inset-x-1 top-1/2 border-t border-zinc-700/80" />
+          <div
+            className={`absolute bottom-0 left-0 w-full transition-all duration-300 ${fillClass}`}
+            style={{ height: `${Math.max(4, magnitudePct)}%` }}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="text-[10px] uppercase tracking-wider text-zinc-500">Pressure</div>
+            <div className={`text-[11px] font-bold uppercase tracking-wide ${pressureClass}`}>{pressureLabel}</div>
+          </div>
+
+          <div className="rounded-lg border border-zinc-800/70 bg-zinc-950/70 px-3 py-2">
+            <div className="flex items-end justify-between">
+              <div className={`font-mono text-xl font-black ${isNeutral ? "text-zinc-200" : isPositive ? "text-emerald-400" : "text-rose-400"}`}>
+                {formatSignedInt(delta)}
+              </div>
+              <div className="text-[11px] font-mono text-zinc-400">{magnitudePct.toFixed(0)}% of min</div>
+            </div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-zinc-900">
+              <div className={`h-full rounded-full ${fillClass}`} style={{ width: `${Math.max(3, magnitudePct)}%` }} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 text-[10px]">
+            <div className="rounded-md border border-zinc-800 bg-zinc-950/70 px-2 py-1.5 text-zinc-400">
+              Threshold
+              <div className="font-mono text-zinc-200">{normalizeSignedInt(threshold)}</div>
+            </div>
+            <div className="rounded-md border border-zinc-800 bg-zinc-950/70 px-2 py-1.5 text-zinc-400">
+              1m Flow
+              <div className={`font-mono ${normalizeSignedInt(oneMinFlow) >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+                {formatSignedInt(oneMinFlow)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {divergence !== "NONE" && (
+        <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2">
+          <div className="text-[10px] font-black uppercase tracking-wide text-amber-300">Divergence Alert</div>
+          <div className="mt-1 text-xs font-semibold text-amber-200">
+            {divergence} <span className="font-mono text-amber-300">({(divergenceStrength * 100).toFixed(0)}%)</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SystemLocksPanel({ locksData }: { locksData: any }) {
+  const locks = Array.isArray(locksData?.locks) ? locksData.locks : [];
+  const aiCircuitOpen = Boolean(locksData?.ai_circuit_open);
+  const aiCircuitRemaining = safeNumber(locksData?.ai_circuit_remaining_secs);
+  const aiFailures = safeNumber(locksData?.ai_failures);
 
   return (
     <div className="space-y-3">
-      <div className="flex items-end gap-4">
-        <div className="relative h-36 w-10 overflow-hidden rounded-md border border-zinc-800 bg-zinc-950">
-          <div
-            className={`absolute bottom-0 left-0 w-full ${isPositive ? "bg-emerald-500/70" : "bg-rose-500/70"}`}
-            style={{ height: `${normalized * 100}%` }}
-          />
-        </div>
-        <div className="space-y-1">
-          <div className={`font-mono text-sm font-black ${isPositive ? "text-emerald-400" : "text-rose-400"}`}>
-            {isPositive ? "+" : ""}
-            {delta.toFixed(0)}
+      {aiCircuitOpen && (
+        <div className="rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2">
+          <div className="text-[10px] font-black uppercase tracking-wide text-rose-300">AI Circuit Breaker</div>
+          <div className="mt-1 flex items-center justify-between text-xs">
+            <span className="text-rose-200">Reopening in {formatDuration(aiCircuitRemaining)}</span>
+            <span className="font-mono text-rose-300">{aiFailures} failures</span>
           </div>
-          <div className="text-[11px] text-zinc-500">Threshold {threshold.toFixed(0)}</div>
-          <div className="text-[11px] text-zinc-500">1m Flow {safeNumber(cvd?.one_min_delta).toFixed(0)}</div>
-        </div>
-      </div>
-      {divergence !== "NONE" && (
-        <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-300">
-          ⚠ DIV: {divergence} ({(divergenceStrength * 100).toFixed(0)}%)
         </div>
       )}
+
+      {locks.length === 0 ? (
+        <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 px-3 py-2 text-xs text-zinc-500">No active cooldowns.</div>
+      ) : (
+        <div className="space-y-2">
+          {locks.map((lock: any, idx: number) => (
+            <div key={`${lock?.slug}-${lock?.type}-${idx}`} className="rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="font-semibold text-zinc-300">{String(lock?.label || lock?.type || "LOCK")}</span>
+                <span className="font-mono text-amber-300">{formatDuration(safeNumber(lock?.remaining_secs))}</span>
+              </div>
+              <div className="mt-1 truncate font-mono text-[10px] text-zinc-500">{String(lock?.slug || "global")}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AdaptiveThresholdPanel({ atr, cvd, thresholds }: { atr: number; cvd: any; thresholds: any }) {
+  const atrNow = safeNumber(atr);
+  const atrMin = Math.max(1, safeNumber(thresholds?.atr_min, 1));
+  const atrRatio = atrNow / atrMin;
+
+  const cvdDeltaAbs = Math.abs(safeNumber(cvd?.delta));
+  const cvdThreshold = Math.max(1, safeNumber(thresholds?.cvd_threshold, safeNumber(cvd?.threshold, 12000)));
+  const cvdRatio = cvdDeltaAbs / cvdThreshold;
+
+  const row = (label: string, nowValue: number, minValue: number, ratio: number, tone: "blue" | "emerald") => {
+    const progress = clamp(ratio * 100, 0, 100);
+    const color = tone === "blue" ? "bg-blue-500/70" : "bg-emerald-500/70";
+    return (
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between text-[11px]">
+          <span className="text-zinc-500">{label}</span>
+          <span className={`font-mono ${ratio >= 1 ? "text-emerald-400" : "text-amber-300"}`}>
+            {nowValue.toFixed(2)} / {minValue.toFixed(2)}
+          </span>
+        </div>
+        <div className="relative h-2 overflow-hidden rounded-full bg-zinc-900">
+          <div className={`h-full ${color}`} style={{ width: `${progress}%` }} />
+          <div className="pointer-events-none absolute inset-y-0 left-[50%] border-l border-dashed border-zinc-300/60" />
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-3">
+      {row("ATR vs Adaptive Min", atrNow, atrMin, atrRatio, "blue")}
+      {row("CVD |delta| vs Adaptive Min", cvdDeltaAbs, cvdThreshold, cvdRatio, "emerald")}
+      <div className="text-[10px] text-zinc-500">Dashed marker = threshold line (1.0x).</div>
     </div>
   );
 }
@@ -983,7 +1315,11 @@ function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMo
               <SkeletonBox className="h-4 w-44" />
             </div>
           ) : liveData.candle ? (
-            <PriceChart candle={liveData.candle} vwap={liveData.vwap} />
+            <PriceChart
+              candle={liveData.candle}
+              history={liveData.history}
+              vwap={liveData.vwap}
+            />
           ) : (
             <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-zinc-800">
               <div className="text-center text-xs uppercase tracking-wider text-zinc-500">Awaiting stream...</div>
@@ -1017,6 +1353,12 @@ function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMo
         </Panel>
         <Panel title="Smart Money Flow (CVD)">
           <CvdPressureGauge cvd={strategy.cvd_gauge} />
+        </Panel>
+        <Panel title="Adaptive Thresholds">
+          <AdaptiveThresholdPanel atr={safeNumber(liveData.atr)} cvd={strategy.cvd_gauge} thresholds={strategy.adaptive_thresholds} />
+        </Panel>
+        <Panel title="System Locks">
+          <SystemLocksPanel locksData={strategy.system_locks} />
         </Panel>
         <Panel title="Active Positions">
           <ActiveTradesPanel trades={liveData.active_trades} currentUnderlying={safeNumber(liveData.price)} />
@@ -1083,7 +1425,7 @@ function TerminalStream({ logs }: { logs: string[] }) {
           {autoScroll ? "Pause Auto-scroll" : "Resume Auto-scroll"}
         </button>
       </div>
-      <div ref={terminalRef} onScroll={onScroll} className="h-96 space-y-1 overflow-y-auto rounded-xl border border-zinc-800/50 bg-zinc-950/80 p-4 font-mono text-[10px] leading-relaxed">
+      <div ref={terminalRef} onScroll={onScroll} className="h-64 space-y-1 overflow-y-auto rounded-xl border border-zinc-800/50 bg-zinc-950/80 p-3 font-mono text-[10px] leading-relaxed sm:h-96 sm:p-4">
         {logs.slice(-200).map((log, i) => (
           <div key={`${i}-${log.slice(0, 20)}`} className={renderClass(String(log))}>
             {log}
@@ -1120,6 +1462,19 @@ function ActiveTradesPanel({ trades, currentUnderlying }: { trades: Record<strin
         const currentPos = clamp(((liveUnderlying - minUnderlying) / span) * 100, 0, 100);
         const strikePos = clamp(((strike - minUnderlying) / span) * 100, 0, 100);
         const tokenMoveCents = (markPrice - entryPrice) * 100;
+        const tpToken = safeNumber(trade.tp_token_price, entryPrice + Math.max(0, safeNumber(trade.tp_delta)));
+        const slToken = safeNumber(trade.sl_token_price, Math.max(0, entryPrice + safeNumber(trade.sl_delta)));
+        const hasBounds =
+          (Math.abs(safeNumber(trade.tp_delta)) > 0 || Math.abs(safeNumber(trade.sl_delta)) > 0) &&
+          Number.isFinite(tpToken) &&
+          Number.isFinite(slToken);
+        const tokenMin = Math.min(slToken, entryPrice, markPrice, tpToken);
+        const tokenMax = Math.max(slToken, entryPrice, markPrice, tpToken);
+        const tokenSpan = tokenMax - tokenMin || 0.0001;
+        const tokenMarkPos = clamp(((markPrice - tokenMin) / tokenSpan) * 100, 0, 100);
+        const tokenEntryPos = clamp(((entryPrice - tokenMin) / tokenSpan) * 100, 0, 100);
+        const tokenTpPos = clamp(((tpToken - tokenMin) / tokenSpan) * 100, 0, 100);
+        const tokenSlPos = clamp(((slToken - tokenMin) / tokenSpan) * 100, 0, 100);
 
         return (
           <div key={slug} className="rounded-xl border border-zinc-800/50 bg-zinc-950/50 p-4">
@@ -1133,7 +1488,7 @@ function ActiveTradesPanel({ trades, currentUnderlying }: { trades: Record<strin
               <span className="rounded border border-zinc-800 bg-zinc-900 px-2 py-1 font-mono text-[10px] text-zinc-500">{slug.split("-").slice(-2).join("-")}</span>
             </div>
 
-            <div className="mb-3 grid grid-cols-2 gap-4 text-xs">
+            <div className="mb-3 grid grid-cols-1 gap-3 text-xs sm:grid-cols-2 sm:gap-4">
               <div>
                 <div className="text-[10px] font-bold uppercase tracking-tighter text-zinc-600">Entry Price</div>
                 <div className="font-mono font-bold text-zinc-300">${entryPrice.toFixed(3)}</div>
@@ -1157,6 +1512,27 @@ function ActiveTradesPanel({ trades, currentUnderlying }: { trades: Record<strin
               <div className="absolute top-0 h-2 rounded-full bg-blue-500/60" style={{ width: `${currentPos}%` }} />
               <div className="absolute top-[-4px] h-4 w-[2px] bg-fuchsia-400" style={{ left: `${strikePos}%` }} />
             </div>
+
+            {hasBounds && (
+              <div className="mt-3 rounded-lg border border-zinc-800/70 bg-zinc-950/70 p-2">
+                <div className="mb-1 flex items-center justify-between text-[10px] text-zinc-500">
+                  <span>Token Bounds</span>
+                  <span>{safeNumber(trade.seconds_remaining)}s left</span>
+                </div>
+                <div className="relative h-2 rounded-full bg-zinc-900">
+                  <div className="absolute inset-y-0 border-l border-red-400/80" style={{ left: `${tokenSlPos}%` }} />
+                  <div className="absolute inset-y-0 border-l border-blue-400/80" style={{ left: `${tokenEntryPos}%` }} />
+                  <div className="absolute inset-y-0 border-l border-emerald-400/80" style={{ left: `${tokenTpPos}%` }} />
+                  <div className="absolute top-[-2px] h-3 w-[2px] bg-amber-300" style={{ left: `${tokenMarkPos}%` }} />
+                </div>
+                <div className="mt-1 grid grid-cols-4 gap-1 font-mono text-[9px] text-zinc-500">
+                  <span>SL {slToken.toFixed(3)}</span>
+                  <span>EN {entryPrice.toFixed(3)}</span>
+                  <span>TP {tpToken.toFixed(3)}</span>
+                  <span className="text-right">MK {markPrice.toFixed(3)}</span>
+                </div>
+              </div>
+            )}
           </div>
         );
       })}
@@ -1355,6 +1731,7 @@ function AnalyticsView({ portfolio, engineHealth, liveData }: { portfolio: any; 
   const aiStatusClass = aiStatus === "DEGRADED" ? "text-red-400" : aiStatus === "SLOW" ? "text-amber-400" : "text-emerald-400";
   const drawdownGuard = liveData?.strategy?.drawdown_guard || {};
   const dailyPnl = Array.isArray(portfolio?.daily_pnl) ? portfolio.daily_pnl : [];
+  const executionMetrics = Array.isArray(portfolio?.execution_metrics) ? portfolio.execution_metrics : [];
 
   return (
     <motion.div key="analytics" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
@@ -1448,6 +1825,10 @@ function AnalyticsView({ portfolio, engineHealth, liveData }: { portfolio: any; 
       <Panel title="Daily P&L Bars">
         <DailyPnlBarChart rows={dailyPnl} />
       </Panel>
+
+      <Panel title="Execution Slippage Scatter (bps)">
+        <SlippageScatterPlot rows={executionMetrics} />
+      </Panel>
     </motion.div>
   );
 }
@@ -1493,6 +1874,180 @@ function DailyPnlBarChart({ rows }: { rows: any[] }) {
         })}
       </div>
     </div>
+  );
+}
+
+function SlippageScatterPlot({ rows }: { rows: any[] }) {
+  const points = (rows || [])
+    .map((row, idx) => ({
+      x: idx,
+      y: safeNumber(row?.slippage_bps),
+      spread: safeNumber(row?.spread_cents),
+      slug: String(row?.slug || ""),
+      direction: String(row?.direction || ""),
+      time: String(row?.timestamp || ""),
+    }))
+    .slice(-180);
+
+  if (points.length === 0) {
+    return <div className="text-xs text-zinc-500">No execution telemetry yet.</div>;
+  }
+
+  const width = 900;
+  const height = 260;
+  const padding = 30;
+  const maxAbs = Math.max(1, ...points.map((p) => Math.abs(p.y)));
+  const toX = (idx: number) => padding + (idx / Math.max(1, points.length - 1)) * (width - padding * 2);
+  const toY = (value: number) => {
+    const norm = (value + maxAbs) / (maxAbs * 2);
+    return height - padding - norm * (height - padding * 2);
+  };
+  const zeroY = toY(0);
+
+  return (
+    <div className="space-y-3">
+      <div className="overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-950/60">
+        <svg viewBox={`0 0 ${width} ${height}`} className="h-64 w-full min-w-[680px]">
+          <line x1={padding} y1={zeroY} x2={width - padding} y2={zeroY} stroke="#52525b" strokeDasharray="4 4" />
+          {points.map((p, idx) => {
+            const color = p.y >= 0 ? "#22c55e" : "#ef4444";
+            const r = clamp(2 + Math.abs(p.spread) * 0.15, 2, 5);
+            return (
+              <circle key={`${idx}-${p.slug}`} cx={toX(idx)} cy={toY(p.y)} r={r} fill={color} fillOpacity={0.85}>
+                <title>{`${p.time} | ${p.direction} | ${p.slug}\nslippage=${p.y.toFixed(2)} bps | spread=${p.spread.toFixed(2)}c`}</title>
+              </circle>
+            );
+          })}
+        </svg>
+      </div>
+      <div className="flex items-center justify-between text-[11px] text-zinc-500">
+        <span>Older</span>
+        <span>Slippage range ±{maxAbs.toFixed(1)} bps</span>
+        <span>Newest</span>
+      </div>
+    </div>
+  );
+}
+
+function NotificationCenter({
+  items,
+  timeMode,
+  onClear,
+  onClose,
+}: {
+  items: ToastItem[];
+  timeMode: TimeMode;
+  onClear: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="absolute right-0 top-10 z-40 w-[min(92vw,24rem)] overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/95 shadow-2xl backdrop-blur">
+      <div className="flex items-center justify-between border-b border-zinc-800 px-3 py-2">
+        <div className="text-[11px] font-black uppercase tracking-wide text-zinc-400">Notification History</div>
+        <div className="flex items-center gap-2">
+          <button onClick={onClear} className="text-[10px] font-bold uppercase tracking-wide text-zinc-500 hover:text-zinc-300">Clear</button>
+          <button onClick={onClose} className="rounded p-1 text-zinc-500 hover:text-zinc-200"><X size={12} /></button>
+        </div>
+      </div>
+      <div className="max-h-72 space-y-2 overflow-y-auto p-3">
+        {items.length === 0 ? (
+          <div className="text-xs text-zinc-500">No recent notifications.</div>
+        ) : (
+          items.map((item) => (
+            <div key={`hist-${item.id}-${item.ts}`} className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="truncate text-[11px] font-bold text-zinc-200">{item.title}</div>
+                <div className="font-mono text-[10px] text-zinc-500">
+                  {timeMode === "LOCAL"
+                    ? new Date(item.ts).toLocaleTimeString()
+                    : new Date(item.ts).toISOString().slice(11, 19) + " UTC"}
+                </div>
+              </div>
+              <div className="mt-1 text-[11px] text-zinc-400">{item.message}</div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AlertSettingsDrawer({
+  settings,
+  setSettings,
+  onClose,
+}: {
+  settings: AlertSettings;
+  setSettings: React.Dispatch<React.SetStateAction<AlertSettings>>;
+  onClose: () => void;
+}) {
+  const toggle = (key: keyof AlertSettings) => {
+    if (key === "volume") {
+      return;
+    }
+    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[115] bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <motion.div
+        initial={{ x: 380 }}
+        animate={{ x: 0 }}
+        exit={{ x: 380 }}
+        transition={{ type: "spring", stiffness: 280, damping: 32 }}
+        onClick={(e) => e.stopPropagation()}
+        className="absolute right-0 top-0 h-full w-full max-w-sm border-l border-zinc-800 bg-zinc-950 p-5"
+      >
+        <div className="mb-5 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm font-black uppercase tracking-wide text-zinc-200">
+            <SlidersHorizontal size={16} />
+            Alert Settings
+          </div>
+          <button onClick={onClose} className="rounded border border-zinc-800 p-1.5 text-zinc-500 hover:text-zinc-200">
+            <X size={14} />
+          </button>
+        </div>
+
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold uppercase tracking-wide text-zinc-500">Volume</label>
+              <span className="font-mono text-xs text-zinc-300">{Math.round(settings.volume * 100)}%</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {settings.volume > 0 ? <Volume2 size={14} className="text-zinc-400" /> : <VolumeX size={14} className="text-zinc-500" />}
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={1}
+                value={Math.round(settings.volume * 100)}
+                onChange={(e) => setSettings((prev) => ({ ...prev, volume: Number(e.target.value) / 100 }))}
+                className="w-full accent-blue-500"
+              />
+            </div>
+          </div>
+
+          {[
+            ["sound_trade_entered", "Trade Entered"],
+            ["sound_stop_loss", "Stop Loss Hit"],
+            ["sound_take_profit", "Take Profit Hit"],
+            ["sound_circuit_breaker", "AI Circuit Breaker"],
+          ].map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => toggle(key as keyof AlertSettings)}
+              className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+                settings[key as keyof AlertSettings] ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200" : "border-zinc-700 bg-zinc-900 text-zinc-400"
+              }`}
+            >
+              <span>{label}</span>
+              <span>{settings[key as keyof AlertSettings] ? "ON" : "OFF"}</span>
+            </button>
+          ))}
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -1579,10 +2134,10 @@ function ToastStack({ toasts, onDismiss }: { toasts: ToastItem[]; onDismiss: (id
   };
 
   return (
-    <div className="pointer-events-none fixed right-6 top-6 z-[140] space-y-2">
+    <div className="pointer-events-none fixed right-3 top-3 z-[140] space-y-2 sm:right-6 sm:top-6">
       <AnimatePresence>
         {toasts.map((toast) => (
-          <motion.div key={toast.id} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 30 }} className={`pointer-events-auto flex w-80 items-start gap-2 rounded-xl border p-3 shadow-xl ${getClasses(toast.level)}`}>
+          <motion.div key={toast.id} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 30 }} className={`pointer-events-auto flex w-[min(92vw,20rem)] items-start gap-2 rounded-xl border p-3 shadow-xl sm:w-80 ${getClasses(toast.level)}`}>
             <div className="mt-0.5">{getIcon(toast.level)}</div>
             <div className="min-w-0 flex-1">
               <div className="text-xs font-black uppercase tracking-wide">{toast.title}</div>
