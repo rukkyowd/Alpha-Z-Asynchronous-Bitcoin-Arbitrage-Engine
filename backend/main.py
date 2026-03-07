@@ -150,7 +150,7 @@ def get_execution_metrics_recent(limit: int = 300) -> list[dict]:
             return []
         df_exec = df_exec.iloc[::-1].reset_index(drop=True)
         ts = pd.to_datetime(df_exec["timestamp"], errors="coerce", utc=True)
-        df_exec["time"] = (ts.view("int64") // 10**9).astype("int64")
+        df_exec["time"] = (ts.astype("int64") // 10**9).astype("int64")
         df_exec.loc[ts.isna(), "time"] = 0
         return df_exec.to_dict(orient="records")
     except Exception as e:

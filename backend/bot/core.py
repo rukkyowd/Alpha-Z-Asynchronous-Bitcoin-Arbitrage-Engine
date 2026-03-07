@@ -45,6 +45,15 @@ LIVE_TINY_AMM_FALLBACK_MAX_ENTRY_SLIPPAGE_CENTS = float(
 )
 LIVE_CLOB_RECOVERY_WAIT_SECS = int(os.getenv("LIVE_CLOB_RECOVERY_WAIT_SECS", "12"))
 LIVE_CLOB_RECOVERY_POLL_SECS = float(os.getenv("LIVE_CLOB_RECOVERY_POLL_SECS", "1.0"))
+# Tiny-live execution retry tuning (used only after FAK no-match on tiny tickets).
+LIVE_TINY_REPRICE_BUFFER_CENTS = float(os.getenv("LIVE_TINY_REPRICE_BUFFER_CENTS", "0.005"))
+LIVE_TINY_REPRICE_MAX_EXTRA_CENTS = float(os.getenv("LIVE_TINY_REPRICE_MAX_EXTRA_CENTS", "0.01"))
+LIVE_RESTING_ENTRY_ENABLED = os.getenv("LIVE_RESTING_ENTRY_ENABLED", "true").lower() == "true"
+LIVE_RESTING_ENTRY_MAX_BET_USD = float(os.getenv("LIVE_RESTING_ENTRY_MAX_BET_USD", "2.50"))
+LIVE_RESTING_ENTRY_WAIT_SECS = int(os.getenv("LIVE_RESTING_ENTRY_WAIT_SECS", "12"))
+LIVE_RESTING_ENTRY_POLL_SECS = float(os.getenv("LIVE_RESTING_ENTRY_POLL_SECS", "1.0"))
+LIVE_HEARTBEAT_INTERVAL_SECS = float(os.getenv("LIVE_HEARTBEAT_INTERVAL_SECS", "5.0"))
+LIVE_GTD_EXPIRY_BUFFER_SECS = 60
 
 GAMMA_API       = "https://gamma-api.polymarket.com"
 CLOB_HOST       = "https://clob.polymarket.com"
@@ -497,6 +506,8 @@ ai_processing_lock = asyncio.Lock()
 strike_price_cache: dict = {}  
 
 clob_client = None
+clob_heartbeat_id: str = ""
+clob_heartbeat_task = None
 live_price: float = 0.0
 live_candle: dict = {}
 last_closed_kline_ms: int = 0
@@ -566,6 +577,244 @@ def fire_and_forget(coro):
     task = asyncio.create_task(coro)
     background_tasks.add(task)
     task.add_done_callback(background_tasks.discard)
+
+def _safe_float(value, default: float = 0.0) -> float:
+    try:
+        if value in ("", None):
+            return default
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+def _extract_order_payload(resp: Optional[dict]) -> dict:
+    if isinstance(resp, dict):
+        order = resp.get("order")
+        if isinstance(order, dict):
+            return order
+        return resp
+    return {}
+
+def _parse_resting_entry_status(resp: Optional[dict], fallback_price: float, fallback_size: float) -> tuple[str, float, float, float, float]:
+    payload = _extract_order_payload(resp)
+    status = str(payload.get("status") or "").lower()
+    original_size = _safe_float(payload.get("original_size"), fallback_size)
+    matched_size = _safe_float(payload.get("size_matched"), 0.0)
+    order_price = _safe_float(payload.get("price"), fallback_price)
+
+    txs = payload.get("transactions") or []
+    total_shares = 0.0
+    total_cost = 0.0
+    for tx in txs:
+        tx_size = _safe_float(tx.get("size"), 0.0)
+        tx_price = _safe_float(tx.get("price"), order_price)
+        if tx_size > 0:
+            total_shares += tx_size
+            total_cost += tx_size * tx_price
+
+    if total_shares <= 0 and matched_size > 0:
+        total_shares = matched_size
+        total_cost = total_shares * order_price
+
+    if total_shares <= 0 and status == "matched" and original_size > 0:
+        total_shares = original_size
+        total_cost = total_shares * order_price
+
+    avg_fill_price = (total_cost / total_shares) if total_shares > 0 else order_price
+    return status, original_size, total_shares, avg_fill_price, total_cost
+
+async def _mark_live_entry_filled(
+    slug: str,
+    decision: str,
+    requested_bet_size: float,
+    expected_price: float,
+    actual_price: float,
+    fill_cost: float,
+    fill_shares: float,
+    liq_msg: str,
+    order_type_used: str,
+):
+    spread_cents = float(liq_msg.split("spread=")[1].split("c")[0]) if "spread=" in liq_msg else 0.0
+    await log_execution_metrics(slug, decision, expected_price, actual_price, spread_cents, liq_msg)
+    slug_execution_fail_state.pop(slug, None)
+
+    realized_bet_size = round(fill_cost, 4) if fill_cost > 0 else requested_bet_size
+    if realized_bet_size <= 0 and fill_shares > 0 and actual_price > 0:
+        realized_bet_size = round(fill_shares * actual_price, 4)
+    if fill_cost > 0 and fill_cost + 1e-9 < requested_bet_size:
+        log.info(
+            f"[PARTIAL FILL] {slug}: ${requested_bet_size:.2f} requested -> "
+            f"${fill_cost:.2f} filled ({order_type_used})"
+        )
+
+    slippage_bps = ((actual_price - expected_price) / expected_price * 10000) if expected_price > 0 else 0.0
+    slippage_cents = (actual_price - expected_price) * 100
+
+    risk_manager.trades_this_hour += 1
+    log.info(
+        f"[BET] BET PLACED [LIVE] {decision} on {slug} | "
+        f"Bet: ${realized_bet_size:.2f} | Fill: {actual_price:.4f} | "
+        f"Expected: {expected_price:.4f} | Liq: {liq_msg}"
+    )
+    log.info(
+        f"[OK] ORDER FILLED [{order_type_used}]: {decision} on {slug} | "
+        f"${realized_bet_size:.2f} | Fill: {actual_price:.4f} "
+        f"(expected {expected_price:.4f}) | Slippage: {slippage_bps:+.1f}bps "
+        f"({slippage_cents:+.1f}c)"
+    )
+
+    async with state_lock:
+        if slug in active_predictions:
+            pred = active_predictions[slug]
+            pred["status"] = "OPEN"
+            pred["entry_time"] = time.time()
+            pred["bought_price"] = actual_price
+            pred["bet_size"] = realized_bet_size
+            pred.pop("resting_order_id", None)
+            pred.pop("resting_limit_price", None)
+            pred.pop("resting_deadline_ts", None)
+            pred.pop("entry_order_type", None)
+            pred.pop("requested_shares", None)
+            pred.pop("heartbeat_required", None)
+            if "ml_data" in pred:
+                pred["ml_data"]["final_bet_size"] = realized_bet_size
+
+async def clob_heartbeat_loop():
+    global clob_heartbeat_task, clob_heartbeat_id
+    try:
+        while True:
+            async with state_lock:
+                heartbeat_needed = any(
+                    pred.get("status") == "ENTERING" and pred.get("heartbeat_required")
+                    for pred in active_predictions.values()
+                )
+
+            if not heartbeat_needed or PAPER_TRADING or DRY_RUN or clob_client is None:
+                return
+
+            try:
+                resp = await asyncio.to_thread(clob_client.post_heartbeat, clob_heartbeat_id)
+                if isinstance(resp, dict):
+                    next_id = str(resp.get("heartbeat_id", "") or "")
+                    if next_id:
+                        clob_heartbeat_id = next_id
+            except Exception as e:
+                log.warning(f"[HEARTBEAT] Failed while resting live entry orders are open: {e}")
+
+            await asyncio.sleep(max(1.0, LIVE_HEARTBEAT_INTERVAL_SECS))
+    finally:
+        clob_heartbeat_task = None
+
+def ensure_clob_heartbeat_task():
+    global clob_heartbeat_task
+    if PAPER_TRADING or DRY_RUN or clob_client is None:
+        return
+    if clob_heartbeat_task and not clob_heartbeat_task.done():
+        return
+    clob_heartbeat_task = asyncio.create_task(clob_heartbeat_loop())
+    background_tasks.add(clob_heartbeat_task)
+    clob_heartbeat_task.add_done_callback(background_tasks.discard)
+
+async def monitor_resting_entry_order(
+    slug: str,
+    decision: str,
+    order_id: str,
+    limit_price: float,
+    requested_bet_size: float,
+    requested_shares: float,
+    expected_price: float,
+    liq_msg: str,
+    current_ev_pct: float,
+    clob_req_ms: float,
+):
+    watch_start = time.perf_counter()
+    deadline = time.time() + max(1, LIVE_RESTING_ENTRY_WAIT_SECS)
+    ensure_clob_heartbeat_task()
+
+    async def _fetch_status() -> tuple[str, float, float, float, float]:
+        resp = await asyncio.to_thread(clob_client.get_order, order_id)
+        return _parse_resting_entry_status(resp, limit_price, requested_shares)
+
+    try:
+        while time.time() < deadline:
+            try:
+                status, original_size, matched_size, avg_fill_price, fill_cost = await _fetch_status()
+                full_fill = original_size > 0 and matched_size >= max(0.0, original_size - 0.0001)
+                if status == "matched" or full_fill:
+                    await _mark_live_entry_filled(
+                        slug=slug,
+                        decision=decision,
+                        requested_bet_size=requested_bet_size,
+                        expected_price=expected_price,
+                        actual_price=avg_fill_price,
+                        fill_cost=fill_cost,
+                        fill_shares=matched_size,
+                        liq_msg=liq_msg,
+                        order_type_used="GTD",
+                    )
+                    confirm_ms = (time.perf_counter() - watch_start) * 1000.0
+                    update_execution_timing(clob_ms=clob_req_ms, confirmation_ms=confirm_ms)
+                    return
+            except Exception as e:
+                log.debug(f"[ENTRY RESTING] Poll failed for {slug} ({order_id}): {e}")
+
+            await asyncio.sleep(max(0.2, LIVE_RESTING_ENTRY_POLL_SECS))
+
+        status = ""
+        original_size = requested_shares
+        matched_size = 0.0
+        avg_fill_price = limit_price
+        fill_cost = 0.0
+        try:
+            status, original_size, matched_size, avg_fill_price, fill_cost = await _fetch_status()
+        except Exception as e:
+            log.debug(f"[ENTRY RESTING] Final poll failed for {slug} ({order_id}): {e}")
+
+        if matched_size > 0:
+            try:
+                await asyncio.to_thread(clob_client.cancel, order_id)
+            except Exception as e:
+                log.debug(f"[ENTRY RESTING] Partial-fill cancel failed for {slug} ({order_id}): {e}")
+            log.info(
+                f"[ENTRY RESTING] {slug}: matched {matched_size:.4f}/{original_size:.4f} shares "
+                f"before timeout; canceling remainder."
+            )
+            await _mark_live_entry_filled(
+                slug=slug,
+                decision=decision,
+                requested_bet_size=requested_bet_size,
+                expected_price=expected_price,
+                actual_price=avg_fill_price,
+                fill_cost=fill_cost,
+                fill_shares=matched_size,
+                liq_msg=liq_msg,
+                order_type_used="GTD-PARTIAL",
+            )
+            confirm_ms = (time.perf_counter() - watch_start) * 1000.0
+            update_execution_timing(clob_ms=clob_req_ms, confirmation_ms=confirm_ms)
+            return
+
+        try:
+            await asyncio.to_thread(clob_client.cancel, order_id)
+        except Exception as e:
+            log.debug(f"[ENTRY RESTING] Cancel failed for {slug} ({order_id}): {e}")
+
+        reason = f"ENTRY_GTD_TIMEOUT_{LIVE_RESTING_ENTRY_WAIT_SECS}s"
+        log.warning(
+            f"[REJECTED] {slug}: resting GTD entry unfilled after "
+            f"{LIVE_RESTING_ENTRY_WAIT_SECS}s; order canceled."
+        )
+        record_execution_failure(slug, reason, current_ev_pct)
+        async with state_lock:
+            active_predictions.pop(slug, None)
+        committed_slugs.discard(slug)
+        confirm_ms = (time.perf_counter() - watch_start) * 1000.0
+        update_execution_timing(clob_ms=clob_req_ms, confirmation_ms=confirm_ms)
+    except Exception as e:
+        log.error(f"[ENTRY RESTING] Watcher failed for {slug} ({order_id}): {e}")
+        record_execution_failure(slug, f"ENTRY_GTD_WATCHER_ERROR:{e}", current_ev_pct)
+        async with state_lock:
+            active_predictions.pop(slug, None)
+        committed_slugs.discard(slug)
 
 @asynccontextmanager
 async def api_get(session: aiohttp.ClientSession, url: str, **kwargs):
@@ -1583,12 +1832,36 @@ async def check_liquidity_and_spread_v2(
         book = await asyncio.to_thread(clob_client.get_order_book, token_id)
         if not book or not book.asks:
             raise RuntimeError("CLOB orderbook unavailable")
-        
-        best_bid = float(book.bids[0].price) if book.bids else 0.01
-        best_ask = float(book.asks[0].price)
+
+        # py_clob_client does not guarantee bid/ask arrays are best-price-first.
+        # Build normalized levels and compute BBO explicitly.
+        bid_levels: list[tuple[float, float]] = []
+        ask_levels: list[tuple[float, float]] = []
+        for b in (book.bids or []):
+            try:
+                p = float(b.price)
+                s = float(b.size)
+                if p > 0 and s > 0:
+                    bid_levels.append((p, s))
+            except Exception:
+                continue
+        for a in (book.asks or []):
+            try:
+                p = float(a.price)
+                s = float(a.size)
+                if p > 0 and s > 0:
+                    ask_levels.append((p, s))
+            except Exception:
+                continue
+        if not ask_levels:
+            raise RuntimeError("CLOB asks unavailable")
+
+        best_bid = max((p for p, _ in bid_levels), default=0.01)
+        best_ask = min((p for p, _ in ask_levels))
         tob_spread = best_ask - best_bid
-        
-        if tob_spread >= 0.90:
+
+        # Detect true placeholder bands only (not merely wide but tradable books).
+        if best_bid <= 0.002 and best_ask >= 0.998:
             raise RuntimeError("CLOB shows stub quotes")
         
         if not (0.01 <= best_ask <= 0.99):
@@ -1603,9 +1876,8 @@ async def check_liquidity_and_spread_v2(
         total_shares_bought = 0.0
         levels_consumed = 0
         
-        for ask in book.asks:
-            ask_price = float(ask.price)
-            ask_size_shares = float(ask.size)
+        ask_levels_sorted = sorted(ask_levels, key=lambda x: x[0])  # cheapest asks first
+        for ask_price, ask_size_shares in ask_levels_sorted:
             ask_level_dollars = ask_price * ask_size_shares
             levels_consumed += 1
             
@@ -1647,7 +1919,7 @@ async def check_liquidity_and_spread_v2(
             scaled_bet = round(intended_bet * 0.8, 2)
             return True, "OK (CLOB) | Scaled 20% for slippage", scaled_bet
         
-        top3_depth = sum(float(ask.price) * float(ask.size) for ask in book.asks[:3])
+        top3_depth = sum(price * size for price, size in ask_levels_sorted[:3])
         if top3_depth < intended_bet * MIN_LIQUIDITY_MULTIPLIER:
             scaled_bet = round(top3_depth * 0.8, 2)
             if scaled_bet < 1.00:
@@ -2289,7 +2561,7 @@ async def _commit_decision(
                 active_predictions[slug] = {
                     "decision": decision, "strike": strike, "score": result.get("score", 0),
                     "bet_size": result.get("bet_size", 0.0), "bought_price": bought_price,
-                    "token_id": token_id, "status": "OPEN", "entry_time": time.time(),
+                    "token_id": token_id, "status": "ENTERING", "entry_time": time.time(),
                     "signals": result.get("reason", "").split(" | "), "ml_data": ml_data,
                     "sl_breach_count": 0, "entry_underlying_price": ctx.get("price", live_price) if ctx else live_price,
                     "mark_price": bought_price,
@@ -2410,8 +2682,6 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict, 
                 active_predictions[slug]["ml_data"]["spread_eval"] = liq_msg
 
     if not PAPER_TRADING and not DRY_RUN and clob_client:
-        # OPTIMIZED: Use Limit Orders with slippage protection instead of Market Orders
-        # Market orders can slip 4-5c on thin liquidity, destroying 6c ATR targets
         log.info(
             f"[BET ATTEMPT] LIVE {decision} on {slug} | Bet: ${bet_size:.2f} | "
             f"Expected: {expected_price:.4f} | Liq: {liq_msg}"
@@ -2425,12 +2695,10 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict, 
             else 0.02
         )
         max_entry_price = expected_price + max_entry_slippage_cents
-        max_entry_price = min(max_entry_price, 0.99)  # Never pay more than 99c
-        
-        # Round to nearest cent for CLOB compatibility
+        max_entry_price = min(max_entry_price, 0.99)
+
         tick = Decimal("0.01")
         limit_price = float(Decimal(str(max_entry_price)).quantize(tick, rounding=ROUND_UP))
-        # Enforce 2-decimal collateral precision for market BUY semantics.
         collateral_amount = float(Decimal(str(bet_size)).quantize(tick, rounding=ROUND_DOWN))
         if collateral_amount < 1.00:
             log.warning(f"[REJECTED] {slug}: Collateral ${collateral_amount:.2f} < $1.00 minimum")
@@ -2446,6 +2714,19 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict, 
                     active_predictions[slug]["bet_size"] = bet_size
                     active_predictions[slug]["ml_data"]["final_bet_size"] = bet_size
 
+        order_tick_size = "0.01"
+        order_neg_risk = False
+        try:
+            order_tick_size = str(await asyncio.to_thread(clob_client.get_tick_size, token_id))
+        except Exception as e:
+            log.debug(f"[ENTRY ORDER] Tick size fetch failed for {slug}: {e}. Using 0.01 fallback.")
+        try:
+            order_neg_risk = bool(await asyncio.to_thread(clob_client.get_neg_risk, token_id))
+        except Exception as e:
+            log.debug(f"[ENTRY ORDER] Neg-risk fetch failed for {slug}: {e}. Using False fallback.")
+
+        price_tick = Decimal(str(order_tick_size))
+        limit_price = float(Decimal(str(max_entry_price)).quantize(price_tick, rounding=ROUND_UP))
         shares_to_buy = float(
             (Decimal(str(collateral_amount)) / Decimal(str(limit_price))).quantize(Decimal("0.0001"), rounding=ROUND_DOWN)
         )
@@ -2460,38 +2741,111 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict, 
             from py_clob_client.clob_types import OrderType
             from py_clob_client.order_builder.constants import BUY
 
-            # Live BUY is submitted as market-order args with FOK + capped price.
-            # This avoids invalid maker/taker precision errors seen with limit BUY fallback.
             if not hasattr(clob_client, "create_market_order"):
                 raise RuntimeError("Installed py_clob_client lacks create_market_order; cannot submit live BUY safely.")
 
             from py_clob_client.clob_types import MarketOrderArgs, PartialCreateOrderOptions
+            price_holder = {"value": float(limit_price)}
+            tiny_retry_allowed = collateral_amount <= (LIVE_TINY_AMM_FALLBACK_MAX_BET_USD + 1e-9)
+            resting_allowed = (
+                LIVE_RESTING_ENTRY_ENABLED
+                and collateral_amount <= (LIVE_RESTING_ENTRY_MAX_BET_USD + 1e-9)
+            )
 
             def _submit(order_type):
                 market_args = MarketOrderArgs(
                     token_id=token_id,
                     amount=collateral_amount,
                     side=BUY,
-                    price=float(limit_price),
+                    price=float(price_holder["value"]),
                     order_type=order_type,
                 )
-                opts = PartialCreateOrderOptions(tick_size="0.01")
+                opts = PartialCreateOrderOptions(
+                    tick_size=order_tick_size,
+                    neg_risk=order_neg_risk,
+                )
                 signed = clob_client.create_market_order(market_args, opts)
                 resp = clob_client.post_order(signed, order_type)
                 if isinstance(resp, dict):
                     resp["_entry_order_type"] = str(order_type)
+                    resp["_entry_limit_price"] = float(price_holder["value"])
+                return resp
+
+            def _submit_resting_gtd():
+                try:
+                    from py_clob_client.clob_types import LimitOrderArgs, PartialCreateOrderOptions
+                except ImportError:
+                    from py_clob_client.clob_types import OrderArgs as LimitOrderArgs, PartialCreateOrderOptions
+
+                expiration = int(time.time()) + LIVE_GTD_EXPIRY_BUFFER_SECS + LIVE_RESTING_ENTRY_WAIT_SECS
+                order_args = LimitOrderArgs(
+                    token_id=token_id,
+                    price=float(price_holder["value"]),
+                    size=shares_to_buy,
+                    side=BUY,
+                    expiration=expiration,
+                )
+                opts = PartialCreateOrderOptions(
+                    tick_size=order_tick_size,
+                    neg_risk=order_neg_risk,
+                )
+                signed = clob_client.create_order(order_args, opts)
+                resp = clob_client.post_order(signed, OrderType.GTD)
+                if isinstance(resp, dict):
+                    resp["_entry_order_type"] = str(OrderType.GTD)
+                    resp["_entry_limit_price"] = float(price_holder["value"])
+                    resp["_requested_shares"] = shares_to_buy
                 return resp
 
             try:
-                # Try strict all-or-none first.
                 return _submit(OrderType.FOK)
             except Exception as e:
-                # If FOK can't fill fully, retry once as FAK at same capped price.
                 if "fully filled or killed" in str(e).lower():
                     log.warning(f"[ENTRY ORDER] FOK unfilled for {slug}; retrying once as FAK at same max price.")
-                    return _submit(OrderType.FAK)
+                    try:
+                        return _submit(OrderType.FAK)
+                    except Exception as fak_e:
+                        fak_msg = str(fak_e).lower()
+                        no_match_fak = "no orders found to match with fak order" in fak_msg
+                        if tiny_retry_allowed and no_match_fak:
+                            try:
+                                # Refresh top-of-book and retry once with tiny repricing buffer.
+                                book = clob_client.get_order_book(token_id)
+                                ask_prices = []
+                                for ask in (book.asks or []):
+                                    try:
+                                        p = float(ask.price)
+                                        s = float(ask.size)
+                                        if p > 0 and s > 0:
+                                            ask_prices.append(p)
+                                    except Exception:
+                                        continue
+                                if ask_prices:
+                                    best_ask = min(ask_prices)
+                                    retry_candidate = best_ask + LIVE_TINY_REPRICE_BUFFER_CENTS
+                                    retry_cap = min(0.99, price_holder["value"] + LIVE_TINY_REPRICE_MAX_EXTRA_CENTS)
+                                    retry_price = min(retry_candidate, retry_cap)
+                                    retry_price = float(Decimal(str(retry_price)).quantize(tick, rounding=ROUND_UP))
+                                    if retry_price > price_holder["value"]:
+                                        log.warning(
+                                            f"[ENTRY RETRY] FAK no-match on {slug}; "
+                                            f"repricing {price_holder['value']:.4f} -> {retry_price:.4f} "
+                                            f"(best_ask={best_ask:.4f}) and retrying once."
+                                        )
+                                        price_holder["value"] = retry_price
+                                        return _submit(OrderType.FAK)
+                            except Exception as reprice_e:
+                                log.debug(f"[ENTRY RETRY] Reprice attempt failed for {slug}: {reprice_e}")
+                        if resting_allowed and no_match_fak:
+                            log.warning(
+                                f"[ENTRY ORDER] FAK no-match for {slug}; resting a short GTD "
+                                f"limit order at {price_holder['value']:.4f} for up to "
+                                f"{LIVE_RESTING_ENTRY_WAIT_SECS}s."
+                            )
+                            return _submit_resting_gtd()
+                        raise fak_e
                 raise
-        
+
         log.info(
             f"[ENTRY ORDER] Max Entry @ {limit_price:.4f} "
             f"(expected {expected_price:.4f} + max {max_entry_slippage_cents*100:.1f}c slip)"
@@ -2516,39 +2870,52 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict, 
             confirm_start = time.perf_counter()
 
             if status == "matched" or fill_shares > 0:
-                spread_cents = float(liq_msg.split("spread=")[1].split("c")[0]) if "spread=" in liq_msg else 0
-                await log_execution_metrics(slug, decision, expected_price, actual_price, spread_cents, liq_msg)
-                slug_execution_fail_state.pop(slug, None)
-
-                if fill_cost > 0 and fill_cost + 1e-9 < bet_size:
-                    log.info(f"[PARTIAL FILL] {slug}: ${bet_size:.2f} requested -> ${fill_cost:.2f} filled ({order_type_used})")
-                    bet_size = round(fill_cost, 4)
-                    async with state_lock:
-                        if slug in active_predictions:
-                            active_predictions[slug]["bet_size"] = bet_size
-                            active_predictions[slug]["ml_data"]["final_bet_size"] = bet_size
-
-                slippage_bps = ((actual_price - expected_price) / expected_price * 10000) if expected_price > 0 else 0
-                slippage_cents = (actual_price - expected_price) * 100
-
-                risk_manager.trades_this_hour += 1
-                log.info(
-                    f"[BET] BET PLACED [LIVE] {decision} on {slug} | "
-                    f"Bet: ${bet_size:.2f} | Fill: {actual_price:.4f} | "
-                    f"Expected: {expected_price:.4f} | Liq: {liq_msg}"
+                await _mark_live_entry_filled(
+                    slug=slug,
+                    decision=decision,
+                    requested_bet_size=bet_size,
+                    expected_price=expected_price,
+                    actual_price=actual_price,
+                    fill_cost=fill_cost,
+                    fill_shares=fill_shares,
+                    liq_msg=liq_msg,
+                    order_type_used=order_type_used,
                 )
-                log.info(f"[OK] ORDER FILLED [{order_type_used}]: {decision} on {slug} | ${bet_size:.2f} | "
-                        f"Fill: {actual_price:.4f} (expected {expected_price:.4f}) | "
-                        f"Slippage: {slippage_bps:+.1f}bps ({slippage_cents:+.1f}c)")
-
-                async with state_lock:
-                    if slug in active_predictions:
-                        active_predictions[slug]["bought_price"] = actual_price
                 confirm_ms = (time.perf_counter() - confirm_start) * 1000.0
                 update_execution_timing(clob_ms=clob_req_ms, confirmation_ms=confirm_ms)
-                    
+            elif str(status).lower() == "live" and "GTD" in order_type_used:
+                order_id = str(resp.get("orderID") or resp.get("orderId") or "")
+                if not order_id:
+                    raise RuntimeError("Resting GTD order returned status=live without orderID")
+                async with state_lock:
+                    if slug in active_predictions:
+                        active_predictions[slug]["status"] = "ENTERING"
+                        active_predictions[slug]["resting_order_id"] = order_id
+                        active_predictions[slug]["resting_limit_price"] = float(resp.get("_entry_limit_price", limit_price))
+                        active_predictions[slug]["resting_deadline_ts"] = time.time() + LIVE_RESTING_ENTRY_WAIT_SECS
+                        active_predictions[slug]["entry_order_type"] = order_type_used
+                        active_predictions[slug]["requested_shares"] = float(resp.get("_requested_shares", shares_to_buy))
+                        active_predictions[slug]["heartbeat_required"] = True
+                log.info(
+                    f"[ENTRY RESTING] {slug}: GTD order {order_id} live at "
+                    f"{float(resp.get('_entry_limit_price', limit_price)):.4f}; watching for up to "
+                    f"{LIVE_RESTING_ENTRY_WAIT_SECS}s."
+                )
+                fire_and_forget(
+                    monitor_resting_entry_order(
+                        slug=slug,
+                        decision=decision,
+                        order_id=order_id,
+                        limit_price=float(resp.get("_entry_limit_price", limit_price)),
+                        requested_bet_size=bet_size,
+                        requested_shares=float(resp.get("_requested_shares", shares_to_buy)),
+                        expected_price=expected_price,
+                        liq_msg=liq_msg,
+                        current_ev_pct=current_ev_pct,
+                        clob_req_ms=clob_req_ms,
+                    )
+                )
             else:
-                # OPTIMIZED: Strict cutoff. No market order fallback. 
                 log.warning(f"[WARN] LIMIT REJECTED [{status}]: {resp.get('errorMsg', 'Price moved beyond limit')} | {slug}")
                 log.info(f"[STOP] Trade abandoned. Price ran past our +2c slippage guard.")
                 record_execution_failure(slug, f"ENTRY_UNFILLED_{status}", current_ev_pct)
@@ -2584,6 +2951,12 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict, 
             f"[BET] BET PLACED [{mode_label}] {decision} on {slug} | "
             f"Bet: ${bet_size:.2f} | Expected: {expected_price:.4f} | Liq: {liq_msg}"
         )
+        async with state_lock:
+            if slug in active_predictions:
+                active_predictions[slug]["status"] = "OPEN"
+                active_predictions[slug]["entry_time"] = time.time()
+                active_predictions[slug]["bet_size"] = bet_size
+                active_predictions[slug]["ml_data"]["final_bet_size"] = bet_size
         # Paper mode still records path latency so strategy profiling remains realistic.
         paper_path_ms = (time.perf_counter() - bet_start_ts) * 1000.0
         update_execution_timing(clob_ms=paper_path_ms, confirmation_ms=0.0)
@@ -2691,7 +3064,18 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
                 from py_clob_client.clob_types import OrderArgs as LimitOrderArgs, OrderType, PartialCreateOrderOptions
             from py_clob_client.order_builder.constants import SELL
 
-            tick = Decimal("0.01")
+            order_tick_size = "0.01"
+            order_neg_risk = False
+            try:
+                order_tick_size = str(await asyncio.to_thread(clob_client.get_tick_size, pred["token_id"]))
+            except Exception as e:
+                log.debug(f"[EXIT ORDER] Tick size fetch failed for {slug}: {e}. Using 0.01 fallback.")
+            try:
+                order_neg_risk = bool(await asyncio.to_thread(clob_client.get_neg_risk, pred["token_id"]))
+            except Exception as e:
+                log.debug(f"[EXIT ORDER] Neg-risk fetch failed for {slug}: {e}. Using False fallback.")
+
+            tick = Decimal(str(order_tick_size))
             floor_rounded = float(Decimal(str(floor_price)).quantize(tick, rounding=ROUND_DOWN))
             floor_rounded = max(0.01, floor_rounded)
 
@@ -2703,7 +3087,10 @@ async def execute_early_exit(session: aiohttp.ClientSession, slug: str, exit_rea
             )
 
             def _sign_and_post():
-                opts = PartialCreateOrderOptions(tick_size="0.01")
+                opts = PartialCreateOrderOptions(
+                    tick_size=order_tick_size,
+                    neg_risk=order_neg_risk,
+                )
                 signed = clob_client.create_order(order_args, opts)
                 return clob_client.post_order(signed, OrderType.FAK)
 
