@@ -33,6 +33,7 @@ class RiskConfig:
     default_depth_usd: float = 25.0
     market_impact_constant: float = 0.05
     time_decay_tau_seconds: float = 420.0
+    time_decay_floor: float = 0.30
     min_token_price: float = 0.01
     max_token_price: float = 0.99
 
@@ -249,10 +250,11 @@ class RiskManager:
 
     def continuous_time_decay(self, seconds_remaining: float) -> float:
         effective_seconds = max(0.0, seconds_remaining - self.config.min_seconds_remaining)
-        if effective_seconds <= 0:
-            return 0.0
-        decay = 1.0 - math.exp(-effective_seconds / self.config.time_decay_tau_seconds)
-        return _clamp(decay, 0.0, 1.0)
+        if seconds_remaining <= self.config.min_seconds_remaining:
+            return 1.0
+        floor = _clamp(self.config.time_decay_floor, 0.0, 0.95)
+        decay = floor + ((1.0 - floor) * math.exp(-effective_seconds / self.config.time_decay_tau_seconds))
+        return _clamp(decay, floor, 1.0)
 
     def square_root_market_impact_pct(self, bet_size_usd: float, available_depth_usd: float) -> float:
         if bet_size_usd <= 0:

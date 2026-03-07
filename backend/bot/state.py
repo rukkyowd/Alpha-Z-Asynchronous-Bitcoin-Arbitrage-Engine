@@ -7,6 +7,7 @@ from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
 from typing import Any
 
+from .indicators import StreamingEMA, StreamingRSI
 from .models import (
     AIInteraction,
     AISlugState,
@@ -22,6 +23,7 @@ from .models import (
     ReentryState,
     RuntimeCounters,
     SignalAlignmentSnapshot,
+    TechnicalContext,
 )
 
 
@@ -31,18 +33,22 @@ class EngineState:
     ml_queue_max: int = 5000
     db_queue_max: int = 10000
 
-    market_lock: asyncio.Lock = field(default_factory=asyncio.Lock, init=False, repr=False)
-    positions_lock: asyncio.Lock = field(default_factory=asyncio.Lock, init=False, repr=False)
-    risk_lock: asyncio.Lock = field(default_factory=asyncio.Lock, init=False, repr=False)
-    ai_lock: asyncio.Lock = field(default_factory=asyncio.Lock, init=False, repr=False)
-    telemetry_lock: asyncio.Lock = field(default_factory=asyncio.Lock, init=False, repr=False)
-    control_lock: asyncio.Lock = field(default_factory=asyncio.Lock, init=False, repr=False)
+    market_lock: asyncio.Lock | None = field(default=None, init=False, repr=False)
+    positions_lock: asyncio.Lock | None = field(default=None, init=False, repr=False)
+    risk_lock: asyncio.Lock | None = field(default=None, init=False, repr=False)
+    ai_lock: asyncio.Lock | None = field(default=None, init=False, repr=False)
+    telemetry_lock: asyncio.Lock | None = field(default=None, init=False, repr=False)
+    control_lock: asyncio.Lock | None = field(default=None, init=False, repr=False)
 
     candle_history: deque[MarketTick] = field(default_factory=deque, init=False, repr=False)
     cvd_1min_buffer: deque[float] = field(default_factory=deque, init=False, repr=False)
     background_tasks: set[asyncio.Task[Any]] = field(default_factory=set, init=False, repr=False)
-    ml_queue: asyncio.Queue[dict[str, Any]] = field(init=False, repr=False)
-    db_queue: asyncio.Queue[dict[str, Any]] = field(init=False, repr=False)
+    ml_queue: asyncio.Queue[dict[str, Any]] | None = field(default=None, init=False, repr=False)
+    db_queue: asyncio.Queue[dict[str, Any]] | None = field(default=None, init=False, repr=False)
+    ema_fast_9: StreamingEMA | None = field(default=None, init=False, repr=False)
+    ema_slow_21: StreamingEMA | None = field(default=None, init=False, repr=False)
+    rsi_14: StreamingRSI | None = field(default=None, init=False, repr=False)
+    indicator_last_close_ms: int = 0
 
     target_slug: str = ""
     market_family_prefix: str = ""
@@ -73,6 +79,7 @@ class EngineState:
     latest_execution_timing: ExecutionTimingSnapshot = field(default_factory=ExecutionTimingSnapshot)
     adaptive_thresholds: AdaptiveThresholdSnapshot = field(default_factory=AdaptiveThresholdSnapshot)
     last_ai_interaction: AIInteraction = field(default_factory=AIInteraction)
+    latest_context: TechnicalContext | None = None
 
     total_wins: int = 0
     total_losses: int = 0
@@ -97,8 +104,30 @@ class EngineState:
     def __post_init__(self) -> None:
         self.candle_history = deque(maxlen=self.history_maxlen)
         self.cvd_1min_buffer = deque(maxlen=120)
-        self.ml_queue = asyncio.Queue(maxsize=self.ml_queue_max)
-        self.db_queue = asyncio.Queue(maxsize=self.db_queue_max)
+
+    async def initialize(self) -> None:
+        if self.market_lock is None:
+            self.market_lock = asyncio.Lock()
+        if self.positions_lock is None:
+            self.positions_lock = asyncio.Lock()
+        if self.risk_lock is None:
+            self.risk_lock = asyncio.Lock()
+        if self.ai_lock is None:
+            self.ai_lock = asyncio.Lock()
+        if self.telemetry_lock is None:
+            self.telemetry_lock = asyncio.Lock()
+        if self.control_lock is None:
+            self.control_lock = asyncio.Lock()
+        if self.ml_queue is None:
+            self.ml_queue = asyncio.Queue(maxsize=self.ml_queue_max)
+        if self.db_queue is None:
+            self.db_queue = asyncio.Queue(maxsize=self.db_queue_max)
+        if self.ema_fast_9 is None:
+            self.ema_fast_9 = StreamingEMA(9)
+        if self.ema_slow_21 is None:
+            self.ema_slow_21 = StreamingEMA(21)
+        if self.rsi_14 is None:
+            self.rsi_14 = StreamingRSI(14)
 
     def spawn(self, coro) -> asyncio.Task[Any]:
         task = asyncio.create_task(coro)
@@ -164,6 +193,7 @@ class EngineState:
                 "vwap_cum_vol": self.vwap_cum_vol,
                 "vwap_date": self.vwap_date,
                 "candle_history": [candle.to_dict() for candle in list(self.candle_history)],
+                "latest_context": self.latest_context.to_dict() if self.latest_context is not None else None,
             }
 
     async def update_intraday_metrics(
@@ -302,6 +332,7 @@ class EngineState:
         execution_timing: ExecutionTimingSnapshot | None = None,
         adaptive_thresholds: AdaptiveThresholdSnapshot | None = None,
         ai_interaction: AIInteraction | None = None,
+        context: TechnicalContext | None = None,
     ) -> None:
         async with self.telemetry_lock:
             if edge_snapshot is not None:
@@ -316,6 +347,8 @@ class EngineState:
                 self.adaptive_thresholds = adaptive_thresholds.clone()
             if ai_interaction is not None:
                 self.last_ai_interaction = ai_interaction.clone()
+            if context is not None:
+                self.latest_context = context.clone()
 
     async def get_telemetry_snapshot(self) -> dict[str, Any]:
         async with self.telemetry_lock:
@@ -326,6 +359,7 @@ class EngineState:
                 "execution_timing": self.latest_execution_timing.to_dict(),
                 "adaptive_thresholds": self.adaptive_thresholds.to_dict(),
                 "last_ai_interaction": self.last_ai_interaction.to_dict(),
+                "context": self.latest_context.to_dict() if self.latest_context is not None else None,
             }
 
     async def update_runtime_counters(

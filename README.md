@@ -119,6 +119,53 @@ npm run dev -- -H 0.0.0.0
 
 Open [http://localhost:3000](http://localhost:3000).
 
+Frontend connection config is environment-driven through `frontend/config.ts`.
+
+For local development, the frontend falls back to:
+
+- `http://localhost:8000`
+- `ws://localhost:8000/ws/live`
+
+For Vercel or any remote frontend deployment, set these public environment variables:
+
+```ini
+NEXT_PUBLIC_API_URL=https://your-public-backend-host
+NEXT_PUBLIC_WS_URL=wss://your-public-backend-host/ws/live
+```
+
+### Vercel Deployment
+
+In the Vercel project settings for the frontend, add:
+
+```ini
+NEXT_PUBLIC_API_URL=https://your-public-backend-host
+NEXT_PUBLIC_WS_URL=wss://your-public-backend-host/ws/live
+```
+
+If you are tunneling the backend from your local machine, use the public ngrok URL for both values:
+
+```ini
+NEXT_PUBLIC_API_URL=https://<your-ngrok-subdomain>.ngrok-free.app
+NEXT_PUBLIC_WS_URL=wss://<your-ngrok-subdomain>.ngrok-free.app/ws/live
+```
+
+Deployment rule:
+
+- `NEXT_PUBLIC_API_URL` must be the public HTTPS base URL of the backend
+- `NEXT_PUBLIC_WS_URL` must be the matching websocket endpoint ending in `/ws/live`
+- if you rotate the ngrok URL, update both Vercel environment variables and redeploy
+- if only `NEXT_PUBLIC_API_URL` is set, `frontend/config.ts` will derive the websocket URL automatically, but setting both explicitly is safer
+
+`frontend/config.ts` also still accepts the older compatibility names:
+
+- `NEXT_PUBLIC_BACKEND_HTTP_URL`
+- `NEXT_PUBLIC_BACKEND_WS_URL`
+
+but the preferred names are:
+
+- `NEXT_PUBLIC_API_URL`
+- `NEXT_PUBLIC_WS_URL`
+
 The dashboard listens to the backend websocket and now expects a typed payload with these top-level keys:
 
 - `market`

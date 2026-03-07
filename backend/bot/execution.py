@@ -105,7 +105,32 @@ def _parse_numeric(value: Any) -> float:
         return 0.0
 
 
-def _infer_fill_stats(response: dict[str, Any], intended_cost_usd: float, fallback_price: float) -> tuple[float, float, float]:
+def _finalize_inferred_fill(
+    total_cost: float,
+    total_shares: float,
+    average_price: float,
+    *,
+    fallback_price: float,
+) -> tuple[float, float, float, str]:
+    if total_cost <= 0 or total_shares <= 0:
+        return 0.0, 0.0, fallback_price, "UNKNOWN"
+
+    avg_price = average_price
+    status = "INFERRED"
+    if fallback_price > 0:
+        deviation = abs(avg_price - fallback_price) / fallback_price
+        if deviation > 0.05:
+            avg_price = fallback_price
+            total_cost = total_shares * fallback_price
+            status = "UNCERTAIN"
+    return total_cost, total_shares, avg_price, status
+
+
+def _infer_fill_stats(
+    response: dict[str, Any],
+    intended_cost_usd: float,
+    fallback_price: float,
+) -> tuple[float, float, float, str]:
     transactions = response.get("transactions") or []
     if transactions:
         total_cost = 0.0
@@ -118,7 +143,7 @@ def _infer_fill_stats(response: dict[str, Any], intended_cost_usd: float, fallba
                 total_cost += size * price
         if total_shares > 0:
             avg_price = total_cost / total_shares
-            return total_cost, total_shares, avg_price
+            return _finalize_inferred_fill(total_cost, total_shares, avg_price, fallback_price=fallback_price)
 
     matched_amount = _parse_numeric(response.get("matchedAmount"))
     making_amount = _parse_numeric(response.get("makingAmount"))
@@ -149,23 +174,23 @@ def _infer_fill_stats(response: dict[str, Any], intended_cost_usd: float, fallba
             if total_cost > 0 and total_shares > 0:
                 avg_price = total_cost / total_shares
                 if 0.01 <= avg_price <= 0.99:
-                    return total_cost, total_shares, avg_price
+                    return _finalize_inferred_fill(total_cost, total_shares, avg_price, fallback_price=fallback_price)
 
     if matched_amount > 0 and fallback_price > 0:
         if matched_amount <= (intended_cost_usd / max(fallback_price, 0.01)) * 2.0:
             total_shares = matched_amount
             total_cost = total_shares * fallback_price
-            return total_cost, total_shares, fallback_price
+            return total_cost, total_shares, fallback_price, "FALLBACK"
         total_cost = matched_amount
         total_shares = total_cost / fallback_price
-        return total_cost, total_shares, fallback_price
+        return total_cost, total_shares, fallback_price, "FALLBACK"
 
     status = str(response.get("status", "")).lower()
     if status == "matched" and fallback_price > 0 and intended_cost_usd > 0:
         total_shares = intended_cost_usd / fallback_price
-        return intended_cost_usd, total_shares, fallback_price
+        return intended_cost_usd, total_shares, fallback_price, "FALLBACK"
 
-    return 0.0, 0.0, fallback_price
+    return 0.0, 0.0, fallback_price, "UNKNOWN"
 
 
 @dataclass(slots=True, frozen=True)
@@ -553,6 +578,7 @@ class ClobExecutionEngine:
         risk_snapshot: PositionRiskSnapshot,
         liquidity: LiquidityCheckResult,
         order_type: str,
+        fill_status: str,
     ) -> ActivePosition:
         return ActivePosition(
             slug=signal.slug,
@@ -580,7 +606,7 @@ class ClobExecutionEngine:
             tp_peak_delta=0.0,
             tp_lock_floor_delta=0.0,
             signals=signal.reasons,
-            notes=(f"liq_mode={liquidity.mode}", f"entry_order_type={order_type}", liquidity.reason),
+            notes=(f"liq_mode={liquidity.mode}", f"entry_order_type={order_type}", f"fill_status={fill_status}", liquidity.reason),
             ml_features={
                 "filled_cost_usd": round(fill_cost_usd, 6),
                 "filled_shares": round(fill_shares, 6),
@@ -687,6 +713,7 @@ class ClobExecutionEngine:
                 risk_snapshot=risk_snapshot,
                 liquidity=liquidity,
                 order_type="PAPER",
+                fill_status="PAPER",
             )
             await state.upsert_position(position)
             await state.update_runtime_counters(trades_this_hour=state.trades_this_hour + 1)
@@ -803,7 +830,13 @@ class ClobExecutionEngine:
             return None
 
         status = str(order_response.get("status", "") or "")
-        fill_cost_usd, fill_shares, average_price = _infer_fill_stats(order_response, signal.kelly_bet_usd, limit_price)
+        fill_cost_usd, fill_shares, average_price, fill_inference_status = _infer_fill_stats(
+            order_response,
+            signal.kelly_bet_usd,
+            limit_price,
+        )
+        if fill_inference_status == "UNCERTAIN":
+            status = "UNCERTAIN"
         if fill_shares < self.config.min_live_fill_shares or fill_cost_usd <= 0:
             await state.record_execution_failure(
                 signal.slug,
@@ -836,6 +869,7 @@ class ClobExecutionEngine:
             risk_snapshot=risk_snapshot,
             liquidity=liquidity,
             order_type=order_type_used,
+            fill_status=fill_inference_status,
         )
         await state.upsert_position(position)
         await state.update_runtime_counters(trades_this_hour=state.trades_this_hour + 1)
@@ -923,11 +957,14 @@ class ClobExecutionEngine:
                     asyncio.to_thread(self.client.post_order, signed, OrderType.FAK),
                     timeout=self.config.order_submit_timeout_secs,
                 )
-                proceeds_usd, sold_shares, avg_price = _infer_fill_stats(
+                proceeds_usd, sold_shares, avg_price, fill_inference_status = _infer_fill_stats(
                     response if isinstance(response, dict) else {},
                     position.bet_size_usd,
                     floor_price,
                 )
+                exit_status = str((response or {}).get("status", "matched"))
+                if fill_inference_status == "UNCERTAIN":
+                    exit_status = "UNCERTAIN"
                 if sold_shares > 0:
                     fraction = min(sold_shares / shares_owned, 1.0)
                     realized_cost = position.bet_size_usd * fraction
@@ -954,7 +991,7 @@ class ClobExecutionEngine:
                         average_price=avg_price,
                         requested_price=floor_price,
                         requested_bet_usd=position.bet_size_usd,
-                        status=str((response or {}).get("status", "matched")),
+                        status=exit_status,
                         reason=exit_reason,
                     )
             except Exception as exc:

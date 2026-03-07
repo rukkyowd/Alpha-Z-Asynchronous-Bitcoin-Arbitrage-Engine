@@ -1,36 +1,12 @@
-// config.ts
-
-const DEFAULT_BACKEND_PORT = 8000;
-const envPort = Number(process.env.NEXT_PUBLIC_BACKEND_PORT);
-const BACKEND_PORT = Number.isFinite(envPort) && envPort > 0 ? envPort : DEFAULT_BACKEND_PORT;
-const BACKEND_HTTP_URL = process.env.NEXT_PUBLIC_BACKEND_HTTP_URL?.trim();
-const BACKEND_WS_URL = process.env.NEXT_PUBLIC_BACKEND_WS_URL?.trim();
+const PUBLIC_API_URL =
+  process.env.NEXT_PUBLIC_API_URL?.trim() ||
+  process.env.NEXT_PUBLIC_BACKEND_HTTP_URL?.trim();
+const PUBLIC_WS_URL =
+  process.env.NEXT_PUBLIC_WS_URL?.trim() ||
+  process.env.NEXT_PUBLIC_BACKEND_WS_URL?.trim();
 
 function stripTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");
-}
-
-function getBaseHost(): string {
-  if (typeof window !== "undefined") {
-    return window.location.hostname;
-  }
-  return "127.0.0.1";
-}
-
-function getPageProtocol(): "http:" | "https:" {
-  if (typeof window !== "undefined" && window.location.protocol === "https:") {
-    return "https:";
-  }
-  return "http:";
-}
-
-function buildLocalHttpUrl(): string {
-  return `${getPageProtocol()}//${getBaseHost()}:${BACKEND_PORT}`;
-}
-
-function buildLocalWsUrl(): string {
-  const wsProto = getPageProtocol() === "https:" ? "wss:" : "ws:";
-  return `${wsProto}//${getBaseHost()}:${BACKEND_PORT}/ws/live`;
 }
 
 function deriveWsUrlFromHttp(httpUrl: string): string {
@@ -42,25 +18,32 @@ function deriveWsUrlFromHttp(httpUrl: string): string {
     parsed.hash = "";
     return stripTrailingSlash(parsed.toString());
   } catch {
-    return buildLocalWsUrl();
+    return "ws://localhost:8000/ws/live";
   }
 }
 
-export const getBaseIp = (): string => getBaseHost();
+export const getBaseIp = (): string => {
+  try {
+    const parsed = new URL(getHttpUrl());
+    return parsed.hostname;
+  } catch {
+    return "localhost";
+  }
+};
 
 export const getHttpUrl = (): string => {
-  if (BACKEND_HTTP_URL) {
-    return stripTrailingSlash(BACKEND_HTTP_URL);
+  if (PUBLIC_API_URL) {
+    return stripTrailingSlash(PUBLIC_API_URL);
   }
-  return buildLocalHttpUrl();
+  return "http://localhost:8000";
 };
 
 export const getWsUrl = (): string => {
-  if (BACKEND_WS_URL) {
-    return stripTrailingSlash(BACKEND_WS_URL);
+  if (PUBLIC_WS_URL) {
+    return stripTrailingSlash(PUBLIC_WS_URL);
   }
-  if (BACKEND_HTTP_URL) {
-    return deriveWsUrlFromHttp(BACKEND_HTTP_URL);
+  if (PUBLIC_API_URL) {
+    return deriveWsUrlFromHttp(PUBLIC_API_URL);
   }
-  return buildLocalWsUrl();
+  return "ws://localhost:8000/ws/live";
 };

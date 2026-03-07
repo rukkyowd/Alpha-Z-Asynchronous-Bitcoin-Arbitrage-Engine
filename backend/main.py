@@ -32,7 +32,7 @@ from starlette.websockets import WebSocketDisconnect, WebSocketState
 from bot.ai_agent import AIConfig, LocalAIAgent, call_local_ai
 from bot.data_streams import BinanceStreamManager, DataStreamsConfig, PolymarketFetcher, create_http_session
 from bot.execution import ClobExecutionEngine, ExecutionConfig, FillResult
-from bot.indicators import StreamingEMA, StreamingRSI, blended_intraday_volatility, build_technical_context, compute_vwap
+from bot.indicators import apply_probabilistic_model, blended_intraday_volatility, build_technical_context, compute_vwap
 from bot.models import (
     ActivePosition,
     AdaptiveThresholdSnapshot,
@@ -948,6 +948,10 @@ async def build_context_from_state(runtime: EngineServices) -> TechnicalContext 
         raw_snapshot = runtime.state.cvd_snapshot_at_candle_open
         raw_cvd_1min = runtime.state.last_cvd_1min
         cvd_buffer = list(runtime.state.cvd_1min_buffer)
+        ema_fast = runtime.state.ema_fast_9
+        ema_slow = runtime.state.ema_slow_21
+        rsi = runtime.state.rsi_14
+        indicator_last_close_ms = runtime.state.indicator_last_close_ms
 
     if live_candle is None:
         if not history:
@@ -960,16 +964,32 @@ async def build_context_from_state(runtime: EngineServices) -> TechnicalContext 
     if price <= 0:
         return None
 
-    ema_fast = StreamingEMA(9)
-    ema_slow = StreamingEMA(21)
-    rsi = StreamingRSI(14)
-    for candle in history:
+    if ema_fast is None or ema_slow is None or rsi is None:
+        raise RuntimeError("EngineState indicators are not initialized. Call await state.initialize() first.")
+
+    committed_history = history
+    if history and live_candle.is_closed:
+        latest_history_marker = history[-1].close_time_ms or history[-1].event_time_ms
+        live_marker = live_candle.close_time_ms or live_candle.event_time_ms
+        if latest_history_marker > 0 and latest_history_marker == live_marker:
+            committed_history = history[:-1]
+
+    next_indicator_close_ms = indicator_last_close_ms
+    for candle in committed_history:
+        close_marker = candle.close_time_ms or candle.event_time_ms
+        if close_marker <= indicator_last_close_ms:
+            continue
         close_price = candle.close if candle.close > 0 else candle.resolved_price
         if close_price <= 0:
             continue
         ema_fast.update(close_price)
         ema_slow.update(close_price)
         rsi.update(close_price)
+        next_indicator_close_ms = max(next_indicator_close_ms, close_marker)
+
+    if next_indicator_close_ms != indicator_last_close_ms:
+        async with runtime.state.market_lock:
+            runtime.state.indicator_last_close_ms = max(runtime.state.indicator_last_close_ms, next_indicator_close_ms)
 
     recent_candles = history[-30:] if history else [live_candle]
     volume_baseline = mean([max(candle.volume, 0.0) for candle in recent_candles[-20:]]) if recent_candles else 0.0
@@ -1017,6 +1037,7 @@ async def build_context_from_state(runtime: EngineServices) -> TechnicalContext 
             cvd_threshold=context.adaptive_cvd_threshold,
             volatility_lookback=min(len(history), 30),
         ),
+        context=context,
     )
     runtime.latest_context = context
     return context
@@ -1147,6 +1168,133 @@ def _resolve_outcome(final_underlying: float, strike_price: float) -> str:
     return "TIE"
 
 
+def _decode_json_array(raw: Any) -> list[Any]:
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, tuple):
+        return list(raw)
+    if isinstance(raw, str):
+        with suppress(Exception):
+            parsed = json.loads(raw)
+            if isinstance(parsed, list):
+                return parsed
+    return []
+
+
+def _opposite_direction(direction: str) -> str:
+    if direction == Direction.UP.value:
+        return Direction.DOWN.value
+    if direction == Direction.DOWN.value:
+        return Direction.UP.value
+    return "TIE"
+
+
+def _official_outcome_to_underlying(outcome: str, strike_price: float, fallback_underlying: float) -> float:
+    if strike_price <= 0:
+        return fallback_underlying
+    if outcome == Direction.UP.value:
+        return strike_price + 0.01
+    if outcome == Direction.DOWN.value:
+        return strike_price - 0.01
+    return strike_price
+
+
+def _extract_market_from_gamma_payload(payload: Any, slug: str) -> dict[str, Any] | None:
+    if isinstance(payload, list) and payload:
+        return _extract_market_from_gamma_payload(payload[0], slug)
+    if not isinstance(payload, dict):
+        return None
+    if str(payload.get("slug") or "") == slug and payload.get("clobTokenIds") is not None:
+        return payload
+
+    markets = payload.get("markets")
+    if isinstance(markets, list):
+        for market in markets:
+            if isinstance(market, dict) and str(market.get("slug") or "") == slug:
+                return market
+        for market in markets:
+            if isinstance(market, dict) and market.get("clobTokenIds") is not None:
+                return market
+    return None
+
+
+def _extract_official_market_outcome(position: dict[str, Any], market: dict[str, Any]) -> tuple[str | None, str]:
+    decision = str(position.get("decision") or Direction.UNKNOWN.value)
+    opposite = _opposite_direction(decision)
+    token_id = str(position.get("token_id") or "")
+    token_ids = [str(item) for item in _decode_json_array(market.get("clobTokenIds"))]
+    outcome_prices = [_safe_float(item) for item in _decode_json_array(market.get("outcomePrices"))]
+
+    for winner_key in ("winningToken", "winningTokenId", "winnerToken", "winning_token"):
+        winner_token = str(market.get(winner_key) or "").strip()
+        if not winner_token:
+            continue
+        if winner_token == token_id:
+            return decision, winner_key
+        if winner_token in token_ids:
+            return opposite, winner_key
+
+    if token_id and token_ids and outcome_prices and len(token_ids) == len(outcome_prices):
+        max_price = max(outcome_prices)
+        min_price = min(outcome_prices)
+        if max_price >= 0.99 and min_price <= 0.01:
+            winner_index = outcome_prices.index(max_price)
+            winner_token = token_ids[winner_index]
+            if winner_token == token_id:
+                return decision, "outcomePrices"
+            return opposite, "outcomePrices"
+
+    resolved_text = str(market.get("resolution") or market.get("resolvedBy") or "").upper()
+    if "TIE" in resolved_text or "DRAW" in resolved_text:
+        return "TIE", "resolution_text"
+
+    return None, "pending"
+
+
+async def _poll_official_market_outcome(
+    runtime: EngineServices,
+    slug: str,
+    position: dict[str, Any],
+    *,
+    max_wait_seconds: float = 30.0,
+    poll_interval_seconds: float = 5.0,
+) -> tuple[str | None, str]:
+    deadline = time.monotonic() + max_wait_seconds
+    last_reason = "official outcome pending"
+    urls = [
+        f"{runtime.data_config.gamma_api}/events/{slug}",
+        f"{runtime.data_config.gamma_api}/events/slug/{slug}",
+    ]
+
+    while time.monotonic() < deadline and not runtime.stop_event.is_set():
+        for url in urls:
+            try:
+                async with api_slot(runtime):
+                    async with runtime.http_session.get(url) as response:
+                        if response.status != 200:
+                            last_reason = f"gamma_http_{response.status}"
+                            continue
+                        payload = await response.json()
+                market = _extract_market_from_gamma_payload(payload, slug)
+                if market is None:
+                    last_reason = "gamma_market_missing"
+                    continue
+                outcome, source = _extract_official_market_outcome(position, market)
+                if outcome is not None:
+                    return outcome, source
+                last_reason = source
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:
+                last_reason = str(exc)
+
+        if (deadline - time.monotonic()) <= poll_interval_seconds:
+            break
+        await asyncio.sleep(poll_interval_seconds)
+
+    return None, last_reason
+
+
 async def finalize_closed_position(
     runtime: EngineServices,
     position: dict[str, Any],
@@ -1156,6 +1304,8 @@ async def finalize_closed_position(
     exit_underlying: float,
     exit_result: FillResult | None = None,
     settled_at_expiry: bool = False,
+    official_outcome: str | None = None,
+    settlement_source: str | None = None,
 ) -> None:
     bet_size_usd = _safe_float(position.get("bet_size_usd"))
     bought_price = _safe_float(position.get("bought_price"))
@@ -1163,6 +1313,8 @@ async def finalize_closed_position(
     proceeds = exit_result.filled_cost_usd if exit_result is not None else shares_owned * exit_price
     pnl = proceeds - bet_size_usd
     outcome = _resolve_outcome(exit_underlying, _safe_float(position.get("strike")))
+    resolved_official_outcome = official_outcome or (outcome if settled_at_expiry else "EARLY_EXIT")
+    resolved_match_status = settlement_source or ("LOCAL_SETTLED" if settled_at_expiry else "EARLY_EXIT")
     result = "WIN" if pnl > 0 else "LOSS" if pnl < 0 else "TIE"
     ai_validated = _position_has_ai_validation(position)
 
@@ -1200,8 +1352,8 @@ async def finalize_closed_position(
         "ai_validated": ai_validated,
         "trigger_reason": exit_reason,
         "local_calc_outcome": exit_reason,
-        "official_outcome": outcome if settled_at_expiry else "EARLY_EXIT",
-        "match_status": "LOCAL_SETTLED" if settled_at_expiry else "EARLY_EXIT",
+        "official_outcome": resolved_official_outcome,
+        "match_status": resolved_match_status,
         "metadata_json": json.dumps(position.get("ml_features", {}), default=str),
     }
     await _record_trade(runtime, trade_record)
@@ -1227,7 +1379,22 @@ async def settle_expired_position(
     bet_size_usd = _safe_float(position.get("bet_size_usd"))
     bought_price = _safe_float(position.get("bought_price"))
     shares_owned = bet_size_usd / max(bought_price, 0.0001)
-    outcome = _resolve_outcome(final_underlying, _safe_float(position.get("strike")))
+    strike_price = _safe_float(position.get("strike"))
+    official_outcome, source = await _poll_official_market_outcome(runtime, str(position.get("slug") or ""), position)
+    settlement_source = f"POLYMARKET_GAMMA:{source}" if official_outcome is not None else f"LOCAL_BINANCE_FALLBACK:{source}"
+    if official_outcome is not None:
+        outcome = official_outcome
+        resolved_underlying = _official_outcome_to_underlying(official_outcome, strike_price, final_underlying)
+    else:
+        outcome = _resolve_outcome(final_underlying, strike_price)
+        resolved_underlying = final_underlying
+        logger.warning(
+            "[SETTLEMENT] %s: official Polymarket outcome unavailable (%s). Falling back to local Binance snapshot %.2f vs strike %.2f.",
+            position.get("slug"),
+            source,
+            final_underlying,
+            strike_price,
+        )
     settlement_price = 0.0
     if outcome == str(position.get("decision")):
         settlement_price = 1.0
@@ -1241,7 +1408,7 @@ async def settle_expired_position(
             popped.to_dict(),
             exit_reason="EXPIRY_SETTLEMENT",
             exit_price=settlement_price,
-            exit_underlying=final_underlying,
+            exit_underlying=resolved_underlying,
             exit_result=FillResult(
                 success=True,
                 order_type="SETTLE",
@@ -1252,9 +1419,11 @@ async def settle_expired_position(
                 requested_price=settlement_price,
                 requested_bet_usd=bet_size_usd,
                 status="settled",
-                reason="EXPIRY_SETTLEMENT",
+                reason=f"EXPIRY_SETTLEMENT:{settlement_source}",
             ),
             settled_at_expiry=True,
+            official_outcome=outcome,
+            settlement_source=settlement_source,
         )
     return FillResult(
         success=True,
@@ -1266,7 +1435,7 @@ async def settle_expired_position(
         requested_price=settlement_price,
         requested_bet_usd=bet_size_usd,
         status="settled",
-        reason="EXPIRY_SETTLEMENT",
+        reason=f"EXPIRY_SETTLEMENT:{settlement_source}",
     )
 
 
@@ -1349,6 +1518,16 @@ async def evaluation_loop(runtime: EngineServices) -> None:
 
             runtime.latest_context = context
             runtime.latest_odds = odds
+            enriched_context = apply_probabilistic_model(
+                context,
+                strike_price=odds.strike_price,
+                seconds_remaining=odds.seconds_remaining,
+                degrees_of_freedom=runtime.strategy_config.degrees_of_freedom,
+                probability_floor_pct=runtime.strategy_config.probability_floor_pct,
+                probability_ceil_pct=runtime.strategy_config.probability_ceil_pct,
+            )
+            runtime.latest_context = enriched_context
+            await runtime.state.update_telemetry(context=enriched_context)
 
             bankroll = runtime.current_balance or runtime.state.simulated_balance or runtime.bankroll
             signal_started = time.perf_counter()
@@ -1392,15 +1571,6 @@ async def evaluation_loop(runtime: EngineServices) -> None:
                 await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
                 continue
 
-            async with runtime.state.positions_lock:
-                already_open = slug in runtime.state.active_positions or slug in runtime.state.committed_slugs
-            if already_open:
-                runtime.latest_rejected_reason = "Position already active"
-                runtime.latest_locks = [runtime.latest_rejected_reason]
-                log_skip_reason(runtime, slug, runtime.latest_rejected_reason, min_repeat_secs=30.0)
-                await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
-                continue
-
             ai_ms = 0.0
             ai_reason = ""
             if signal.needs_ai:
@@ -1424,8 +1594,26 @@ async def evaluation_loop(runtime: EngineServices) -> None:
                 await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
                 continue
 
+            async with runtime.state.positions_lock:
+                already_open = slug in runtime.state.active_positions or slug in runtime.state.committed_slugs
+                if not already_open:
+                    runtime.state.committed_slugs.add(slug)
+                    runtime.state.soft_skipped_slugs.discard(slug)
+                    runtime.state.best_ev_seen.pop(slug, None)
+            if already_open:
+                runtime.latest_rejected_reason = "Position already active"
+                runtime.latest_locks = [runtime.latest_rejected_reason]
+                log_skip_reason(runtime, slug, runtime.latest_rejected_reason, min_repeat_secs=30.0)
+                await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
+                continue
+
             execution_started = time.perf_counter()
-            position = await runtime.execution_engine.submit_entry_order(runtime.state, signal, odds, context)
+            try:
+                position = await runtime.execution_engine.submit_entry_order(runtime.state, signal, odds, context)
+            except Exception:
+                async with runtime.state.positions_lock:
+                    runtime.state.committed_slugs.discard(slug)
+                raise
             execution_ms = (time.perf_counter() - execution_started) * 1000.0
 
             await runtime.state.update_telemetry(
@@ -1442,6 +1630,7 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             if position is None:
                 async with runtime.state.positions_lock:
                     failure = runtime.state.execution_failures.get(slug)
+                    runtime.state.committed_slugs.discard(slug)
                 runtime.latest_rejected_reason = failure.reason if failure is not None else "Entry failed"
                 runtime.latest_locks = [runtime.latest_rejected_reason]
                 log_skip_reason(runtime, slug, runtime.latest_rejected_reason)
@@ -1453,7 +1642,6 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             runtime.last_logged_rejection_reason = ""
             runtime.last_logged_rejection_ts = 0.0
             runtime.risk_manager.record_trade()
-            await runtime.state.mark_slug_committed(slug)
             merged_features = dict(position.ml_features)
             merged_features.update(
                 {
@@ -1472,6 +1660,7 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             current_position = updated_position.to_dict() if updated_position is not None else position.to_dict()
             liquidity_mode = next((note.split("=", 1)[1] for note in current_position.get("notes", []) if note.startswith("liq_mode=")), "")
             order_type = next((note.split("=", 1)[1] for note in current_position.get("notes", []) if note.startswith("entry_order_type=")), "")
+            fill_status = next((note.split("=", 1)[1] for note in current_position.get("notes", []) if note.startswith("fill_status=")), "matched")
             execution_record = _build_execution_metric(
                 slug=slug,
                 direction=signal.direction,
@@ -1480,7 +1669,7 @@ async def evaluation_loop(runtime: EngineServices) -> None:
                 spread_cents=(liquidity_by_direction.get(signal.direction).estimated_spread_pct if signal.direction in liquidity_by_direction else 0.0),
                 liquidity_check=liquidity_mode or "ENTRY",
                 order_type=order_type or "ENTRY",
-                status="matched",
+                status=fill_status,
                 filled_cost_usd=_safe_float(current_position.get("bet_size_usd")),
                 filled_shares=_safe_float(current_position.get("bet_size_usd")) / max(_safe_float(current_position.get("bought_price")), 0.0001),
                 reason="ENTRY_FILLED",
@@ -1912,6 +2101,7 @@ async def build_live_payload(runtime: EngineServices) -> dict[str, Any]:
     telemetry = await runtime.state.get_telemetry_snapshot()
     positions = await runtime.state.list_positions()
     runtime_counters = await runtime.state.build_runtime_counters()
+    drawdown_guard = await runtime.state.build_drawdown_guard(runtime.current_balance or runtime.state.simulated_balance or runtime.bankroll)
     current_balance = runtime.current_balance or runtime.state.simulated_balance or runtime.bankroll
     health = await build_engine_health_snapshot(runtime)
     control = await build_engine_control_snapshot(runtime)
@@ -1929,74 +2119,60 @@ async def build_live_payload(runtime: EngineServices) -> dict[str, Any]:
     drawdown_regime = "PAUSED" if runtime.state.kill_switch_enabled or drawdown_room_left <= 0 else "NORMAL"
     drawdown_text = "Daily loss limit reached" if drawdown_room_left <= 0 else "Within risk limits"
 
-    active_trades = {position.slug: position.to_dict() for position in positions}
-    candle_history_dicts = market_snapshot.get("candle_history", [])
-    history = [
-        {
-            "time": _epoch_seconds(_safe_timestamp(candle.get("timestamp"))),
-            "open": _safe_float(candle.get("open")),
-            "high": _safe_float(candle.get("high")),
-            "low": _safe_float(candle.get("low")),
-            "close": _safe_float(candle.get("close")),
-        }
-        for candle in candle_history_dicts[-240:]
-        if candle.get("timestamp")
-    ]
-    history.sort(key=lambda item: item["time"])
-
     latest_context = runtime.latest_context
     latest_odds = runtime.latest_odds
-    vwap = latest_context.vwap if latest_context is not None else compute_vwap(
-        market_snapshot.get("vwap_cum_pv", 0.0),
-        market_snapshot.get("vwap_cum_vol", 0.0),
+    context_dict = telemetry.get("context") or market_snapshot.get("latest_context")
+    if context_dict is None and latest_context is not None:
+        context_dict = latest_context.to_dict()
+
+    market_payload = dict(market_snapshot)
+    market_payload["live_price"] = _safe_float(market_snapshot.get("live_price"), 0.0)
+    market_payload["latest_context"] = context_dict
+
+    runtime_payload = runtime_counters.to_dict()
+    runtime_payload.update(
+        {
+            "latest_rejected_reason": runtime.latest_rejected_reason,
+            "paper_trading": bool(runtime.paper_trading or runtime.dry_run),
+            "logs": list(runtime.recent_logs)[-120:],
+        }
     )
 
+    drawdown_payload = drawdown_guard.to_dict()
+    drawdown_payload.update(
+        {
+            "regime": drawdown_regime,
+            "text": drawdown_text,
+            "drawdown_used": round(drawdown_used, 2),
+            "drawdown_room_left": round(drawdown_room_left, 2),
+            "max_bet_cap": round(current_balance * runtime.risk_manager.config.max_trade_pct, 2),
+        }
+    )
+
+    telemetry_payload = dict(telemetry)
+    telemetry_payload["context"] = context_dict
+
     payload = {
-        "price": _safe_float(market_snapshot.get("live_price"), 0.0),
-        "vwap": round(vwap, 4) if vwap > 0 else 0.0,
-        "history": history,
-        "active_trades": active_trades,
-        "candle": _format_candle(runtime.state.live_candle),
-        "is_paper": bool(runtime.paper_trading or runtime.dry_run),
-        "logs": list(runtime.recent_logs)[-120:],
-        "regime": latest_context.market_regime.value if latest_context is not None else MarketRegime.UNKNOWN.value,
-        "atr": round(latest_context.adaptive_atr_floor, 6) if latest_context is not None else 0.0,
-        "strategy": {
-            "edge_tracker": telemetry["edge_snapshot"],
-            "signal_alignment": telemetry["signal_alignment"],
-            "execution_latency": telemetry["execution_timing"],
-            "cvd_gauge": telemetry["cvd_snapshot"],
-            "adaptive_thresholds": telemetry["adaptive_thresholds"],
-            "system_locks": {
-                "locks": locks,
-                "ai_circuit_open": runtime_counters.ai_circuit_open_until > time.time(),
-                "ai_circuit_remaining_secs": max(0, int(runtime_counters.ai_circuit_open_until - time.time())),
-                "ai_failures": runtime_counters.ai_consecutive_failures,
-                "ai_in_flight": bool(runtime_counters.ai_call_in_flight),
-            },
-            "drawdown_guard": {
-                "regime": drawdown_regime,
-                "text": drawdown_text,
-                "bankroll": round(current_balance, 2),
-                "max_bet_cap": round(current_balance * runtime.risk_manager.config.max_trade_pct, 2),
-                "drawdown_used": round(drawdown_used, 2),
-                "drawdown_room_left": round(drawdown_room_left, 2),
-                "max_trade_pct": runtime.risk_manager.config.max_trade_pct,
-                "max_daily_loss_pct": runtime.risk_manager.config.max_daily_loss_pct,
-            },
-        },
+        "market": market_payload,
+        "positions": {position.slug: position.to_dict() for position in positions},
+        "telemetry": telemetry_payload,
+        "runtime": runtime_payload,
+        "drawdown_guard": drawdown_payload,
         "engine_health": health,
         "engine_control": control,
         "portfolio": portfolio,
-        "ai_log": telemetry["last_ai_interaction"],
-        "seconds_remaining": round(latest_odds.seconds_remaining, 2) if latest_odds is not None else 0.0,
-        "balance": round(current_balance, 2),
+        "meta": {
+            "seconds_remaining": round(latest_odds.seconds_remaining, 2) if latest_odds is not None else 0.0,
+            "balance": round(current_balance, 2),
+            "regime": latest_context.market_regime.value if latest_context is not None else MarketRegime.UNKNOWN.value,
+        },
     }
     return sanitize_data(payload)
 
 
 async def bootstrap_runtime() -> EngineServices:
     state = EngineState()
+    await state.initialize()
     data_config = DataStreamsConfig()
     risk_config = RiskConfig(
         max_daily_loss_pct=_env_float("MAX_DAILY_LOSS_PCT", 0.15),
@@ -2062,6 +2238,21 @@ async def bootstrap_runtime() -> EngineServices:
 
     await sync_target_market(runtime)
     await runtime.stream_manager.load_initial_history(runtime.http_session, runtime.state)
+    initial_context = await build_context_from_state(runtime)
+    if initial_context is not None and runtime.state.target_slug:
+        with suppress(Exception):
+            seed_odds, _ = await fetch_market_odds(runtime, runtime.state.target_slug)
+            if seed_odds.market_found:
+                seeded_context = apply_probabilistic_model(
+                    initial_context,
+                    strike_price=seed_odds.strike_price,
+                    seconds_remaining=seed_odds.seconds_remaining,
+                    degrees_of_freedom=runtime.strategy_config.degrees_of_freedom,
+                    probability_floor_pct=runtime.strategy_config.probability_floor_pct,
+                    probability_ceil_pct=runtime.strategy_config.probability_ceil_pct,
+                )
+                runtime.latest_context = seeded_context
+                await runtime.state.update_telemetry(context=seeded_context)
     logger.info("[SYSTEM] Warming up local AI (%s) into RAM...", runtime.ai_config.model)
     warm_signal = TradeSignal(
         slug=runtime.state.target_slug or "warmup",
