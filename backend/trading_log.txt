@@ -4353,3 +4353,22 @@
 2026-03-07 14:02:54,814 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-7-1pm-et - EV improved to 92.14%
 2026-03-07 14:02:54,815 [INFO] [EV] DOWN | Gross: +94.06% | Slippage: -1.00% | Net: +92.14%
 2026-03-07 14:02:54,816 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-7-1pm-et: execution cooldown active (67s left)
+2026-03-07 14:26:18,519 [INFO] Elite Quant Engine v2 Initialized. Monitoring 15m WebSocket...
+2026-03-07 14:26:18,841 [INFO] [INIT] Simulated balance initialized: $5191.32 (base: $5000.0 + historical: $191.32)
+2026-03-07 14:26:25,287 [INFO] [CLOB] Client initialized successfully.
+2026-03-07 14:26:25,289 [INFO] [VWAP] Reset for new day: 2026-03-07 (CVD also reset)
+2026-03-07 14:26:25,290 [INFO] [SYSTEM] Fetching 120 context candles from Binance...
+2026-03-07 14:26:25,637 [INFO] [SYSTEM] Loaded 120 candles. VWAP=67,957.39
+2026-03-07 14:26:25,639 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-07 14:26:37,539 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-07 14:26:43,208 [INFO] [EV] DOWN | Gross: +41.01% | Slippage: -1.00% | Net: +39.61%
+2026-03-07 14:26:43,209 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-7-1pm-et: promoted $0.00 -> $1.00 (High-confidence non-AI, score 3/4, EV 39.61%)
+2026-03-07 14:26:43,210 [INFO] DECISION LOCKED: DOWN | Confidence: High | Score: 3/4 | Bonus: 0 | Bet: $1.00
+2026-03-07 14:26:43,473 [INFO] [BET ATTEMPT] LIVE DOWN on bitcoin-up-or-down-march-7-1pm-et | Bet: $1.00 | Expected: 0.6950 | Liq: OK (CLOB) | spread=1.00c | impact=0.66% | levels=1
+2026-03-07 14:26:43,543 [INFO] [ENTRY ORDER] Max Entry @ 0.7200 (expected 0.6950 + max 2.0c slip)
+2026-03-07 14:26:44,268 [WARNING] [ENTRY ORDER] FOK unfilled for bitcoin-up-or-down-march-7-1pm-et; retrying once as FAK at same max price.
+2026-03-07 14:26:45,024 [WARNING] [ENTRY RETRY] FAK no-match on bitcoin-up-or-down-march-7-1pm-et; repricing 0.7200 -> 0.7300 (best_ask=0.7700) and retrying once.
+2026-03-07 14:26:45,678 [WARNING] [ENTRY ORDER] FAK no-match for bitcoin-up-or-down-march-7-1pm-et; resting a short GTD limit order at 0.7300 for up to 12s.
+2026-03-07 14:26:46,123 [ERROR] [ERROR] CLOB execution failed: PolyApiException[status_code=400, error_message={'error': 'order 0x037ec21b4266680d61429833a38721b5c93f7bb357c7a1a2a5bdcaf42be9cb7c is invalid. Size (1.38) lower than the minimum: 5'}]
+2026-03-07 14:26:48,407 [INFO] [EV] DOWN | Gross: +41.01% | Slippage: -1.00% | Net: +39.61%
+2026-03-07 14:26:48,419 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-7-1pm-et: execution cooldown active (87s left)
