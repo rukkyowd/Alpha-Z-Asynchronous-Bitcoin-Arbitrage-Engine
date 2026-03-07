@@ -1567,3 +1567,1727 @@
 2026-03-06 13:52:16,663 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
 2026-03-06 13:52:22,229 [INFO] [EV] DOWN | Gross: +7.10% | Slippage: -1.00% | Net: +6.04%
 2026-03-06 13:52:22,230 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #1, slug 1/6)...
+2026-03-06 13:52:42,818 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.30
+2026-03-06 13:52:43,179 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-12pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 13:52:47,696 [INFO] [EV] DOWN | Gross: +7.10% | Slippage: -1.00% | Net: +6.04%
+2026-03-06 13:52:47,696 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-12pm-et: execution cooldown active (85s left)
+2026-03-06 13:53:30,746 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:53:36,033 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:53:41,544 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:53:46,795 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:53:52,937 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:53:58,555 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:54:03,828 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:54:09,190 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:54:14,380 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:54:19,870 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:54:25,225 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:54:30,482 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:54:36,292 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:54:41,481 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:54:47,134 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:54:52,396 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:54:57,811 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:55:03,088 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:55:08,592 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:55:13,771 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:55:19,201 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:55:24,468 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:55:30,115 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:55:35,370 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:55:41,196 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:55:46,390 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:55:52,185 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:55:57,364 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:56:02,790 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:56:08,036 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:56:13,764 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:56:19,053 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:56:24,743 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:56:29,926 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:56:35,489 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:56:40,745 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:56:46,213 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:56:51,469 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:56:57,091 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:57:02,277 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:57:08,138 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:57:13,323 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:57:18,509 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:57:24,050 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:57:29,611 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:57:34,852 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:57:40,521 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:57:45,719 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:57:51,437 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:57:56,678 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:58:02,435 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:58:07,700 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:58:13,296 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:58:18,488 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:58:23,759 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:58:29,011 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:58:34,657 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:58:39,934 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:58:45,612 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:58:50,859 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:58:56,448 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:59:01,624 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:59:07,201 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:59:12,468 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:59:17,678 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:59:22,931 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:59:28,372 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 13:59:33,553 [INFO] [GATE] Skipped: Too close to expiry (26s < 30s)
+2026-03-06 13:59:39,286 [INFO] [GATE] Skipped: Too close to expiry (20s < 30s)
+2026-03-06 13:59:44,561 [INFO] [GATE] Skipped: Too close to expiry (15s < 30s)
+2026-03-06 13:59:49,734 [INFO] [GATE] Skipped: Too close to expiry (10s < 30s)
+2026-03-06 13:59:55,000 [INFO] [GATE] Skipped: Too close to expiry (5s < 30s)
+2026-03-06 14:00:05,334 [INFO] [GATE] Skipped: Too early (3594s > 3540s)
+2026-03-06 14:00:11,100 [INFO] [GATE] Skipped: Too early (3589s > 3540s)
+2026-03-06 14:00:16,371 [INFO] [GATE] Skipped: Too early (3583s > 3540s)
+2026-03-06 14:00:22,171 [INFO] [GATE] Skipped: Too early (3578s > 3540s)
+2026-03-06 14:00:27,421 [INFO] [GATE] Skipped: Too early (3572s > 3540s)
+2026-03-06 14:00:32,951 [INFO] [GATE] Skipped: Too early (3567s > 3540s)
+2026-03-06 14:00:38,204 [INFO] [GATE] Skipped: Too early (3561s > 3540s)
+2026-03-06 14:00:43,683 [INFO] [GATE] Skipped: Too early (3556s > 3540s)
+2026-03-06 14:00:48,885 [INFO] [GATE] Skipped: Too early (3551s > 3540s)
+2026-03-06 14:00:54,693 [INFO] [GATE] Skipped: Too early (3545s > 3540s)
+2026-03-06 14:00:59,938 [INFO] [GATE] Skipped: Too early (3540s > 3540s)
+2026-03-06 14:01:05,445 [INFO] [EV] UP | Gross: +2.73% | Slippage: -1.00% | Net: +1.72%
+2026-03-06 14:01:05,445 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 14:01:10,688 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 5.36%
+2026-03-06 14:01:10,690 [INFO] [EV] UP | Gross: +6.42% | Slippage: -1.00% | Net: +5.36%
+2026-03-06 14:01:10,691 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 14:01:21,912 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 14.87%
+2026-03-06 14:01:21,913 [INFO] [EV] UP | Gross: +16.02% | Slippage: -1.00% | Net: +14.87%
+2026-03-06 14:01:21,914 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 14:01:32,707 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 19.11%
+2026-03-06 14:01:32,708 [INFO] [EV] UP | Gross: +20.30% | Slippage: -1.00% | Net: +19.11%
+2026-03-06 14:01:32,709 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 14:01:38,279 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 25.52%
+2026-03-06 14:01:38,280 [INFO] [EV] UP | Gross: +26.77% | Slippage: -1.00% | Net: +25.52%
+2026-03-06 14:01:38,281 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 14:01:54,331 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 29.83%
+2026-03-06 14:01:54,332 [INFO] [EV] UP | Gross: +31.13% | Slippage: -1.00% | Net: +29.83%
+2026-03-06 14:01:54,333 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 14:13:06,382 [INFO] Elite Quant Engine v2 Initialized. Monitoring 15m WebSocket...
+2026-03-06 14:13:06,595 [INFO] [INIT] Simulated balance initialized: $5191.32 (base: $5000.0 + historical: $191.32)
+2026-03-06 14:13:09,714 [INFO] [CLOB] Client initialized successfully.
+2026-03-06 14:13:09,716 [INFO] [VWAP] Reset for new day: 2026-03-06 (CVD also reset)
+2026-03-06 14:13:09,717 [INFO] [SYSTEM] Fetching 120 context candles from Binance...
+2026-03-06 14:13:10,405 [INFO] [SYSTEM] Loaded 120 candles. VWAP=69,794.60
+2026-03-06 14:13:10,407 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-06 14:13:17,642 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-06 14:13:23,221 [INFO] [EV] UP | Gross: +10.38% | Slippage: -1.00% | Net: +9.29%
+2026-03-06 14:13:23,222 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 14:13:39,312 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 11.44%
+2026-03-06 14:13:39,313 [INFO] [EV] UP | Gross: +12.55% | Slippage: -1.00% | Net: +11.44%
+2026-03-06 14:13:39,313 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 14:13:44,793 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 13.91%
+2026-03-06 14:13:44,794 [INFO] [EV] UP | Gross: +15.05% | Slippage: -1.00% | Net: +13.91%
+2026-03-06 14:13:44,795 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 14:13:50,056 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 17.74%
+2026-03-06 14:13:50,057 [INFO] [EV] UP | Gross: +18.92% | Slippage: -1.00% | Net: +17.74%
+2026-03-06 14:13:50,058 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 14:13:55,437 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 19.17%
+2026-03-06 14:13:55,438 [INFO] [EV] UP | Gross: +20.36% | Slippage: -1.00% | Net: +19.17%
+2026-03-06 14:13:55,439 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 14:28:28,508 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 20.13%
+2026-03-06 14:28:28,510 [INFO] [EV] DOWN | Gross: +21.33% | Slippage: -1.00% | Net: +20.13%
+2026-03-06 14:28:28,512 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #1, slug 1/6)...
+2026-03-06 14:28:48,897 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-1pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 20.13%)
+2026-03-06 14:28:48,898 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 14:28:49,156 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-1pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 14:28:49,564 [INFO] [EV] DOWN | Gross: +22.44% | Slippage: -1.00% | Net: +21.23%
+2026-03-06 14:28:49,566 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-1pm-et: execution cooldown active (89s left)
+2026-03-06 14:29:05,679 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 27.39%
+2026-03-06 14:29:05,680 [INFO] [EV] DOWN | Gross: +28.67% | Slippage: -1.00% | Net: +27.39%
+2026-03-06 14:29:05,681 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-1pm-et: execution cooldown active (73s left)
+2026-03-06 14:29:10,937 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 39.35%
+2026-03-06 14:29:10,938 [INFO] [EV] DOWN | Gross: +40.74% | Slippage: -1.00% | Net: +39.35%
+2026-03-06 14:29:10,939 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-1pm-et: execution cooldown active (68s left)
+2026-03-06 14:29:16,340 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 43.53%
+2026-03-06 14:29:16,340 [INFO] [EV] DOWN | Gross: +44.96% | Slippage: -1.00% | Net: +43.53%
+2026-03-06 14:29:16,341 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-1pm-et: execution cooldown active (62s left)
+2026-03-06 14:29:21,598 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 47.17%
+2026-03-06 14:29:21,599 [INFO] [EV] DOWN | Gross: +48.64% | Slippage: -1.00% | Net: +47.17%
+2026-03-06 14:29:21,600 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-1pm-et: execution cooldown active (57s left)
+2026-03-06 14:36:28,052 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 61.01%
+2026-03-06 14:36:28,054 [INFO] [EV] DOWN | Gross: +62.62% | Slippage: -1.00% | Net: +61.01%
+2026-03-06 14:36:28,055 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #2, slug 2/6)...
+2026-03-06 14:36:42,249 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-1pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 61.01%)
+2026-03-06 14:36:42,249 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 14:36:42,517 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-1pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 14:36:43,998 [INFO] [EV] DOWN | Gross: +59.38% | Slippage: -1.00% | Net: +57.81%
+2026-03-06 14:36:43,999 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-1pm-et: execution cooldown active (88s left)
+2026-03-06 14:36:49,297 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 60.40%
+2026-03-06 14:36:49,298 [INFO] [EV] DOWN | Gross: +62.00% | Slippage: -1.00% | Net: +60.40%
+2026-03-06 14:36:49,299 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-1pm-et: execution cooldown active (83s left)
+2026-03-06 14:37:15,711 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-1pm-et - EV improved to 76.54%
+2026-03-06 14:37:15,712 [INFO] [EV] DOWN | Gross: +78.31% | Slippage: -1.00% | Net: +76.54%
+2026-03-06 14:37:15,713 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-1pm-et: execution cooldown active (56s left)
+2026-03-06 14:45:45,240 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:45:50,501 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:45:56,300 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:46:01,563 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:46:06,915 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:46:12,179 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:46:17,926 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:46:23,161 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:46:28,800 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:46:34,049 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:46:39,316 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:46:44,570 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:46:50,162 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:46:55,344 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:47:01,105 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:47:06,446 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:47:11,945 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:47:17,215 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:47:22,927 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:47:28,120 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:47:33,462 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:47:38,645 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:47:44,472 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:47:49,761 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:47:55,170 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:48:00,455 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:48:05,716 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:48:10,902 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:48:16,154 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:48:21,424 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:48:26,624 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:48:31,952 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:48:37,604 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:48:42,820 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:48:48,471 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:48:54,003 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:48:59,214 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:49:04,737 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:49:10,017 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:49:15,439 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:49:20,691 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:49:26,076 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:49:31,356 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:49:36,975 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:49:42,166 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:49:47,835 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:49:53,100 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:49:58,276 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:50:03,576 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:50:08,872 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:50:14,189 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:50:19,430 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:50:24,922 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:50:30,096 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:50:35,772 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:50:41,014 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:50:46,492 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:50:51,748 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:50:57,501 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:51:02,765 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:51:08,023 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:51:13,204 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:51:18,482 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:51:23,756 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:51:29,289 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:51:34,569 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:51:40,257 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:51:45,436 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:51:51,285 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:51:56,547 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:52:01,888 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:52:07,125 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:52:12,712 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:52:17,895 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:52:23,673 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:52:28,937 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:52:34,123 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:52:39,370 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:52:44,903 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:52:50,076 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:52:55,325 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:53:00,510 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:53:06,132 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:53:11,395 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:53:16,574 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:53:21,829 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:53:27,096 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:53:32,297 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:53:37,574 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:53:42,867 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:53:48,275 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:53:53,849 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:53:59,106 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:54:04,317 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:54:09,639 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:54:14,895 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:54:20,076 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:54:25,364 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:54:30,630 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:54:35,824 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:54:41,177 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:54:46,448 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:54:51,624 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:54:56,880 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:55:02,290 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:55:07,478 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:55:12,758 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:55:18,020 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:55:23,569 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:55:28,895 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:55:34,332 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:55:39,600 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:55:44,850 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:55:50,041 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:55:55,326 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:56:00,589 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:56:05,784 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:56:11,415 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:56:16,691 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:56:21,890 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:56:27,162 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:56:32,551 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:56:37,747 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:56:43,258 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:56:48,588 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:56:53,779 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:56:59,020 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:57:04,701 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:57:09,889 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:57:15,296 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:57:20,558 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:57:26,208 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:57:31,490 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:57:37,682 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:57:43,496 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:57:48,767 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:57:54,351 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:57:59,596 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:58:05,162 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:58:10,344 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:58:15,989 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:58:21,244 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:58:26,570 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:58:31,825 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:58:37,684 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:58:42,884 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:58:48,387 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:58:53,663 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:58:59,378 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:59:04,641 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:59:09,869 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:59:15,129 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:59:20,531 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:59:25,709 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 14:59:31,583 [INFO] [GATE] Skipped: Too close to expiry (28s < 30s)
+2026-03-06 14:59:36,876 [INFO] [GATE] Skipped: Too close to expiry (23s < 30s)
+2026-03-06 14:59:42,063 [INFO] [GATE] Skipped: Too close to expiry (18s < 30s)
+2026-03-06 14:59:47,309 [INFO] [GATE] Skipped: Too close to expiry (12s < 30s)
+2026-03-06 14:59:52,890 [INFO] [GATE] Skipped: Too close to expiry (7s < 30s)
+2026-03-06 14:59:58,111 [INFO] [GATE] Skipped: Too close to expiry (2s < 30s)
+2026-03-06 15:00:08,703 [INFO] [GATE] Skipped: Too early (3591s > 3540s)
+2026-03-06 15:00:14,320 [INFO] [GATE] Skipped: Too early (3585s > 3540s)
+2026-03-06 15:00:19,577 [INFO] [GATE] Skipped: Too early (3580s > 3540s)
+2026-03-06 15:00:25,097 [INFO] [GATE] Skipped: Too early (3575s > 3540s)
+2026-03-06 15:00:30,281 [INFO] [GATE] Skipped: Too early (3569s > 3540s)
+2026-03-06 15:00:35,676 [INFO] [GATE] Skipped: Too early (3564s > 3540s)
+2026-03-06 15:00:40,929 [INFO] [GATE] Skipped: Too early (3559s > 3540s)
+2026-03-06 15:00:46,604 [INFO] [GATE] Skipped: Too early (3553s > 3540s)
+2026-03-06 15:00:51,848 [INFO] [GATE] Skipped: Too early (3548s > 3540s)
+2026-03-06 15:00:57,169 [INFO] [GATE] Skipped: Too early (3542s > 3540s)
+2026-03-06 15:01:02,411 [INFO] [EV] UP | Gross: +2.08% | Slippage: -1.00% | Net: +1.07%
+2026-03-06 15:01:02,412 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 15:01:13,141 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 2.30%
+2026-03-06 15:01:13,142 [INFO] [EV] UP | Gross: +3.32% | Slippage: -1.00% | Net: +2.30%
+2026-03-06 15:01:13,142 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 15:01:29,506 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 4.68%
+2026-03-06 15:01:29,507 [INFO] [EV] UP | Gross: +5.73% | Slippage: -1.00% | Net: +4.68%
+2026-03-06 15:01:29,508 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 15:01:34,796 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 10.93%
+2026-03-06 15:01:34,797 [INFO] [EV] UP | Gross: +12.04% | Slippage: -1.00% | Net: +10.93%
+2026-03-06 15:01:34,798 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 15:01:51,322 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 11.95%
+2026-03-06 15:01:51,322 [INFO] [EV] UP | Gross: +13.07% | Slippage: -1.00% | Net: +11.95%
+2026-03-06 15:01:51,323 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 15:03:33,872 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 15.93%
+2026-03-06 15:03:33,873 [INFO] [EV] UP | Gross: +17.09% | Slippage: -1.00% | Net: +15.93%
+2026-03-06 15:03:33,874 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 15:04:22,528 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 16.78%
+2026-03-06 15:04:22,529 [INFO] [EV] DOWN | Gross: +17.95% | Slippage: -1.00% | Net: +16.78%
+2026-03-06 15:04:22,530 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #3, slug 1/6)...
+2026-03-06 15:04:48,252 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-2pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 16.78%)
+2026-03-06 15:04:48,253 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 15:04:48,507 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-2pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 15:04:50,234 [INFO] [EV] DOWN | Gross: +17.09% | Slippage: -1.00% | Net: +15.93%
+2026-03-06 15:04:50,235 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-2pm-et: execution cooldown active (88s left)
+2026-03-06 15:05:06,586 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 18.71%
+2026-03-06 15:05:06,586 [INFO] [EV] DOWN | Gross: +19.90% | Slippage: -1.00% | Net: +18.71%
+2026-03-06 15:05:06,587 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-2pm-et: execution cooldown active (71s left)
+2026-03-06 15:05:22,719 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 24.95%
+2026-03-06 15:05:22,719 [INFO] [EV] DOWN | Gross: +26.20% | Slippage: -1.00% | Net: +24.95%
+2026-03-06 15:05:22,720 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-2pm-et: execution cooldown active (55s left)
+2026-03-06 15:18:13,962 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 31.22%
+2026-03-06 15:18:13,962 [INFO] [EV] DOWN | Gross: +32.53% | Slippage: -1.00% | Net: +31.22%
+2026-03-06 15:18:13,964 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #4, slug 2/6)...
+2026-03-06 15:18:29,999 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-2pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 31.22%)
+2026-03-06 15:18:30,000 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 15:18:30,342 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-2pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 15:18:34,822 [INFO] [EV] DOWN | Gross: +69.71% | Slippage: -1.00% | Net: +68.03%
+2026-03-06 15:18:34,823 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-2pm-et: execution cooldown active (85s left)
+2026-03-06 15:22:57,872 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 72.61%
+2026-03-06 15:22:57,873 [INFO] [EV] DOWN | Gross: +74.34% | Slippage: -1.00% | Net: +72.61%
+2026-03-06 15:22:57,874 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #5, slug 3/6)...
+2026-03-06 15:23:07,626 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-2pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 72.61%)
+2026-03-06 15:23:07,627 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 15:23:07,879 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-2pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 15:23:08,319 [INFO] [EV] DOWN | Gross: +75.17% | Slippage: -1.00% | Net: +73.44%
+2026-03-06 15:23:08,320 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-2pm-et: execution cooldown active (89s left)
+2026-03-06 15:23:13,889 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 76.69%
+2026-03-06 15:23:13,889 [INFO] [EV] DOWN | Gross: +78.45% | Slippage: -1.00% | Net: +76.69%
+2026-03-06 15:23:13,890 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-2pm-et: execution cooldown active (83s left)
+2026-03-06 15:24:33,126 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 78.59%
+2026-03-06 15:24:33,127 [INFO] [EV] DOWN | Gross: +80.38% | Slippage: -1.00% | Net: +78.59%
+2026-03-06 15:24:33,128 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-2pm-et: execution cooldown active (4s left)
+2026-03-06 15:25:05,096 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 81.92%
+2026-03-06 15:25:05,096 [INFO] [EV] DOWN | Gross: +83.74% | Slippage: -1.00% | Net: +81.92%
+2026-03-06 15:25:05,098 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #6, slug 4/6)...
+2026-03-06 15:25:14,961 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-2pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 81.92%)
+2026-03-06 15:25:14,962 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 15:25:15,309 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-2pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 15:25:15,662 [INFO] [EV] DOWN | Gross: +97.09% | Slippage: -1.00% | Net: +95.14%
+2026-03-06 15:25:15,663 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-2pm-et: execution cooldown active (89s left)
+2026-03-06 15:44:08,308 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 98.27%
+2026-03-06 15:44:08,309 [INFO] [EV] DOWN | Gross: +100.25% | Slippage: -1.00% | Net: +98.27%
+2026-03-06 15:44:08,311 [INFO] [DET_FILTER] Vetoed DOWN: Bullish Rejection Wick detected
+2026-03-06 15:44:08,312 [INFO] [SKIP LOG] Market bitcoin-up-or-down-march-6-2pm-et safely bypassed. Reason: DET_FILTER: Bullish Rejection Wick detected
+2026-03-06 15:44:13,914 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 103.22%
+2026-03-06 15:44:13,916 [INFO] [EV] DOWN | Gross: +105.25% | Slippage: -1.00% | Net: +103.22%
+2026-03-06 15:44:13,917 [INFO] [DET_FILTER] Vetoed DOWN: Bullish Rejection Wick detected
+2026-03-06 15:44:13,917 [INFO] [SKIP LOG] Market bitcoin-up-or-down-march-6-2pm-et safely bypassed. Reason: DET_FILTER: Bullish Rejection Wick detected
+2026-03-06 15:44:19,118 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 105.94%
+2026-03-06 15:44:19,119 [INFO] [EV] DOWN | Gross: +108.00% | Slippage: -1.00% | Net: +105.94%
+2026-03-06 15:44:19,120 [INFO] [DET_FILTER] Vetoed DOWN: Bullish Rejection Wick detected
+2026-03-06 15:44:19,121 [INFO] [SKIP LOG] Market bitcoin-up-or-down-march-6-2pm-et safely bypassed. Reason: DET_FILTER: Bullish Rejection Wick detected
+2026-03-06 15:44:24,706 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 111.80%
+2026-03-06 15:44:24,707 [INFO] [EV] DOWN | Gross: +113.92% | Slippage: -1.00% | Net: +111.80%
+2026-03-06 15:44:24,709 [INFO] [DET_FILTER] Vetoed DOWN: Bullish Rejection Wick detected
+2026-03-06 15:44:24,709 [INFO] [SKIP LOG] Market bitcoin-up-or-down-march-6-2pm-et safely bypassed. Reason: DET_FILTER: Bullish Rejection Wick detected
+2026-03-06 15:44:30,000 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 122.81%
+2026-03-06 15:44:30,001 [INFO] [EV] DOWN | Gross: +125.04% | Slippage: -1.00% | Net: +122.81%
+2026-03-06 15:44:30,003 [INFO] [DET_FILTER] Vetoed DOWN: Bullish Rejection Wick detected
+2026-03-06 15:44:30,003 [INFO] [SKIP LOG] Market bitcoin-up-or-down-march-6-2pm-et safely bypassed. Reason: DET_FILTER: Bullish Rejection Wick detected
+2026-03-06 15:44:35,417 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 150.50%
+2026-03-06 15:44:35,417 [INFO] [EV] DOWN | Gross: +153.00% | Slippage: -1.00% | Net: +150.50%
+2026-03-06 15:44:35,422 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #7, slug 5/6)...
+2026-03-06 15:44:49,772 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.82
+2026-03-06 15:44:50,025 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-2pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 15:44:50,828 [INFO] [EV] DOWN | Gross: +169.33% | Slippage: -1.00% | Net: +166.67%
+2026-03-06 15:44:50,830 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-2pm-et: execution cooldown active (89s left)
+2026-03-06 15:45:01,454 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 172.36%
+2026-03-06 15:45:01,455 [INFO] [EV] DOWN | Gross: +175.08% | Slippage: -1.00% | Net: +172.36%
+2026-03-06 15:45:01,456 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-2pm-et: execution cooldown active (78s left)
+2026-03-06 15:46:10,912 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 180.49%
+2026-03-06 15:46:10,913 [INFO] [EV] DOWN | Gross: +183.29% | Slippage: -1.00% | Net: +180.49%
+2026-03-06 15:46:10,914 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-2pm-et: execution cooldown active (9s left)
+2026-03-06 15:46:16,271 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-2pm-et - EV improved to 190.14%
+2026-03-06 15:46:16,273 [INFO] [EV] DOWN | Gross: +193.04% | Slippage: -1.00% | Net: +190.14%
+2026-03-06 15:46:16,274 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-2pm-et: execution cooldown active (3s left)
+2026-03-06 15:59:31,119 [INFO] [GATE] Skipped: Too close to expiry (29s < 30s)
+2026-03-06 15:59:36,588 [INFO] [GATE] Skipped: Too close to expiry (23s < 30s)
+2026-03-06 15:59:41,908 [INFO] [GATE] Skipped: Too close to expiry (18s < 30s)
+2026-03-06 15:59:47,498 [INFO] [GATE] Skipped: Too close to expiry (13s < 30s)
+2026-03-06 15:59:52,695 [INFO] [GATE] Skipped: Too close to expiry (7s < 30s)
+2026-03-06 15:59:58,318 [INFO] [GATE] Skipped: Too close to expiry (1s < 30s)
+2026-03-06 16:00:08,715 [INFO] [GATE] Skipped: Too early (3591s > 3540s)
+2026-03-06 16:00:14,020 [INFO] [GATE] Skipped: Too early (3586s > 3540s)
+2026-03-06 16:00:19,744 [INFO] [GATE] Skipped: Too early (3580s > 3540s)
+2026-03-06 16:00:24,920 [INFO] [GATE] Skipped: Too early (3575s > 3540s)
+2026-03-06 16:00:30,434 [INFO] [GATE] Skipped: Too early (3569s > 3540s)
+2026-03-06 16:00:35,705 [INFO] [GATE] Skipped: Too early (3564s > 3540s)
+2026-03-06 16:00:41,180 [INFO] [GATE] Skipped: Too early (3559s > 3540s)
+2026-03-06 16:00:46,469 [INFO] [GATE] Skipped: Too early (3553s > 3540s)
+2026-03-06 16:00:52,142 [INFO] [GATE] Skipped: Too early (3548s > 3540s)
+2026-03-06 16:00:57,311 [INFO] [GATE] Skipped: Too early (3542s > 3540s)
+2026-03-06 16:01:02,829 [INFO] [EV] UP | Gross: +0.28% | Slippage: -1.00% | Net: -0.71%
+2026-03-06 16:01:02,830 [INFO] [RULE] Skip: Net EV -0.71% <= 0 after slippage
+2026-03-06 16:01:24,571 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 1.05%
+2026-03-06 16:01:24,572 [INFO] [EV] UP | Gross: +2.06% | Slippage: -1.00% | Net: +1.05%
+2026-03-06 16:01:24,573 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 16:01:29,828 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 8.85%
+2026-03-06 16:01:29,828 [INFO] [EV] UP | Gross: +9.94% | Slippage: -1.00% | Net: +8.85%
+2026-03-06 16:01:29,829 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 16:01:35,323 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 16.63%
+2026-03-06 16:01:35,325 [INFO] [EV] UP | Gross: +17.80% | Slippage: -1.00% | Net: +16.63%
+2026-03-06 16:01:35,326 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 16:01:40,506 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 18.31%
+2026-03-06 16:01:40,507 [INFO] [EV] UP | Gross: +19.49% | Slippage: -1.00% | Net: +18.31%
+2026-03-06 16:01:40,508 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 16:01:45,821 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 19.33%
+2026-03-06 16:01:45,822 [INFO] [EV] UP | Gross: +20.53% | Slippage: -1.00% | Net: +19.33%
+2026-03-06 16:01:45,822 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 16:02:01,559 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 20.81%
+2026-03-06 16:02:01,560 [INFO] [EV] UP | Gross: +22.02% | Slippage: -1.00% | Net: +20.81%
+2026-03-06 16:02:01,561 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 16:02:17,608 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 21.44%
+2026-03-06 16:02:17,609 [INFO] [EV] UP | Gross: +22.65% | Slippage: -1.00% | Net: +21.44%
+2026-03-06 16:02:17,610 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 16:02:22,883 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 24.63%
+2026-03-06 16:02:22,884 [INFO] [EV] UP | Gross: +25.88% | Slippage: -1.00% | Net: +24.63%
+2026-03-06 16:02:22,885 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 16:02:28,067 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 25.34%
+2026-03-06 16:02:28,068 [INFO] [EV] UP | Gross: +26.59% | Slippage: -1.00% | Net: +25.34%
+2026-03-06 16:02:28,069 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 16:02:33,354 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 27.97%
+2026-03-06 16:02:33,355 [INFO] [EV] UP | Gross: +29.25% | Slippage: -1.00% | Net: +27.97%
+2026-03-06 16:02:33,356 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 16:04:52,280 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 38.27%
+2026-03-06 16:04:52,282 [INFO] [EV] DOWN | Gross: +39.65% | Slippage: -1.00% | Net: +38.27%
+2026-03-06 16:04:52,283 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #8, slug 1/6)...
+2026-03-06 16:05:11,508 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-3pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 38.27%)
+2026-03-06 16:05:11,508 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 16:05:11,851 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-3pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 16:05:13,443 [INFO] [EV] DOWN | Gross: +30.41% | Slippage: -1.00% | Net: +29.11%
+2026-03-06 16:05:13,445 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (88s left)
+2026-03-06 16:05:18,704 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 33.16%
+2026-03-06 16:05:18,705 [INFO] [EV] DOWN | Gross: +34.49% | Slippage: -1.00% | Net: +33.16%
+2026-03-06 16:05:18,706 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (83s left)
+2026-03-06 16:05:24,005 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 35.72%
+2026-03-06 16:05:24,006 [INFO] [EV] DOWN | Gross: +37.07% | Slippage: -1.00% | Net: +35.72%
+2026-03-06 16:05:24,007 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (77s left)
+2026-03-06 16:05:29,186 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 37.98%
+2026-03-06 16:05:29,187 [INFO] [EV] DOWN | Gross: +39.36% | Slippage: -1.00% | Net: +37.98%
+2026-03-06 16:05:29,188 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (72s left)
+2026-03-06 16:05:34,658 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 43.81%
+2026-03-06 16:05:34,659 [INFO] [EV] DOWN | Gross: +45.25% | Slippage: -1.00% | Net: +43.81%
+2026-03-06 16:05:34,660 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (67s left)
+2026-03-06 16:05:39,913 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 50.78%
+2026-03-06 16:05:39,914 [INFO] [EV] DOWN | Gross: +52.29% | Slippage: -1.00% | Net: +50.78%
+2026-03-06 16:05:39,915 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (61s left)
+2026-03-06 16:11:59,444 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 56.24%
+2026-03-06 16:11:59,445 [INFO] [EV] DOWN | Gross: +57.80% | Slippage: -1.00% | Net: +56.24%
+2026-03-06 16:11:59,446 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #9, slug 2/6)...
+2026-03-06 16:12:14,009 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-3pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 56.24%)
+2026-03-06 16:12:14,010 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 16:12:14,334 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-3pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 16:12:15,134 [INFO] [EV] DOWN | Gross: +53.08% | Slippage: -1.00% | Net: +51.56%
+2026-03-06 16:12:15,135 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (89s left)
+2026-03-06 16:12:20,427 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 52.41%
+2026-03-06 16:12:20,428 [INFO] [EV] DOWN | Gross: +53.93% | Slippage: -1.00% | Net: +52.41%
+2026-03-06 16:12:20,429 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (83s left)
+2026-03-06 16:12:25,603 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 55.98%
+2026-03-06 16:12:25,604 [INFO] [EV] DOWN | Gross: +57.54% | Slippage: -1.00% | Net: +55.98%
+2026-03-06 16:12:25,605 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (78s left)
+2026-03-06 16:12:41,809 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 61.01%
+2026-03-06 16:12:41,810 [INFO] [EV] DOWN | Gross: +62.62% | Slippage: -1.00% | Net: +61.01%
+2026-03-06 16:12:41,811 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (62s left)
+2026-03-06 16:12:52,260 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 63.38%
+2026-03-06 16:12:52,261 [INFO] [EV] DOWN | Gross: +65.01% | Slippage: -1.00% | Net: +63.38%
+2026-03-06 16:12:52,262 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (52s left)
+2026-03-06 16:21:30,843 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 64.61%
+2026-03-06 16:21:30,844 [INFO] [EV] DOWN | Gross: +66.26% | Slippage: -1.00% | Net: +64.61%
+2026-03-06 16:21:30,845 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #10, slug 3/6)...
+2026-03-06 16:21:44,448 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-3pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 64.61%)
+2026-03-06 16:21:44,448 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 16:21:44,778 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-3pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 16:21:46,276 [INFO] [EV] DOWN | Gross: +55.16% | Slippage: -1.00% | Net: +53.63%
+2026-03-06 16:21:46,278 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (88s left)
+2026-03-06 16:25:03,533 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 54.14%
+2026-03-06 16:25:03,533 [INFO] [EV] DOWN | Gross: +55.68% | Slippage: -1.00% | Net: +54.14%
+2026-03-06 16:25:03,534 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #11, slug 4/6)...
+2026-03-06 16:25:13,050 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-3pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 54.14%)
+2026-03-06 16:25:13,051 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 16:25:13,394 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-3pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 16:25:14,145 [INFO] [EV] DOWN | Gross: +54.04% | Slippage: -1.00% | Net: +52.52%
+2026-03-06 16:25:14,146 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (89s left)
+2026-03-06 16:25:19,738 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 54.41%
+2026-03-06 16:25:19,740 [INFO] [EV] DOWN | Gross: +55.96% | Slippage: -1.00% | Net: +54.41%
+2026-03-06 16:25:19,741 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (83s left)
+2026-03-06 16:25:24,929 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 63.62%
+2026-03-06 16:25:24,930 [INFO] [EV] DOWN | Gross: +65.26% | Slippage: -1.00% | Net: +63.62%
+2026-03-06 16:25:24,931 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (78s left)
+2026-03-06 16:25:30,248 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 68.27%
+2026-03-06 16:25:30,249 [INFO] [EV] DOWN | Gross: +69.96% | Slippage: -1.00% | Net: +68.27%
+2026-03-06 16:25:30,249 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (73s left)
+2026-03-06 16:25:35,571 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 73.31%
+2026-03-06 16:25:35,572 [INFO] [EV] DOWN | Gross: +75.04% | Slippage: -1.00% | Net: +73.31%
+2026-03-06 16:25:35,574 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (67s left)
+2026-03-06 16:25:40,926 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 73.90%
+2026-03-06 16:25:40,927 [INFO] [EV] DOWN | Gross: +75.64% | Slippage: -1.00% | Net: +73.90%
+2026-03-06 16:25:40,928 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (62s left)
+2026-03-06 16:25:46,205 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 84.69%
+2026-03-06 16:25:46,206 [INFO] [EV] DOWN | Gross: +86.53% | Slippage: -1.00% | Net: +84.69%
+2026-03-06 16:25:46,207 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (57s left)
+2026-03-06 16:26:02,700 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 87.27%
+2026-03-06 16:26:02,702 [INFO] [EV] DOWN | Gross: +89.15% | Slippage: -1.00% | Net: +87.27%
+2026-03-06 16:26:02,703 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (40s left)
+2026-03-06 16:26:07,888 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 92.46%
+2026-03-06 16:26:07,889 [INFO] [EV] DOWN | Gross: +94.38% | Slippage: -1.00% | Net: +92.46%
+2026-03-06 16:26:07,890 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (35s left)
+2026-03-06 16:26:13,510 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 98.51%
+2026-03-06 16:26:13,511 [INFO] [EV] DOWN | Gross: +100.49% | Slippage: -1.00% | Net: +98.51%
+2026-03-06 16:26:13,512 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (29s left)
+2026-03-06 16:26:40,204 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 102.27%
+2026-03-06 16:26:40,205 [INFO] [EV] DOWN | Gross: +104.29% | Slippage: -1.00% | Net: +102.27%
+2026-03-06 16:26:40,206 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (3s left)
+2026-03-06 16:26:45,729 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-3pm-et - EV improved to 115.64%
+2026-03-06 16:26:45,730 [INFO] [EV] DOWN | Gross: +117.80% | Slippage: -1.00% | Net: +115.64%
+2026-03-06 16:26:45,732 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #12, slug 5/6)...
+2026-03-06 16:26:55,189 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-3pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 115.64%)
+2026-03-06 16:26:55,189 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 16:26:55,502 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-3pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 16:26:56,042 [INFO] [EV] DOWN | Gross: +120.22% | Slippage: -1.00% | Net: +118.04%
+2026-03-06 16:26:56,044 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-3pm-et: execution cooldown active (89s left)
+2026-03-06 16:59:31,341 [INFO] [GATE] Skipped: Too close to expiry (28s < 30s)
+2026-03-06 16:59:36,536 [INFO] [GATE] Skipped: Too close to expiry (23s < 30s)
+2026-03-06 16:59:41,795 [INFO] [GATE] Skipped: Too close to expiry (18s < 30s)
+2026-03-06 16:59:46,973 [INFO] [GATE] Skipped: Too close to expiry (13s < 30s)
+2026-03-06 16:59:52,227 [INFO] [GATE] Skipped: Too close to expiry (7s < 30s)
+2026-03-06 16:59:57,491 [INFO] [GATE] Skipped: Too close to expiry (2s < 30s)
+2026-03-06 17:00:08,065 [INFO] [GATE] Skipped: Too early (3592s > 3540s)
+2026-03-06 17:00:13,719 [INFO] [GATE] Skipped: Too early (3586s > 3540s)
+2026-03-06 17:00:18,906 [INFO] [GATE] Skipped: Too early (3581s > 3540s)
+2026-03-06 17:00:24,202 [INFO] [GATE] Skipped: Too early (3575s > 3540s)
+2026-03-06 17:00:29,472 [INFO] [GATE] Skipped: Too early (3570s > 3540s)
+2026-03-06 17:00:34,793 [INFO] [GATE] Skipped: Too early (3565s > 3540s)
+2026-03-06 17:00:40,108 [INFO] [GATE] Skipped: Too early (3560s > 3540s)
+2026-03-06 17:00:45,655 [INFO] [GATE] Skipped: Too early (3554s > 3540s)
+2026-03-06 17:00:50,843 [INFO] [GATE] Skipped: Too early (3549s > 3540s)
+2026-03-06 17:00:56,433 [INFO] [GATE] Skipped: Too early (3543s > 3540s)
+2026-03-06 17:01:01,691 [INFO] [EV] DOWN | Gross: +8.00% | Slippage: -1.00% | Net: +6.93%
+2026-03-06 17:01:01,692 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #13, slug 1/6)...
+2026-03-06 17:01:15,652 [WARNING] [DUST REJECT] DOWN on bitcoin-up-or-down-march-6-4pm-et discarded. Bet size $0.00 < $1.00 Minimum
+2026-03-06 17:01:33,189 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 8.68%
+2026-03-06 17:01:33,190 [INFO] [EV] DOWN | Gross: +9.77% | Slippage: -1.00% | Net: +8.68%
+2026-03-06 17:01:33,191 [INFO] [DET_FILTER] Vetoed DOWN: Bullish Rejection Wick detected
+2026-03-06 17:01:33,192 [INFO] [SKIP LOG] Market bitcoin-up-or-down-march-6-4pm-et safely bypassed. Reason: DET_FILTER: Bullish Rejection Wick detected
+2026-03-06 17:01:38,581 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 11.92%
+2026-03-06 17:01:38,582 [INFO] [EV] DOWN | Gross: +13.04% | Slippage: -1.00% | Net: +11.92%
+2026-03-06 17:01:38,583 [INFO] [DET_FILTER] Vetoed DOWN: Bullish Rejection Wick detected
+2026-03-06 17:01:38,584 [INFO] [SKIP LOG] Market bitcoin-up-or-down-march-6-4pm-et safely bypassed. Reason: DET_FILTER: Bullish Rejection Wick detected
+2026-03-06 17:01:49,346 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 25.00%
+2026-03-06 17:01:49,347 [INFO] [EV] DOWN | Gross: +26.25% | Slippage: -1.00% | Net: +25.00%
+2026-03-06 17:01:49,349 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #14, slug 2/6)...
+2026-03-06 17:01:58,658 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-4pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 25.00%)
+2026-03-06 17:01:58,658 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 17:01:58,984 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-4pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 17:01:59,761 [INFO] [EV] DOWN | Gross: +11.77% | Slippage: -1.00% | Net: +10.66%
+2026-03-06 17:01:59,762 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-4pm-et: execution cooldown active (89s left)
+2026-03-06 17:03:30,704 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 18.00%
+2026-03-06 17:03:30,705 [INFO] [EV] DOWN | Gross: +19.18% | Slippage: -1.00% | Net: +18.00%
+2026-03-06 17:03:30,706 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #15, slug 3/6)...
+2026-03-06 17:03:40,147 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-4pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 18.00%)
+2026-03-06 17:03:40,148 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 17:03:40,402 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-4pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 17:03:41,008 [INFO] [EV] DOWN | Gross: +18.00% | Slippage: -1.00% | Net: +16.83%
+2026-03-06 17:03:41,009 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-4pm-et: execution cooldown active (89s left)
+2026-03-06 17:03:46,292 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 20.09%
+2026-03-06 17:03:46,293 [INFO] [EV] DOWN | Gross: +21.29% | Slippage: -1.00% | Net: +20.09%
+2026-03-06 17:03:46,294 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-4pm-et: execution cooldown active (84s left)
+2026-03-06 17:10:15,676 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 24.06%
+2026-03-06 17:10:15,677 [INFO] [EV] DOWN | Gross: +25.30% | Slippage: -1.00% | Net: +24.06%
+2026-03-06 17:10:15,678 [INFO] [DET_FILTER] Vetoed DOWN: Bullish Rejection Wick detected
+2026-03-06 17:10:15,679 [INFO] [SKIP LOG] Market bitcoin-up-or-down-march-6-4pm-et safely bypassed. Reason: DET_FILTER: Bullish Rejection Wick detected
+2026-03-06 17:20:13,571 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 25.49%
+2026-03-06 17:20:13,572 [INFO] [EV] DOWN | Gross: +26.75% | Slippage: -1.00% | Net: +25.49%
+2026-03-06 17:20:13,573 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #16, slug 4/6)...
+2026-03-06 17:20:29,533 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-4pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 25.49%)
+2026-03-06 17:20:29,534 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 17:20:29,784 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-4pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 17:20:34,846 [INFO] [EV] DOWN | Gross: +19.49% | Slippage: -1.00% | Net: +18.31%
+2026-03-06 17:20:34,848 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-4pm-et: execution cooldown active (84s left)
+2026-03-06 17:21:06,507 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 19.14%
+2026-03-06 17:21:06,508 [INFO] [EV] DOWN | Gross: +20.33% | Slippage: -1.00% | Net: +19.14%
+2026-03-06 17:21:06,509 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-4pm-et: execution cooldown active (53s left)
+2026-03-06 17:21:27,570 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 27.55%
+2026-03-06 17:21:27,571 [INFO] [EV] DOWN | Gross: +28.82% | Slippage: -1.00% | Net: +27.55%
+2026-03-06 17:21:27,572 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-4pm-et: execution cooldown active (32s left)
+2026-03-06 17:22:31,682 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 31.81%
+2026-03-06 17:22:31,683 [INFO] [EV] DOWN | Gross: +33.13% | Slippage: -1.00% | Net: +31.81%
+2026-03-06 17:22:31,684 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #17, slug 5/6)...
+2026-03-06 17:22:40,928 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-4pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 31.81%)
+2026-03-06 17:22:40,928 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 17:22:41,258 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-4pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 17:22:42,211 [INFO] [EV] DOWN | Gross: +41.67% | Slippage: -1.00% | Net: +40.27%
+2026-03-06 17:22:42,212 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-4pm-et: execution cooldown active (89s left)
+2026-03-06 17:23:45,902 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 44.02%
+2026-03-06 17:23:45,903 [INFO] [EV] DOWN | Gross: +45.46% | Slippage: -1.00% | Net: +44.02%
+2026-03-06 17:23:45,904 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-4pm-et: execution cooldown active (25s left)
+2026-03-06 17:24:02,003 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 50.24%
+2026-03-06 17:24:02,004 [INFO] [EV] DOWN | Gross: +51.74% | Slippage: -1.00% | Net: +50.24%
+2026-03-06 17:24:02,005 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-4pm-et: execution cooldown active (9s left)
+2026-03-06 17:24:38,966 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 55.58%
+2026-03-06 17:24:38,967 [INFO] [EV] DOWN | Gross: +57.14% | Slippage: -1.00% | Net: +55.58%
+2026-03-06 17:24:38,968 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #18, slug 6/6)...
+2026-03-06 17:24:48,200 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-4pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 55.58%)
+2026-03-06 17:24:48,201 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 17:24:48,457 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-4pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 17:24:49,222 [INFO] [EV] DOWN | Gross: +52.58% | Slippage: -1.00% | Net: +51.07%
+2026-03-06 17:24:49,223 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-4pm-et: execution cooldown active (89s left)
+2026-03-06 17:24:54,549 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 61.50%
+2026-03-06 17:24:54,550 [INFO] [EV] DOWN | Gross: +63.12% | Slippage: -1.00% | Net: +61.50%
+2026-03-06 17:24:54,551 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-4pm-et: execution cooldown active (83s left)
+2026-03-06 17:25:00,092 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 71.70%
+2026-03-06 17:25:00,093 [INFO] [EV] DOWN | Gross: +73.42% | Slippage: -1.00% | Net: +71.70%
+2026-03-06 17:25:00,094 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-4pm-et: execution cooldown active (78s left)
+2026-03-06 17:25:05,271 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 77.26%
+2026-03-06 17:25:05,271 [INFO] [EV] DOWN | Gross: +79.03% | Slippage: -1.00% | Net: +77.26%
+2026-03-06 17:25:05,272 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-4pm-et: execution cooldown active (73s left)
+2026-03-06 17:25:21,721 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 77.98%
+2026-03-06 17:25:21,722 [INFO] [EV] DOWN | Gross: +79.76% | Slippage: -1.00% | Net: +77.98%
+2026-03-06 17:25:21,723 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-4pm-et: execution cooldown active (56s left)
+2026-03-06 17:25:48,624 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 80.54%
+2026-03-06 17:25:48,625 [INFO] [EV] DOWN | Gross: +82.34% | Slippage: -1.00% | Net: +80.54%
+2026-03-06 17:25:48,626 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-4pm-et: execution cooldown active (29s left)
+2026-03-06 17:26:36,709 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 85.03%
+2026-03-06 17:26:36,709 [INFO] [EV] DOWN | Gross: +86.88% | Slippage: -1.00% | Net: +85.03%
+2026-03-06 17:26:36,710 [INFO] [AI GATE] Skipped bitcoin-up-or-down-march-6-4pm-et: AI cap reached (6/6)
+2026-03-06 17:26:47,515 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 85.88%
+2026-03-06 17:26:47,516 [INFO] [EV] DOWN | Gross: +87.74% | Slippage: -1.00% | Net: +85.88%
+2026-03-06 17:26:47,517 [INFO] [AI GATE] Skipped bitcoin-up-or-down-march-6-4pm-et: AI cap reached (6/6)
+2026-03-06 17:55:01,705 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-4pm-et - EV improved to 153.83%
+2026-03-06 17:55:01,707 [INFO] [EV] DOWN | Gross: +156.36% | Slippage: -1.00% | Net: +153.83%
+2026-03-06 17:55:01,708 [INFO] [AI GATE] Skipped bitcoin-up-or-down-march-6-4pm-et: AI cap reached (6/6)
+2026-03-06 17:59:35,010 [INFO] [GATE] Skipped: Too close to expiry (25s < 30s)
+2026-03-06 17:59:40,297 [INFO] [GATE] Skipped: Too close to expiry (19s < 30s)
+2026-03-06 17:59:45,552 [INFO] [GATE] Skipped: Too close to expiry (14s < 30s)
+2026-03-06 17:59:50,831 [INFO] [GATE] Skipped: Too close to expiry (9s < 30s)
+2026-03-06 17:59:56,028 [INFO] [GATE] Skipped: Too close to expiry (4s < 30s)
+2026-03-06 18:00:06,756 [INFO] [GATE] Skipped: Too early (3593s > 3540s)
+2026-03-06 18:00:11,939 [INFO] [GATE] Skipped: Too early (3588s > 3540s)
+2026-03-06 18:00:17,645 [INFO] [GATE] Skipped: Too early (3582s > 3540s)
+2026-03-06 18:00:22,906 [INFO] [GATE] Skipped: Too early (3577s > 3540s)
+2026-03-06 18:00:28,127 [INFO] [GATE] Skipped: Too early (3571s > 3540s)
+2026-03-06 18:00:33,413 [INFO] [GATE] Skipped: Too early (3566s > 3540s)
+2026-03-06 18:00:39,002 [INFO] [GATE] Skipped: Too early (3561s > 3540s)
+2026-03-06 18:00:44,186 [INFO] [GATE] Skipped: Too early (3555s > 3540s)
+2026-03-06 18:00:49,748 [INFO] [GATE] Skipped: Too early (3550s > 3540s)
+2026-03-06 18:00:55,071 [INFO] [GATE] Skipped: Too early (3545s > 3540s)
+2026-03-06 18:01:00,345 [INFO] [EV] UP | Gross: +2.66% | Slippage: -1.00% | Net: +1.64%
+2026-03-06 18:01:00,346 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 18:01:16,142 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 3.91%
+2026-03-06 18:01:16,144 [INFO] [EV] UP | Gross: +4.95% | Slippage: -1.00% | Net: +3.91%
+2026-03-06 18:01:16,145 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 18:01:21,756 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 7.34%
+2026-03-06 18:01:21,756 [INFO] [EV] UP | Gross: +8.41% | Slippage: -1.00% | Net: +7.34%
+2026-03-06 18:01:21,757 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 18:01:27,019 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 10.32%
+2026-03-06 18:01:27,020 [INFO] [EV] UP | Gross: +11.42% | Slippage: -1.00% | Net: +10.32%
+2026-03-06 18:01:27,020 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 18:01:43,279 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 11.01%
+2026-03-06 18:01:43,280 [INFO] [EV] UP | Gross: +12.12% | Slippage: -1.00% | Net: +11.01%
+2026-03-06 18:01:43,281 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 18:01:48,577 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 11.91%
+2026-03-06 18:01:48,578 [INFO] [EV] UP | Gross: +13.03% | Slippage: -1.00% | Net: +11.91%
+2026-03-06 18:01:48,578 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 18:04:48,266 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 22.51%
+2026-03-06 18:04:48,267 [INFO] [EV] UP | Gross: +23.73% | Slippage: -1.00% | Net: +22.51%
+2026-03-06 18:04:48,268 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 18:19:21,682 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 23.14%
+2026-03-06 18:19:21,684 [INFO] [EV] UP | Gross: +24.37% | Slippage: -1.00% | Net: +23.14%
+2026-03-06 18:19:21,685 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 18:21:02,859 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 23.65%
+2026-03-06 18:21:02,860 [INFO] [EV] UP | Gross: +24.89% | Slippage: -1.00% | Net: +23.65%
+2026-03-06 18:21:02,861 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 18:22:06,139 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 36.41%
+2026-03-06 18:22:06,140 [INFO] [EV] UP | Gross: +37.77% | Slippage: -1.00% | Net: +36.41%
+2026-03-06 18:22:06,141 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 18:32:36,654 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 37.23%
+2026-03-06 18:32:36,655 [INFO] [EV] DOWN | Gross: +38.61% | Slippage: -1.00% | Net: +37.23%
+2026-03-06 18:32:36,656 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #19, slug 1/6)...
+2026-03-06 18:32:51,089 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.82
+2026-03-06 18:32:51,351 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-5pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 18:32:52,537 [INFO] [EV] DOWN | Gross: +38.75% | Slippage: -1.00% | Net: +37.37%
+2026-03-06 18:32:52,538 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-5pm-et: execution cooldown active (88s left)
+2026-03-06 18:41:18,392 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 44.80%
+2026-03-06 18:41:18,393 [INFO] [EV] UP | Gross: +46.25% | Slippage: -1.00% | Net: +44.80%
+2026-03-06 18:41:18,394 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 18:41:24,101 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 45.71%
+2026-03-06 18:41:24,102 [INFO] [EV] UP | Gross: +47.17% | Slippage: -1.00% | Net: +45.71%
+2026-03-06 18:41:24,103 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 18:41:29,277 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 49.36%
+2026-03-06 18:41:29,278 [INFO] [EV] UP | Gross: +50.85% | Slippage: -1.00% | Net: +49.36%
+2026-03-06 18:41:29,279 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 18:43:42,722 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 52.86%
+2026-03-06 18:43:42,723 [INFO] [EV] UP | Gross: +54.39% | Slippage: -1.00% | Net: +52.86%
+2026-03-06 18:43:42,723 [INFO] [DET_FILTER] Vetoed UP: VWAP Overextended vs Direction (1.75%)
+2026-03-06 18:43:42,724 [INFO] [SKIP LOG] Market bitcoin-up-or-down-march-6-5pm-et safely bypassed. Reason: DET_FILTER: VWAP Overextended vs Direction (1.75%)
+2026-03-06 18:43:53,347 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 55.82%
+2026-03-06 18:43:53,348 [INFO] [EV] UP | Gross: +57.38% | Slippage: -1.00% | Net: +55.82%
+2026-03-06 18:43:53,350 [INFO] [DET_FILTER] Vetoed UP: VWAP Overextended vs Direction (1.74%)
+2026-03-06 18:43:53,350 [INFO] [SKIP LOG] Market bitcoin-up-or-down-march-6-5pm-et safely bypassed. Reason: DET_FILTER: VWAP Overextended vs Direction (1.74%)
+2026-03-06 18:51:09,369 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 87.89%
+2026-03-06 18:51:09,370 [INFO] [EV] DOWN | Gross: +89.76% | Slippage: -1.00% | Net: +87.89%
+2026-03-06 18:51:09,371 [INFO] [DET_FILTER] Vetoed DOWN: Bullish Rejection Wick detected
+2026-03-06 18:51:09,372 [INFO] [SKIP LOG] Market bitcoin-up-or-down-march-6-5pm-et safely bypassed. Reason: DET_FILTER: Bullish Rejection Wick detected
+2026-03-06 18:51:35,917 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-5pm-et - EV improved to 95.69%
+2026-03-06 18:51:35,918 [INFO] [EV] DOWN | Gross: +97.65% | Slippage: -1.00% | Net: +95.69%
+2026-03-06 18:51:35,920 [INFO] [DET_FILTER] Vetoed DOWN: Bullish Rejection Wick detected
+2026-03-06 18:51:35,921 [INFO] [SKIP LOG] Market bitcoin-up-or-down-march-6-5pm-et safely bypassed. Reason: DET_FILTER: Bullish Rejection Wick detected
+2026-03-06 18:56:49,404 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:56:54,659 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:56:59,906 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:57:05,094 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:57:10,344 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:57:15,594 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:57:20,791 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:57:26,156 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:57:31,409 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:57:36,842 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:57:42,116 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:57:47,628 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:57:52,810 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:57:58,063 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:58:03,342 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:58:08,873 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:58:14,128 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:58:19,419 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:58:24,679 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:58:29,967 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:58:35,142 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:58:40,393 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:58:45,639 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:58:50,940 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:58:56,198 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:59:01,786 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:59:06,973 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:59:12,452 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:59:17,713 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:59:22,926 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:59:28,214 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 18:59:33,858 [INFO] [GATE] Skipped: Too close to expiry (26s < 30s)
+2026-03-06 18:59:39,040 [INFO] [GATE] Skipped: Too close to expiry (21s < 30s)
+2026-03-06 18:59:44,388 [INFO] [GATE] Skipped: Too close to expiry (15s < 30s)
+2026-03-06 18:59:49,652 [INFO] [GATE] Skipped: Too close to expiry (10s < 30s)
+2026-03-06 18:59:54,835 [INFO] [GATE] Skipped: Too close to expiry (5s < 30s)
+2026-03-06 19:00:00,134 [INFO] [GATE] Skipped: Too close to expiry (0s < 30s)
+2026-03-06 19:00:10,377 [INFO] [GATE] Skipped: Too early (3589s > 3540s)
+2026-03-06 19:00:15,686 [INFO] [GATE] Skipped: Too early (3584s > 3540s)
+2026-03-06 19:00:20,930 [INFO] [GATE] Skipped: Too early (3579s > 3540s)
+2026-03-06 19:00:26,322 [INFO] [GATE] Skipped: Too early (3574s > 3540s)
+2026-03-06 19:00:31,631 [INFO] [GATE] Skipped: Too early (3568s > 3540s)
+2026-03-06 19:00:36,853 [INFO] [GATE] Skipped: Too early (3563s > 3540s)
+2026-03-06 19:00:42,144 [INFO] [GATE] Skipped: Too early (3558s > 3540s)
+2026-03-06 19:00:47,394 [INFO] [GATE] Skipped: Too early (3552s > 3540s)
+2026-03-06 19:00:52,560 [INFO] [GATE] Skipped: Too early (3547s > 3540s)
+2026-03-06 19:00:57,813 [INFO] [GATE] Skipped: Too early (3542s > 3540s)
+2026-03-06 19:01:03,247 [INFO] [EV] DOWN | Gross: +31.11% | Slippage: -1.00% | Net: +29.81%
+2026-03-06 19:01:03,248 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #20, slug 1/6)...
+2026-03-06 19:01:17,408 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-6pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 29.81%)
+2026-03-06 19:01:17,408 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 19:01:18,138 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-6pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 19:01:18,577 [INFO] [EV] DOWN | Gross: +17.64% | Slippage: -1.00% | Net: +16.48%
+2026-03-06 19:01:18,579 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-6pm-et: execution cooldown active (89s left)
+2026-03-06 19:01:24,045 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 19.99%
+2026-03-06 19:01:24,046 [INFO] [EV] DOWN | Gross: +21.19% | Slippage: -1.00% | Net: +19.99%
+2026-03-06 19:01:24,046 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-6pm-et: execution cooldown active (84s left)
+2026-03-06 19:02:06,909 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 20.64%
+2026-03-06 19:02:06,910 [INFO] [EV] DOWN | Gross: +21.84% | Slippage: -1.00% | Net: +20.64%
+2026-03-06 19:02:06,911 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-6pm-et: execution cooldown active (41s left)
+2026-03-06 19:19:28,981 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 24.24%
+2026-03-06 19:19:28,982 [INFO] [EV] UP | Gross: +25.48% | Slippage: -1.00% | Net: +24.24%
+2026-03-06 19:19:28,982 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 19:20:22,939 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 27.96%
+2026-03-06 19:20:22,940 [INFO] [EV] UP | Gross: +29.24% | Slippage: -1.00% | Net: +27.96%
+2026-03-06 19:20:22,940 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 19:20:28,132 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 31.18%
+2026-03-06 19:20:28,133 [INFO] [EV] UP | Gross: +32.49% | Slippage: -1.00% | Net: +31.18%
+2026-03-06 19:20:28,134 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 19:21:05,529 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 36.59%
+2026-03-06 19:21:05,530 [INFO] [EV] UP | Gross: +37.96% | Slippage: -1.00% | Net: +36.59%
+2026-03-06 19:21:05,531 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 19:29:38,403 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 37.71%
+2026-03-06 19:29:38,404 [INFO] [EV] DOWN | Gross: +39.09% | Slippage: -1.00% | Net: +37.71%
+2026-03-06 19:29:38,405 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #21, slug 2/6)...
+2026-03-06 19:29:52,432 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-6pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 37.71%)
+2026-03-06 19:29:52,433 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 19:29:52,748 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-6pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 19:29:53,887 [INFO] [EV] DOWN | Gross: +39.14% | Slippage: -1.00% | Net: +37.76%
+2026-03-06 19:29:53,888 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-6pm-et: execution cooldown active (88s left)
+2026-03-06 19:34:04,214 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 44.11%
+2026-03-06 19:34:04,215 [INFO] [EV] DOWN | Gross: +45.56% | Slippage: -1.00% | Net: +44.11%
+2026-03-06 19:34:04,216 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #22, slug 3/6)...
+2026-03-06 19:34:13,884 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.82
+2026-03-06 19:34:14,174 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-6pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 19:34:14,462 [INFO] [EV] DOWN | Gross: +46.15% | Slippage: -1.00% | Net: +44.70%
+2026-03-06 19:34:14,463 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-6pm-et: execution cooldown active (89s left)
+2026-03-06 19:34:19,844 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 46.53%
+2026-03-06 19:34:19,845 [INFO] [EV] DOWN | Gross: +48.00% | Slippage: -1.00% | Net: +46.53%
+2026-03-06 19:34:19,846 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-6pm-et: execution cooldown active (84s left)
+2026-03-06 19:34:25,128 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 54.02%
+2026-03-06 19:34:25,129 [INFO] [EV] DOWN | Gross: +55.56% | Slippage: -1.00% | Net: +54.02%
+2026-03-06 19:34:25,130 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-6pm-et: execution cooldown active (79s left)
+2026-03-06 19:37:00,017 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 55.38%
+2026-03-06 19:37:00,019 [INFO] [EV] DOWN | Gross: +56.93% | Slippage: -1.00% | Net: +55.38%
+2026-03-06 19:37:00,020 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #23, slug 4/6)...
+2026-03-06 19:37:09,603 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.82
+2026-03-06 19:37:09,966 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-6pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 19:37:10,260 [INFO] [EV] DOWN | Gross: +55.19% | Slippage: -1.00% | Net: +53.65%
+2026-03-06 19:37:10,261 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-6pm-et: execution cooldown active (89s left)
+2026-03-06 19:37:31,534 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 58.73%
+2026-03-06 19:37:31,535 [INFO] [EV] DOWN | Gross: +60.32% | Slippage: -1.00% | Net: +58.73%
+2026-03-06 19:37:31,536 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-6pm-et: execution cooldown active (68s left)
+2026-03-06 19:37:36,784 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 61.87%
+2026-03-06 19:37:36,784 [INFO] [EV] DOWN | Gross: +63.49% | Slippage: -1.00% | Net: +61.87%
+2026-03-06 19:37:36,786 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-6pm-et: execution cooldown active (63s left)
+2026-03-06 19:42:20,023 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 64.70%
+2026-03-06 19:42:20,023 [INFO] [EV] DOWN | Gross: +66.35% | Slippage: -1.00% | Net: +64.70%
+2026-03-06 19:42:20,026 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #24, slug 5/6)...
+2026-03-06 19:42:35,847 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.82
+2026-03-06 19:42:36,170 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-6pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 19:42:40,891 [INFO] [EV] DOWN | Gross: +68.07% | Slippage: -1.00% | Net: +66.41%
+2026-03-06 19:42:40,892 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-6pm-et: execution cooldown active (85s left)
+2026-03-06 19:42:51,467 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 69.94%
+2026-03-06 19:42:51,468 [INFO] [EV] DOWN | Gross: +71.64% | Slippage: -1.00% | Net: +69.94%
+2026-03-06 19:42:51,469 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-6pm-et: execution cooldown active (74s left)
+2026-03-06 19:43:07,590 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 72.62%
+2026-03-06 19:43:07,590 [INFO] [EV] DOWN | Gross: +74.35% | Slippage: -1.00% | Net: +72.62%
+2026-03-06 19:43:07,591 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-6pm-et: execution cooldown active (58s left)
+2026-03-06 19:43:12,796 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-6pm-et - EV improved to 74.29%
+2026-03-06 19:43:12,797 [INFO] [EV] DOWN | Gross: +76.04% | Slippage: -1.00% | Net: +74.29%
+2026-03-06 19:43:12,798 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-6pm-et: execution cooldown active (53s left)
+2026-03-06 19:58:42,680 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 19:58:47,949 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 19:58:53,206 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 19:58:58,386 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 19:59:03,870 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 19:59:09,155 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 19:59:14,342 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 19:59:19,588 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 19:59:24,858 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 19:59:30,253 [INFO] [GATE] Skipped: Too close to expiry (29s < 30s)
+2026-03-06 19:59:35,537 [INFO] [GATE] Skipped: Too close to expiry (24s < 30s)
+2026-03-06 19:59:41,090 [INFO] [GATE] Skipped: Too close to expiry (19s < 30s)
+2026-03-06 19:59:46,262 [INFO] [GATE] Skipped: Too close to expiry (13s < 30s)
+2026-03-06 19:59:51,911 [INFO] [GATE] Skipped: Too close to expiry (8s < 30s)
+2026-03-06 19:59:57,166 [INFO] [GATE] Skipped: Too close to expiry (3s < 30s)
+2026-03-06 20:00:07,575 [INFO] [RISK] Daily stats reset. New session started.
+2026-03-06 20:00:07,576 [INFO] [GATE] Skipped: Too early (3592s > 3540s)
+2026-03-06 20:00:12,844 [INFO] [GATE] Skipped: Too early (3587s > 3540s)
+2026-03-06 20:00:18,033 [INFO] [GATE] Skipped: Too early (3582s > 3540s)
+2026-03-06 20:00:23,406 [INFO] [GATE] Skipped: Too early (3576s > 3540s)
+2026-03-06 20:00:28,709 [INFO] [GATE] Skipped: Too early (3571s > 3540s)
+2026-03-06 20:00:34,233 [INFO] [GATE] Skipped: Too early (3565s > 3540s)
+2026-03-06 20:00:39,489 [INFO] [GATE] Skipped: Too early (3560s > 3540s)
+2026-03-06 20:00:44,917 [INFO] [GATE] Skipped: Too early (3555s > 3540s)
+2026-03-06 20:00:50,192 [INFO] [GATE] Skipped: Too early (3550s > 3540s)
+2026-03-06 20:00:55,486 [INFO] [GATE] Skipped: Too early (3544s > 3540s)
+2026-03-06 20:01:00,680 [INFO] [EV] UP | Gross: +8.55% | Slippage: -1.00% | Net: +7.48%
+2026-03-06 20:01:00,681 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 20:02:42,272 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-7pm-et - EV improved to 10.52%
+2026-03-06 20:02:42,274 [INFO] [EV] UP | Gross: +11.62% | Slippage: -1.00% | Net: +10.52%
+2026-03-06 20:02:42,275 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 20:03:03,270 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-7pm-et - EV improved to 17.50%
+2026-03-06 20:03:03,271 [INFO] [EV] UP | Gross: +18.67% | Slippage: -1.00% | Net: +17.50%
+2026-03-06 20:03:03,272 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 20:03:13,904 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-7pm-et - EV improved to 22.14%
+2026-03-06 20:03:13,905 [INFO] [EV] UP | Gross: +23.37% | Slippage: -1.00% | Net: +22.14%
+2026-03-06 20:03:13,906 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 20:03:29,588 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-7pm-et - EV improved to 30.10%
+2026-03-06 20:03:29,589 [INFO] [EV] UP | Gross: +31.41% | Slippage: -1.00% | Net: +30.10%
+2026-03-06 20:03:29,590 [INFO] [RULE] Skip: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-06 20:06:36,768 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-7pm-et - EV improved to 33.24%
+2026-03-06 20:06:36,770 [INFO] [EV] UP | Gross: +34.57% | Slippage: -1.00% | Net: +33.24%
+2026-03-06 20:06:36,771 [INFO] [DET_FILTER] Vetoed UP: VWAP Overextended vs Direction (1.99%)
+2026-03-06 20:06:36,772 [INFO] [SKIP LOG] Market bitcoin-up-or-down-march-6-7pm-et safely bypassed. Reason: DET_FILTER: VWAP Overextended vs Direction (1.99%)
+2026-03-06 20:06:52,490 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-7pm-et - EV improved to 40.40%
+2026-03-06 20:06:52,491 [INFO] [EV] UP | Gross: +41.80% | Slippage: -1.00% | Net: +40.40%
+2026-03-06 20:06:52,492 [INFO] [DET_FILTER] Vetoed UP: VWAP Overextended vs Direction (1.97%)
+2026-03-06 20:06:52,493 [INFO] [SKIP LOG] Market bitcoin-up-or-down-march-6-7pm-et safely bypassed. Reason: DET_FILTER: VWAP Overextended vs Direction (1.97%)
+2026-03-06 20:06:58,086 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-7pm-et - EV improved to 41.57%
+2026-03-06 20:06:58,087 [INFO] [EV] UP | Gross: +42.99% | Slippage: -1.00% | Net: +41.57%
+2026-03-06 20:06:58,166 [INFO] [DET_FILTER] Vetoed UP: VWAP Overextended vs Direction (1.96%)
+2026-03-06 20:06:58,167 [INFO] [SKIP LOG] Market bitcoin-up-or-down-march-6-7pm-et safely bypassed. Reason: DET_FILTER: VWAP Overextended vs Direction (1.96%)
+2026-03-06 20:14:59,222 [INFO] [VWAP] Reset for new day: 2026-03-07 (CVD also reset)
+2026-03-06 20:21:09,535 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-7pm-et - EV improved to 44.72%
+2026-03-06 20:21:09,536 [INFO] [EV] DOWN | Gross: +46.17% | Slippage: -1.00% | Net: +44.72%
+2026-03-06 20:21:09,537 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #25, slug 1/6)...
+2026-03-06 20:21:23,690 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-7pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 44.72%)
+2026-03-06 20:21:23,691 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 20:21:23,935 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-7pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 20:21:25,104 [INFO] [EV] DOWN | Gross: +59.19% | Slippage: -1.00% | Net: +57.62%
+2026-03-06 20:21:25,105 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-7pm-et: execution cooldown active (88s left)
+2026-03-06 20:21:35,642 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-7pm-et - EV improved to 109.02%
+2026-03-06 20:21:35,643 [INFO] [EV] DOWN | Gross: +111.11% | Slippage: -1.00% | Net: +109.02%
+2026-03-06 20:21:35,644 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-7pm-et: execution cooldown active (78s left)
+2026-03-06 20:21:40,842 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-7pm-et - EV improved to 127.01%
+2026-03-06 20:21:40,843 [INFO] [EV] DOWN | Gross: +129.28% | Slippage: -1.00% | Net: +127.01%
+2026-03-06 20:21:40,844 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-7pm-et: execution cooldown active (73s left)
+2026-03-06 20:46:57,697 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:47:02,951 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:47:08,199 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:47:13,380 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:47:18,692 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:47:23,959 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:47:29,148 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:47:34,421 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:47:40,013 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:47:45,286 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:47:50,997 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:47:56,176 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:48:01,746 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:48:06,999 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:48:12,187 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:48:17,458 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:48:22,962 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:48:28,147 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:48:33,550 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:48:38,812 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:48:44,300 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:48:49,565 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:48:55,170 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:49:00,357 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:49:05,757 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:49:10,993 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:49:16,491 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:49:21,758 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:49:26,998 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:49:32,284 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:49:37,533 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:49:42,711 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:49:47,962 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:49:53,240 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:49:58,746 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:50:04,012 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:50:09,447 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:50:14,643 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:50:20,204 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:50:25,466 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:50:30,660 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:50:36,313 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:50:41,899 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:50:47,074 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:50:52,575 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:50:57,847 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:51:03,100 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:51:08,394 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:51:13,573 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:51:19,060 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:51:24,308 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:51:29,613 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:51:34,896 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:51:40,259 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:51:45,443 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:51:50,971 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:51:56,214 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:52:01,394 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:52:06,658 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:52:11,955 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:52:17,195 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:52:22,458 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:52:27,704 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:52:33,320 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:52:38,642 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:52:44,018 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:52:49,203 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:52:54,503 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:52:59,744 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:53:05,114 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:53:10,393 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:53:15,914 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:53:21,193 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:53:26,818 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:53:31,995 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:53:37,265 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:53:42,535 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:53:47,726 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:53:52,977 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:53:58,253 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:54:03,788 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:54:09,035 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:54:14,314 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:54:19,490 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:54:25,113 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:54:30,384 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:54:35,568 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:54:40,870 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:54:46,414 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:54:51,601 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:54:56,843 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:55:02,122 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:55:07,305 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:55:12,851 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:55:18,103 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:55:23,610 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:55:28,896 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:55:34,080 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:55:39,646 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:55:45,261 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:55:50,449 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:55:56,042 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:56:01,330 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:56:06,705 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:56:12,036 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:56:17,591 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:56:22,772 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:56:28,088 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:56:33,386 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:56:38,617 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:56:43,881 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:56:49,499 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:56:54,716 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:57:00,310 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:57:05,514 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:57:11,187 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:57:16,449 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:57:21,799 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:57:27,059 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:57:32,351 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:57:37,523 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:57:42,943 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:57:48,211 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:57:53,422 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:57:58,977 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:58:04,228 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:58:09,585 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:58:14,879 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:58:20,575 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:58:25,763 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:58:31,379 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:58:36,683 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:58:42,153 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:58:47,411 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:58:52,690 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:58:57,940 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:59:03,231 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:59:08,947 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:59:14,222 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:59:19,672 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:59:24,844 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 20:59:30,235 [INFO] [GATE] Skipped: Too close to expiry (29s < 30s)
+2026-03-06 20:59:35,504 [INFO] [GATE] Skipped: Too close to expiry (24s < 30s)
+2026-03-06 20:59:40,685 [INFO] [GATE] Skipped: Too close to expiry (19s < 30s)
+2026-03-06 20:59:45,962 [INFO] [GATE] Skipped: Too close to expiry (14s < 30s)
+2026-03-06 20:59:51,215 [INFO] [GATE] Skipped: Too close to expiry (8s < 30s)
+2026-03-06 20:59:56,586 [INFO] [GATE] Skipped: Too close to expiry (3s < 30s)
+2026-03-06 21:00:06,885 [INFO] [GATE] Skipped: Too early (3593s > 3540s)
+2026-03-06 21:00:12,083 [INFO] [GATE] Skipped: Too early (3588s > 3540s)
+2026-03-06 21:00:17,348 [INFO] [GATE] Skipped: Too early (3582s > 3540s)
+2026-03-06 21:00:22,619 [INFO] [GATE] Skipped: Too early (3577s > 3540s)
+2026-03-06 21:00:27,792 [INFO] [GATE] Skipped: Too early (3572s > 3540s)
+2026-03-06 21:00:33,073 [INFO] [GATE] Skipped: Too early (3567s > 3540s)
+2026-03-06 21:00:38,395 [INFO] [GATE] Skipped: Too early (3561s > 3540s)
+2026-03-06 21:00:43,575 [INFO] [GATE] Skipped: Too early (3556s > 3540s)
+2026-03-06 21:00:48,815 [INFO] [GATE] Skipped: Too early (3551s > 3540s)
+2026-03-06 21:00:54,069 [INFO] [GATE] Skipped: Too early (3546s > 3540s)
+2026-03-06 21:00:59,263 [INFO] [GATE] Skipped: Too early (3540s > 3540s)
+2026-03-06 21:01:04,545 [INFO] [EV] UP | Gross: +5.41% | Slippage: -1.00% | Net: +4.36%
+2026-03-06 21:01:04,547 [INFO] [RULE] Skip: Score 1 requires EV >= 15.00% (got 4.36%)
+2026-03-06 21:01:10,079 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 5.99%
+2026-03-06 21:01:10,081 [INFO] [EV] UP | Gross: +7.05% | Slippage: -1.00% | Net: +5.99%
+2026-03-06 21:01:10,082 [INFO] [RULE] Skip: Score 1 requires EV >= 15.00% (got 5.99%)
+2026-03-06 21:01:15,264 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 11.91%
+2026-03-06 21:01:15,265 [INFO] [EV] UP | Gross: +13.03% | Slippage: -1.00% | Net: +11.91%
+2026-03-06 21:01:15,266 [INFO] [RULE] Skip: Score 1 requires EV >= 15.00% (got 11.91%)
+2026-03-06 21:01:20,719 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 12.77%
+2026-03-06 21:01:20,720 [INFO] [EV] UP | Gross: +13.90% | Slippage: -1.00% | Net: +12.77%
+2026-03-06 21:01:20,722 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #26, slug 1/6)...
+2026-03-06 21:01:37,366 [WARNING] [DUST REJECT] UP on bitcoin-up-or-down-march-6-8pm-et discarded. Bet size $0.00 < $1.00 Minimum
+2026-03-06 21:01:51,952 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 21.73%
+2026-03-06 21:01:51,953 [INFO] [EV] UP | Gross: +22.95% | Slippage: -1.00% | Net: +21.73%
+2026-03-06 21:01:51,955 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #27, slug 2/6)...
+2026-03-06 21:02:00,934 [INFO] [DUST FLOOR] UP on bitcoin-up-or-down-march-6-8pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 21.73%)
+2026-03-06 21:02:00,935 [INFO] DECISION LOCKED: UP | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 21:02:01,191 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-8pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 21:02:02,740 [INFO] [EV] UP | Gross: +22.99% | Slippage: -1.00% | Net: +21.77%
+2026-03-06 21:02:02,741 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (88s left)
+2026-03-06 21:02:24,413 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 26.71%
+2026-03-06 21:02:24,413 [INFO] [EV] UP | Gross: +27.98% | Slippage: -1.00% | Net: +26.71%
+2026-03-06 21:02:24,414 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (66s left)
+2026-03-06 21:02:45,897 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 29.63%
+2026-03-06 21:02:45,897 [INFO] [EV] UP | Gross: +30.93% | Slippage: -1.00% | Net: +29.63%
+2026-03-06 21:02:45,898 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (45s left)
+2026-03-06 21:03:55,271 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 30.75%
+2026-03-06 21:03:55,272 [INFO] [EV] UP | Gross: +32.06% | Slippage: -1.00% | Net: +30.75%
+2026-03-06 21:03:55,273 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #28, slug 3/6)...
+2026-03-06 21:04:05,070 [INFO] [DUST FLOOR] UP on bitcoin-up-or-down-march-6-8pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 30.75%)
+2026-03-06 21:04:05,071 [INFO] DECISION LOCKED: UP | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 21:04:05,392 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-8pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 21:04:05,723 [INFO] [EV] UP | Gross: +34.79% | Slippage: -1.00% | Net: +33.46%
+2026-03-06 21:04:05,724 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (89s left)
+2026-03-06 21:04:22,085 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 34.07%
+2026-03-06 21:04:22,086 [INFO] [EV] UP | Gross: +35.41% | Slippage: -1.00% | Net: +34.07%
+2026-03-06 21:04:22,087 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (73s left)
+2026-03-06 21:04:37,802 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 21:04:43,385 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 36.16%
+2026-03-06 21:04:43,386 [INFO] [EV] UP | Gross: +37.52% | Slippage: -1.00% | Net: +36.16%
+2026-03-06 21:04:43,387 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (52s left)
+2026-03-06 21:13:09,126 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 52.22%
+2026-03-06 21:13:09,127 [INFO] [EV] DOWN | Gross: +53.74% | Slippage: -1.00% | Net: +52.22%
+2026-03-06 21:13:09,128 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #29, slug 4/6)...
+2026-03-06 21:13:22,719 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-8pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 1/4, EV 52.22%)
+2026-03-06 21:13:22,721 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 1/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 21:13:23,065 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-8pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 21:13:24,873 [INFO] [EV] DOWN | Gross: +53.81% | Slippage: -1.00% | Net: +52.29%
+2026-03-06 21:13:24,875 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (88s left)
+2026-03-06 21:13:35,719 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 61.96%
+2026-03-06 21:13:35,720 [INFO] [EV] DOWN | Gross: +63.58% | Slippage: -1.00% | Net: +61.96%
+2026-03-06 21:13:35,721 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (77s left)
+2026-03-06 21:13:40,918 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 70.72%
+2026-03-06 21:13:40,919 [INFO] [EV] DOWN | Gross: +72.42% | Slippage: -1.00% | Net: +70.72%
+2026-03-06 21:13:40,920 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (72s left)
+2026-03-06 21:13:46,539 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 77.94%
+2026-03-06 21:13:46,540 [INFO] [EV] DOWN | Gross: +79.72% | Slippage: -1.00% | Net: +77.94%
+2026-03-06 21:13:46,541 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (66s left)
+2026-03-06 21:13:51,822 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 82.83%
+2026-03-06 21:13:51,823 [INFO] [EV] DOWN | Gross: +84.66% | Slippage: -1.00% | Net: +82.83%
+2026-03-06 21:13:51,825 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (61s left)
+2026-03-06 21:51:12,130 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 93.05%
+2026-03-06 21:51:12,131 [INFO] [EV] UP | Gross: +94.99% | Slippage: -1.00% | Net: +93.05%
+2026-03-06 21:51:12,133 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #30, slug 5/6)...
+2026-03-06 21:51:26,167 [INFO] DECISION LOCKED: UP | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.36
+2026-03-06 21:51:26,434 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-8pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 21:51:27,728 [INFO] [EV] UP | Gross: +118.81% | Slippage: -1.00% | Net: +116.64%
+2026-03-06 21:51:27,729 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (88s left)
+2026-03-06 21:52:10,134 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 137.24%
+2026-03-06 21:52:10,135 [INFO] [EV] UP | Gross: +139.61% | Slippage: -1.00% | Net: +137.24%
+2026-03-06 21:52:10,136 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (46s left)
+2026-03-06 21:52:21,003 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 138.07%
+2026-03-06 21:52:21,004 [INFO] [EV] UP | Gross: +140.45% | Slippage: -1.00% | Net: +138.07%
+2026-03-06 21:52:21,005 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (35s left)
+2026-03-06 21:52:47,832 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 138.87%
+2026-03-06 21:52:47,833 [INFO] [EV] UP | Gross: +141.25% | Slippage: -1.00% | Net: +138.87%
+2026-03-06 21:52:47,833 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (8s left)
+2026-03-06 21:52:53,104 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 144.51%
+2026-03-06 21:52:53,105 [INFO] [EV] UP | Gross: +146.96% | Slippage: -1.00% | Net: +144.51%
+2026-03-06 21:52:53,106 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (3s left)
+2026-03-06 21:53:03,911 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 145.43%
+2026-03-06 21:53:03,912 [INFO] [EV] UP | Gross: +147.88% | Slippage: -1.00% | Net: +145.43%
+2026-03-06 21:53:03,913 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #31, slug 6/6)...
+2026-03-06 21:53:13,391 [INFO] DECISION LOCKED: UP | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.36
+2026-03-06 21:53:13,723 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-8pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 21:53:14,151 [INFO] [EV] UP | Gross: +133.73% | Slippage: -1.00% | Net: +131.42%
+2026-03-06 21:53:14,152 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (89s left)
+2026-03-06 21:53:35,419 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 21:53:40,718 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 141.82%
+2026-03-06 21:53:40,719 [INFO] [EV] UP | Gross: +144.24% | Slippage: -1.00% | Net: +141.82%
+2026-03-06 21:53:40,720 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-8pm-et: execution cooldown active (63s left)
+2026-03-06 21:56:53,190 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-8pm-et - EV improved to 155.82%
+2026-03-06 21:56:53,191 [INFO] [EV] DOWN | Gross: +158.38% | Slippage: -1.00% | Net: +155.82%
+2026-03-06 21:56:53,192 [INFO] [AI GATE] Skipped bitcoin-up-or-down-march-6-8pm-et: AI cap reached (6/6)
+2026-03-06 21:59:32,072 [INFO] [GATE] Skipped: Too close to expiry (28s < 30s)
+2026-03-06 21:59:37,582 [INFO] [GATE] Skipped: Too close to expiry (22s < 30s)
+2026-03-06 21:59:42,845 [INFO] [GATE] Skipped: Too close to expiry (17s < 30s)
+2026-03-06 21:59:48,378 [INFO] [GATE] Skipped: Too close to expiry (11s < 30s)
+2026-03-06 21:59:53,571 [INFO] [GATE] Skipped: Too close to expiry (6s < 30s)
+2026-03-06 21:59:59,091 [INFO] [GATE] Skipped: Too close to expiry (1s < 30s)
+2026-03-06 22:00:09,484 [INFO] [GATE] Skipped: Too early (3590s > 3540s)
+2026-03-06 22:00:14,795 [INFO] [GATE] Skipped: Too early (3585s > 3540s)
+2026-03-06 22:00:19,987 [INFO] [GATE] Skipped: Too early (3580s > 3540s)
+2026-03-06 22:00:25,571 [INFO] [GATE] Skipped: Too early (3574s > 3540s)
+2026-03-06 22:00:30,827 [INFO] [GATE] Skipped: Too early (3569s > 3540s)
+2026-03-06 22:00:36,277 [INFO] [GATE] Skipped: Too early (3564s > 3540s)
+2026-03-06 22:00:41,588 [INFO] [GATE] Skipped: Too early (3558s > 3540s)
+2026-03-06 22:00:47,223 [INFO] [GATE] Skipped: Too early (3553s > 3540s)
+2026-03-06 22:00:52,404 [INFO] [GATE] Skipped: Too early (3547s > 3540s)
+2026-03-06 22:00:58,076 [INFO] [GATE] Skipped: Too early (3542s > 3540s)
+2026-03-06 22:01:03,322 [INFO] [EV] DOWN | Gross: +14.20% | Slippage: -1.00% | Net: +13.07%
+2026-03-06 22:01:03,323 [INFO] [RULE] Skip: Score 1 requires EV >= 15.00% (got 13.07%)
+2026-03-06 22:01:29,924 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-9pm-et - EV improved to 21.25%
+2026-03-06 22:01:29,924 [INFO] [EV] DOWN | Gross: +22.46% | Slippage: -1.00% | Net: +21.25%
+2026-03-06 22:01:29,925 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #32, slug 1/6)...
+2026-03-06 22:01:43,806 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-9pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 1/4, EV 21.25%)
+2026-03-06 22:01:43,807 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 1/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 22:01:44,492 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-9pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 22:01:45,485 [INFO] [EV] DOWN | Gross: +30.28% | Slippage: -1.00% | Net: +28.99%
+2026-03-06 22:01:45,486 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-9pm-et: execution cooldown active (89s left)
+2026-03-06 22:01:56,232 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-9pm-et - EV improved to 37.35%
+2026-03-06 22:01:56,233 [INFO] [EV] DOWN | Gross: +38.73% | Slippage: -1.00% | Net: +37.35%
+2026-03-06 22:01:56,234 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-9pm-et: execution cooldown active (78s left)
+2026-03-06 22:18:12,741 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-9pm-et - EV improved to 39.18%
+2026-03-06 22:18:12,742 [INFO] [EV] DOWN | Gross: +40.57% | Slippage: -1.00% | Net: +39.18%
+2026-03-06 22:18:12,743 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #33, slug 2/6)...
+2026-03-06 22:18:26,660 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-9pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 1/4, EV 39.18%)
+2026-03-06 22:18:26,660 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 1/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 22:18:26,922 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-9pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 22:18:28,528 [INFO] [EV] DOWN | Gross: +40.64% | Slippage: -1.00% | Net: +39.24%
+2026-03-06 22:18:28,530 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-9pm-et: execution cooldown active (88s left)
+2026-03-06 22:23:36,856 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-9pm-et - EV improved to 52.17%
+2026-03-06 22:23:36,857 [INFO] [EV] DOWN | Gross: +53.69% | Slippage: -1.00% | Net: +52.17%
+2026-03-06 22:23:36,858 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #34, slug 3/6)...
+2026-03-06 22:23:50,988 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-9pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 52.17%)
+2026-03-06 22:23:50,989 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 22:23:51,268 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-9pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 22:23:52,343 [INFO] [EV] DOWN | Gross: +67.08% | Slippage: -1.00% | Net: +65.42%
+2026-03-06 22:23:52,344 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-9pm-et: execution cooldown active (88s left)
+2026-03-06 22:26:48,524 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-9pm-et - EV improved to 67.20%
+2026-03-06 22:26:48,525 [INFO] [EV] DOWN | Gross: +68.87% | Slippage: -1.00% | Net: +67.20%
+2026-03-06 22:26:48,527 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #35, slug 4/6)...
+2026-03-06 22:26:57,696 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-9pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 67.20%)
+2026-03-06 22:26:57,697 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 22:26:58,011 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-9pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 22:26:59,155 [INFO] [EV] DOWN | Gross: +68.96% | Slippage: -1.00% | Net: +67.28%
+2026-03-06 22:26:59,156 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-9pm-et: execution cooldown active (88s left)
+2026-03-06 22:27:36,027 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-9pm-et - EV improved to 68.75%
+2026-03-06 22:27:36,028 [INFO] [EV] DOWN | Gross: +70.43% | Slippage: -1.00% | Net: +68.75%
+2026-03-06 22:27:36,029 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-9pm-et: execution cooldown active (51s left)
+2026-03-06 22:38:05,025 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-9pm-et - EV improved to 71.73%
+2026-03-06 22:38:05,026 [INFO] [EV] DOWN | Gross: +73.45% | Slippage: -1.00% | Net: +71.73%
+2026-03-06 22:38:05,028 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #36, slug 5/6)...
+2026-03-06 22:38:18,974 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.82
+2026-03-06 22:38:19,315 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-9pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 22:38:20,440 [INFO] [EV] DOWN | Gross: +73.45% | Slippage: -1.00% | Net: +71.73%
+2026-03-06 22:38:20,441 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-9pm-et: execution cooldown active (88s left)
+2026-03-06 22:51:50,481 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-9pm-et - EV improved to 86.66%
+2026-03-06 22:51:50,482 [INFO] [EV] UP | Gross: +88.52% | Slippage: -1.00% | Net: +86.66%
+2026-03-06 22:51:50,483 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #37, slug 6/6)...
+2026-03-06 22:52:03,857 [INFO] DECISION LOCKED: UP | Confidence: Scout | Score: 1/4 | Bonus: 0 | Bet: $1.36
+2026-03-06 22:52:04,191 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-9pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 22:52:05,879 [INFO] [EV] UP | Gross: +88.17% | Slippage: -1.00% | Net: +86.31%
+2026-03-06 22:52:05,881 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-9pm-et: execution cooldown active (88s left)
+2026-03-06 22:53:36,594 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-9pm-et - EV improved to 103.21%
+2026-03-06 22:53:36,595 [INFO] [EV] UP | Gross: +105.25% | Slippage: -1.00% | Net: +103.21%
+2026-03-06 22:53:36,596 [INFO] [AI GATE] Skipped bitcoin-up-or-down-march-6-9pm-et: AI cap reached (6/6)
+2026-03-06 22:59:13,170 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-9pm-et - EV improved to 165.83%
+2026-03-06 22:59:13,171 [INFO] [EV] UP | Gross: +168.49% | Slippage: -1.00% | Net: +165.83%
+2026-03-06 22:59:13,172 [INFO] [AI GATE] Skipped bitcoin-up-or-down-march-6-9pm-et: AI cap reached (6/6)
+2026-03-06 22:59:34,376 [INFO] [GATE] Skipped: Too close to expiry (25s < 30s)
+2026-03-06 22:59:39,629 [INFO] [GATE] Skipped: Too close to expiry (20s < 30s)
+2026-03-06 22:59:45,140 [INFO] [GATE] Skipped: Too close to expiry (14s < 30s)
+2026-03-06 22:59:50,390 [INFO] [GATE] Skipped: Too close to expiry (9s < 30s)
+2026-03-06 22:59:55,636 [INFO] [GATE] Skipped: Too close to expiry (4s < 30s)
+2026-03-06 23:00:06,311 [INFO] [GATE] Skipped: Too early (3594s > 3540s)
+2026-03-06 23:00:11,577 [INFO] [GATE] Skipped: Too early (3588s > 3540s)
+2026-03-06 23:00:16,780 [INFO] [GATE] Skipped: Too early (3583s > 3540s)
+2026-03-06 23:00:22,039 [INFO] [GATE] Skipped: Too early (3578s > 3540s)
+2026-03-06 23:00:27,502 [INFO] [GATE] Skipped: Too early (3572s > 3540s)
+2026-03-06 23:00:32,693 [INFO] [GATE] Skipped: Too early (3567s > 3540s)
+2026-03-06 23:00:38,255 [INFO] [GATE] Skipped: Too early (3561s > 3540s)
+2026-03-06 23:00:43,556 [INFO] [GATE] Skipped: Too early (3556s > 3540s)
+2026-03-06 23:00:48,729 [INFO] [GATE] Skipped: Too early (3551s > 3540s)
+2026-03-06 23:00:53,983 [INFO] [GATE] Skipped: Too early (3546s > 3540s)
+2026-03-06 23:00:59,225 [INFO] [GATE] Skipped: Too early (3540s > 3540s)
+2026-03-06 23:01:04,400 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:01:09,660 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:01:14,984 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:01:20,161 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:01:25,422 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:01:30,669 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:01:35,837 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:01:41,121 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:01:46,376 [INFO] [EV] UP | Gross: +23.05% | Slippage: -1.00% | Net: +21.83%
+2026-03-06 23:01:46,378 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #38, slug 1/6)...
+2026-03-06 23:02:00,378 [INFO] [DUST FLOOR] UP on bitcoin-up-or-down-march-6-10pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 21.83%)
+2026-03-06 23:02:00,379 [INFO] DECISION LOCKED: UP | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 23:02:00,950 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-10pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 23:02:02,201 [INFO] [EV] UP | Gross: +35.43% | Slippage: -1.00% | Net: +34.08%
+2026-03-06 23:02:02,202 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-10pm-et: execution cooldown active (88s left)
+2026-03-06 23:02:07,465 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-10pm-et - EV improved to 39.75%
+2026-03-06 23:02:07,466 [INFO] [EV] UP | Gross: +41.15% | Slippage: -1.00% | Net: +39.75%
+2026-03-06 23:02:07,467 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-10pm-et: execution cooldown active (83s left)
+2026-03-06 23:02:12,728 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-10pm-et - EV improved to 45.53%
+2026-03-06 23:02:12,729 [INFO] [EV] UP | Gross: +46.99% | Slippage: -1.00% | Net: +45.53%
+2026-03-06 23:02:12,729 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-10pm-et: execution cooldown active (78s left)
+2026-03-06 23:03:05,434 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:03:10,697 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:03:15,948 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:03:21,132 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:03:26,405 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:03:31,969 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:03:37,148 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:03:42,413 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:03:47,679 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:03:52,853 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:03:58,123 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:04:03,385 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:04:08,845 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:04:14,112 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:04:19,361 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:04:24,540 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:04:29,811 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:04:35,394 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.000%)
+2026-03-06 23:04:40,654 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:04:46,139 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:04:51,322 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:04:56,590 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:05:01,867 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:05:07,349 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:05:12,615 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:05:17,890 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:05:23,315 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:05:28,692 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:05:34,158 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:05:39,334 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:05:44,832 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:05:50,088 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:05:55,426 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:06:00,729 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:06:05,995 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:06:11,261 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:06:16,531 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:06:32,898 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:06:38,113 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:06:43,698 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:06:48,945 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:06:54,137 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:06:59,398 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:07:04,656 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:07:09,837 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:07:15,207 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:07:20,479 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:08:29,354 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-10pm-et - EV improved to 50.75%
+2026-03-06 23:08:29,355 [INFO] [EV] UP | Gross: +52.26% | Slippage: -1.00% | Net: +50.75%
+2026-03-06 23:08:29,357 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #39, slug 2/6)...
+2026-03-06 23:08:45,707 [INFO] [DUST FLOOR] UP on bitcoin-up-or-down-march-6-10pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 50.75%)
+2026-03-06 23:08:45,708 [INFO] DECISION LOCKED: UP | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 23:08:46,044 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-10pm-et: Live requires CLOB depth/quotes (no AMM fallback): CLOB shows stub quotes
+2026-03-06 23:08:49,780 [INFO] [EV] UP | Gross: +52.45% | Slippage: -1.00% | Net: +50.94%
+2026-03-06 23:08:49,781 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-10pm-et: execution cooldown active (86s left)
+2026-03-06 23:09:21,728 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:09:26,899 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:09:32,176 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:09:37,722 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:09:42,953 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:09:48,296 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:09:53,584 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:10:20,812 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:10:26,063 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:10:31,679 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:10:36,953 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:10:42,229 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:10:47,482 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:10:52,782 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:10:57,983 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:11:03,378 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:11:08,641 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:11:14,104 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:11:19,414 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:11:24,859 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:11:30,037 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:11:35,290 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:11:40,555 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:11:45,987 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:11:51,291 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:11:56,679 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:12:01,865 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:12:07,235 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:12:12,514 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:12:17,904 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:12:23,178 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:12:28,804 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:12:33,969 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:12:39,425 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:12:44,595 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:12:50,230 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:12:55,490 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:13:00,957 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:13:54,759 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-10pm-et - EV improved to 62.43%
+2026-03-06 23:13:54,760 [INFO] [EV] UP | Gross: +64.05% | Slippage: -1.00% | Net: +62.43%
+2026-03-06 23:13:54,761 [WARNING] [DUST REJECT] UP on bitcoin-up-or-down-march-6-10pm-et discarded. Bet size $0.00 < $1.00 Minimum
+2026-03-06 23:14:32,514 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-10pm-et - EV improved to 65.24%
+2026-03-06 23:14:32,515 [INFO] [EV] UP | Gross: +66.89% | Slippage: -1.00% | Net: +65.24%
+2026-03-06 23:14:32,516 [WARNING] [DUST REJECT] UP on bitcoin-up-or-down-march-6-10pm-et discarded. Bet size $0.00 < $1.00 Minimum
+2026-03-06 23:28:07,346 [INFO] Elite Quant Engine v2 Initialized. Monitoring 15m WebSocket...
+2026-03-06 23:28:07,659 [INFO] [INIT] Simulated balance initialized: $5191.32 (base: $5000.0 + historical: $191.32)
+2026-03-06 23:28:12,252 [INFO] [CLOB] Client initialized successfully.
+2026-03-06 23:28:12,253 [INFO] [VWAP] Reset for new day: 2026-03-07 (CVD also reset)
+2026-03-06 23:28:12,253 [INFO] [SYSTEM] Fetching 120 context candles from Binance...
+2026-03-06 23:28:12,655 [INFO] [SYSTEM] Loaded 120 candles. VWAP=68,262.77
+2026-03-06 23:28:12,657 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-06 23:28:18,587 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-06 23:28:24,232 [INFO] [EV] DOWN | Gross: +61.13% | Slippage: -1.00% | Net: +59.54%
+2026-03-06 23:28:24,234 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #1, slug 1/6)...
+2026-03-06 23:28:34,733 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-10pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 59.54%)
+2026-03-06 23:28:34,734 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-06 23:28:35,087 [INFO] [BET] BET PLACED [LIVE] DOWN on bitcoin-up-or-down-march-6-10pm-et | Bet: $1.00 | Expected: 0.5200 | Liq: OK (AMM tiny live fallback) | spread=0.00c | cap=$2.00 (CLOB unavailable: CLOB shows stub quotes)
+2026-03-06 23:28:35,099 [INFO] [ENTRY ORDER] Max Entry @ 0.5300 (expected 0.5200 + max 1.0c slip)
+2026-03-06 23:28:35,714 [WARNING] [ENTRY ORDER] FOK unfilled for bitcoin-up-or-down-march-6-10pm-et; retrying once as FAK at same max price.
+2026-03-06 23:28:36,223 [ERROR] [ERROR] CLOB execution failed: PolyApiException[status_code=400, error_message={'error': 'no orders found to match with FAK order. FAK orders are partially filled or killed if no match is found.'}]
+2026-03-06 23:28:39,529 [INFO] [EV] DOWN | Gross: +63.35% | Slippage: -1.00% | Net: +61.73%
+2026-03-06 23:28:39,530 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-10pm-et: execution cooldown active (86s left)
+2026-03-06 23:29:21,761 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-10pm-et - EV improved to 62.24%
+2026-03-06 23:29:21,773 [INFO] [EV] DOWN | Gross: +63.87% | Slippage: -1.00% | Net: +62.24%
+2026-03-06 23:29:21,775 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-10pm-et: execution cooldown active (44s left)
+2026-03-06 23:30:03,981 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:30:09,345 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:30:14,627 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:30:19,897 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:30:25,155 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:30:30,418 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:30:35,749 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:30:41,049 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:30:46,307 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:30:51,591 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:30:56,856 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:31:02,106 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:31:07,391 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:31:12,663 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:31:17,979 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:31:23,250 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.000%)
+2026-03-06 23:31:28,513 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.000%)
+2026-03-06 23:31:33,796 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:31:39,158 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:32:00,288 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:32:05,578 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:32:10,841 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:32:16,116 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:32:21,369 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:32:26,612 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:32:31,899 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:32:37,142 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:32:42,479 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:32:48,365 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:32:53,623 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:32:58,878 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:33:04,168 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:33:09,409 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:33:14,679 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:33:19,940 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:33:25,504 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.005%)
+2026-03-06 23:33:30,747 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.000%)
+2026-03-06 23:33:36,016 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.000%)
+2026-03-06 23:33:41,302 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:33:46,564 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:33:51,828 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:33:57,100 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:34:02,363 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:34:07,635 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:34:12,911 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:34:18,173 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:34:23,439 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:34:28,719 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:34:33,967 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:34:39,235 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:34:44,529 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:34:49,785 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:34:55,040 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.004%)
+2026-03-06 23:35:00,330 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:35:05,609 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:35:10,871 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:35:16,135 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.000%)
+2026-03-06 23:35:21,395 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:35:26,648 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:35:32,034 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:35:37,306 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:35:42,571 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.000%)
+2026-03-06 23:35:47,842 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.000%)
+2026-03-06 23:35:53,092 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.000%)
+2026-03-06 23:35:58,358 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.000%)
+2026-03-06 23:36:03,619 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.000%)
+2026-03-06 23:36:08,865 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.000%)
+2026-03-06 23:36:14,133 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:36:19,407 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:36:24,716 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:36:29,962 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:36:35,212 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:36:40,541 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:36:45,793 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:36:51,049 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:36:56,333 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:37:01,583 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:37:06,833 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:37:12,106 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:37:17,393 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:37:22,681 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:37:27,954 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:37:33,209 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:37:38,452 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:37:43,713 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:37:48,972 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:37:54,221 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:37:59,480 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:38:04,825 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:38:10,105 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:38:15,380 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:38:20,631 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:38:26,340 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:38:31,608 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:38:36,845 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:38:42,103 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.000%)
+2026-03-06 23:38:47,366 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.000%)
+2026-03-06 23:38:52,697 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.000%)
+2026-03-06 23:38:57,966 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.000%)
+2026-03-06 23:39:03,232 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.001%)
+2026-03-06 23:39:08,493 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:39:13,751 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:39:19,019 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:39:24,292 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:39:29,572 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:39:34,871 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.002%)
+2026-03-06 23:39:40,109 [INFO] [GATE] Skipped: EMA Squeeze (spread 0.003%)
+2026-03-06 23:41:57,633 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-10pm-et - EV improved to 63.08%
+2026-03-06 23:41:57,634 [INFO] [EV] DOWN | Gross: +64.71% | Slippage: -1.00% | Net: +63.08%
+2026-03-06 23:41:57,635 [INFO] [AI GATE] Skipped bitcoin-up-or-down-march-6-10pm-et: AI recheck EV delta not met (63.08% < 63.54%)
+2026-03-06 23:53:55,257 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:54:00,519 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:54:05,783 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:54:11,045 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:54:16,307 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:54:21,574 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:54:26,831 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:54:32,134 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:54:37,396 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:54:42,647 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:54:47,902 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:54:53,166 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:54:58,428 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:55:03,690 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:55:08,964 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:55:14,250 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:55:19,544 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:55:24,800 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:55:30,063 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:55:35,332 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:55:40,604 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:55:45,894 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:55:51,168 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:55:56,455 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:56:01,714 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:56:06,972 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:56:12,231 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:56:17,494 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:56:22,782 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:56:28,063 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:56:33,316 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:56:38,582 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:56:43,871 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:56:49,171 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:56:54,447 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:56:59,801 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:57:05,111 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:57:10,395 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:57:15,662 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:57:20,912 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:57:26,169 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:57:31,449 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:57:36,783 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:57:42,066 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:57:47,375 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:57:52,629 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:57:57,901 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:58:03,167 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:58:08,423 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:58:13,688 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:58:18,941 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:58:24,213 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:58:29,835 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:58:35,111 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:58:40,381 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:58:45,679 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:58:50,948 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:58:56,201 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:59:01,482 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:59:06,735 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:59:12,127 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:59:17,405 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:59:22,668 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:59:27,938 [INFO] [GATE] Skipped: Crowd skew too high
+2026-03-06 23:59:33,218 [INFO] [GATE] Skipped: Too close to expiry (26s < 30s)
+2026-03-06 23:59:38,483 [INFO] [GATE] Skipped: Too close to expiry (21s < 30s)
+2026-03-06 23:59:43,737 [INFO] [GATE] Skipped: Too close to expiry (16s < 30s)
+2026-03-06 23:59:48,998 [INFO] [GATE] Skipped: Too close to expiry (11s < 30s)
+2026-03-06 23:59:54,258 [INFO] [GATE] Skipped: Too close to expiry (5s < 30s)
+2026-03-06 23:59:59,500 [INFO] [GATE] Skipped: Too close to expiry (0s < 30s)
+2026-03-07 00:00:09,931 [INFO] [GATE] Skipped: Too early (3590s > 3540s)
+2026-03-07 00:00:15,104 [INFO] [GATE] Skipped: Too early (3585s > 3540s)
+2026-03-07 00:00:20,467 [INFO] [GATE] Skipped: Too early (3579s > 3540s)
+2026-03-07 00:00:25,726 [INFO] [GATE] Skipped: Too early (3574s > 3540s)
+2026-03-07 00:00:30,945 [INFO] [GATE] Skipped: Too early (3569s > 3540s)
+2026-03-07 00:00:36,221 [INFO] [GATE] Skipped: Too early (3563s > 3540s)
+2026-03-07 00:00:41,702 [INFO] [GATE] Skipped: Too early (3558s > 3540s)
+2026-03-07 00:00:46,900 [INFO] [GATE] Skipped: Too early (3553s > 3540s)
+2026-03-07 00:00:52,801 [INFO] [GATE] Skipped: Too early (3547s > 3540s)
+2026-03-07 00:00:57,980 [INFO] [GATE] Skipped: Too early (3542s > 3540s)
+2026-03-07 00:01:03,274 [INFO] [EV] DOWN | Gross: +2.65% | Slippage: -1.00% | Net: +1.64%
+2026-03-07 00:01:03,275 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #2, slug 1/6)...
+2026-03-07 00:01:27,691 [WARNING] [DUST REJECT] DOWN on bitcoin-up-or-down-march-6-11pm-et discarded. Bet size $0.00 < $1.00 Minimum
+2026-03-07 00:01:30,030 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-11pm-et - EV improved to 5.42%
+2026-03-07 00:01:30,031 [INFO] [EV] DOWN | Gross: +6.47% | Slippage: -1.00% | Net: +5.42%
+2026-03-07 00:01:30,032 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #3, slug 2/6)...
+2026-03-07 00:01:41,396 [WARNING] [DUST REJECT] DOWN on bitcoin-up-or-down-march-6-11pm-et discarded. Bet size $0.00 < $1.00 Minimum
+2026-03-07 00:01:45,659 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-11pm-et - EV improved to 12.12%
+2026-03-07 00:01:45,660 [INFO] [EV] DOWN | Gross: +13.24% | Slippage: -1.00% | Net: +12.12%
+2026-03-07 00:01:45,662 [INFO] [DET_FILTER] Vetoed DOWN: Bullish Rejection Wick detected
+2026-03-07 00:01:45,662 [INFO] [SKIP LOG] Market bitcoin-up-or-down-march-6-11pm-et safely bypassed. Reason: DET_FILTER: Bullish Rejection Wick detected
+2026-03-07 00:01:56,249 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-11pm-et - EV improved to 14.41%
+2026-03-07 00:01:56,250 [INFO] [EV] DOWN | Gross: +15.55% | Slippage: -1.00% | Net: +14.41%
+2026-03-07 00:01:56,252 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #4, slug 3/6)...
+2026-03-07 00:02:06,825 [WARNING] [DUST REJECT] DOWN on bitcoin-up-or-down-march-6-11pm-et discarded. Bet size $0.00 < $1.00 Minimum
+2026-03-07 00:02:11,663 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-11pm-et - EV improved to 15.19%
+2026-03-07 00:02:11,664 [INFO] [EV] DOWN | Gross: +16.35% | Slippage: -1.00% | Net: +15.19%
+2026-03-07 00:02:11,665 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #5, slug 4/6)...
+2026-03-07 00:02:22,154 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-11pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 15.19%)
+2026-03-07 00:02:22,155 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-07 00:02:22,468 [INFO] [BET] BET PLACED [LIVE] DOWN on bitcoin-up-or-down-march-6-11pm-et | Bet: $1.00 | Expected: 0.4900 | Liq: OK (AMM tiny live fallback) | spread=0.00c | cap=$2.00 (CLOB unavailable: CLOB shows stub quotes)
+2026-03-07 00:02:22,469 [INFO] [ENTRY ORDER] Max Entry @ 0.5000 (expected 0.4900 + max 1.0c slip)
+2026-03-07 00:02:23,496 [WARNING] [ENTRY ORDER] FOK unfilled for bitcoin-up-or-down-march-6-11pm-et; retrying once as FAK at same max price.
+2026-03-07 00:02:24,092 [ERROR] [ERROR] CLOB execution failed: PolyApiException[status_code=400, error_message={'error': 'no orders found to match with FAK order. FAK orders are partially filled or killed if no match is found.'}]
+2026-03-07 00:02:27,321 [INFO] [EV] DOWN | Gross: +20.06% | Slippage: -1.00% | Net: +18.87%
+2026-03-07 00:02:27,322 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-11pm-et: execution cooldown active (86s left)
+2026-03-07 00:02:54,178 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-11pm-et - EV improved to 30.94%
+2026-03-07 00:02:54,179 [INFO] [EV] DOWN | Gross: +32.24% | Slippage: -1.00% | Net: +30.94%
+2026-03-07 00:02:54,180 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-11pm-et: execution cooldown active (59s left)
+2026-03-07 00:02:59,765 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-11pm-et - EV improved to 46.41%
+2026-03-07 00:02:59,765 [INFO] [EV] DOWN | Gross: +47.88% | Slippage: -1.00% | Net: +46.41%
+2026-03-07 00:02:59,766 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-11pm-et: execution cooldown active (54s left)
+2026-03-07 00:03:04,948 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-11pm-et - EV improved to 56.29%
+2026-03-07 00:03:04,949 [INFO] [EV] DOWN | Gross: +57.86% | Slippage: -1.00% | Net: +56.29%
+2026-03-07 00:03:04,950 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-11pm-et: execution cooldown active (49s left)
+2026-03-07 00:03:10,303 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-11pm-et - EV improved to 59.99%
+2026-03-07 00:03:10,303 [INFO] [EV] DOWN | Gross: +61.59% | Slippage: -1.00% | Net: +59.99%
+2026-03-07 00:03:10,304 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-11pm-et: execution cooldown active (43s left)
+2026-03-07 00:03:15,553 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-11pm-et - EV improved to 73.19%
+2026-03-07 00:03:15,553 [INFO] [EV] DOWN | Gross: +74.92% | Slippage: -1.00% | Net: +73.19%
+2026-03-07 00:03:15,554 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-11pm-et: execution cooldown active (38s left)
+2026-03-07 00:03:20,861 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-11pm-et - EV improved to 82.02%
+2026-03-07 00:03:20,862 [INFO] [EV] DOWN | Gross: +83.84% | Slippage: -1.00% | Net: +82.02%
+2026-03-07 00:03:20,862 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-11pm-et: execution cooldown active (33s left)
+2026-03-07 00:05:30,628 [INFO] Elite Quant Engine v2 Initialized. Monitoring 15m WebSocket...
+2026-03-07 00:05:30,793 [INFO] [INIT] Simulated balance initialized: $5191.32 (base: $5000.0 + historical: $191.32)
+2026-03-07 00:05:34,154 [INFO] [CLOB] Client initialized successfully.
+2026-03-07 00:05:34,156 [INFO] [VWAP] Reset for new day: 2026-03-07 (CVD also reset)
+2026-03-07 00:05:34,156 [INFO] [SYSTEM] Fetching 120 context candles from Binance...
+2026-03-07 00:05:34,563 [INFO] [SYSTEM] Loaded 120 candles. VWAP=68,208.51
+2026-03-07 00:05:34,564 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-07 00:05:35,963 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-07 00:05:41,551 [INFO] [EV] DOWN | Gross: +93.73% | Slippage: -1.00% | Net: +91.82%
+2026-03-07 00:05:41,552 [WARNING] [DUST REJECT] DOWN on bitcoin-up-or-down-march-6-11pm-et discarded. Bet size $0.00 < $1.00 Minimum
+2026-03-07 00:05:57,321 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-11pm-et - EV improved to 93.01%
+2026-03-07 00:05:57,322 [INFO] [EV] DOWN | Gross: +94.94% | Slippage: -1.00% | Net: +93.01%
+2026-03-07 00:05:57,322 [WARNING] [DUST REJECT] DOWN on bitcoin-up-or-down-march-6-11pm-et discarded. Bet size $0.00 < $1.00 Minimum
+2026-03-07 00:12:16,767 [INFO] Elite Quant Engine v2 Initialized. Monitoring 15m WebSocket...
+2026-03-07 00:12:17,304 [INFO] [INIT] Simulated balance initialized: $5191.32 (base: $5000.0 + historical: $191.32)
+2026-03-07 00:12:24,243 [INFO] [CLOB] Client initialized successfully.
+2026-03-07 00:12:24,245 [INFO] [VWAP] Reset for new day: 2026-03-07 (CVD also reset)
+2026-03-07 00:12:24,246 [INFO] [SYSTEM] Fetching 120 context candles from Binance...
+2026-03-07 00:12:25,799 [INFO] [SYSTEM] Loaded 120 candles. VWAP=68,199.69
+2026-03-07 00:12:25,801 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-07 00:12:35,710 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-07 00:12:41,318 [INFO] [EV] DOWN | Gross: +38.31% | Slippage: -1.00% | Net: +36.94%
+2026-03-07 00:12:41,318 [WARNING] [DUST REJECT] DOWN on bitcoin-up-or-down-march-6-11pm-et discarded. Bet size $0.00 < $1.00 Minimum
+2026-03-07 00:16:03,598 [INFO] Elite Quant Engine v2 Initialized. Monitoring 15m WebSocket...
+2026-03-07 00:16:03,777 [INFO] [INIT] Simulated balance initialized: $5191.32 (base: $5000.0 + historical: $191.32)
+2026-03-07 00:16:08,911 [INFO] [CLOB] Client initialized successfully.
+2026-03-07 00:16:08,913 [INFO] [VWAP] Reset for new day: 2026-03-07 (CVD also reset)
+2026-03-07 00:16:08,914 [INFO] [SYSTEM] Fetching 120 context candles from Binance...
+2026-03-07 00:16:10,326 [INFO] [SYSTEM] Loaded 120 candles. VWAP=68,195.57
+2026-03-07 00:16:10,328 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-07 00:16:11,668 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-07 00:16:17,244 [INFO] [EV] DOWN | Gross: +15.19% | Slippage: -1.00% | Net: +14.05%
+2026-03-07 00:16:17,246 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #1, slug 1/6)...
+2026-03-07 00:16:32,238 [WARNING] [DUST REJECT] DOWN on bitcoin-up-or-down-march-6-11pm-et discarded. Bet size $0.00 < $1.00 Minimum
+2026-03-07 00:16:32,988 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-11pm-et - EV improved to 18.87%
+2026-03-07 00:16:33,000 [INFO] [EV] DOWN | Gross: +20.06% | Slippage: -1.00% | Net: +18.87%
+2026-03-07 00:16:33,001 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #2, slug 2/6)...
+2026-03-07 00:16:44,879 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-11pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 18.87%)
+2026-03-07 00:16:44,879 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-07 00:16:45,123 [INFO] [ENTRY WAIT] bitcoin-up-or-down-march-6-11pm-et: tiny fallback path active; waiting up to 12s for CLOB recovery...
+2026-03-07 00:16:58,343 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-11pm-et: CLOB did not recover within 12s (last: OK (AMM tiny live fallback) | spread=0.00c | cap=$2.00 (CLOB unavailable: CLOB shows stub quotes))
+2026-03-07 00:16:59,000 [INFO] [EV] DOWN | Gross: +18.78% | Slippage: -1.00% | Net: +17.61%
+2026-03-07 00:16:59,001 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-11pm-et: execution cooldown active (89s left)
+2026-03-07 00:17:57,566 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-11pm-et - EV improved to 20.53%
+2026-03-07 00:17:57,567 [INFO] [EV] DOWN | Gross: +21.73% | Slippage: -1.00% | Net: +20.53%
+2026-03-07 00:17:57,568 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-11pm-et: execution cooldown active (30s left)
+2026-03-07 00:18:13,762 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-11pm-et - EV improved to 24.78%
+2026-03-07 00:18:13,763 [INFO] [EV] DOWN | Gross: +26.03% | Slippage: -1.00% | Net: +24.78%
+2026-03-07 00:18:13,764 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-11pm-et: execution cooldown active (14s left)
+2026-03-07 00:20:43,608 [INFO] [EV MEMORY] Re-engaging bitcoin-up-or-down-march-6-11pm-et - EV improved to 26.91%
+2026-03-07 00:20:43,610 [INFO] [EV] DOWN | Gross: +28.18% | Slippage: -1.00% | Net: +26.91%
+2026-03-07 00:20:43,611 [INFO] [AI CONFIRM] Borderline score - asking llama3.2:3b-instruct-q4_K_M (global call #3, slug 3/6)...
+2026-03-07 00:20:54,086 [INFO] [DUST FLOOR] DOWN on bitcoin-up-or-down-march-6-11pm-et: promoted $0.00 -> $1.00 (AI confirmed, score 2/4, EV 26.91%)
+2026-03-07 00:20:54,087 [INFO] DECISION LOCKED: DOWN | Confidence: Scout | Score: 2/4 | Bonus: 0 | Bet: $1.00
+2026-03-07 00:20:54,417 [INFO] [ENTRY WAIT] bitcoin-up-or-down-march-6-11pm-et: tiny fallback path active; waiting up to 12s for CLOB recovery...
+2026-03-07 00:21:07,979 [WARNING] [REJECTED] bitcoin-up-or-down-march-6-11pm-et: CLOB did not recover within 12s (last: OK (AMM tiny live fallback) | spread=0.00c | cap=$2.00 (CLOB unavailable: CLOB shows stub quotes))
+2026-03-07 00:21:09,166 [INFO] [EV] DOWN | Gross: +31.11% | Slippage: -1.00% | Net: +29.81%
+2026-03-07 00:21:09,167 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-6-11pm-et: execution cooldown active (88s left)

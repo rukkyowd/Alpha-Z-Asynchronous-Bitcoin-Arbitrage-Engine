@@ -37,6 +37,14 @@ PAPER_TRADING = os.getenv("PAPER_TRADING", "true").lower() == "true"
 PAPER_BALANCE = float(os.getenv("PAPER_BALANCE", f"{BANKROLL}"))
 # In live mode, require real CLOB depth/quotes; do not route off AMM fallback heuristics.
 LIVE_REQUIRE_CLOB_LIQUIDITY = os.getenv("LIVE_REQUIRE_CLOB_LIQUIDITY", "true").lower() == "true"
+# Compromise mode: allow tiny live fallback when CLOB is unavailable, but keep strict guards.
+LIVE_TINY_AMM_FALLBACK_MAX_BET_USD = float(os.getenv("LIVE_TINY_AMM_FALLBACK_MAX_BET_USD", "2.00"))
+LIVE_TINY_AMM_FALLBACK_MAX_SPREAD_PCT = float(os.getenv("LIVE_TINY_AMM_FALLBACK_MAX_SPREAD_PCT", "0.015"))
+LIVE_TINY_AMM_FALLBACK_MAX_ENTRY_SLIPPAGE_CENTS = float(
+    os.getenv("LIVE_TINY_AMM_FALLBACK_MAX_ENTRY_SLIPPAGE_CENTS", "0.01")
+)
+LIVE_CLOB_RECOVERY_WAIT_SECS = int(os.getenv("LIVE_CLOB_RECOVERY_WAIT_SECS", "12"))
+LIVE_CLOB_RECOVERY_POLL_SECS = float(os.getenv("LIVE_CLOB_RECOVERY_POLL_SECS", "1.0"))
 
 GAMMA_API       = "https://gamma-api.polymarket.com"
 CLOB_HOST       = "https://clob.polymarket.com"
@@ -1654,7 +1662,27 @@ async def check_liquidity_and_spread_v2(
         log.debug(f"[LIQ] CLOB primary check failed for {token_id}: {e}.")
 
     if (not PAPER_TRADING) and LIVE_REQUIRE_CLOB_LIQUIDITY:
-        return False, f"Live requires CLOB depth/quotes (no AMM fallback): {clob_error}", 0.0
+        tiny_fallback_allowed = (
+            amm_spread is not None and
+            intended_bet <= LIVE_TINY_AMM_FALLBACK_MAX_BET_USD and
+            amm_spread <= LIVE_TINY_AMM_FALLBACK_MAX_SPREAD_PCT
+        )
+        if tiny_fallback_allowed:
+            tiny_bet = round(min(intended_bet, LIVE_TINY_AMM_FALLBACK_MAX_BET_USD), 2)
+            if tiny_bet < 1.0:
+                return False, (
+                    f"Live tiny fallback bet ${tiny_bet:.2f} < $1.00 minimum "
+                    f"(CLOB unavailable: {clob_error})"
+                ), 0.0
+            return True, (
+                f"OK (AMM tiny live fallback) | spread={amm_spread*100:.2f}c | "
+                f"cap=${LIVE_TINY_AMM_FALLBACK_MAX_BET_USD:.2f} "
+                f"(CLOB unavailable: {clob_error})"
+            ), tiny_bet
+        return False, (
+            f"Live requires CLOB depth/quotes (tiny fallback <= ${LIVE_TINY_AMM_FALLBACK_MAX_BET_USD:.2f}, "
+            f"spread <= {LIVE_TINY_AMM_FALLBACK_MAX_SPREAD_PCT*100:.2f}c): {clob_error}"
+        ), 0.0
 
     if amm_spread is not None:
         if amm_spread > MAX_SPREAD_PCT:
@@ -1677,6 +1705,34 @@ async def check_liquidity_and_spread_v2(
         ), intended_bet
 
     return False, f"Liquidity unavailable (CLOB: {clob_error}; no AMM fallback)", 0.0
+
+async def wait_for_live_clob_recovery(
+    token_id: str,
+    intended_bet: float,
+    poly_data: dict,
+    clob_client
+) -> Tuple[bool, str, float]:
+    """Wait briefly for a non-stub CLOB book before abandoning a live entry."""
+    deadline = time.time() + max(1, LIVE_CLOB_RECOVERY_WAIT_SECS)
+    last_msg = "CLOB recovery not started"
+
+    while time.time() < deadline:
+        liq_ok, liq_msg, executable_bet = await check_liquidity_and_spread_v2(
+            token_id=token_id,
+            intended_bet=intended_bet,
+            poly_data=poly_data,
+            clob_client=clob_client,
+            session=None,
+            PAPER_TRADING=False,
+            MAX_SPREAD_PCT=MAX_SPREAD_PCT,
+            MIN_LIQUIDITY_MULTIPLIER=MIN_LIQUIDITY_MULTIPLIER
+        )
+        last_msg = liq_msg
+        if liq_ok and liq_msg.startswith("OK (CLOB"):
+            return True, liq_msg, executable_bet
+        await asyncio.sleep(max(0.2, LIVE_CLOB_RECOVERY_POLL_SECS))
+
+    return False, last_msg, 0.0
     
 # ============================================================
 # PARALLEL POLYMARKET RESOLUTION (FIX 1)
@@ -2185,17 +2241,25 @@ async def _commit_decision(
         bet_size = float(result.get("bet_size", 0.0) or 0.0)
         if bet_size < 1.00:
             # Guarded minimum ticket: only promote dust-sized trades when AI explicitly
-            # confirmed a technically valid setup with strong EV.
+            # confirmed a technically valid setup with strong EV, or when
+            # high-confidence non-AI bypass conditions are strong enough.
             ai_confirmed = "AI confirmed" in str(result.get("reason", ""))
             score_ok = int(result.get("score", 0) or 0) >= MIN_SCORE_TO_TRADE
             ev_ok = float(current_ev_pct or 0.0) >= SCORE1_MIN_EV_PCT
             secs_remaining = float(poly_data.get("seconds_remaining", 0.0) or 0.0)
             time_ok = secs_remaining > MIN_SECONDS_REMAINING
-            if ai_confirmed and score_ok and ev_ok and time_ok:
+            high_conf_non_ai = (
+                str(result.get("confidence", "")).upper() == "HIGH"
+                and not bool(result.get("needs_ai", False))
+                and int(result.get("score", 0) or 0) >= EV_BYPASS_MIN_SCORE
+                and float(current_ev_pct or 0.0) >= SCORE1_MIN_EV_PCT
+            )
+            if (ai_confirmed or high_conf_non_ai) and score_ok and ev_ok and time_ok:
                 result["bet_size"] = 1.00
+                floor_reason = "AI confirmed" if ai_confirmed else "High-confidence non-AI"
                 log.info(
                     f"[DUST FLOOR] {decision} on {slug}: promoted ${bet_size:.2f} -> $1.00 "
-                    f"(AI confirmed, score {result.get('score', 0)}/4, EV {current_ev_pct:.2f}%)"
+                    f"({floor_reason}, score {result.get('score', 0)}/4, EV {current_ev_pct:.2f}%)"
                 )
 
         if result.get("bet_size", 0) >= 1.00:
@@ -2302,20 +2366,65 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict, 
         if slug in active_predictions:
             active_predictions[slug]["ml_data"]["spread_eval"] = liq_msg
 
-    risk_manager.trades_this_hour += 1
     market_prob = poly_data["up_prob"] if decision == "UP" else poly_data["down_prob"]
     expected_price = market_prob / 100.0
 
-    log.info(f"[BET] BET PLACED [{'PAPER' if PAPER_TRADING else 'LIVE'}] {decision} on {slug} | "
-            f"Bet: ${bet_size:.2f} | Expected: {expected_price:.4f} | Liq: {liq_msg}")
+    if not PAPER_TRADING and not DRY_RUN and clob_client and ("AMM tiny live fallback" in liq_msg):
+        log.info(
+            f"[ENTRY WAIT] {slug}: tiny fallback path active; waiting up to "
+            f"{LIVE_CLOB_RECOVERY_WAIT_SECS}s for CLOB recovery..."
+        )
+        recovered, recovered_msg, recovered_bet = await wait_for_live_clob_recovery(
+            token_id=token_id,
+            intended_bet=bet_size,
+            poly_data=poly_data,
+            clob_client=clob_client
+        )
+        if not recovered:
+            reason = (
+                f"CLOB did not recover within {LIVE_CLOB_RECOVERY_WAIT_SECS}s "
+                f"(last: {recovered_msg})"
+            )
+            log.warning(f"[REJECTED] {slug}: {reason}")
+            record_execution_failure(slug, "CLOB_RECOVERY_TIMEOUT", current_ev_pct)
+            async with state_lock:
+                active_predictions.pop(slug, None)
+            committed_slugs.discard(slug)
+            return
+        liq_msg = recovered_msg
+        if recovered_bet > 0 and recovered_bet < bet_size:
+            log.info(f"[BET SCALED] {slug}: ${bet_size:.2f} -> ${recovered_bet:.2f} (post-recovery)")
+            bet_size = recovered_bet
+            async with state_lock:
+                if slug in active_predictions:
+                    active_predictions[slug]["bet_size"] = bet_size
+                    active_predictions[slug]["ml_data"]["final_bet_size"] = bet_size
+        if bet_size < 1.00:
+            log.warning(f"[REJECTED] {slug}: Recovered CLOB bet ${bet_size:.2f} < $1.00 minimum")
+            async with state_lock:
+                active_predictions.pop(slug, None)
+            committed_slugs.discard(slug)
+            return
+        async with state_lock:
+            if slug in active_predictions:
+                active_predictions[slug]["ml_data"]["spread_eval"] = liq_msg
 
     if not PAPER_TRADING and not DRY_RUN and clob_client:
         # OPTIMIZED: Use Limit Orders with slippage protection instead of Market Orders
         # Market orders can slip 4-5c on thin liquidity, destroying 6c ATR targets
+        log.info(
+            f"[BET ATTEMPT] LIVE {decision} on {slug} | Bet: ${bet_size:.2f} | "
+            f"Expected: {expected_price:.4f} | Liq: {liq_msg}"
+        )
         
-        # Calculate maximum acceptable entry price (expected + 2c max slippage)
-        MAX_ENTRY_SLIPPAGE_CENTS = 0.02  # 2 cents maximum slippage
-        max_entry_price = expected_price + MAX_ENTRY_SLIPPAGE_CENTS
+        # Tighten slippage when using tiny AMM fallback in live mode.
+        is_tiny_amm_live_fallback = ("AMM tiny live fallback" in liq_msg)
+        max_entry_slippage_cents = (
+            LIVE_TINY_AMM_FALLBACK_MAX_ENTRY_SLIPPAGE_CENTS
+            if is_tiny_amm_live_fallback
+            else 0.02
+        )
+        max_entry_price = expected_price + max_entry_slippage_cents
         max_entry_price = min(max_entry_price, 0.99)  # Never pay more than 99c
         
         # Round to nearest cent for CLOB compatibility
@@ -2383,7 +2492,10 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict, 
                     return _submit(OrderType.FAK)
                 raise
         
-        log.info(f"[ENTRY ORDER] Max Entry @ {limit_price:.4f} (expected {expected_price:.4f} + max {MAX_ENTRY_SLIPPAGE_CENTS*100:.0f}c slip)")
+        log.info(
+            f"[ENTRY ORDER] Max Entry @ {limit_price:.4f} "
+            f"(expected {expected_price:.4f} + max {max_entry_slippage_cents*100:.1f}c slip)"
+        )
 
         try:
             clob_req_start = time.perf_counter()
@@ -2419,6 +2531,12 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict, 
                 slippage_bps = ((actual_price - expected_price) / expected_price * 10000) if expected_price > 0 else 0
                 slippage_cents = (actual_price - expected_price) * 100
 
+                risk_manager.trades_this_hour += 1
+                log.info(
+                    f"[BET] BET PLACED [LIVE] {decision} on {slug} | "
+                    f"Bet: ${bet_size:.2f} | Fill: {actual_price:.4f} | "
+                    f"Expected: {expected_price:.4f} | Liq: {liq_msg}"
+                )
                 log.info(f"[OK] ORDER FILLED [{order_type_used}]: {decision} on {slug} | ${bet_size:.2f} | "
                         f"Fill: {actual_price:.4f} (expected {expected_price:.4f}) | "
                         f"Slippage: {slippage_bps:+.1f}bps ({slippage_cents:+.1f}c)")
@@ -2460,6 +2578,12 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict, 
                 active_predictions.pop(slug, None)
             committed_slugs.discard(slug)
     else:
+        mode_label = "PAPER" if PAPER_TRADING else "DRY_RUN"
+        risk_manager.trades_this_hour += 1
+        log.info(
+            f"[BET] BET PLACED [{mode_label}] {decision} on {slug} | "
+            f"Bet: ${bet_size:.2f} | Expected: {expected_price:.4f} | Liq: {liq_msg}"
+        )
         # Paper mode still records path latency so strategy profiling remains realistic.
         paper_path_ms = (time.perf_counter() - bet_start_ts) * 1000.0
         update_execution_timing(clob_ms=paper_path_ms, confirmation_ms=0.0)
