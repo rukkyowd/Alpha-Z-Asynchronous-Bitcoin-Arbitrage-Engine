@@ -9,6 +9,46 @@ function stripTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");
 }
 
+function normalizeHttpUrl(value: string): string {
+  try {
+    const parsed = new URL(value);
+    if (parsed.protocol === "ws:") {
+      parsed.protocol = "http:";
+    } else if (parsed.protocol === "wss:") {
+      parsed.protocol = "https:";
+    }
+    if (parsed.pathname.endsWith("/ws/live")) {
+      parsed.pathname = parsed.pathname.slice(0, -"/ws/live".length) || "/";
+    }
+    parsed.search = "";
+    parsed.hash = "";
+    return stripTrailingSlash(parsed.toString());
+  } catch {
+    return stripTrailingSlash(value);
+  }
+}
+
+function normalizeWsUrl(value: string): string {
+  try {
+    const parsed = new URL(value);
+    if (parsed.protocol === "http:") {
+      parsed.protocol = "ws:";
+    } else if (parsed.protocol === "https:") {
+      parsed.protocol = "wss:";
+    }
+    if (!parsed.pathname || parsed.pathname === "/") {
+      parsed.pathname = "/ws/live";
+    } else if (!parsed.pathname.endsWith("/ws/live")) {
+      parsed.pathname = `${parsed.pathname.replace(/\/+$/, "")}/ws/live`;
+    }
+    parsed.search = "";
+    parsed.hash = "";
+    return stripTrailingSlash(parsed.toString());
+  } catch {
+    return stripTrailingSlash(value);
+  }
+}
+
 function deriveWsUrlFromHttp(httpUrl: string): string {
   try {
     const parsed = new URL(httpUrl);
@@ -46,7 +86,7 @@ export const getBaseIp = (): string => {
 
 export const getHttpUrl = (): string => {
   if (PUBLIC_API_URL) {
-    return stripTrailingSlash(PUBLIC_API_URL);
+    return normalizeHttpUrl(PUBLIC_API_URL);
   }
   if (PUBLIC_WS_URL) {
     return deriveHttpUrlFromWs(PUBLIC_WS_URL);
@@ -56,7 +96,7 @@ export const getHttpUrl = (): string => {
 
 export const getWsUrl = (): string => {
   if (PUBLIC_WS_URL) {
-    return stripTrailingSlash(PUBLIC_WS_URL);
+    return normalizeWsUrl(PUBLIC_WS_URL);
   }
   if (PUBLIC_API_URL) {
     return deriveWsUrlFromHttp(PUBLIC_API_URL);

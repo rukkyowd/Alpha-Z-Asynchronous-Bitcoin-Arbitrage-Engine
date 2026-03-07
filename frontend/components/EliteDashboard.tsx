@@ -239,6 +239,51 @@ function dedupePriceBars(bars: PriceBar[]): PriceBar[] {
   return Array.from(deduped.values()).sort((a, b) => a.time - b.time);
 }
 
+function buildBackendFetchCandidates(path: string): string[] {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const candidates = new Set<string>();
+  const apiUrl = getHttpUrl();
+  const wsUrl = getWsUrl();
+
+  if (apiUrl) {
+    candidates.add(`${apiUrl}${normalizedPath}`);
+  }
+
+  if (wsUrl) {
+    try {
+      const parsed = new URL(wsUrl);
+      parsed.protocol = parsed.protocol === "wss:" ? "https:" : "http:";
+      parsed.pathname = "";
+      parsed.search = "";
+      parsed.hash = "";
+      candidates.add(`${parsed.toString().replace(/\/+$/, "")}${normalizedPath}`);
+    } catch {
+      // Ignore malformed WS URL candidate.
+    }
+  }
+
+  if (typeof window !== "undefined" && window.location?.origin) {
+    candidates.add(`${window.location.origin.replace(/\/+$/, "")}${normalizedPath}`);
+  }
+
+  return Array.from(candidates);
+}
+
+async function fetchBackend(path: string, init?: RequestInit): Promise<Response> {
+  const candidates = buildBackendFetchCandidates(path);
+  let lastError: unknown = null;
+
+  for (const url of candidates) {
+    try {
+      return await fetch(url, init);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error(`Failed to fetch ${path}`);
+}
+
 function normalizePositions(raw: EngineWsPayload["positions"]): Record<string, EnginePosition> {
   if (Array.isArray(raw)) {
     return raw.reduce<Record<string, EnginePosition>>((acc, position) => {
@@ -695,7 +740,10 @@ export default function EliteDashboard() {
 
   const fetchMetrics = useCallback(async () => {
     try {
-      const res = await fetch(`${getHttpUrl()}/api/metrics`);
+      const res = await fetchBackend("/api/metrics");
+      if (!res.ok) {
+        throw new Error(`Metrics request failed: ${res.status}`);
+      }
       const data = await res.json();
       if (!data.error) {
         setPortfolio(data);
@@ -712,7 +760,7 @@ export default function EliteDashboard() {
       return;
     }
     try {
-      const res = await fetch(`${getHttpUrl()}/api/engine/health`);
+      const res = await fetchBackend("/api/engine/health");
       if (res.status === 404) {
         healthSupportedRef.current = false;
         addToast("warning", "Health Endpoint Missing", "Backend does not expose /api/engine/health yet.");
@@ -734,7 +782,7 @@ export default function EliteDashboard() {
         return;
       }
       try {
-        const res = await fetch(`${getHttpUrl()}/api/engine/control`);
+        const res = await fetchBackend("/api/engine/control");
         if (res.status === 404) {
           controlSupportedRef.current = false;
           addToast("warning", "Control Endpoint Missing", "Backend does not expose /api/engine/control yet.");
@@ -761,11 +809,53 @@ export default function EliteDashboard() {
     [showControls, controlDirty, addToast],
   );
 
+  const fetchHistory = useCallback(async () => {
+    try {
+      const res = await fetchBackend("/api/history");
+      if (!res.ok) {
+        throw new Error(`History request failed: ${res.status}`);
+      }
+      const data = await res.json();
+      const historyBars = dedupePriceBars(
+        Array.isArray(data?.history)
+          ? (data.history as unknown[]).map(normalizePriceBar).filter((bar): bar is PriceBar => Boolean(bar))
+          : [],
+      );
+
+      const lastBar = historyBars.length > 0 ? historyBars[historyBars.length - 1] : null;
+      const nextPrice = safeNumber(data?.price, lastBar?.close ?? 0);
+
+      if (historyBars.length > 0) {
+        lastPriceRef.current = nextPrice || lastBar?.close || lastPriceRef.current;
+      }
+
+      setLiveData((prev) => ({
+        ...prev,
+        price: nextPrice || prev.price,
+        history: historyBars.length > 0 ? historyBars : prev.history,
+        candle: lastBar ?? prev.candle,
+        market: {
+          ...prev.market,
+          live_price: nextPrice || prev.market.live_price,
+          candle_history: historyBars.length > 0 ? historyBars : prev.market.candle_history,
+          live_candle: lastBar ?? prev.market.live_candle,
+        },
+      }));
+
+      if (historyBars.length > 0 || nextPrice > 0) {
+        setLiveLoading(false);
+      }
+    } catch (error) {
+      console.error("History sync error:", error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchMetrics();
     fetchEngineHealth();
     fetchEngineControl(true);
-  }, [fetchMetrics, fetchEngineHealth, fetchEngineControl]);
+    fetchHistory();
+  }, [fetchMetrics, fetchEngineHealth, fetchEngineControl, fetchHistory]);
 
   useEffect(() => {
     if (wsStatus === "LIVE") {
@@ -775,11 +865,12 @@ export default function EliteDashboard() {
       fetchMetrics();
       fetchEngineHealth();
       fetchEngineControl(false);
+      fetchHistory();
     }, OFFLINE_FALLBACK_POLL_MS);
     return () => {
       clearInterval(fallbackInterval);
     };
-  }, [wsStatus, fetchMetrics, fetchEngineHealth, fetchEngineControl]);
+  }, [wsStatus, fetchMetrics, fetchEngineHealth, fetchEngineControl, fetchHistory]);
 
   useEffect(() => {
     const logs = Array.isArray(liveData.logs) ? liveData.logs : [];
@@ -835,7 +926,7 @@ export default function EliteDashboard() {
     }
     setSavingControl(true);
     try {
-      const res = await fetch(`${getHttpUrl()}/api/engine/control`, {
+      const res = await fetchBackend("/api/engine/control", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(controlDraft),
@@ -1473,22 +1564,23 @@ function AdaptiveThresholdPanel({ atr, cvd, thresholds }: { atr: number; cvd: an
 
 function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMode }: any) {
   const strategy = liveData?.strategy || DEFAULT_DASHBOARD_LIVE_DATA.strategy;
+  const chartCandle = liveData?.candle || (Array.isArray(liveData?.history) && liveData.history.length > 0 ? liveData.history[liveData.history.length - 1] : null);
   return (
     <motion.div key="terminal" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="grid grid-cols-12 gap-6">
       <div className="col-span-12 space-y-6 xl:col-span-8">
-        <Panel title="Live Price Action • 15m Candles">
-          {liveLoading ? (
-            <div className="grid grid-cols-1 gap-3">
-              <SkeletonBox className="h-64 w-full" />
-              <SkeletonBox className="h-4 w-44" />
-            </div>
-          ) : liveData.candle ? (
-            <PriceChart
-              candle={liveData.candle}
-              history={liveData.history}
-              vwap={liveData.vwap}
-            />
-          ) : (
+          <Panel title="Live Price Action • 15m Candles">
+            {liveLoading ? (
+              <div className="grid grid-cols-1 gap-3">
+                <SkeletonBox className="h-64 w-full" />
+                <SkeletonBox className="h-4 w-44" />
+              </div>
+            ) : chartCandle || (Array.isArray(liveData?.history) && liveData.history.length > 0) ? (
+              <PriceChart
+                candle={chartCandle}
+                history={liveData.history}
+                vwap={liveData.vwap}
+              />
+            ) : (
             <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-zinc-800">
               <div className="text-center text-xs uppercase tracking-wider text-zinc-500">Awaiting stream...</div>
             </div>
@@ -2348,7 +2440,7 @@ function TradeReplayModal({ trade, onClose, timeMode }: { trade: any; onClose: (
       try {
         const dateStr = String(trade["Timestamp (UTC)"] || "").replace(" ", "T");
         const timestamp = Math.floor(new Date(dateStr + "Z").getTime() / 1000);
-        const res = await fetch(`${getHttpUrl()}/api/history/replay?timestamp=${timestamp}`);
+        const res = await fetchBackend(`/api/history/replay?timestamp=${timestamp}`);
         const data = await res.json();
         if (data.history?.length > 0) {
           candleSeries.setData(

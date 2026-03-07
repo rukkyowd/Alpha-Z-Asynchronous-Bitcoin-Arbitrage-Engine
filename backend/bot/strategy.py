@@ -49,6 +49,11 @@ class StrategyConfig:
     trend_lock_min_ema_spread_pct: float = 0.0012
     trend_lock_min_vwap_dist_pct: float = 0.0010
     trend_lock_cvd_confirm_threshold: float = 15000.0
+    countertrend_min_score: int = 3
+    countertrend_min_ev_pct: float = 20.0
+    countertrend_min_vwap_dist_pct: float = 0.0010
+    countertrend_min_strike_dist_pct: float = 0.0010
+    countertrend_force_ai: bool = True
     default_depth_usd: float = 40.0
     default_spread_pct: float = 0.01
 
@@ -140,6 +145,15 @@ def _derive_liquidity_profile(
     )
 
 
+def _infer_trend_direction(context: TechnicalContext) -> Direction:
+    trend_direction = Direction.UNKNOWN
+    if context.ema_9 > context.ema_21 and context.vwap_distance > 0:
+        trend_direction = Direction.UP
+    elif context.ema_9 < context.ema_21 and context.vwap_distance < 0:
+        trend_direction = Direction.DOWN
+    return trend_direction
+
+
 def _trend_lock_veto(context: TechnicalContext, direction: Direction, config: StrategyConfig) -> str | None:
     if not config.trend_lock_enabled:
         return None
@@ -148,12 +162,7 @@ def _trend_lock_veto(context: TechnicalContext, direction: Direction, config: St
     ema_spread_pct = abs(context.ema_spread_pct)
     vwap_dist_pct = abs(_safe_div(context.vwap_distance, price, default=0.0))
     cvd_delta = context.cvd_candle_delta
-
-    trend_direction = Direction.UNKNOWN
-    if context.ema_9 > context.ema_21 and context.vwap_distance > 0:
-        trend_direction = Direction.UP
-    elif context.ema_9 < context.ema_21 and context.vwap_distance < 0:
-        trend_direction = Direction.DOWN
+    trend_direction = _infer_trend_direction(context)
 
     strong_trend = (
         context.market_regime in (MarketRegime.BULL_TREND, MarketRegime.BEAR_TREND, MarketRegime.BREAKOUT)
@@ -173,6 +182,45 @@ def _trend_lock_veto(context: TechnicalContext, direction: Direction, config: St
             f"(EMA spread {ema_spread_pct * 100:.3f}%, "
             f"VWAP dist {vwap_dist_pct * 100:.3f}%, "
             f"CVD {cvd_delta:+.0f})"
+        )
+    return None
+
+
+def _countertrend_reason(
+    context: TechnicalContext,
+    odds: MarketOddsSnapshot,
+    direction: Direction,
+    score: int,
+    ev_pct: float,
+    config: StrategyConfig,
+) -> str | None:
+    trend_direction = _infer_trend_direction(context)
+    if trend_direction not in (Direction.UP, Direction.DOWN) or direction == trend_direction:
+        return None
+
+    price = max(context.price, 1e-9)
+    strike_dist_pct = abs(_safe_div(context.price - odds.strike_price, price, default=0.0))
+    vwap_dist_pct = abs(_safe_div(context.vwap_distance, price, default=0.0))
+
+    if score < config.countertrend_min_score:
+        return (
+            f"Countertrend blocked: score {score}/4 < {config.countertrend_min_score}/4 "
+            f"against {trend_direction.value} trend"
+        )
+    if ev_pct < config.countertrend_min_ev_pct:
+        return (
+            f"Countertrend blocked: EV {ev_pct:.2f}% < {config.countertrend_min_ev_pct:.2f}% "
+            f"against {trend_direction.value} trend"
+        )
+    if vwap_dist_pct < config.countertrend_min_vwap_dist_pct:
+        return (
+            f"Countertrend blocked: VWAP distance {vwap_dist_pct * 100:.3f}% < "
+            f"{config.countertrend_min_vwap_dist_pct * 100:.3f}%"
+        )
+    if strike_dist_pct < config.countertrend_min_strike_dist_pct:
+        return (
+            f"Countertrend blocked: strike distance {strike_dist_pct * 100:.3f}% < "
+            f"{config.countertrend_min_strike_dist_pct * 100:.3f}%"
         )
     return None
 
@@ -332,6 +380,17 @@ class StrategyEngine:
                 score=score,
             )
 
+        countertrend_reason = _countertrend_reason(
+            enriched_context,
+            odds,
+            target_direction,
+            score,
+            target_ev.ev_pct,
+            self.config,
+        )
+        if countertrend_reason:
+            return _skip_signal(slug, countertrend_reason, score=score)
+
         reasons: list[str] = []
         if signal_alignment.vwap:
             reasons.append("VWAP Trend")
@@ -344,6 +403,8 @@ class StrategyEngine:
 
         confidence = ConfidenceLevel.SCOUT
         needs_ai = True
+        trend_direction = _infer_trend_direction(enriched_context)
+        is_countertrend = trend_direction in (Direction.UP, Direction.DOWN) and trend_direction != target_direction
 
         if allow_score0_extreme_ev:
             confidence = ConfidenceLevel.SCOUT
@@ -383,6 +444,13 @@ class StrategyEngine:
                 f"Net EV {target_ev.ev_pct:.2f}% below AI trigger ({self.config.min_ev_pct_to_call_ai:.2f}%)",
                 score=score,
             )
+
+        if is_countertrend:
+            reasons.append(f"COUNTERTREND vs {trend_direction.value}")
+            if self.config.countertrend_force_ai:
+                needs_ai = True
+                if confidence == ConfidenceLevel.HIGH:
+                    confidence = ConfidenceLevel.SCOUT
 
         approved, approval_reason = self.risk_manager.can_trade(bankroll, target_ev.kelly_bet_usd)
         if not approved:

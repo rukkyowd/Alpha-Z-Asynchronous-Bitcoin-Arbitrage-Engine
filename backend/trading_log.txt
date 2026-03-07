@@ -4926,3 +4926,46 @@
 2026-03-07 19:24:05,801 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.2750 | U-PnL: $-13.82 (-27.63%) | TP: +6.0c @ 0.4400 | SL: -14.4c @ 0.2360 | T-35:54 | TP Armed: N | SL Disabled: N
 2026-03-07 19:24:13,618 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: Score 1 requires EV >= 15.00% (got 3.81%)
 2026-03-07 19:24:17,950 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.2750 | U-PnL: $-13.82 (-27.63%) | TP: +6.0c @ 0.4400 | SL: -12.0c @ 0.2600 | T-35:42 | TP Armed: N | SL Disabled: N
+2026-03-07 19:25:15,488 [INFO] Elite Quant Engine v2 Initialized. Monitoring 15m WebSocket...
+2026-03-07 19:25:15,503 [INFO] [INIT] Simulated balance initialized: $5070.56 (base: $5000.0 + historical: $70.56)
+2026-03-07 19:25:15,505 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-7-6pm-et | Prefix: bitcoin-up-or-down-march-7-6pm
+2026-03-07 19:25:15,753 [INFO] [SYSTEM] Loaded 120 candles. VWAP=67,759.41
+2026-03-07 19:25:16,187 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-07 19:25:35,153 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-07 19:25:56,185 [INFO] [BET] BET PLACED [PAPER] DOWN on bitcoin-up-or-down-march-7-6pm-et | Filled: $50.00 | Avg Px: 0.3000 | Shares: 166.6667 | Liq: PAPER_SIM | Expected: 0.2794
+2026-03-07 19:25:56,341 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.2250 | U-PnL: $-12.50 (-25.00%) | TP: +6.0c @ 0.3600 | SL: -14.4c @ 0.1560 | T-34:03 | TP Armed: N | SL Disabled: N
+2026-03-07 19:26:09,239 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.2250 | U-PnL: $-12.50 (-25.00%) | TP: +6.0c @ 0.3600 | SL: -14.4c @ 0.1560 | T-33:50 | TP Armed: N | SL Disabled: N
+2026-03-07 19:26:20,362 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI vetoed borderline signal
+2026-03-07 19:26:21,696 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.2250 | U-PnL: $-12.50 (-25.00%) | TP: +6.0c @ 0.3600 | SL: -14.4c @ 0.1560 | T-33:38 | TP Armed: N | SL Disabled: N
+2026-03-07 19:29:58,105 [INFO] Elite Quant Engine v2 Initialized. Monitoring 15m WebSocket...
+2026-03-07 19:29:58,127 [INFO] [INIT] Simulated balance initialized: $5070.56 (base: $5000.0 + historical: $70.56)
+2026-03-07 19:29:58,128 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-7-6pm-et | Prefix: bitcoin-up-or-down-march-7-6pm
+2026-03-07 19:29:58,497 [INFO] [SYSTEM] Loaded 120 candles. VWAP=67,757.69
+2026-03-07 19:29:58,736 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-07 19:30:22,460 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-07 19:31:01,488 [INFO] Elite Quant Engine v2 Initialized. Monitoring 15m WebSocket...
+2026-03-07 19:31:01,508 [INFO] [INIT] Simulated balance initialized: $5070.56 (base: $5000.0 + historical: $70.56)
+2026-03-07 19:31:01,509 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-7-6pm-et | Prefix: bitcoin-up-or-down-march-7-6pm
+2026-03-07 19:31:01,914 [INFO] [SYSTEM] Loaded 120 candles. VWAP=67,757.43
+2026-03-07 19:31:02,190 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-07 19:31:24,357 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-07 19:31:48,669 [INFO] [BET] BET PLACED [PAPER] DOWN on bitcoin-up-or-down-march-7-6pm-et | Filled: $50.00 | Avg Px: 0.2800 | Shares: 178.5714 | Liq: PAPER_SIM | Expected: 0.2591
+2026-03-07 19:31:48,788 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: Score 1 requires EV >= 15.00% (got 6.11%)
+2026-03-07 19:31:49,105 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.2550 | U-PnL: $-4.46 (-8.93%) | TP: +6.0c @ 0.3400 | SL: -11.5c @ 0.1648 | T-28:10 | TP Armed: N | SL Disabled: N
+2026-03-07 19:32:02,058 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.2750 | U-PnL: $-0.89 (-1.79%) | TP: +6.0c @ 0.3400 | SL: -11.5c @ 0.1648 | T-27:57 | TP Armed: N | SL Disabled: N
+2026-03-07 19:32:14,301 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.2750 | U-PnL: $-0.89 (-1.79%) | TP: +6.0c @ 0.3400 | SL: -11.5c @ 0.1648 | T-27:45 | TP Armed: N | SL Disabled: N
+2026-03-07 19:32:26,982 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.2750 | U-PnL: $-0.89 (-1.79%) | TP: +6.0c @ 0.3400 | SL: -11.5c @ 0.1648 | T-27:33 | TP Armed: N | SL Disabled: N
+2026-03-07 19:32:28,828 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: Score 1 requires EV >= 15.00% (got 1.67%)
+2026-03-07 19:32:36,861 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: Score 1 requires EV >= 15.00% (got 1.85%)
+2026-03-07 19:32:38,996 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.2750 | U-PnL: $-0.89 (-1.79%) | TP: +6.0c @ 0.3400 | SL: -11.5c @ 0.1648 | T-27:21 | TP Armed: N | SL Disabled: N
+2026-03-07 19:32:44,899 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: Score 1 requires EV >= 15.00% (got 2.18%)
+2026-03-07 19:32:52,052 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.2750 | U-PnL: $-0.89 (-1.79%) | TP: +6.0c @ 0.3400 | SL: -11.5c @ 0.1648 | T-27:07 | TP Armed: N | SL Disabled: N
+2026-03-07 19:32:53,098 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: Score 1 requires EV >= 15.00% (got 2.34%)
+2026-03-07 19:34:59,369 [INFO] Elite Quant Engine v2 Initialized. Monitoring 15m WebSocket...
+2026-03-07 19:34:59,387 [INFO] [INIT] Simulated balance initialized: $5070.56 (base: $5000.0 + historical: $70.56)
+2026-03-07 19:34:59,388 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-7-6pm-et | Prefix: bitcoin-up-or-down-march-7-6pm
+2026-03-07 19:34:59,841 [INFO] [SYSTEM] Loaded 120 candles. VWAP=67,757.14
+2026-03-07 19:35:00,095 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-07 19:35:18,897 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-07 19:35:41,086 [INFO] [BET] BET PLACED [PAPER] DOWN on bitcoin-up-or-down-march-7-6pm-et | Filled: $50.00 | Avg Px: 0.2200 | Shares: 227.2727 | Liq: PAPER_SIM | Expected: 0.1982
+2026-03-07 19:35:41,632 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1950 | U-PnL: $-5.68 (-11.36%) | TP: +6.0c @ 0.2800 | SL: -11.5c @ 0.1048 | T-24:18 | TP Armed: N | SL Disabled: N
