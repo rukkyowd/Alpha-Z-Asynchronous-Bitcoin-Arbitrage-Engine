@@ -22,6 +22,19 @@ function deriveWsUrlFromHttp(httpUrl: string): string {
   }
 }
 
+function deriveHttpUrlFromWs(wsUrl: string): string {
+  try {
+    const parsed = new URL(wsUrl);
+    parsed.protocol = parsed.protocol === "wss:" ? "https:" : "http:";
+    parsed.pathname = "";
+    parsed.search = "";
+    parsed.hash = "";
+    return stripTrailingSlash(parsed.toString());
+  } catch {
+    return "http://localhost:8000";
+  }
+}
+
 export const getBaseIp = (): string => {
   try {
     const parsed = new URL(getHttpUrl());
@@ -34,6 +47,9 @@ export const getBaseIp = (): string => {
 export const getHttpUrl = (): string => {
   if (PUBLIC_API_URL) {
     return stripTrailingSlash(PUBLIC_API_URL);
+  }
+  if (PUBLIC_WS_URL) {
+    return deriveHttpUrlFromWs(PUBLIC_WS_URL);
   }
   return "http://localhost:8000";
 };
