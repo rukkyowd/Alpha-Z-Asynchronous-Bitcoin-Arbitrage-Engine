@@ -26,6 +26,21 @@ function normalizeBar(bar: Partial<PriceBar> | null | undefined): PriceBar | nul
   return { time, open, high, low, close, volume };
 }
 
+function sanitizeHistoryBars(history: Array<Partial<PriceBar>>): PriceBar[] {
+  const deduped = new Map<number, PriceBar>();
+
+  history
+    .map((bar) => normalizeBar(bar))
+    .filter((bar): bar is PriceBar => Boolean(bar))
+    .sort((a, b) => a.time - b.time)
+    .forEach((bar) => {
+      // Keep the latest copy for a timestamp so backfill/live overlap cannot break the chart.
+      deduped.set(bar.time, bar);
+    });
+
+  return Array.from(deduped.values()).sort((a, b) => a.time - b.time);
+}
+
 type PriceChartProps = {
   candle: Partial<PriceBar> | null;
   history?: Array<Partial<PriceBar>>;
@@ -93,10 +108,7 @@ export default function PriceChart({
     if (!candlestickSeriesRef.current || !Array.isArray(history) || history.length === 0) {
       return;
     }
-    const sanitizedHistory = history
-      .map((bar) => normalizeBar(bar))
-      .filter((bar): bar is PriceBar => Boolean(bar))
-      .sort((a, b) => a.time - b.time);
+    const sanitizedHistory = sanitizeHistoryBars(history);
     if (sanitizedHistory.length === 0) {
       return;
     }

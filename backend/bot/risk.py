@@ -5,7 +5,7 @@ from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 
 from .indicators import blended_intraday_volatility
-from .models import ActivePosition, PositionStatus, TechnicalContext
+from .models import ActivePosition, Direction, PositionStatus, TechnicalContext
 from .state import EngineState
 
 EPSILON = 1e-9
@@ -99,6 +99,10 @@ class PositionRiskConfig:
     sl_confirm_breach_mid: int = 8
     sl_confirm_breach_late: int = 6
     sl_recovery_reset_buffer: float = 0.01
+    hard_sl_extra_cents: float = 0.06
+    hard_sl_extra_frac: float = 0.50
+    underlying_soft_sl_min_confirms: int = 2
+    underlying_vwap_buffer_frac: float = 0.0005
     sl_entry_rel_max_loss_pct: float = 0.55
     sl_entry_rel_min_cents: float = 0.03
     force_tp_roi_pct: float = 0.70
@@ -112,8 +116,10 @@ class PositionRiskConfig:
 class PositionRiskSnapshot:
     tp_delta: float
     sl_delta: float
+    hard_sl_delta: float
     tp_token_price: float
     sl_token_price: float
+    hard_sl_token_price: float
     sl_disabled: bool
     sl_confirms_needed: int
     phase: str
@@ -387,6 +393,42 @@ class RiskManager:
             synthetic_tick = max(abs(context.ema_spread_pct), abs(context.price_vs_vwap_pct), 0.001)
         return synthetic_tick
 
+    def _underlying_soft_sl_confirmed(
+        self,
+        position: ActivePosition,
+        context: TechnicalContext,
+        *,
+        current_underlying_price: float,
+    ) -> bool:
+        cfg = self.position_config
+        underlying_price = current_underlying_price if current_underlying_price > 0 else context.price
+        cvd_threshold = max(abs(context.adaptive_cvd_threshold), 1.0)
+        confirmations = 0
+
+        if position.decision == Direction.DOWN:
+            if position.strike > 0 and underlying_price >= position.strike:
+                return True
+            if context.vwap > 0 and underlying_price >= (context.vwap * (1.0 + cfg.underlying_vwap_buffer_frac)):
+                confirmations += 1
+            if context.ema_9 >= context.ema_21:
+                confirmations += 1
+            if context.cvd_candle_delta >= cvd_threshold:
+                confirmations += 1
+            return confirmations >= cfg.underlying_soft_sl_min_confirms
+
+        if position.decision == Direction.UP:
+            if position.strike > 0 and underlying_price <= position.strike:
+                return True
+            if context.vwap > 0 and underlying_price <= (context.vwap * (1.0 - cfg.underlying_vwap_buffer_frac)):
+                confirmations += 1
+            if context.ema_9 <= context.ema_21:
+                confirmations += 1
+            if context.cvd_candle_delta <= -cvd_threshold:
+                confirmations += 1
+            return confirmations >= cfg.underlying_soft_sl_min_confirms
+
+        return True
+
     def position_risk_snapshot(
         self,
         position: ActivePosition,
@@ -437,12 +479,16 @@ class RiskManager:
         if reachable_floor < 0:
             entry_based_sl = max(entry_based_sl, reachable_floor)
         sl_delta = max(sl_delta, entry_based_sl)
+        hard_sl_extra = max(cfg.hard_sl_extra_cents, abs(sl_delta) * cfg.hard_sl_extra_frac)
+        hard_sl_delta = max(sl_delta - hard_sl_extra, reachable_floor)
 
         return PositionRiskSnapshot(
             tp_delta=tp_delta,
             sl_delta=sl_delta,
+            hard_sl_delta=hard_sl_delta,
             tp_token_price=position.bought_price + tp_delta,
             sl_token_price=max(0.0, position.bought_price + sl_delta),
+            hard_sl_token_price=max(0.0, position.bought_price + hard_sl_delta),
             sl_disabled=sl_disabled,
             sl_confirms_needed=sl_confirms_needed,
             phase=phase,
@@ -531,16 +577,32 @@ class RiskManager:
                         exit_price=current_token_price,
                     )
 
+        if price_delta <= snapshot.hard_sl_delta:
+            return PositionMonitorDecision(
+                position=replace(updated, status=PositionStatus.CLOSING),
+                should_exit=True,
+                exit_reason=(
+                    f"HARD_STOP_LOSS ({price_delta * 100:.1f}c <= "
+                    f"{snapshot.hard_sl_delta * 100:.1f}c hard floor)"
+                ),
+                exit_price=current_token_price,
+            )
+
         if not snapshot.sl_disabled and price_delta <= snapshot.sl_delta:
             breach_count = int(updated.sl_breach_count) + 1
             updated = replace(updated, sl_breach_count=breach_count)
-            if breach_count >= snapshot.sl_confirms_needed:
+            underlying_confirmed = self._underlying_soft_sl_confirmed(
+                position,
+                context,
+                current_underlying_price=current_underlying_price,
+            )
+            if underlying_confirmed and breach_count >= snapshot.sl_confirms_needed:
                 return PositionMonitorDecision(
                     position=replace(updated, status=PositionStatus.CLOSING),
                     should_exit=True,
                     exit_reason=(
                         f"STOP_LOSS_CONFIRMED ({price_delta * 100:.1f}c, "
-                        f"{breach_count}/{snapshot.sl_confirms_needed})"
+                        f"{breach_count}/{snapshot.sl_confirms_needed}, underlying confirmed)"
                     ),
                     exit_price=current_token_price,
                 )

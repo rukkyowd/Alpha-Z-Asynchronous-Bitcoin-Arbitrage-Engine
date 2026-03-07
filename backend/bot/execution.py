@@ -690,6 +690,16 @@ class ClobExecutionEngine:
             )
             await state.upsert_position(position)
             await state.update_runtime_counters(trades_this_hour=state.trades_this_hour + 1)
+            log.info(
+                "[BET] BET PLACED [PAPER] %s on %s | Filled: $%.2f | Avg Px: %.4f | Shares: %.4f | Liq: %s | Expected: %.4f",
+                signal.direction.value,
+                signal.slug,
+                synthetic_fill_cost,
+                limit_price,
+                synthetic_shares,
+                liquidity.mode,
+                expected_price,
+            )
             return position
 
         log.info(
@@ -870,6 +880,15 @@ class ClobExecutionEngine:
             self.risk_manager.record_pnl(pnl)
             await state.update_runtime_counters(current_daily_pnl=state.current_daily_pnl + pnl)
             await state.pop_position(position.slug)
+            log.info(
+                "[EXIT] EXIT FILLED [PAPER] %s on %s | Reason: %s | Exit Px: %.4f | Proceeds: $%.2f | PnL: $%+.2f",
+                position.decision.value,
+                position.slug,
+                exit_reason,
+                current_token_price,
+                exit_notional,
+                pnl,
+            )
             return FillResult(
                 success=True,
                 order_type="PAPER",

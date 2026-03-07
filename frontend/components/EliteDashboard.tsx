@@ -228,6 +228,17 @@ function normalizeLiveCandle(raw: Partial<MarketCandleSnapshot> | null | undefin
   return normalizePriceBar(raw ?? null);
 }
 
+function dedupePriceBars(bars: PriceBar[]): PriceBar[] {
+  const deduped = new Map<number, PriceBar>();
+  bars
+    .slice()
+    .sort((a, b) => a.time - b.time)
+    .forEach((bar) => {
+      deduped.set(bar.time, bar);
+    });
+  return Array.from(deduped.values()).sort((a, b) => a.time - b.time);
+}
+
 function normalizePositions(raw: EngineWsPayload["positions"]): Record<string, EnginePosition> {
   if (Array.isArray(raw)) {
     return raw.reduce<Record<string, EnginePosition>>((acc, position) => {
@@ -349,10 +360,10 @@ function normalizeWsPayload(raw: unknown, previous: DashboardLiveData): Dashboar
   const context = extractContext(market, telemetry);
 
   const historySource = Array.isArray(payload.market?.candle_history) ? payload.market?.candle_history : previous.market.candle_history;
-  const history = (historySource || [])
+  const history = dedupePriceBars((historySource || [])
     .map(normalizePriceBar)
     .filter((bar): bar is PriceBar => Boolean(bar))
-    .sort((a, b) => a.time - b.time);
+  );
 
   const candle = normalizeLiveCandle((payload.market?.live_candle as Partial<MarketCandleSnapshot> | null | undefined) ?? market.live_candle) ?? previous.candle;
   const price = safeNumber(payload.market?.live_price, previous.price);
@@ -2340,7 +2351,13 @@ function TradeReplayModal({ trade, onClose, timeMode }: { trade: any; onClose: (
         const res = await fetch(`${getHttpUrl()}/api/history/replay?timestamp=${timestamp}`);
         const data = await res.json();
         if (data.history?.length > 0) {
-          candleSeries.setData(data.history.sort((a: any, b: any) => a.time - b.time));
+          candleSeries.setData(
+            dedupePriceBars(
+              data.history
+                .map((item: unknown) => normalizePriceBar(item))
+                .filter((bar: PriceBar | null): bar is PriceBar => Boolean(bar)),
+            ) as any,
+          );
           (candleSeries as any).setMarkers([{ time: timestamp as any, position: trade["AI Decision"] === "UP" ? "belowBar" : "aboveBar", color: trade["AI Decision"] === "UP" ? "#22c55e" : "#ef4444", shape: trade["AI Decision"] === "UP" ? "arrowUp" : "arrowDown", text: `${trade["AI Decision"]}` }]);
           chart.timeScale().fitContent();
         }

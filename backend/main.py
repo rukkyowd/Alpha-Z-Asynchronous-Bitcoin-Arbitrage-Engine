@@ -34,6 +34,7 @@ from bot.data_streams import BinanceStreamManager, DataStreamsConfig, Polymarket
 from bot.execution import ClobExecutionEngine, ExecutionConfig, FillResult
 from bot.indicators import StreamingEMA, StreamingRSI, blended_intraday_volatility, build_technical_context, compute_vwap
 from bot.models import (
+    ActivePosition,
     AdaptiveThresholdSnapshot,
     CVDSnapshot,
     ConfidenceLevel,
@@ -63,6 +64,7 @@ METRICS_CACHE_TTL_SECS = 2.0
 BALANCE_REFRESH_SECS = 15.0
 EVALUATION_IDLE_SLEEP_SECS = 0.40
 POSITION_MONITOR_SLEEP_SECS = 1.00
+POSITION_HEARTBEAT_SECS = 12.0
 SOFT_EVAL_REFRESH_SECS = 8.0
 
 logger = logging.getLogger("alpha_z_engine")
@@ -147,6 +149,9 @@ class EngineServices:
     latest_signal: TradeSignal | None = None
     latest_rejected_reason: str = ""
     latest_locks: list[str] = field(default_factory=list)
+    last_logged_rejection_reason: str = ""
+    last_logged_rejection_ts: float = 0.0
+    position_heartbeat_ts: dict[str, float] = field(default_factory=dict)
     trade_history: list[dict[str, Any]] = field(default_factory=list)
     execution_history: list[dict[str, Any]] = field(default_factory=list)
     equity_curve: list[dict[str, Any]] = field(default_factory=list)
@@ -237,6 +242,67 @@ DEFAULT_MARKET_DATA = {
         },
     },
 }
+
+
+def log_skip_reason(runtime: EngineServices, slug: str, reason: str, *, min_repeat_secs: float = 15.0) -> None:
+    now_ts = time.time()
+    if reason == "Position already active":
+        last_position_log = runtime.position_heartbeat_ts.get(slug, 0.0)
+        if (now_ts - last_position_log) <= (POSITION_HEARTBEAT_SECS + 2.0):
+            return
+    should_log = (
+        reason != runtime.last_logged_rejection_reason
+        or (now_ts - runtime.last_logged_rejection_ts) >= min_repeat_secs
+    )
+    if not should_log:
+        return
+    logger.info("[SKIP] %s: %s", slug, reason)
+    runtime.last_logged_rejection_reason = reason
+    runtime.last_logged_rejection_ts = now_ts
+
+
+def _format_countdown(seconds_remaining: float) -> str:
+    total = max(0, int(seconds_remaining))
+    hours, remainder = divmod(total, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    if hours > 0:
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    return f"{minutes:02d}:{seconds:02d}"
+
+
+def log_position_heartbeat(
+    runtime: EngineServices,
+    position: ActivePosition,
+    *,
+    min_repeat_secs: float = POSITION_HEARTBEAT_SECS,
+) -> None:
+    now_ts = time.time()
+    last_logged = runtime.position_heartbeat_ts.get(position.slug, 0.0)
+    if (now_ts - last_logged) < min_repeat_secs:
+        return
+
+    mark_price = _safe_float(position.current_token_price, position.mark_price)
+    unrealized_pnl = position.unrealized_pnl
+    unrealized_pct = 0.0
+    if position.bet_size_usd > 0:
+        unrealized_pct = (unrealized_pnl / position.bet_size_usd) * 100.0
+
+    logger.info(
+        "[POSITION] %s %s | Mark: %.4f | U-PnL: $%+.2f (%+.2f%%) | TP: %+.1fc @ %.4f | SL: %+.1fc @ %.4f | T-%s | TP Armed: %s | SL Disabled: %s",
+        position.status.value,
+        position.slug,
+        mark_price,
+        unrealized_pnl,
+        unrealized_pct,
+        position.tp_delta * 100.0,
+        position.tp_token_price,
+        position.sl_delta * 100.0,
+        position.sl_token_price,
+        _format_countdown(float(position.seconds_remaining)),
+        "Y" if position.tp_armed else "N",
+        "Y" if position.sl_disabled else "N",
+    )
+    runtime.position_heartbeat_ts[position.slug] = now_ts
 
 
 def sanitize_data(value: Any) -> Any:
@@ -1140,6 +1206,7 @@ async def finalize_closed_position(
     }
     await _record_trade(runtime, trade_record)
     await runtime.state.clear_slug_commit(trade_record["slug"])
+    runtime.position_heartbeat_ts.pop(trade_record["slug"], None)
     logger.info(
         "[TRADE CLOSED] %s | %s | PnL: $%+.2f | Exit: %.4f | Underlying: %.2f | Reason: %s",
         trade_record["slug"],
@@ -1276,6 +1343,7 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             if not odds.market_found:
                 runtime.latest_rejected_reason = "No active market found"
                 runtime.latest_locks = [runtime.latest_rejected_reason]
+                log_skip_reason(runtime, slug, runtime.latest_rejected_reason)
                 await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
                 continue
 
@@ -1298,6 +1366,7 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             if runtime.state.kill_switch_enabled:
                 runtime.latest_rejected_reason = "Kill switch enabled"
                 runtime.latest_locks = [runtime.latest_rejected_reason]
+                log_skip_reason(runtime, slug, runtime.latest_rejected_reason)
                 await runtime.state.update_telemetry(
                     execution_timing=ExecutionTimingSnapshot(
                         signal_generation_ms=signal_ms,
@@ -1311,6 +1380,7 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             if not signal.approved or signal.direction == Direction.SKIP:
                 runtime.latest_rejected_reason = signal.reasons[0] if signal.reasons else "Signal rejected"
                 runtime.latest_locks = [runtime.latest_rejected_reason]
+                log_skip_reason(runtime, slug, runtime.latest_rejected_reason)
                 await runtime.state.note_soft_skip(slug, best_ev=signal.expected_value_pct)
                 await runtime.state.update_telemetry(
                     execution_timing=ExecutionTimingSnapshot(
@@ -1327,6 +1397,7 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             if already_open:
                 runtime.latest_rejected_reason = "Position already active"
                 runtime.latest_locks = [runtime.latest_rejected_reason]
+                log_skip_reason(runtime, slug, runtime.latest_rejected_reason, min_repeat_secs=30.0)
                 await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
                 continue
 
@@ -1341,6 +1412,7 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             if not signal.approved:
                 runtime.latest_rejected_reason = ai_reason or "AI rejected signal"
                 runtime.latest_locks = [runtime.latest_rejected_reason]
+                log_skip_reason(runtime, slug, runtime.latest_rejected_reason)
                 await runtime.state.update_telemetry(
                     execution_timing=ExecutionTimingSnapshot(
                         signal_generation_ms=signal_ms,
@@ -1372,11 +1444,14 @@ async def evaluation_loop(runtime: EngineServices) -> None:
                     failure = runtime.state.execution_failures.get(slug)
                 runtime.latest_rejected_reason = failure.reason if failure is not None else "Entry failed"
                 runtime.latest_locks = [runtime.latest_rejected_reason]
+                log_skip_reason(runtime, slug, runtime.latest_rejected_reason)
                 await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
                 continue
 
             runtime.latest_rejected_reason = ""
             runtime.latest_locks = []
+            runtime.last_logged_rejection_reason = ""
+            runtime.last_logged_rejection_ts = 0.0
             runtime.risk_manager.record_trade()
             await runtime.state.mark_slug_committed(slug)
             merged_features = dict(position.ml_features)
@@ -1465,6 +1540,7 @@ async def position_monitor_loop(runtime: EngineServices) -> None:
                 )
 
                 if not monitor_decision.should_exit:
+                    log_position_heartbeat(runtime, monitor_decision.position)
                     continue
 
                 exit_fill = await runtime.execution_engine.submit_exit_order(

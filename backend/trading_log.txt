@@ -4402,3 +4402,149 @@
 2026-03-07 16:46:42,843 [INFO] [SYSTEM] Loaded 120 candles. VWAP=67,830.87
 2026-03-07 16:46:42,843 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
 2026-03-07 16:47:25,984 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-07 17:00:00,093 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-7-4pm-et | Prefix: bitcoin-up-or-down-march-7-4pm
+2026-03-07 17:21:48,800 [INFO] [TRADE CLOSED] bitcoin-up-or-down-march-7-4pm-et | DOWN | PnL: $-17.45 | Exit: 0.3450 | Underlying: 67445.12 | Reason: STOP_LOSS_CONFIRMED (-18.5c, 12/12)
+2026-03-07 17:22:52,488 [INFO] Elite Quant Engine v2 Initialized. Monitoring 15m WebSocket...
+2026-03-07 17:22:52,512 [INFO] [INIT] Simulated balance initialized: $5000.00 (base: $5000.0 + historical: $0.00)
+2026-03-07 17:22:52,512 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-7-4pm-et | Prefix: bitcoin-up-or-down-march-7-4pm
+2026-03-07 17:22:52,772 [INFO] [SYSTEM] Loaded 120 candles. VWAP=67,810.37
+2026-03-07 17:22:52,773 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-07 17:23:26,570 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-07 17:23:53,131 [INFO] [BET] BET PLACED [PAPER] DOWN on bitcoin-up-or-down-march-7-4pm-et | Filled: $50.00 | Avg Px: 0.3800 | Shares: 131.5789 | Liq: PAPER_SIM | Expected: 0.3506
+2026-03-07 17:23:53,261 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:24:26,221 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:24:42,612 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV -0.02% <= 0 after slippage
+2026-03-07 17:24:50,904 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV -0.06% <= 0 after slippage
+2026-03-07 17:24:58,989 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV -0.07% <= 0 after slippage
+2026-03-07 17:25:07,282 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV 0.49% below AI trigger (1.00%)
+2026-03-07 17:25:15,690 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV 0.43% below AI trigger (1.00%)
+2026-03-07 17:25:23,861 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV 0.39% below AI trigger (1.00%)
+2026-03-07 17:25:32,035 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV -0.02% <= 0 after slippage
+2026-03-07 17:25:40,217 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV -0.07% <= 0 after slippage
+2026-03-07 17:25:48,648 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 6.55%)
+2026-03-07 17:25:56,656 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 6.60%)
+2026-03-07 17:26:04,814 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 6.65%)
+2026-03-07 17:26:12,880 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 6.72%)
+2026-03-07 17:26:20,955 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 6.75%)
+2026-03-07 17:26:29,158 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 6.82%)
+2026-03-07 17:26:37,310 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 6.85%)
+2026-03-07 17:26:45,363 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 8.45%)
+2026-03-07 17:26:53,484 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 9.36%)
+2026-03-07 17:27:01,614 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 9.39%)
+2026-03-07 17:27:10,024 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 9.43%)
+2026-03-07 17:27:18,080 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 9.48%)
+2026-03-07 17:27:26,311 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 9.46%)
+2026-03-07 17:27:34,546 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 9.49%)
+2026-03-07 17:27:42,757 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV 0.10% below AI trigger (1.00%)
+2026-03-07 17:27:50,865 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV -0.02% <= 0 after slippage
+2026-03-07 17:27:58,948 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV -0.07% <= 0 after slippage
+2026-03-07 17:28:07,431 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV -0.08% <= 0 after slippage
+2026-03-07 17:28:15,907 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV -0.04% <= 0 after slippage
+2026-03-07 17:28:24,070 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV -0.15% <= 0 after slippage
+2026-03-07 17:30:41,798 [INFO] Elite Quant Engine v2 Initialized. Monitoring 15m WebSocket...
+2026-03-07 17:30:41,821 [INFO] [INIT] Simulated balance initialized: $5000.00 (base: $5000.0 + historical: $0.00)
+2026-03-07 17:30:41,822 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-7-4pm-et | Prefix: bitcoin-up-or-down-march-7-4pm
+2026-03-07 17:30:42,103 [INFO] [SYSTEM] Loaded 120 candles. VWAP=67,809.37
+2026-03-07 17:30:42,104 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-07 17:31:14,996 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-07 17:31:39,724 [INFO] [BET] BET PLACED [PAPER] DOWN on bitcoin-up-or-down-march-7-4pm-et | Filled: $50.00 | Avg Px: 0.3500 | Shares: 142.8571 | Liq: PAPER_SIM | Expected: 0.3201
+2026-03-07 17:31:39,853 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:31:39,907 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3150 | U-PnL: $-5.00 (-10.00%) | TP: +6.0c @ 0.4100 | SL: -11.5c @ 0.2348 | T-28:20 | TP Armed: N | SL Disabled: N
+2026-03-07 17:31:52,859 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3150 | U-PnL: $-5.00 (-10.00%) | TP: +6.0c @ 0.4100 | SL: -11.5c @ 0.2348 | T-28:07 | TP Armed: N | SL Disabled: N
+2026-03-07 17:32:05,932 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3150 | U-PnL: $-5.00 (-10.00%) | TP: +6.0c @ 0.4100 | SL: -11.5c @ 0.2348 | T-27:54 | TP Armed: N | SL Disabled: N
+2026-03-07 17:32:13,029 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:32:18,837 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3150 | U-PnL: $-5.00 (-10.00%) | TP: +6.0c @ 0.4100 | SL: -11.5c @ 0.2348 | T-27:41 | TP Armed: N | SL Disabled: N
+2026-03-07 17:32:31,651 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3150 | U-PnL: $-5.00 (-10.00%) | TP: +6.0c @ 0.4100 | SL: -11.5c @ 0.2348 | T-27:28 | TP Armed: N | SL Disabled: N
+2026-03-07 17:32:44,511 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3150 | U-PnL: $-5.00 (-10.00%) | TP: +6.0c @ 0.4100 | SL: -11.5c @ 0.2348 | T-27:15 | TP Armed: N | SL Disabled: N
+2026-03-07 17:32:46,288 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:32:57,378 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3150 | U-PnL: $-5.00 (-10.00%) | TP: +6.0c @ 0.4100 | SL: -11.5c @ 0.2348 | T-27:02 | TP Armed: N | SL Disabled: N
+2026-03-07 17:33:10,300 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3150 | U-PnL: $-5.00 (-10.00%) | TP: +6.0c @ 0.4100 | SL: -11.5c @ 0.2348 | T-26:49 | TP Armed: N | SL Disabled: N
+2026-03-07 17:33:19,234 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:33:23,157 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3150 | U-PnL: $-5.00 (-10.00%) | TP: +6.0c @ 0.4100 | SL: -11.5c @ 0.2348 | T-26:36 | TP Armed: N | SL Disabled: N
+2026-03-07 17:33:36,158 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3150 | U-PnL: $-5.00 (-10.00%) | TP: +6.0c @ 0.4100 | SL: -11.5c @ 0.2348 | T-26:23 | TP Armed: N | SL Disabled: N
+2026-03-07 17:33:49,122 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.5750 | U-PnL: $+32.14 (+64.29%) | TP: +6.0c @ 0.4100 | SL: -11.5c @ 0.2348 | T-26:10 | TP Armed: Y | SL Disabled: N
+2026-03-07 17:33:52,415 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:34:02,077 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.5750 | U-PnL: $+32.14 (+64.29%) | TP: +6.0c @ 0.4100 | SL: -11.5c @ 0.2348 | T-25:57 | TP Armed: Y | SL Disabled: N
+2026-03-07 17:34:08,828 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 12.86%)
+2026-03-07 17:34:15,098 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.5750 | U-PnL: $+32.14 (+64.29%) | TP: +6.0c @ 0.4100 | SL: -11.5c @ 0.2348 | T-25:44 | TP Armed: Y | SL Disabled: N
+2026-03-07 17:34:17,216 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:34:27,940 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.5750 | U-PnL: $+32.14 (+64.29%) | TP: +6.0c @ 0.4100 | SL: -11.5c @ 0.2348 | T-25:32 | TP Armed: Y | SL Disabled: N
+2026-03-07 17:34:33,839 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 9.92%)
+2026-03-07 17:34:40,803 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.5750 | U-PnL: $+32.14 (+64.29%) | TP: +6.0c @ 0.4100 | SL: -9.6c @ 0.2540 | T-25:19 | TP Armed: Y | SL Disabled: N
+2026-03-07 17:34:42,176 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:34:53,724 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.5750 | U-PnL: $+32.14 (+64.29%) | TP: +6.0c @ 0.4100 | SL: -9.6c @ 0.2540 | T-25:06 | TP Armed: Y | SL Disabled: N
+2026-03-07 17:35:06,733 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.5750 | U-PnL: $+32.14 (+64.29%) | TP: +6.0c @ 0.4100 | SL: -9.6c @ 0.2540 | T-24:53 | TP Armed: Y | SL Disabled: N
+2026-03-07 17:35:14,914 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:35:19,685 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.5750 | U-PnL: $+32.14 (+64.29%) | TP: +6.0c @ 0.4100 | SL: -9.6c @ 0.2540 | T-24:40 | TP Armed: Y | SL Disabled: N
+2026-03-07 17:35:32,635 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.5750 | U-PnL: $+32.14 (+64.29%) | TP: +6.0c @ 0.4100 | SL: -9.6c @ 0.2540 | T-24:27 | TP Armed: Y | SL Disabled: N
+2026-03-07 17:35:45,648 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.5750 | U-PnL: $+32.14 (+64.29%) | TP: +6.0c @ 0.4100 | SL: -9.6c @ 0.2540 | T-24:14 | TP Armed: Y | SL Disabled: N
+2026-03-07 17:35:47,440 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:35:58,612 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.5750 | U-PnL: $+32.14 (+64.29%) | TP: +6.0c @ 0.4100 | SL: -9.6c @ 0.2540 | T-24:01 | TP Armed: Y | SL Disabled: N
+2026-03-07 17:36:11,407 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.5750 | U-PnL: $+32.14 (+64.29%) | TP: +6.0c @ 0.4100 | SL: -9.6c @ 0.2540 | T-23:48 | TP Armed: Y | SL Disabled: N
+2026-03-07 17:36:20,622 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:36:24,434 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.5750 | U-PnL: $+32.14 (+64.29%) | TP: +6.0c @ 0.4100 | SL: -9.6c @ 0.2540 | T-23:35 | TP Armed: Y | SL Disabled: N
+2026-03-07 17:36:37,333 [INFO] [EXIT] EXIT FILLED [PAPER] DOWN on bitcoin-up-or-down-march-7-4pm-et | Reason: TP_LOCK_RETRACE (peak +22.5c -> now +1.5c, floor +12.4c) | Exit Px: 0.3650 | Proceeds: $52.14 | PnL: $+2.14
+2026-03-07 17:36:37,335 [INFO] [TRADE CLOSED] bitcoin-up-or-down-march-7-4pm-et | DOWN | PnL: $+2.14 | Exit: 0.3650 | Underlying: 67318.94 | Reason: TP_LOCK_RETRACE (peak +22.5c -> now +1.5c, floor +12.4c)
+2026-03-07 17:37:06,830 [INFO] [BET] BET PLACED [PAPER] DOWN on bitcoin-up-or-down-march-7-4pm-et | Filled: $50.00 | Avg Px: 0.4000 | Shares: 125.0000 | Liq: PAPER_SIM | Expected: 0.3709
+2026-03-07 17:37:06,969 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:37:07,329 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3650 | U-PnL: $-4.38 (-8.75%) | TP: +6.0c @ 0.4600 | SL: -11.5c @ 0.2848 | T-22:52 | TP Armed: N | SL Disabled: N
+2026-03-07 17:37:19,622 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3650 | U-PnL: $-4.38 (-8.75%) | TP: +6.0c @ 0.4600 | SL: -11.5c @ 0.2848 | T-22:40 | TP Armed: N | SL Disabled: N
+2026-03-07 17:37:32,661 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3650 | U-PnL: $-4.38 (-8.75%) | TP: +6.0c @ 0.4600 | SL: -11.5c @ 0.2848 | T-22:27 | TP Armed: N | SL Disabled: N
+2026-03-07 17:37:39,944 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:37:45,520 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3650 | U-PnL: $-4.38 (-8.75%) | TP: +6.0c @ 0.4600 | SL: -11.5c @ 0.2848 | T-22:14 | TP Armed: N | SL Disabled: N
+2026-03-07 17:37:58,492 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3650 | U-PnL: $-4.38 (-8.75%) | TP: +6.0c @ 0.4600 | SL: -11.5c @ 0.2848 | T-22:01 | TP Armed: N | SL Disabled: N
+2026-03-07 17:38:11,379 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3650 | U-PnL: $-4.38 (-8.75%) | TP: +6.0c @ 0.4600 | SL: -11.5c @ 0.2848 | T-21:48 | TP Armed: N | SL Disabled: N
+2026-03-07 17:38:13,274 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:38:24,301 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3650 | U-PnL: $-4.38 (-8.75%) | TP: +6.0c @ 0.4600 | SL: -11.5c @ 0.2848 | T-21:35 | TP Armed: N | SL Disabled: N
+2026-03-07 17:38:37,173 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3650 | U-PnL: $-4.38 (-8.75%) | TP: +6.0c @ 0.4600 | SL: -11.5c @ 0.2848 | T-21:22 | TP Armed: N | SL Disabled: N
+2026-03-07 17:38:46,440 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:38:50,024 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3650 | U-PnL: $-4.38 (-8.75%) | TP: +6.0c @ 0.4600 | SL: -11.5c @ 0.2848 | T-21:09 | TP Armed: N | SL Disabled: N
+2026-03-07 17:39:02,039 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3650 | U-PnL: $-4.38 (-8.75%) | TP: +6.0c @ 0.4600 | SL: -11.5c @ 0.2848 | T-20:57 | TP Armed: N | SL Disabled: N
+2026-03-07 17:39:14,517 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3650 | U-PnL: $-4.38 (-8.75%) | TP: +6.0c @ 0.4600 | SL: -11.5c @ 0.2848 | T-20:45 | TP Armed: N | SL Disabled: N
+2026-03-07 17:39:19,592 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Position already active
+2026-03-07 17:39:26,633 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.3650 | U-PnL: $-4.38 (-8.75%) | TP: +6.0c @ 0.4600 | SL: -11.5c @ 0.2848 | T-20:33 | TP Armed: N | SL Disabled: N
+2026-03-07 17:39:38,266 [INFO] [EXIT] EXIT FILLED [PAPER] DOWN on bitcoin-up-or-down-march-7-4pm-et | Reason: TAKE_PROFIT (vol-adjusted: +36.5c) | Exit Px: 0.7650 | Proceeds: $95.62 | PnL: $+45.62
+2026-03-07 17:39:38,271 [INFO] [TRADE CLOSED] bitcoin-up-or-down-march-7-4pm-et | DOWN | PnL: $+45.62 | Exit: 0.7650 | Underlying: 67330.46 | Reason: TAKE_PROFIT (vol-adjusted: +36.5c)
+2026-03-07 17:39:44,135 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 7.24%)
+2026-03-07 17:40:00,850 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV -0.33% <= 0 after slippage
+2026-03-07 17:40:09,328 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV 0.30% below AI trigger (1.00%)
+2026-03-07 17:40:17,472 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV -0.05% <= 0 after slippage
+2026-03-07 17:40:47,308 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: AI vetoed borderline signal
+2026-03-07 17:40:47,832 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 8.67%)
+2026-03-07 17:40:56,080 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 5.59%)
+2026-03-07 17:41:24,467 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: AI vetoed borderline signal
+2026-03-07 17:41:51,001 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: AI vetoed borderline signal
+2026-03-07 17:41:51,715 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: AI cap reached (6/6)
+2026-03-07 17:42:08,264 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Net EV -0.16% <= 0 after slippage
+2026-03-07 17:42:16,427 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 12.52%)
+2026-03-07 17:42:24,576 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 12.31%)
+2026-03-07 17:42:32,589 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 8.54%)
+2026-03-07 17:42:40,887 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 7.08%)
+2026-03-07 17:42:49,334 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: AI cap reached (6/6)
+2026-03-07 17:43:06,051 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: AI cap reached (6/6)
+2026-03-07 17:43:14,520 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 12.18%)
+2026-03-07 17:43:22,877 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Score 1 requires EV >= 15.00% (got 11.85%)
+2026-03-07 17:43:31,232 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: AI cap reached (6/6)
+2026-03-07 17:43:47,600 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: AI cap reached (6/6)
+2026-03-07 17:44:04,261 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: AI cap reached (6/6)
+2026-03-07 17:44:20,705 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: AI cap reached (6/6)
+2026-03-07 17:44:37,060 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: AI cap reached (6/6)
+2026-03-07 17:44:53,692 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: AI cap reached (6/6)
+2026-03-07 17:45:10,360 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: AI cap reached (6/6)
+2026-03-07 17:45:18,473 [INFO] [BET] BET PLACED [PAPER] DOWN on bitcoin-up-or-down-march-7-4pm-et | Filled: $50.00 | Avg Px: 0.8000 | Shares: 62.5000 | Liq: PAPER_SIM | Expected: 0.7774
+2026-03-07 17:45:19,121 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.7650 | U-PnL: $-2.19 (-4.38%) | TP: +6.0c @ 0.8600 | SL: -11.5c @ 0.6848 | T-14:40 | TP Armed: N | SL Disabled: N
+2026-03-07 17:45:26,833 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Max trades per hour (3) reached.
+2026-03-07 17:45:31,242 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.7650 | U-PnL: $-2.19 (-4.38%) | TP: +6.0c @ 0.8600 | SL: -11.5c @ 0.6848 | T-14:28 | TP Armed: N | SL Disabled: N
+2026-03-07 17:45:43,647 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Max trades per hour (3) reached.
+2026-03-07 17:45:44,319 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-4pm-et | Mark: 0.6750 | U-PnL: $-7.81 (-15.62%) | TP: +6.0c @ 0.8600 | SL: -11.5c @ 0.6848 | T-14:15 | TP Armed: N | SL Disabled: N
+2026-03-07 17:45:45,419 [INFO] [EXIT] EXIT FILLED [PAPER] DOWN on bitcoin-up-or-down-march-7-4pm-et | Reason: STOP_LOSS_CONFIRMED (-12.5c, 8/8) | Exit Px: 0.6750 | Proceeds: $42.19 | PnL: $-7.81
+2026-03-07 17:45:45,422 [INFO] [TRADE CLOSED] bitcoin-up-or-down-march-7-4pm-et | DOWN | PnL: $-7.81 | Exit: 0.6750 | Underlying: 67335.03 | Reason: STOP_LOSS_CONFIRMED (-12.5c, 8/8)
+2026-03-07 17:45:59,956 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Max trades per hour (3) reached.
+2026-03-07 17:46:16,258 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Max trades per hour (3) reached.
+2026-03-07 17:46:32,886 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Max trades per hour (3) reached.
+2026-03-07 17:46:49,233 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Max trades per hour (3) reached.
+2026-03-07 17:47:06,001 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Max trades per hour (3) reached.
+2026-03-07 17:47:22,530 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Max trades per hour (3) reached.
+2026-03-07 17:47:38,879 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Max trades per hour (3) reached.
+2026-03-07 17:47:55,466 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Max trades per hour (3) reached.
+2026-03-07 17:48:11,796 [INFO] [SKIP] bitcoin-up-or-down-march-7-4pm-et: Max trades per hour (3) reached.
