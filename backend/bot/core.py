@@ -1459,6 +1459,11 @@ def compute_ev_with_slippage(
         "approved": net_ev_pct > 0  
     }
 
+def get_entry_market_prob_pct(poly_data: dict, direction: str) -> float:
+    if direction == "UP":
+        return float(poly_data.get("up_entry_prob", poly_data.get("up_prob", 0.0)) or 0.0)
+    return float(poly_data.get("down_entry_prob", poly_data.get("down_prob", 0.0)) or 0.0)
+
 # ============================================================
 # POLYMARKET CLOB & FETCHERS
 # ============================================================
@@ -1549,6 +1554,40 @@ async def get_polymarket_odds_cached(session: aiohttp.ClientSession, slug: str) 
         _poly_cache_ts   = now
     return result
 
+async def _fetch_clob_best_quotes(token_id: str) -> tuple[float | None, float | None]:
+    if not token_id or clob_client is None:
+        return None, None
+    try:
+        book = await asyncio.to_thread(clob_client.get_order_book, token_id)
+        if not book:
+            return None, None
+
+        bid_prices = []
+        ask_prices = []
+        for bid in (book.bids or []):
+            try:
+                p = float(bid.price)
+                s = float(bid.size)
+                if p > 0 and s > 0:
+                    bid_prices.append(p)
+            except Exception:
+                continue
+        for ask in (book.asks or []):
+            try:
+                p = float(ask.price)
+                s = float(ask.size)
+                if p > 0 and s > 0:
+                    ask_prices.append(p)
+            except Exception:
+                continue
+
+        best_bid = max(bid_prices) if bid_prices else None
+        best_ask = min(ask_prices) if ask_prices else None
+        return best_bid, best_ask
+    except Exception as e:
+        log.debug(f"[ODDS] CLOB quote fetch failed for {token_id}: {e}")
+        return None, None
+
 async def _fetch_polymarket_odds(session: aiohttp.ClientSession, slug: str) -> dict:
     if not slug: return {"market_found": False}
     try:
@@ -1563,9 +1602,34 @@ async def _fetch_polymarket_odds(session: aiohttp.ClientSession, slug: str) -> d
                 token_ids = json.loads(active_market.get("clobTokenIds", "[]"))
                 strike_price = await fetch_price_to_beat_for_market(session, slug)
 
+                up_public_prob = float(prices[0]) * 100
+                down_public_prob = float(prices[1]) * 100
+                up_entry_prob = up_public_prob
+                down_entry_prob = down_public_prob
+                up_best_bid = None
+                up_best_ask = None
+                down_best_bid = None
+                down_best_ask = None
+
+                if clob_client is not None and not PAPER_TRADING:
+                    try:
+                        (up_best_bid, up_best_ask), (down_best_bid, down_best_ask) = await asyncio.gather(
+                            _fetch_clob_best_quotes(token_ids[0]),
+                            _fetch_clob_best_quotes(token_ids[1]),
+                        )
+                        if up_best_ask is not None and 0.01 <= up_best_ask <= 0.99:
+                            up_entry_prob = up_best_ask * 100.0
+                        if down_best_ask is not None and 0.01 <= down_best_ask <= 0.99:
+                            down_entry_prob = down_best_ask * 100.0
+                    except Exception as e:
+                        log.debug(f"[ODDS] Live entry price overlay failed for {slug}: {e}")
+
                 return {
                     "market_found": True,
-                    "up_prob": float(prices[0]) * 100, "down_prob": float(prices[1]) * 100,
+                    "up_prob": up_public_prob, "down_prob": down_public_prob,
+                    "up_entry_prob": up_entry_prob, "down_entry_prob": down_entry_prob,
+                    "up_best_bid": up_best_bid, "up_best_ask": up_best_ask,
+                    "down_best_bid": down_best_bid, "down_best_ask": down_best_ask,
                     "seconds_remaining": _parse_seconds_remaining(event.get("endDate", "")),
                     "token_id_up": token_ids[0], "token_id_down": token_ids[1],
                     "strike_price": strike_price
@@ -2057,6 +2121,9 @@ def run_gatekeeper(
     if not poly_data["market_found"]: 
         return False, "No Polymarket data", {}, {}
 
+    up_market_prob = get_entry_market_prob_pct(poly_data, "UP")
+    down_market_prob = get_entry_market_prob_pct(poly_data, "DOWN")
+
     seconds_left = poly_data.get("seconds_remaining", 0)
     
     if seconds_left < MIN_SECONDS_REMAINING: 
@@ -2081,7 +2148,7 @@ def run_gatekeeper(
     if ema_spread_pct < EMA_SQUEEZE_PCT:
         return False, f"EMA Squeeze (spread {ema_spread_pct*100:.3f}%)", {}, {}
 
-    if poly_data["up_prob"] > MAX_CROWD_PROB_TO_CALL or poly_data["down_prob"] > MAX_CROWD_PROB_TO_CALL:
+    if up_market_prob > MAX_CROWD_PROB_TO_CALL or down_market_prob > MAX_CROWD_PROB_TO_CALL:
         return False, "Crowd skew too high", {}, {}
 
     strike = poly_data.get("strike_price", 0.0)
@@ -2091,22 +2158,22 @@ def run_gatekeeper(
     prob_up, prob_down = compute_directional_prob(ctx, strike, seconds_left)
     
     kelly_up_temp = compute_ev_with_slippage(
-        prob_up, poly_data["up_prob"], current_balance, bet_size=2.50
+        prob_up, up_market_prob, current_balance, bet_size=2.50
     )
     kelly_down_temp = compute_ev_with_slippage(
-        prob_down, poly_data["down_prob"], current_balance, bet_size=2.50
+        prob_down, down_market_prob, current_balance, bet_size=2.50
     )
 
     ev_up = compute_ev_with_slippage(
         prob_up, 
-        poly_data["up_prob"],
+        up_market_prob,
         current_balance,
         bet_size=kelly_up_temp["kelly_bet"],
         estimated_spread_pct=0.02 
     )
     ev_down = compute_ev_with_slippage(
         prob_down,
-        poly_data["down_prob"],
+        down_market_prob,
         current_balance,
         bet_size=kelly_down_temp["kelly_bet"],
         estimated_spread_pct=0.02
@@ -2114,8 +2181,8 @@ def run_gatekeeper(
 
     target_dir = "UP" if ev_up["ev_pct"] > ev_down["ev_pct"] else "DOWN"
     latest_signal_alignment = build_signal_alignment(ctx, target_dir)
-    up_edge = prob_up - float(poly_data.get("up_prob", 0.0))
-    down_edge = prob_down - float(poly_data.get("down_prob", 0.0))
+    up_edge = prob_up - up_market_prob
+    down_edge = prob_down - down_market_prob
     best_edge = up_edge if target_dir == "UP" else down_edge
     best_ev_pct = float(ev_up.get("ev_pct", 0.0)) if target_dir == "UP" else float(ev_down.get("ev_pct", 0.0))
     latest_edge_snapshot = {
@@ -2123,8 +2190,10 @@ def run_gatekeeper(
         "direction": target_dir,
         "up_math_prob": round(prob_up, 2),
         "down_math_prob": round(prob_down, 2),
-        "up_poly_prob": round(float(poly_data.get("up_prob", 0.0)), 2),
-        "down_poly_prob": round(float(poly_data.get("down_prob", 0.0)), 2),
+        "up_poly_prob": round(up_market_prob, 2),
+        "down_poly_prob": round(down_market_prob, 2),
+        "up_public_prob": round(float(poly_data.get("up_prob", 0.0)), 2),
+        "down_public_prob": round(float(poly_data.get("down_prob", 0.0)), 2),
         "up_edge": round(up_edge, 2),
         "down_edge": round(down_edge, 2),
         "best_edge": round(best_edge, 2),
@@ -2214,10 +2283,7 @@ def rule_engine_decide(ctx: dict, ev_up: dict, ev_down: dict,
 
     secs_remaining = poly_data.get("seconds_remaining", 0)
     target_ev_pct = target_ev.get("ev_pct", 0.0)
-    target_token_price = (
-        poly_data.get("up_prob", 0.0) / 100.0 if target_dir == "UP"
-        else poly_data.get("down_prob", 0.0) / 100.0
-    )
+    target_token_price = get_entry_market_prob_pct(poly_data, target_dir) / 100.0
     allow_score0_extreme_ev = (
         score == 0
         and target_ev_pct >= SCORE0_MIN_EV_PCT
@@ -2348,7 +2414,7 @@ async def _commit_decision(
             soft_skipped_slugs.discard(slug)
             best_ev_seen.pop(slug, None)
 
-            bought_price = poly_data["up_prob"] / 100.0 if decision == "UP" else poly_data["down_prob"] / 100.0
+            bought_price = get_entry_market_prob_pct(poly_data, decision) / 100.0
             token_id = poly_data.get("token_id_up", "") if decision == "UP" else poly_data.get("token_id_down", "")
 
             ml_data = {
@@ -2447,7 +2513,7 @@ async def place_bet(slug: str, decision: str, bet_size: float, poly_data: dict, 
         if slug in active_predictions:
             active_predictions[slug]["ml_data"]["spread_eval"] = liq_msg
 
-    market_prob = poly_data["up_prob"] if decision == "UP" else poly_data["down_prob"]
+    market_prob = get_entry_market_prob_pct(poly_data, decision)
     expected_price = market_prob / 100.0
 
     if not PAPER_TRADING and not DRY_RUN and clob_client and ("AMM tiny live fallback" in liq_msg):
@@ -2944,10 +3010,7 @@ async def call_local_ai(session: aiohttp.ClientSession, current_candle: dict, hi
 
         decision_score = int(rule_decision.get("score", 0))
         target_ev_pct = float(ev.get("ev_pct", 0.0))
-        target_token_price = (
-            poly_data.get("up_prob", 0.0) / 100.0 if favored_dir == "UP"
-            else poly_data.get("down_prob", 0.0) / 100.0
-        )
+        target_token_price = get_entry_market_prob_pct(poly_data, favored_dir) / 100.0
 
         # =====================================================================
         # UPDATED AI PROMPT: Smoothed persona & explicit "majority rules" logic

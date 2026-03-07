@@ -33,6 +33,17 @@ import EquityCurve from "../components/EquityCurve";
 import WinHeatmap from "../components/WinHeatmap";
 import AiInsights from "../components/AiInsights";
 import GrowthChart from "../components/GrowthChart";
+import {
+  type DashboardLiveData,
+  type DrawdownGuardSnapshot,
+  type EnginePosition,
+  type EngineTelemetrySnapshot,
+  type EngineWsPayload,
+  type MarketCandleSnapshot,
+  type PriceBar,
+  type TechnicalContextSnapshot,
+  DEFAULT_DASHBOARD_LIVE_DATA,
+} from "../components/engine-types";
 import { getHttpUrl, getWsUrl } from "../config";
 
 type WsStatus = "CONNECTING" | "LIVE" | "OFFLINE" | "ERROR";
@@ -117,77 +128,6 @@ const DEFAULT_ENGINE_HEALTH: EngineHealth = {
   kill_switch: false,
 };
 
-const DEFAULT_LIVE_DATA = {
-  price: 0,
-  vwap: 0,
-  history: [],
-  active_trades: {},
-  candle: null,
-  is_paper: true,
-  logs: [],
-  regime: "UNKNOWN",
-  atr: 0,
-  strategy: {
-    edge_tracker: {
-      slug: "",
-      direction: "UNKNOWN",
-      up_math_prob: 0,
-      down_math_prob: 0,
-      up_poly_prob: 0,
-      down_poly_prob: 0,
-      up_edge: 0,
-      down_edge: 0,
-      best_edge: 0,
-      best_ev_pct: 0,
-    },
-    signal_alignment: {
-      direction: "UNKNOWN",
-      score: 0,
-      max_score: 4,
-      vwap: false,
-      rsi: false,
-      volume: false,
-      cvd: false,
-    },
-    execution_latency: {
-      signal_generation_ms: 0,
-      ai_inference_ms: 0,
-      clob_request_ms: 0,
-      confirmation_ms: 0,
-      total_ms: 0,
-      updated_at: 0,
-    },
-    cvd_gauge: {
-      delta: 0,
-      one_min_delta: 0,
-      threshold: 12000,
-      divergence: "NONE",
-      divergence_strength: 0,
-    },
-    adaptive_thresholds: {
-      atr_min: 0,
-      cvd_threshold: 12000,
-    },
-    system_locks: {
-      locks: [],
-      ai_circuit_open: false,
-      ai_circuit_remaining_secs: 0,
-      ai_failures: 0,
-      ai_in_flight: false,
-    },
-    drawdown_guard: {
-      regime: "NORMAL",
-      text: "",
-      bankroll: 0,
-      max_bet_cap: 0,
-      drawdown_used: 0,
-      drawdown_room_left: 0,
-      max_trade_pct: 0.05,
-      max_daily_loss_pct: 0.2,
-    },
-  },
-};
-
 function parseUtcTimestamp(raw: string): Date | null {
   if (!raw) {
     return null;
@@ -247,6 +187,261 @@ function formatDuration(seconds: number): string {
   return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function toEpochSeconds(raw: unknown): number {
+  if (typeof raw === "number" && Number.isFinite(raw)) {
+    return raw > 10_000_000_000 ? Math.floor(raw / 1000) : Math.floor(raw);
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    const asNumber = Number(raw);
+    if (Number.isFinite(asNumber)) {
+      return toEpochSeconds(asNumber);
+    }
+    const parsed = parseUtcTimestamp(raw);
+    if (parsed) {
+      return Math.floor(parsed.getTime() / 1000);
+    }
+  }
+  return 0;
+}
+
+function normalizePriceBar(raw: unknown): PriceBar | null {
+  if (!isRecord(raw)) {
+    return null;
+  }
+  const time = toEpochSeconds(raw.time ?? raw.timestamp);
+  const open = safeNumber(raw.open);
+  const high = safeNumber(raw.high);
+  const low = safeNumber(raw.low);
+  const close = safeNumber(raw.close);
+  const volume = safeNumber(raw.volume);
+  if (!time || !Number.isFinite(open) || !Number.isFinite(high) || !Number.isFinite(low) || !Number.isFinite(close)) {
+    return null;
+  }
+  return { time, open, high, low, close, volume };
+}
+
+function normalizeLiveCandle(raw: Partial<MarketCandleSnapshot> | null | undefined): PriceBar | null {
+  return normalizePriceBar(raw ?? null);
+}
+
+function normalizePositions(raw: EngineWsPayload["positions"]): Record<string, EnginePosition> {
+  if (Array.isArray(raw)) {
+    return raw.reduce<Record<string, EnginePosition>>((acc, position) => {
+      if (position?.slug) {
+        acc[position.slug] = position;
+      }
+      return acc;
+    }, {});
+  }
+  if (isRecord(raw)) {
+    return Object.entries(raw).reduce<Record<string, EnginePosition>>((acc, [slug, value]) => {
+      if (isRecord(value)) {
+        acc[slug] = { ...(value as unknown as EnginePosition), slug: String((value as EnginePosition).slug || slug) };
+      }
+      return acc;
+    }, {});
+  }
+  return {};
+}
+
+function extractContext(
+  market: DashboardLiveData["market"],
+  telemetry: EngineTelemetrySnapshot,
+): Partial<TechnicalContextSnapshot> {
+  const telemetryContext = isRecord(telemetry.context) ? telemetry.context : null;
+  const marketContext = isRecord(market.latest_context) ? market.latest_context : null;
+  return {
+    ...(marketContext || {}),
+    ...(telemetryContext || {}),
+  };
+}
+
+function normalizeDrawdownGuard(
+  drawdownGuard: Partial<DrawdownGuardSnapshot> | undefined,
+  previous: DashboardLiveData,
+  runtime: EngineWsPayload["runtime"],
+): DrawdownGuardSnapshot {
+  const previousGuard = previous.drawdown_guard || DEFAULT_DASHBOARD_LIVE_DATA.drawdown_guard;
+  const next = {
+    ...previousGuard,
+    ...(drawdownGuard || {}),
+  };
+  if (!next.regime) {
+    next.regime = runtime?.kill_switch_enabled ? "PAUSED" : "NORMAL";
+  }
+  if (!next.text) {
+    next.text = next.regime === "PAUSED" ? "Trading paused" : "";
+  }
+  if (!Number.isFinite(Number(next.current_balance)) && Number.isFinite(Number(runtime?.simulated_balance))) {
+    next.current_balance = safeNumber(runtime?.simulated_balance);
+  }
+  return next;
+}
+
+function normalizeWsPayload(raw: unknown, previous: DashboardLiveData): DashboardLiveData {
+  if (!isRecord(raw)) {
+    return previous;
+  }
+
+  const legacyRootKeys = ["price", "history", "strategy", "active_trades", "candle"];
+  const isLegacyPayload = legacyRootKeys.some((key) => key in raw);
+  if (isLegacyPayload) {
+    const merged = {
+      ...DEFAULT_DASHBOARD_LIVE_DATA,
+      ...previous,
+      ...raw,
+    } as DashboardLiveData;
+    return {
+      ...merged,
+      history: Array.isArray(raw.history)
+        ? raw.history.map(normalizePriceBar).filter((bar): bar is PriceBar => Boolean(bar))
+        : previous.history,
+      candle: normalizeLiveCandle((raw.candle as Partial<MarketCandleSnapshot> | null | undefined) ?? previous.candle),
+      active_trades: isRecord(raw.active_trades)
+        ? normalizePositions(raw.active_trades as EngineWsPayload["positions"])
+        : previous.active_trades,
+    };
+  }
+
+  const payload = raw as EngineWsPayload;
+  const market = {
+    ...previous.market,
+    ...(payload.market || {}),
+  };
+  const telemetry = {
+    ...previous.telemetry,
+    ...(payload.telemetry || {}),
+    edge_snapshot: {
+      ...previous.telemetry.edge_snapshot,
+      ...(payload.telemetry?.edge_snapshot || {}),
+    },
+    signal_alignment: {
+      ...previous.telemetry.signal_alignment,
+      ...(payload.telemetry?.signal_alignment || {}),
+    },
+    execution_timing: {
+      ...previous.telemetry.execution_timing,
+      ...(payload.telemetry?.execution_timing || {}),
+    },
+    cvd_snapshot: {
+      ...previous.telemetry.cvd_snapshot,
+      ...(payload.telemetry?.cvd_snapshot || {}),
+    },
+    adaptive_thresholds: {
+      ...previous.telemetry.adaptive_thresholds,
+      ...(payload.telemetry?.adaptive_thresholds || {}),
+    },
+    last_ai_interaction: {
+      ...previous.telemetry.last_ai_interaction,
+      ...(payload.telemetry?.last_ai_interaction || {}),
+    },
+  };
+  const runtime = {
+    ...previous.runtime,
+    ...(payload.runtime || {}),
+  };
+  const drawdown_guard = normalizeDrawdownGuard(payload.drawdown_guard, previous, runtime);
+  const positions = normalizePositions(payload.positions);
+  const context = extractContext(market, telemetry);
+
+  const historySource = Array.isArray(payload.market?.candle_history) ? payload.market?.candle_history : previous.market.candle_history;
+  const history = (historySource || [])
+    .map(normalizePriceBar)
+    .filter((bar): bar is PriceBar => Boolean(bar))
+    .sort((a, b) => a.time - b.time);
+
+  const candle = normalizeLiveCandle((payload.market?.live_candle as Partial<MarketCandleSnapshot> | null | undefined) ?? market.live_candle) ?? previous.candle;
+  const price = safeNumber(payload.market?.live_price, previous.price);
+  const vwap = safeNumber((context as Partial<TechnicalContextSnapshot>).vwap, previous.vwap);
+  const regime = String((context as Partial<TechnicalContextSnapshot>).market_regime || previous.regime || "UNKNOWN");
+  const atr = safeNumber((context as Partial<TechnicalContextSnapshot>).adaptive_atr_floor, previous.atr);
+  const positionSecondsRemaining = Object.values(positions)[0]?.seconds_remaining;
+  const seconds_remaining = safeNumber(positionSecondsRemaining, previous.seconds_remaining);
+  const logs = Array.isArray(runtime.logs)
+    ? runtime.logs.map((item) => String(item))
+    : previous.logs;
+
+  const strategy = {
+    edge_tracker: {
+      ...DEFAULT_DASHBOARD_LIVE_DATA.strategy.edge_tracker,
+      ...previous.strategy.edge_tracker,
+      ...telemetry.edge_snapshot,
+    },
+    signal_alignment: {
+      ...DEFAULT_DASHBOARD_LIVE_DATA.strategy.signal_alignment,
+      ...previous.strategy.signal_alignment,
+      ...telemetry.signal_alignment,
+    },
+    execution_latency: {
+      ...DEFAULT_DASHBOARD_LIVE_DATA.strategy.execution_latency,
+      ...previous.strategy.execution_latency,
+      ...telemetry.execution_timing,
+    },
+    cvd_gauge: {
+      ...DEFAULT_DASHBOARD_LIVE_DATA.strategy.cvd_gauge,
+      ...previous.strategy.cvd_gauge,
+      ...telemetry.cvd_snapshot,
+    },
+    adaptive_thresholds: {
+      ...DEFAULT_DASHBOARD_LIVE_DATA.strategy.adaptive_thresholds,
+      ...previous.strategy.adaptive_thresholds,
+      ...telemetry.adaptive_thresholds,
+    },
+    system_locks: {
+      ...DEFAULT_DASHBOARD_LIVE_DATA.strategy.system_locks,
+      ...previous.strategy.system_locks,
+      locks: runtime.latest_rejected_reason
+        ? Array.from(new Set([...(previous.strategy.system_locks.locks || []), runtime.latest_rejected_reason]))
+        : previous.strategy.system_locks.locks,
+      ai_circuit_open: safeNumber(runtime.ai_circuit_open_until) > Date.now() / 1000,
+      ai_circuit_remaining_secs: Math.max(0, Math.floor(safeNumber(runtime.ai_circuit_open_until) - Date.now() / 1000)),
+      ai_failures: safeNumber(runtime.ai_consecutive_failures),
+      ai_in_flight: Boolean(runtime.ai_call_in_flight),
+    },
+    drawdown_guard,
+  };
+
+  return {
+    market: {
+      ...market,
+      live_price: price,
+      live_candle: payload.market?.live_candle ? { ...payload.market.live_candle } : market.live_candle,
+      candle_history: historySource || [],
+      latest_context: Object.keys(context).length > 0 ? context : market.latest_context,
+    },
+    positions,
+    telemetry,
+    runtime,
+    drawdown_guard,
+    price,
+    vwap,
+    history: history.length > 0 ? history : previous.history,
+    active_trades: positions,
+    candle,
+    is_paper: Boolean(runtime.paper_trading ?? previous.is_paper),
+    logs,
+    regime,
+    atr,
+    seconds_remaining,
+    ai_log: {
+      prompt: String(telemetry.last_ai_interaction?.prompt || previous.ai_log.prompt),
+      response: String(telemetry.last_ai_interaction?.response || previous.ai_log.response),
+      timestamp: String(telemetry.last_ai_interaction?.timestamp || previous.ai_log.timestamp),
+    },
+    strategy,
+    quant: {
+      bayesian_probability: safeNumber((context as Partial<TechnicalContextSnapshot>).bayesian_probability, previous.quant.bayesian_probability),
+      garman_klass_volatility: safeNumber((context as Partial<TechnicalContextSnapshot>).garman_klass_volatility, previous.quant.garman_klass_volatility),
+      cvd_candle_delta: safeNumber((context as Partial<TechnicalContextSnapshot>).cvd_candle_delta, previous.quant.cvd_candle_delta),
+      expected_move_sigma: safeNumber((context as Partial<TechnicalContextSnapshot>).expected_move_sigma, previous.quant.expected_move_sigma),
+    },
+  };
+}
+
 function getOutcomeFromPnl(pnl: number): "WIN" | "LOSS" | "TIE" {
   if (pnl > 0) {
     return "WIN";
@@ -260,7 +455,7 @@ function getOutcomeFromPnl(pnl: number): "WIN" | "LOSS" | "TIE" {
 export default function EliteDashboard() {
   const [activeTab, setActiveTab] = useState<"terminal" | "journal" | "analytics">("terminal");
   const [portfolio, setPortfolio] = useState<any>(null);
-  const [liveData, setLiveData] = useState<any>(DEFAULT_LIVE_DATA);
+  const [liveData, setLiveData] = useState<DashboardLiveData>(DEFAULT_DASHBOARD_LIVE_DATA);
   const [wsStatus, setWsStatus] = useState<WsStatus>("CONNECTING");
   const [reconnectIn, setReconnectIn] = useState(0);
   const [reconnectNonce, setReconnectNonce] = useState(0);
@@ -440,42 +635,32 @@ export default function EliteDashboard() {
         return;
       }
       try {
-        const data = JSON.parse(event.data);
-        if (data.candle && data.candle.o !== undefined) {
-          const k = data.candle;
-          data.candle = {
-            open: parseFloat(k.o),
-            high: parseFloat(k.h),
-            low: parseFloat(k.l),
-            close: parseFloat(k.c),
-            volume: parseFloat(k.v),
-            ...(k.t ? { time: k.t } : {}),
-          };
-        }
+        const rawPayload = JSON.parse(event.data) as EngineWsPayload;
+        const nextPayload = normalizeWsPayload(rawPayload, liveData);
 
-        if (data.price && lastPriceRef.current) {
-          const change = ((data.price - lastPriceRef.current) / lastPriceRef.current) * 100;
+        if (nextPayload.price && lastPriceRef.current) {
+          const change = ((nextPayload.price - lastPriceRef.current) / lastPriceRef.current) * 100;
           setPriceChange(change);
         }
-        lastPriceRef.current = safeNumber(data.price);
+        lastPriceRef.current = safeNumber(nextPayload.price);
 
-        if (data.portfolio && !data.portfolio.error) {
-          setPortfolio(data.portfolio);
+        if (isRecord(rawPayload.portfolio) && !rawPayload.portfolio?.error) {
+          setPortfolio(rawPayload.portfolio);
           setMetricsLoading(false);
         }
 
-        if (data.engine_health && typeof data.engine_health === "object") {
+        if (rawPayload.engine_health && typeof rawPayload.engine_health === "object") {
           healthSupportedRef.current = true;
-          setEngineHealth({ ...DEFAULT_ENGINE_HEALTH, ...data.engine_health });
+          setEngineHealth({ ...DEFAULT_ENGINE_HEALTH, ...rawPayload.engine_health });
         }
 
-        if (data.engine_control && typeof data.engine_control === "object") {
+        if (rawPayload.engine_control && typeof rawPayload.engine_control === "object") {
           controlSupportedRef.current = true;
           const nextControl: EngineControl = {
-            kill_switch: Boolean(data.engine_control.kill_switch),
-            paper_trading: Boolean(data.engine_control.paper_trading),
-            max_trade_pct: safeNumber(data.engine_control.max_trade_pct, 0.05),
-            max_daily_loss_pct: safeNumber(data.engine_control.max_daily_loss_pct, 0.2),
+            kill_switch: Boolean(rawPayload.engine_control.kill_switch),
+            paper_trading: Boolean(rawPayload.engine_control.paper_trading),
+            max_trade_pct: safeNumber(rawPayload.engine_control.max_trade_pct, 0.05),
+            max_daily_loss_pct: safeNumber(rawPayload.engine_control.max_daily_loss_pct, 0.2),
           };
           setEngineControl(nextControl);
           if (!showControlsRef.current || !controlDirtyRef.current) {
@@ -483,51 +668,7 @@ export default function EliteDashboard() {
           }
         }
 
-        setLiveData((prev: any) => ({
-          ...DEFAULT_LIVE_DATA,
-          ...(prev || {}),
-          ...data,
-          strategy: {
-            ...DEFAULT_LIVE_DATA.strategy,
-            ...(prev?.strategy || {}),
-            ...(data?.strategy || {}),
-            edge_tracker: {
-              ...DEFAULT_LIVE_DATA.strategy.edge_tracker,
-              ...(prev?.strategy?.edge_tracker || {}),
-              ...(data?.strategy?.edge_tracker || {}),
-            },
-            signal_alignment: {
-              ...DEFAULT_LIVE_DATA.strategy.signal_alignment,
-              ...(prev?.strategy?.signal_alignment || {}),
-              ...(data?.strategy?.signal_alignment || {}),
-            },
-            execution_latency: {
-              ...DEFAULT_LIVE_DATA.strategy.execution_latency,
-              ...(prev?.strategy?.execution_latency || {}),
-              ...(data?.strategy?.execution_latency || {}),
-            },
-            cvd_gauge: {
-              ...DEFAULT_LIVE_DATA.strategy.cvd_gauge,
-              ...(prev?.strategy?.cvd_gauge || {}),
-              ...(data?.strategy?.cvd_gauge || {}),
-            },
-            adaptive_thresholds: {
-              ...DEFAULT_LIVE_DATA.strategy.adaptive_thresholds,
-              ...(prev?.strategy?.adaptive_thresholds || {}),
-              ...(data?.strategy?.adaptive_thresholds || {}),
-            },
-            system_locks: {
-              ...DEFAULT_LIVE_DATA.strategy.system_locks,
-              ...(prev?.strategy?.system_locks || {}),
-              ...(data?.strategy?.system_locks || {}),
-            },
-            drawdown_guard: {
-              ...DEFAULT_LIVE_DATA.strategy.drawdown_guard,
-              ...(prev?.strategy?.drawdown_guard || {}),
-              ...(data?.strategy?.drawdown_guard || {}),
-            },
-          },
-        }));
+        setLiveData((prev) => normalizeWsPayload(rawPayload, prev));
         setLiveLoading(false);
       } catch (error) {
         console.error("WebSocket payload parse error:", error);
@@ -709,6 +850,8 @@ export default function EliteDashboard() {
   const isPnlPositive = safeNumber(metrics?.current_pnl) >= 0;
   const isPriceUp = priceChange > 0;
   const activePositions = Object.keys(liveData.active_trades || {}).length;
+  const bayesianWinProbPct = clamp(safeNumber(liveData.quant.bayesian_probability) * 100, 0, 100);
+  const intradayVolatilityPct = Math.max(0, safeNumber(liveData.quant.garman_klass_volatility) * 100);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100 font-sans selection:bg-blue-500/30">
@@ -826,7 +969,7 @@ export default function EliteDashboard() {
           </div>
         </header>
 
-        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6">
           {metricsLoading ? (
             <>
               <SkeletonCard />
@@ -863,6 +1006,20 @@ export default function EliteDashboard() {
                 value={activePositions.toString()}
                 trend="neutral"
                 subtitle="Open trades"
+              />
+              <EnhancedStatCard
+                icon={<Target size={18} className="text-fuchsia-400" />}
+                label="Bayesian Win Prob"
+                value={`${bayesianWinProbPct.toFixed(1)}%`}
+                trend={bayesianWinProbPct >= 55 ? "up" : bayesianWinProbPct <= 45 ? "down" : "neutral"}
+                subtitle={`Move sigma ${safeNumber(liveData.quant.expected_move_sigma).toFixed(2)}`}
+              />
+              <EnhancedStatCard
+                icon={<BarChart3 size={18} className="text-cyan-400" />}
+                label="Intraday Volatility"
+                value={`${intradayVolatilityPct.toFixed(3)}%`}
+                trend={intradayVolatilityPct >= 0.5 ? "down" : "neutral"}
+                subtitle={`CVD ${formatSignedInt(safeNumber(liveData.quant.cvd_candle_delta))}`}
               />
             </>
           )}
@@ -1304,7 +1461,7 @@ function AdaptiveThresholdPanel({ atr, cvd, thresholds }: { atr: number; cvd: an
 }
 
 function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMode }: any) {
-  const strategy = liveData?.strategy || DEFAULT_LIVE_DATA.strategy;
+  const strategy = liveData?.strategy || DEFAULT_DASHBOARD_LIVE_DATA.strategy;
   return (
     <motion.div key="terminal" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="grid grid-cols-12 gap-6">
       <div className="col-span-12 space-y-6 xl:col-span-8">

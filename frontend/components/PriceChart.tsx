@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { createChart, CandlestickSeries, LineSeries, ColorType } from "lightweight-charts";
+import type { PriceBar } from "./engine-types";
 
 function getChartHeight(): number {
   if (typeof window !== "undefined" && window.innerWidth < 768) {
@@ -9,15 +10,33 @@ function getChartHeight(): number {
   return 350;
 }
 
+function normalizeBar(bar: Partial<PriceBar> | null | undefined): PriceBar | null {
+  if (!bar) {
+    return null;
+  }
+  const time = Number(bar.time);
+  const open = Number(bar.open);
+  const high = Number(bar.high);
+  const low = Number(bar.low);
+  const close = Number(bar.close);
+  const volume = Number(bar.volume ?? 0);
+  if (!Number.isFinite(time) || !Number.isFinite(open) || !Number.isFinite(high) || !Number.isFinite(low) || !Number.isFinite(close)) {
+    return null;
+  }
+  return { time, open, high, low, close, volume };
+}
+
+type PriceChartProps = {
+  candle: Partial<PriceBar> | null;
+  history?: Array<Partial<PriceBar>>;
+  vwap: number;
+};
+
 export default function PriceChart({
   candle,
   history,
   vwap,
-}: {
-  candle: any;
-  history?: any[];
-  vwap: number;
-}) {
+}: PriceChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<any>(null);
   const candlestickSeriesRef = useRef<any>(null);
@@ -75,14 +94,8 @@ export default function PriceChart({
       return;
     }
     const sanitizedHistory = history
-      .filter((bar) => bar && bar.time !== undefined)
-      .map((bar) => ({
-        time: Number(bar.time),
-        open: Number(bar.open),
-        high: Number(bar.high),
-        low: Number(bar.low),
-        close: Number(bar.close),
-      }))
+      .map((bar) => normalizeBar(bar))
+      .filter((bar): bar is PriceBar => Boolean(bar))
       .sort((a, b) => a.time - b.time);
     if (sanitizedHistory.length === 0) {
       return;
@@ -93,19 +106,21 @@ export default function PriceChart({
 
   // 4. Handle Live Updates safely
   useEffect(() => {
-    if (!candlestickSeriesRef.current || !candle?.time) return;
+    if (!candlestickSeriesRef.current) return;
+    const nextCandle = normalizeBar(candle);
+    if (!nextCandle) return;
 
     // Bootstrap with current candle if history has not arrived yet.
     if (!isHistoryLoaded.current) {
-      candlestickSeriesRef.current.setData([candle]);
+      candlestickSeriesRef.current.setData([nextCandle]);
       isHistoryLoaded.current = true;
     } else {
-      candlestickSeriesRef.current.update(candle);
+      candlestickSeriesRef.current.update(nextCandle);
     }
 
     if (vwap && vwapSeriesRef.current) {
       vwapSeriesRef.current.update({
-        time: candle.time,
+        time: nextCandle.time,
         value: vwap,
       });
     }
