@@ -1930,7 +1930,7 @@ async def bootstrap_runtime() -> EngineServices:
     )
     strategy_config = StrategyConfig(risk=risk_config)
     execution_config = ExecutionConfig(paper_trading=PAPER_TRADING, dry_run=DRY_RUN)
-    ai_config = AIConfig(model=os.getenv("LOCAL_AI_MODEL", AIConfig.model))
+    ai_config = AIConfig(model=os.getenv("LOCAL_AI_MODEL", AIConfig().model))
 
     http_session = create_http_session(data_config)
 

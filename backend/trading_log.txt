@@ -4390,3 +4390,15 @@
 2026-03-07 14:33:56,053 [ERROR] [ERROR] CLOB execution failed: PolyApiException[status_code=400, error_message={'error': 'no orders found to match with FAK order. FAK orders are partially filled or killed if no match is found.'}]
 2026-03-07 14:33:57,806 [INFO] [EV] DOWN | Gross: +23.27% | Slippage: -1.00% | Net: +22.05%
 2026-03-07 14:33:57,806 [INFO] [REENTRY] Skipped bitcoin-up-or-down-march-7-1pm-et: execution cooldown active (88s left)
+2026-03-07 16:45:05,902 [INFO] Elite Quant Engine v2 Initialized. Monitoring 15m WebSocket...
+2026-03-07 16:45:05,946 [INFO] [INIT] Simulated balance initialized: $5191.32 (base: $5000.0 + historical: $191.32)
+2026-03-07 16:45:05,947 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-7-3pm-et | Prefix: bitcoin-up-or-down-march-7-3pm
+2026-03-07 16:45:06,209 [INFO] [SYSTEM] Loaded 120 candles. VWAP=67,831.01
+2026-03-07 16:45:06,211 [INFO] [SYSTEM] Warming up local AI (<member 'model' of 'AIConfig' objects>) into RAM...
+2026-03-07 16:45:08,230 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-07 16:46:42,544 [INFO] Elite Quant Engine v2 Initialized. Monitoring 15m WebSocket...
+2026-03-07 16:46:42,564 [INFO] [INIT] Simulated balance initialized: $5000.00 (base: $5000.0 + historical: $0.00)
+2026-03-07 16:46:42,565 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-7-3pm-et | Prefix: bitcoin-up-or-down-march-7-3pm
+2026-03-07 16:46:42,843 [INFO] [SYSTEM] Loaded 120 candles. VWAP=67,830.87
+2026-03-07 16:46:42,843 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-07 16:47:25,984 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
