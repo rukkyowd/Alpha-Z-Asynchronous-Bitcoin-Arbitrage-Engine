@@ -1776,46 +1776,40 @@ function TerminalStream({ logs }: { logs: string[] }) {
 
 function ActiveTradesPanel({ trades, currentUnderlying }: { trades: Record<string, any>; currentUnderlying: number }) {
   const entries = Object.entries(trades || {});
+  
   if (entries.length === 0) {
-    return (
-      <div className="flex h-32 items-center justify-center text-xs text-az-text-muted">
-        No Active Positions
-      </div>
-    );
+    return <div className="p-4 text-xs font-mono uppercase text-az-text flex justify-center items-center h-full">No Active Positions</div>;
   }
 
   return (
-    <div className="w-full overflow-x-auto">
-      <table className="w-full text-left text-xs">
-        <thead>
-          <tr className="border-b border-az-border text-az-text-muted">
-            <th className="py-2 pl-4 pr-2 font-normal">Market</th>
-            <th className="px-2 py-2 font-normal">Side</th>
-            <th className="px-2 py-2 font-normal">Size</th>
-            <th className="px-2 py-2 text-right font-normal">Entry</th>
-            <th className="px-2 py-2 text-right font-normal">Mark</th>
-            <th className="py-2 pl-2 pr-4 text-right font-normal">PnL (c)</th>
+    <div className="w-full overflow-x-auto text-[11px] pb-2">
+      <table className="w-full text-left font-mono whitespace-nowrap">
+        <thead className="text-[10px] uppercase tracking-wider text-az-text border-b border-az-border">
+          <tr>
+            <th className="px-3 py-2 font-medium">Market</th>
+            <th className="px-3 py-2 font-medium">Dir</th>
+            <th className="px-3 py-2 font-medium text-right">Entry</th>
+            <th className="px-3 py-2 font-medium text-right">Mark</th>
+            <th className="px-3 py-2 font-medium text-right">PnL</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-az-border/50">
           {entries.map(([slug, trade]) => {
-            const direction = trade.decision === "UP" ? "LONG" : "SHORT";
-            const isLong = direction === "LONG";
-            const entryPrice = safeNumber(trade.bought_price);
-            const markPrice = safeNumber(trade.mark_price, entryPrice);
-            const tokenMoveCents = (markPrice - entryPrice) * 100;
-            const pnlColor = tokenMoveCents >= 0 ? "text-az-profit" : "text-az-loss";
-            const marketName = slug.split("-").slice(-2).join("-");
+            const entryPrice = Number(trade.bought_price) || 0;
+            const markPrice = Number(trade.mark_price) || entryPrice;
+            const pnlCents = (markPrice - entryPrice) * 100;
+            const isUp = trade.decision === "UP";
 
             return (
-              <tr key={slug} className="group border-b border-az-border/50 transition-colors hover:bg-az-surface-2">
-                <td className="py-2 pl-4 pr-2 font-mono text-az-text">{marketName}</td>
-                <td className={`px-2 py-2 font-bold ${isLong ? "text-az-profit" : "text-az-loss"}`}>{direction}</td>
-                <td className="px-2 py-2 text-az-text-muted">{safeNumber(trade.score)}/4</td>
-                <td className="px-2 py-2 text-right font-mono tabular-nums text-az-text">${entryPrice.toFixed(3)}</td>
-                <td className="px-2 py-2 text-right font-mono tabular-nums text-az-text">${markPrice.toFixed(3)}</td>
-                <td className={`py-2 pl-2 pr-4 text-right font-mono tabular-nums ${pnlColor}`}>
-                  {tokenMoveCents > 0 ? "+" : ""}{tokenMoveCents.toFixed(1)}
+              <tr key={slug} className="hover:bg-az-surface-2 transition-colors cursor-default">
+                <td className="px-3 py-2.5 text-az-text">{slug.split("-").slice(-2).join("-")}</td>
+                <td className={`px-3 py-2.5 font-bold ${isUp ? 'text-az-profit' : 'text-az-loss'}`}>
+                  {isUp ? "LONG" : "SHORT"}
+                </td>
+                <td className="px-3 py-2.5 text-right text-az-text">${entryPrice.toFixed(3)}</td>
+                <td className="px-3 py-2.5 text-right text-az-text">${markPrice.toFixed(3)}</td>
+                <td className={`px-3 py-2.5 text-right font-bold ${pnlCents >= 0 ? 'text-az-profit' : 'text-az-loss'}`}>
+                  {pnlCents >= 0 ? "+" : ""}{pnlCents.toFixed(1)}c
                 </td>
               </tr>
             );

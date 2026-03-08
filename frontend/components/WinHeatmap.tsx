@@ -9,13 +9,8 @@ export default function WinHeatmap({ data }: { data: any[] }) {
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center py-12 border border-dashed border-zinc-800 rounded-xl">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-zinc-800 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
-          <div className="text-xs text-zinc-600 uppercase tracking-wide font-mono">
-            Collecting hourly data...
-          </div>
-        </div>
+      <div className="flex h-24 items-center justify-center text-[10px] font-mono uppercase tracking-widest text-az-text-muted">
+        Awaiting Heatmap Data...
       </div>
     );
   }
@@ -23,80 +18,27 @@ export default function WinHeatmap({ data }: { data: any[] }) {
   // Helper to determine color intensity and styling
   const getCellStyle = (wr: number, trades: number) => {
     if (trades === 0) {
-      return {
-        bg: "bg-zinc-900/30",
-        border: "border-zinc-800/50",
-        text: "text-zinc-700",
-        shadow: ""
-      };
+      return "bg-az-surface border border-az-border/50 text-az-text-muted/30";
     }
     
-    if (wr >= 70) {
-      return {
-        bg: "bg-emerald-500/80",
-        border: "border-emerald-400/50",
-        text: "text-white",
-        shadow: "shadow-lg shadow-emerald-500/20"
-      };
-    }
-    if (wr >= 60) {
-      return {
-        bg: "bg-emerald-500/50",
-        border: "border-emerald-500/40",
-        text: "text-emerald-100",
-        shadow: "shadow-md shadow-emerald-500/10"
-      };
-    }
-    if (wr >= 50) {
-      return {
-        bg: "bg-green-500/30",
-        border: "border-green-500/30",
-        text: "text-green-200",
-        shadow: ""
-      };
-    }
-    if (wr >= 40) {
-      return {
-        bg: "bg-amber-500/20",
-        border: "border-amber-500/30",
-        text: "text-amber-200",
-        shadow: ""
-      };
-    }
-    return {
-      bg: "bg-red-500/20",
-      border: "border-red-500/30",
-      text: "text-red-200",
-      shadow: ""
-    };
+    if (wr >= 60) return "bg-az-profit/40 border border-az-profit/50 text-az-profit";
+    if (wr >= 50) return "bg-az-profit/20 border border-az-profit/30 text-az-profit";
+    if (wr >= 40) return "bg-az-warning/20 border border-az-warning/30 text-az-warning";
+    return "bg-az-loss/20 border border-az-loss/30 text-az-loss";
   };
 
   // Get trend icon
   const getTrendIcon = (wr: number, trades: number) => {
-    if (trades === 0) return <Minus size={14} className="opacity-40" />;
-    if (wr >= 55) return <TrendingUp size={14} />;
-    if (wr < 45) return <TrendingDown size={14} />;
-    return <Minus size={14} />;
+    if (trades === 0) return <Minus size={10} className="opacity-30" />;
+    if (wr >= 55) return <TrendingUp size={10} />;
+    if (wr < 45) return <TrendingDown size={10} />;
+    return <Minus size={10} />;
   };
 
-  // Calculate summary stats
-  const totalTrades = data.reduce((sum, item) => sum + item.trades, 0);
-  const avgWinRate = totalTrades > 0 
-    ? data.reduce((sum, item) => sum + (item.win_rate * item.trades), 0) / totalTrades 
-    : 0;
-  const bestHour = data.reduce((best, curr) => 
-    curr.trades > 0 && curr.win_rate > (best?.win_rate || 0) ? curr : best, 
-    null
-  );
-  const worstHour = data.reduce((worst, curr) => 
-    curr.trades > 0 && curr.win_rate < (worst?.win_rate || 100) ? curr : worst,
-    null
-  );
-
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-3">
       {/* Heatmap Grid */}
-      <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-12 gap-2">
+      <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-12 gap-1">
         {data.map((item) => {
           const style = getCellStyle(item.win_rate, item.trades);
           const isHovered = hoveredHour === item.hour;
@@ -104,86 +46,51 @@ export default function WinHeatmap({ data }: { data: any[] }) {
           return (
             <motion.div
               key={item.hour}
-              className={`relative group flex flex-col items-center justify-center p-3 rounded-xl border transition-all cursor-pointer ${style.bg} ${style.border} ${style.text} ${style.shadow}`}
+              className={`relative group flex h-10 flex-col items-center justify-center rounded-sm transition-all cursor-pointer ${style}`}
               whileHover={{ scale: 1.05, zIndex: 10 }}
-              whileTap={{ scale: 0.95 }}
               onHoverStart={() => setHoveredHour(item.hour)}
               onHoverEnd={() => setHoveredHour(null)}
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: item.hour * 0.02 }}
+              transition={{ delay: item.hour * 0.01 }}
             >
-              {/* Hour Label */}
-              <span className="text-[9px] font-bold opacity-60 mb-1.5 uppercase tracking-wide">
-                {String(item.hour).padStart(2, '0')}h
-              </span>
+              <div className="flex w-full items-center justify-between px-1">
+                <span className="text-[8px] font-mono tracking-tighter opacity-70">
+                  {String(item.hour).padStart(2, '0')}h
+                </span>
+                <span className="opacity-60">
+                  {getTrendIcon(item.win_rate, item.trades)}
+                </span>
+              </div>
               
-              {/* Win Rate */}
-              <span className="text-sm font-black tracking-tighter">
+              <span className="text-[10px] font-mono font-bold">
                 {item.trades > 0 ? `${Math.round(item.win_rate)}%` : "—"}
               </span>
-
-              {/* Trend Indicator */}
-              {item.trades > 0 && (
-                <div className="mt-1 opacity-70">
-                  {getTrendIcon(item.win_rate, item.trades)}
-                </div>
-              )}
-
-              {/* Trade Count Badge */}
-              {item.trades > 0 && (
-                <div className="absolute -top-1 -right-1 bg-blue-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full border border-blue-400 shadow-lg">
-                  {item.trades}
-                </div>
-              )}
 
               {/* Hover Tooltip */}
               <AnimatePresence>
                 {isHovered && (
                   <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                    initial={{ opacity: 0, y: 5, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                    className="absolute bottom-full mb-3 z-50 pointer-events-none"
-                    style={{
-                      left: '50%',
-                      transform: 'translateX(-50%)'
-                    }}
+                    exit={{ opacity: 0, y: 5, scale: 0.95 }}
+                    className="absolute bottom-full mb-2 z-50 pointer-events-none left-1/2 -translate-x-1/2"
                   >
-                    <div className="bg-zinc-950 border border-zinc-700 p-3 rounded-lg shadow-2xl text-[10px] whitespace-nowrap leading-relaxed min-w-[140px]">
-                      <div className="font-bold text-blue-400 mb-2 flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                        Hour {String(item.hour).padStart(2, '0')}:00 UTC
+                    <div className="bg-az-surface border border-az-border p-2 rounded shadow-lg text-[9px] font-mono whitespace-nowrap min-w-[120px]">
+                      <div className="font-bold text-az-text mb-1 border-b border-az-border/50 pb-1">
+                        {String(item.hour).padStart(2, '0')}:00 UTC
                       </div>
-                      <div className="space-y-1 text-zinc-400">
-                        <div className="flex justify-between">
-                          <span>Trades:</span>
-                          <span className="font-mono text-white">{item.trades}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Win Rate:</span>
-                          <span className={`font-mono font-bold ${
-                            item.win_rate >= 60 ? 'text-emerald-400' : 
-                            item.win_rate >= 50 ? 'text-green-400' : 
-                            'text-red-400'
-                          }`}>
-                            {item.win_rate.toFixed(1)}%
-                          </span>
-                        </div>
-                        {item.avg_pnl !== undefined && (
-                          <div className="flex justify-between pt-1 border-t border-zinc-800">
-                            <span>Avg P&L:</span>
-                            <span className={`font-mono font-bold ${
-                              item.avg_pnl >= 0 ? 'text-emerald-400' : 'text-red-400'
-                            }`}>
-                              {item.avg_pnl >= 0 ? '+' : ''}${item.avg_pnl.toFixed(2)}
-                            </span>
-                          </div>
-                        )}
+                      <div className="flex justify-between text-az-text-muted">
+                        <span>Trades:</span>
+                        <span className="text-az-text">{item.trades}</span>
                       </div>
-                      {/* Tooltip Arrow */}
-                      <div className="absolute top-full -mt-[1px]" style={{ left: '50%', transform: 'translateX(-50%)' }}>
-                        <div className="w-2 h-2 bg-zinc-950 border-r border-b border-zinc-700 transform rotate-45" />
+                      <div className="flex justify-between text-az-text-muted">
+                        <span>Win Rate:</span>
+                        <span className={`font-bold ${
+                          item.win_rate >= 50 ? 'text-az-profit' : 'text-az-loss'
+                        }`}>
+                          {item.win_rate.toFixed(1)}%
+                        </span>
                       </div>
                     </div>
                   </motion.div>
@@ -194,70 +101,25 @@ export default function WinHeatmap({ data }: { data: any[] }) {
         })}
       </div>
 
-      {/* Summary Statistics */}
-      <motion.div 
-        className="grid grid-cols-3 gap-4 pt-4 border-t border-zinc-800"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
-        <div className="text-center p-3 bg-zinc-900/50 rounded-xl border border-zinc-800/50">
-          <div className="text-xs text-zinc-500 mb-1 uppercase tracking-wide">Total Trades</div>
-          <div className="text-2xl font-black text-white">{totalTrades}</div>
+      {/* Mini Legend */}
+      <div className="flex items-center justify-end gap-3 px-1">
+        <div className="flex items-center gap-1.5">
+          <div className="w-2 h-2 bg-az-profit/40 border border-az-profit/50 rounded-sm" />
+          <span className="text-[9px] text-az-text-muted font-mono uppercase">Good</span>
         </div>
-        
-        <div className="text-center p-3 bg-zinc-900/50 rounded-xl border border-zinc-800/50">
-          <div className="text-xs text-zinc-500 mb-1 uppercase tracking-wide">Avg Win Rate</div>
-          <div className={`text-2xl font-black ${
-            avgWinRate >= 60 ? 'text-emerald-400' : 
-            avgWinRate >= 50 ? 'text-green-400' : 
-            'text-amber-400'
-          }`}>
-            {avgWinRate.toFixed(1)}%
-          </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-2 h-2 bg-az-warning/20 border border-az-warning/30 rounded-sm" />
+          <span className="text-[9px] text-az-text-muted font-mono uppercase">Mid</span>
         </div>
-        
-        <div className="text-center p-3 bg-zinc-900/50 rounded-xl border border-zinc-800/50">
-          <div className="text-xs text-zinc-500 mb-1 uppercase tracking-wide">Best Hour</div>
-          <div className="text-2xl font-black text-blue-400">
-            {bestHour ? `${String(bestHour.hour).padStart(2, '0')}:00` : '—'}
-          </div>
-          {bestHour && (
-            <div className="text-[10px] text-zinc-600 mt-1">
-              {bestHour.win_rate.toFixed(0)}% WR • {bestHour.trades} trades
-            </div>
-          )}
+        <div className="flex items-center gap-1.5">
+          <div className="w-2 h-2 bg-az-loss/20 border border-az-loss/30 rounded-sm" />
+          <span className="text-[9px] text-az-text-muted font-mono uppercase">Poor</span>
         </div>
-      </motion.div>
-
-      {/* Legend */}
-      <motion.div 
-        className="flex items-center justify-center gap-4 pt-4 border-t border-zinc-800"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-      >
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-emerald-500/50 border border-emerald-500/40 rounded" />
-          <span className="text-[10px] text-zinc-500 font-mono">60%+</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-2 h-2 bg-az-surface border border-az-border/50 rounded-sm" />
+          <span className="text-[9px] text-az-text-muted font-mono uppercase">None</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-green-500/30 border border-green-500/30 rounded" />
-          <span className="text-[10px] text-zinc-500 font-mono">50-60%</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-amber-500/20 border border-amber-500/30 rounded" />
-          <span className="text-[10px] text-zinc-500 font-mono">40-50%</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-red-500/20 border border-red-500/30 rounded" />
-          <span className="text-[10px] text-zinc-500 font-mono">&lt;40%</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-zinc-900/30 border border-zinc-800/50 rounded" />
-          <span className="text-[10px] text-zinc-500 font-mono">No Data</span>
-        </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

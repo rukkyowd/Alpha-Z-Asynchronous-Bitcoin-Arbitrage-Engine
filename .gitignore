@@ -15,3 +15,4 @@ backend/alpha_z_history.db-wal
 backend/ai_training_data.csv
 
 backend/bot/core - Copy.py
+backend/trading_log.txt
