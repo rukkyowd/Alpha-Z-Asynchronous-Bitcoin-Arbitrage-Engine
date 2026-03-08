@@ -1243,6 +1243,12 @@ async def fetch_market_odds(runtime: EngineServices, slug: str) -> tuple[MarketO
             odds.down_token_id or "N/A",
         )
         runtime.market_audit_logged.add(slug)
+        # Dynamically update CLOB WS subscriptions for the new market's token IDs
+        if runtime.clob_ws_manager is not None:
+            ws_tokens = [t for t in (odds.up_token_id, odds.down_token_id) if t]
+            if ws_tokens:
+                runtime.clob_ws_manager.update_subscriptions(ws_tokens)
+                logger.info("[CLOB WS] Updated subscriptions: %d token(s) for %s", len(ws_tokens), slug)
 
     runtime.latest_odds = odds
     return odds, liquidity_by_direction
@@ -2492,6 +2498,11 @@ async def bootstrap_runtime() -> EngineServices:
             else:
                 logger.warning("[CLOB] Paper shadow CLOB unavailable. Falling back to PAPER_SIM: %s", exc)
 
+    # Create CLOB WS manager (token IDs populated dynamically at runtime via sync_target_market)
+    clob_ws_mgr: ClobWebSocketManager | None = None
+    if clob_client is not None:
+        clob_ws_mgr = ClobWebSocketManager(token_ids=[])
+
     runtime = EngineServices(
         state=state,
         http_session=http_session,
@@ -2503,6 +2514,7 @@ async def bootstrap_runtime() -> EngineServices:
             clob_client,
             config=replace(execution_config, paper_trading=not live_enabled, dry_run=DRY_RUN),
             risk_manager=RiskManager(risk_config),
+            clob_ws=clob_ws_mgr,
         ),
         ai_agent=LocalAIAgent(ai_config),
         data_config=data_config,
@@ -2516,6 +2528,7 @@ async def bootstrap_runtime() -> EngineServices:
         dry_run=DRY_RUN,
         current_balance=BASE_BANKROLL,
     )
+    runtime.clob_ws_manager = clob_ws_mgr
     runtime.strategy_engine.risk_manager = runtime.risk_manager
     _setup_logging(runtime)
     _init_db()
@@ -2578,7 +2591,7 @@ async def bootstrap_runtime() -> EngineServices:
         task_group.create_task(ml_writer_worker(runtime)),
     ]
     # --- Polymarket SDK heartbeat kill-switch + CLOB WS book ---
-    if clob_client is not None:
+    if live_enabled and clob_client is not None:
         runtime.tasks.append(
             task_group.create_task(
                 run_heartbeat_loop(
@@ -2590,6 +2603,16 @@ async def bootstrap_runtime() -> EngineServices:
             )
         )
         logger.info("[SYSTEM] CLOB heartbeat kill-switch ARMED (8s interval).")
+    if clob_ws_mgr is not None:
+        runtime.tasks.append(
+            task_group.create_task(
+                clob_ws_mgr.run(stop_event=runtime.stop_event)
+            )
+        )
+        if runtime.paper_trading:
+            logger.info("[SYSTEM] CLOB WebSocket book manager started in paper shadow mode (heartbeat disabled).")
+        else:
+            logger.info("[SYSTEM] CLOB WebSocket book manager started.")
     return runtime
 
 

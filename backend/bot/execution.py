@@ -12,6 +12,7 @@ from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import MarketOrderArgs, OrderArgs, OrderType, PartialCreateOrderOptions
 from py_clob_client.order_builder.constants import BUY, SELL
 
+from .clob_ws import ClobWebSocketManager, LiveOrderBook
 from .models import (
     ActivePosition,
     Direction,
@@ -217,6 +218,9 @@ class ExecutionConfig:
     min_live_fill_shares: float = 0.01
     exit_floor_first: float = 0.98
     exit_floor_second: float = 0.96
+    maker_window_secs: float = 6.0
+    maker_poll_interval_secs: float = 0.8
+    maker_enabled: bool = True
 
 
 @dataclass(slots=True, frozen=True)
@@ -259,7 +263,7 @@ class FillResult:
 
 
 class ClobExecutionEngine:
-    __slots__ = ("client", "config", "risk_manager")
+    __slots__ = ("client", "config", "risk_manager", "clob_ws")
 
     def __init__(
         self,
@@ -267,10 +271,12 @@ class ClobExecutionEngine:
         *,
         config: ExecutionConfig | None = None,
         risk_manager: RiskManager | None = None,
+        clob_ws: ClobWebSocketManager | None = None,
     ):
         self.client = client
         self.config = config or ExecutionConfig()
         self.risk_manager = risk_manager or RiskManager()
+        self.clob_ws = clob_ws
 
     def _paper_sim_liquidity(
         self,
@@ -365,54 +371,76 @@ class ClobExecutionEngine:
                 levels=0,
             )
 
-        try:
-            book = await asyncio.to_thread(self.client.get_order_book, token_id)
-        except Exception as exc:
-            if self.config.paper_trading:
-                return self._paper_sim_liquidity(
-                    bet_size_usd=bet_size_usd,
-                    expected_price=expected_price,
-                    reason=f"Paper simulation liquidity (CLOB unavailable: {exc})",
-                )
-            if allow_tiny_amm_fallback and bet_size_usd <= self.config.live_tiny_amm_fallback_max_bet_usd:
-                fallback_spread = 0.0
-                if odds is not None:
-                    direction = Direction.UP if token_id == odds.up_token_id else Direction.DOWN
-                    public_prob = odds.entry_prob_pct(direction) / 100.0
-                    fallback_spread = abs(public_prob - expected_price)
-                allow = fallback_spread <= self.config.live_tiny_amm_fallback_max_spread_pct
+        # --- WS-first book fetch: zero-latency if available, REST fallback ---
+        ws_book: LiveOrderBook | None = None
+        if self.clob_ws is not None:
+            ws_book = self.clob_ws.get_book(token_id)
+            if ws_book.stale:
+                ws_book = None  # Stale — fall through to REST
+
+        if ws_book is not None and (ws_book.bids or ws_book.asks):
+            # Build levels from WS book (already sorted dicts)
+            bid_levels = sorted(
+                [(p, s) for p, s in ws_book.bids.items() if p > 0 and s > 0],
+                key=lambda x: x[0], reverse=True,
+            )
+            ask_levels = sorted(
+                [(p, s) for p, s in ws_book.asks.items() if p > 0 and s > 0],
+                key=lambda x: x[0], reverse=False,
+            )
+            best_bid = bid_levels[0][0] if bid_levels else None
+            best_ask = ask_levels[0][0] if ask_levels else None
+            log.debug("[LIQUIDITY] Using WS book for %s (age=%.1fs)", token_id, time.time() - ws_book.last_update_ts)
+        else:
+            # REST fallback
+            try:
+                book = await asyncio.to_thread(self.client.get_order_book, token_id)
+            except Exception as exc:
+                if self.config.paper_trading:
+                    return self._paper_sim_liquidity(
+                        bet_size_usd=bet_size_usd,
+                        expected_price=expected_price,
+                        reason=f"Paper simulation liquidity (CLOB unavailable: {exc})",
+                    )
+                if allow_tiny_amm_fallback and bet_size_usd <= self.config.live_tiny_amm_fallback_max_bet_usd:
+                    fallback_spread = 0.0
+                    if odds is not None:
+                        direction = Direction.UP if token_id == odds.up_token_id else Direction.DOWN
+                        public_prob = odds.entry_prob_pct(direction) / 100.0
+                        fallback_spread = abs(public_prob - expected_price)
+                    allow = fallback_spread <= self.config.live_tiny_amm_fallback_max_spread_pct
+                    return LiquidityCheckResult(
+                        ok=allow,
+                        mode="AMM_TINY_LIVE_FALLBACK",
+                        reason=f"CLOB unavailable: {exc}",
+                        entry_price=expected_price,
+                        best_bid=None,
+                        best_ask=None,
+                        spread_pct=fallback_spread,
+                        available_depth_usd=0.0,
+                        expected_slippage_pct=fallback_spread,
+                        market_impact_pct=0.0,
+                        levels=0,
+                        allow_tiny_amm_fallback=allow,
+                    )
                 return LiquidityCheckResult(
-                    ok=allow,
-                    mode="AMM_TINY_LIVE_FALLBACK",
+                    ok=False,
+                    mode="NO_CLOB",
                     reason=f"CLOB unavailable: {exc}",
                     entry_price=expected_price,
                     best_bid=None,
                     best_ask=None,
-                    spread_pct=fallback_spread,
+                    spread_pct=1.0,
                     available_depth_usd=0.0,
-                    expected_slippage_pct=fallback_spread,
-                    market_impact_pct=0.0,
+                    expected_slippage_pct=1.0,
+                    market_impact_pct=1.0,
                     levels=0,
-                    allow_tiny_amm_fallback=allow,
                 )
-            return LiquidityCheckResult(
-                ok=False,
-                mode="NO_CLOB",
-                reason=f"CLOB unavailable: {exc}",
-                entry_price=expected_price,
-                best_bid=None,
-                best_ask=None,
-                spread_pct=1.0,
-                available_depth_usd=0.0,
-                expected_slippage_pct=1.0,
-                market_impact_pct=1.0,
-                levels=0,
-            )
 
-        bid_levels = _extract_levels(getattr(book, "bids", None), reverse=True)
-        ask_levels = _extract_levels(getattr(book, "asks", None), reverse=False)
-        best_bid = bid_levels[0][0] if bid_levels else None
-        best_ask = ask_levels[0][0] if ask_levels else None
+            bid_levels = _extract_levels(getattr(book, "bids", None), reverse=True)
+            ask_levels = _extract_levels(getattr(book, "asks", None), reverse=False)
+            best_bid = bid_levels[0][0] if bid_levels else None
+            best_ask = ask_levels[0][0] if ask_levels else None
 
         if best_bid is not None and best_ask is not None and best_bid <= 0.002 and best_ask >= 0.998:
             if self.config.paper_trading:
@@ -905,84 +933,155 @@ class ClobExecutionEngine:
         order_response: dict[str, Any] = {}
         order_type_used = "FOK"
 
-        try:
-            try:
-                order_response = await asyncio.wait_for(
-                    self._submit_market_order(
-                        token_id,
-                        amount=signal.kelly_bet_usd,
-                        limit_price=limit_price,
-                        order_type=OrderType.FOK,
-                        tick_size=tick_size,
-                        neg_risk=neg_risk,
-                    ),
-                    timeout=self.config.order_submit_timeout_secs,
+        # ═══════════════════════════════════════════════════════════════════
+        # PHASE 0: Maker-first GTC limit (zero/reduced fees)
+        # Post a limit order at target_price and poll for fill.
+        # If filled within maker_window_secs, bypass the taker path entirely.
+        # ═══════════════════════════════════════════════════════════════════
+        maker_filled = False
+        if self.config.maker_enabled and not self.config.paper_trading and not self.config.dry_run:
+            maker_price = _quantize(
+                _clamp(target_price, 0.01, 0.99), tick_size, ROUND_DOWN,
+            )
+            maker_shares = float(
+                Decimal(str(signal.kelly_bet_usd / max(maker_price, 0.01))).quantize(
+                    Decimal("0.01"), rounding=ROUND_DOWN,
                 )
-                order_type_used = "FOK"
-            except Exception as exc:
-                if "fully filled or killed" not in str(exc).lower():
-                    raise
-                log.warning("[ENTRY ORDER] FOK unfilled for %s; retrying once as FAK at same max price.", signal.slug)
+            )
+            if maker_shares > 0:
+                try:
+                    log.info(
+                        "[ENTRY MAKER] Posting GTC limit %s on %s | Px: %.4f | Shares: %.4f | Window: %.1fs",
+                        signal.direction.value,
+                        signal.slug,
+                        maker_price,
+                        maker_shares,
+                        self.config.maker_window_secs,
+                    )
+                    maker_resp = await asyncio.wait_for(
+                        self._submit_limit_order(
+                            token_id,
+                            price=maker_price,
+                            size=maker_shares,
+                            side=BUY,
+                            tick_size=tick_size,
+                            neg_risk=neg_risk,
+                            order_type=OrderType.GTC,
+                        ),
+                        timeout=self.config.order_submit_timeout_secs,
+                    )
+                    maker_order_id = maker_resp.get("orderID") or maker_resp.get("id", "")
+
+                    if maker_order_id:
+                        # Poll for fill within the maker window
+                        deadline = asyncio.get_event_loop().time() + self.config.maker_window_secs
+                        while asyncio.get_event_loop().time() < deadline:
+                            await asyncio.sleep(self.config.maker_poll_interval_secs)
+                            maker_status = await self._get_order_status(maker_order_id)
+                            status_text = str(maker_status.get("status", "")).lower()
+                            if status_text == "matched":
+                                order_response = maker_status
+                                order_type_used = "MAKER_GTC"
+                                maker_filled = True
+                                log.info(
+                                    "[ENTRY MAKER] GTC FILLED for %s (order %s)",
+                                    signal.slug,
+                                    maker_order_id,
+                                )
+                                break
+
+                        if not maker_filled:
+                            await self._cancel_order(maker_order_id)
+                            log.info(
+                                "[ENTRY MAKER] GTC unfilled for %s after %.1fs — cancelling, falling through to taker.",
+                                signal.slug,
+                                self.config.maker_window_secs,
+                            )
+                except Exception as maker_exc:
+                    log.warning("[ENTRY MAKER] Maker phase failed for %s: %s — falling through to taker.", signal.slug, maker_exc)
+
+        # ═══════════════════════════════════════════════════════════════════
+        # PHASE 1: Taker FOK → FAK (existing path, skipped if maker filled)
+        # ═══════════════════════════════════════════════════════════════════
+        if not maker_filled:
+            try:
                 try:
                     order_response = await asyncio.wait_for(
                         self._submit_market_order(
                             token_id,
                             amount=signal.kelly_bet_usd,
                             limit_price=limit_price,
-                            order_type=OrderType.FAK,
+                            order_type=OrderType.FOK,
                             tick_size=tick_size,
                             neg_risk=neg_risk,
                         ),
                         timeout=self.config.order_submit_timeout_secs,
                     )
-                    order_type_used = "FAK"
-                except Exception as fak_exc:
-                    if (
-                        signal.kelly_bet_usd <= self.config.live_tiny_amm_fallback_max_bet_usd
-                        and "no orders found to match with fak order" in str(fak_exc).lower()
-                    ):
-                        recovered = await self.check_liquidity_and_spread(
-                            token_id,
-                            bet_size_usd=signal.kelly_bet_usd,
-                            expected_price=expected_price,
-                            side="buy",
-                            odds=odds,
-                            allow_tiny_amm_fallback=False,
+                    order_type_used = "FOK"
+                except Exception as exc:
+                    if "fully filled or killed" not in str(exc).lower():
+                        raise
+                    log.warning("[ENTRY ORDER] FOK unfilled for %s; retrying once as FAK at same max price.", signal.slug)
+                    try:
+                        order_response = await asyncio.wait_for(
+                            self._submit_market_order(
+                                token_id,
+                                amount=signal.kelly_bet_usd,
+                                limit_price=limit_price,
+                                order_type=OrderType.FAK,
+                                tick_size=tick_size,
+                                neg_risk=neg_risk,
+                            ),
+                            timeout=self.config.order_submit_timeout_secs,
                         )
-                        if recovered.best_ask is not None:
-                            retry_candidate = recovered.best_ask + self.config.live_tiny_reprice_buffer_cents
-                            retry_cap = min(0.99, limit_price + self.config.live_tiny_reprice_max_extra_cents)
-                            retry_price = _quantize(min(retry_candidate, retry_cap), tick_size, ROUND_UP)
-                            if retry_price > limit_price:
-                                log.warning(
-                                    "[ENTRY RETRY] FAK no-match on %s; repricing %.4f -> %.4f (best_ask=%.4f) and retrying once.",
-                                    signal.slug,
-                                    limit_price,
-                                    retry_price,
-                                    recovered.best_ask,
-                                )
-                                limit_price = retry_price
-                                order_response = await asyncio.wait_for(
-                                    self._submit_market_order(
-                                        token_id,
-                                        amount=signal.kelly_bet_usd,
-                                        limit_price=limit_price,
-                                        order_type=OrderType.FAK,
-                                        tick_size=tick_size,
-                                        neg_risk=neg_risk,
-                                    ),
-                                    timeout=self.config.order_submit_timeout_secs,
-                                )
-                                order_type_used = "FAK_REPRICE"
+                        order_type_used = "FAK"
+                    except Exception as fak_exc:
+                        if (
+                            signal.kelly_bet_usd <= self.config.live_tiny_amm_fallback_max_bet_usd
+                            and "no orders found to match with fak order" in str(fak_exc).lower()
+                        ):
+                            recovered = await self.check_liquidity_and_spread(
+                                token_id,
+                                bet_size_usd=signal.kelly_bet_usd,
+                                expected_price=expected_price,
+                                side="buy",
+                                odds=odds,
+                                allow_tiny_amm_fallback=False,
+                            )
+                            if recovered.best_ask is not None:
+                                retry_candidate = recovered.best_ask + self.config.live_tiny_reprice_buffer_cents
+                                retry_cap = min(0.99, limit_price + self.config.live_tiny_reprice_max_extra_cents)
+                                retry_price = _quantize(min(retry_candidate, retry_cap), tick_size, ROUND_UP)
+                                if retry_price > limit_price:
+                                    log.warning(
+                                        "[ENTRY RETRY] FAK no-match on %s; repricing %.4f -> %.4f (best_ask=%.4f) and retrying once.",
+                                        signal.slug,
+                                        limit_price,
+                                        retry_price,
+                                        recovered.best_ask,
+                                    )
+                                    limit_price = retry_price
+                                    order_response = await asyncio.wait_for(
+                                        self._submit_market_order(
+                                            token_id,
+                                            amount=signal.kelly_bet_usd,
+                                            limit_price=limit_price,
+                                            order_type=OrderType.FAK,
+                                            tick_size=tick_size,
+                                            neg_risk=neg_risk,
+                                        ),
+                                        timeout=self.config.order_submit_timeout_secs,
+                                    )
+                                    order_type_used = "FAK_REPRICE"
+                                else:
+                                    raise fak_exc
                             else:
                                 raise fak_exc
                         else:
                             raise fak_exc
-                    else:
-                        raise fak_exc
-        except Exception as exc:
-            await state.record_execution_failure(signal.slug, reason=str(exc), ev_pct=signal.expected_value_pct)
-            return None
+            except Exception as exc:
+                await state.record_execution_failure(signal.slug, reason=str(exc), ev_pct=signal.expected_value_pct)
+                return None
 
         status = str(order_response.get("status", "") or "")
         fill_cost_usd, fill_shares, average_price, fill_inference_status = _infer_fill_stats(

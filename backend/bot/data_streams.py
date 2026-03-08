@@ -651,3 +651,10 @@ __all__ = [
     "PolymarketFetcher",
     "create_http_session",
 ]
+
+# Backward-compatible re-exports from connector sub-modules.
+# New code should import directly from bot.connectors.binance_connector
+# and bot.connectors.gamma_connector respectively.
+from .connectors.binance_connector import BinanceStreamManager as BinanceStreamManager  # noqa: F811, E402
+from .connectors.gamma_connector import PolymarketFetcher as PolymarketFetcher  # noqa: F811, E402
+
