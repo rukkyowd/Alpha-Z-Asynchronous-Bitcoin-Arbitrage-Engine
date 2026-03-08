@@ -89,6 +89,12 @@ class DataSource(StrEnum):
     INTERNAL = "INTERNAL"
 
 
+class MarketResolution(StrEnum):
+    STRIKE = "STRIKE"
+    CANDLE_OPEN = "CANDLE_OPEN"
+    UNKNOWN = "UNKNOWN"
+
+
 @dataclass(slots=True, kw_only=True)
 class MarketTick(SerializableModel):
     timestamp: datetime
@@ -137,7 +143,9 @@ class MarketOddsSnapshot(SerializableModel):
     slug: str
     market_found: bool = False
     seconds_remaining: float = 0.0
+    reference_price: float = 0.0
     strike_price: float = 0.0
+    market_resolution: MarketResolution = MarketResolution.UNKNOWN
     market_category: str = ""
     fees_enabled: bool = False
     fee_curve_rate: float = 0.0

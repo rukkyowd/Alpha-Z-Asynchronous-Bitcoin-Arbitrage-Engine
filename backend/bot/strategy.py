@@ -27,6 +27,10 @@ def _safe_div(numerator: float, denominator: float, default: float = 0.0) -> flo
     return numerator / denominator
 
 
+def _reference_price(odds: MarketOddsSnapshot) -> float:
+    return odds.reference_price if odds.reference_price > 0 else odds.strike_price
+
+
 @dataclass(slots=True, frozen=True)
 class StrategyConfig:
     risk: RiskConfig = field(default_factory=RiskConfig)
@@ -182,7 +186,7 @@ def _countertrend_reason(
         return None
 
     price = max(context.price, 1e-9)
-    strike_dist_pct = abs(_safe_div(context.price - odds.strike_price, price, default=0.0))
+    strike_dist_pct = abs(_safe_div(context.price - _reference_price(odds), price, default=0.0))
     vwap_dist_pct = abs(_safe_div(context.vwap_distance, price, default=0.0))
 
     if score < config.countertrend_min_score:
@@ -318,12 +322,13 @@ class StrategyEngine:
                 slug,
                 f"Too early ({int(odds.seconds_remaining)}s > {int(self.config.max_seconds_for_new_bet)}s)",
             )
-        if odds.strike_price <= 0:
-            return _skip_signal(slug, "Invalid strike price")
+        reference_price = _reference_price(odds)
+        if reference_price <= 0:
+            return _skip_signal(slug, "Invalid reference price")
 
         enriched_context = apply_probabilistic_model(
             context,
-            strike_price=odds.strike_price,
+            strike_price=reference_price,
             seconds_remaining=odds.seconds_remaining,
             degrees_of_freedom=self.config.degrees_of_freedom,
             probability_floor_pct=self.config.probability_floor_pct,

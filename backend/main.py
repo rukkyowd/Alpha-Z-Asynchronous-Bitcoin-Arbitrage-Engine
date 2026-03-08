@@ -336,14 +336,35 @@ def utc_timestamp_text(dt: datetime | None = None) -> str:
     return value.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
 
 
-def current_market_slug(now_utc: datetime | None = None) -> str:
-    now_et = (now_utc or utc_now()).astimezone(ET_TZ)
+def _market_slug_for_et_datetime(now_et: datetime) -> str:
     month = now_et.strftime("%B").lower()
     day = now_et.day
     hour_24 = now_et.hour
     hour_12 = hour_24 % 12 or 12
     ampm = "am" if hour_24 < 12 else "pm"
     return f"bitcoin-up-or-down-{month}-{day}-{hour_12}{ampm}-et"
+
+
+def current_market_slug(now_utc: datetime | None = None) -> str:
+    now_et = (now_utc or utc_now()).astimezone(ET_TZ)
+    return _market_slug_for_et_datetime(now_et)
+
+
+def candidate_market_slugs(
+    now_utc: datetime | None = None,
+    *,
+    hour_offsets: tuple[int, ...] = (-3, -2, -1, 0, 1, 2, 3),
+) -> list[str]:
+    base_time = now_utc or utc_now()
+    candidates: list[str] = []
+    seen: set[str] = set()
+    for offset_hours in hour_offsets:
+        candidate = current_market_slug(base_time + timedelta(hours=offset_hours))
+        if candidate in seen:
+            continue
+        seen.add(candidate)
+        candidates.append(candidate)
+    return candidates
 
 
 def market_family_prefix(slug: str) -> str:
@@ -954,8 +975,45 @@ async def fetch_live_balance(runtime: EngineServices, *, force: bool = False) ->
         return existing if existing > 0 else runtime.bankroll
 
 
-async def sync_target_market(runtime: EngineServices) -> str:
-    slug = current_market_slug()
+async def resolve_active_market_slug(runtime: EngineServices, *, force: bool = False) -> str:
+    current_target = runtime.state.target_slug.strip()
+    latest_odds = runtime.latest_odds
+    if (
+        not force
+        and current_target
+        and latest_odds is not None
+        and latest_odds.slug == current_target
+        and latest_odds.market_found
+        and latest_odds.seconds_remaining > runtime.strategy_config.risk.min_seconds_remaining
+    ):
+        return current_target
+
+    candidate_slugs: list[str] = []
+    for candidate in [current_target, *candidate_market_slugs()]:
+        candidate = candidate.strip()
+        if not candidate or candidate in candidate_slugs:
+            continue
+        candidate_slugs.append(candidate)
+
+    best_slug = ""
+    best_seconds_remaining: float | None = None
+    for candidate in candidate_slugs:
+        try:
+            async with api_slot(runtime):
+                odds = await runtime.polymarket_fetcher.fetch_market_odds(runtime.http_session, candidate)
+        except Exception:
+            continue
+        if not odds.market_found or odds.seconds_remaining <= 0:
+            continue
+        if best_seconds_remaining is None or odds.seconds_remaining < best_seconds_remaining:
+            best_slug = odds.slug or candidate
+            best_seconds_remaining = odds.seconds_remaining
+
+    return best_slug or current_market_slug()
+
+
+async def sync_target_market(runtime: EngineServices, *, force: bool = False) -> str:
+    slug = await resolve_active_market_slug(runtime, force=force)
     prefix = market_family_prefix(slug)
     if slug != runtime.state.target_slug:
         await runtime.state.set_target_market(slug, prefix)
@@ -1212,11 +1270,9 @@ async def _record_trade(runtime: EngineServices, record: dict[str, Any]) -> None
 
 
 def _resolve_outcome(final_underlying: float, strike_price: float) -> str:
-    if final_underlying > strike_price:
+    if final_underlying >= strike_price:
         return Direction.UP.value
-    if final_underlying < strike_price:
-        return Direction.DOWN.value
-    return "TIE"
+    return Direction.DOWN.value
 
 
 def _decode_json_array(raw: Any) -> list[Any]:
@@ -1575,8 +1631,19 @@ async def evaluation_loop(runtime: EngineServices) -> None:
                 continue
 
             odds, liquidity_by_direction = await fetch_market_odds(runtime, slug)
+            if not odds.market_found or odds.seconds_remaining <= 0:
+                refreshed_slug = await sync_target_market(runtime, force=True)
+                if refreshed_slug != slug:
+                    await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
+                    continue
             if not odds.market_found:
                 runtime.latest_rejected_reason = "No active market found"
+                runtime.latest_locks = [runtime.latest_rejected_reason]
+                log_skip_reason(runtime, slug, runtime.latest_rejected_reason)
+                await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
+                continue
+            if odds.seconds_remaining <= 0:
+                runtime.latest_rejected_reason = f"Expired market ({int(odds.seconds_remaining)}s)"
                 runtime.latest_locks = [runtime.latest_rejected_reason]
                 log_skip_reason(runtime, slug, runtime.latest_rejected_reason)
                 await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
@@ -1586,7 +1653,7 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             runtime.latest_odds = odds
             enriched_context = apply_probabilistic_model(
                 context,
-                strike_price=odds.strike_price,
+                strike_price=odds.reference_price or odds.strike_price,
                 seconds_remaining=odds.seconds_remaining,
                 degrees_of_freedom=runtime.strategy_config.degrees_of_freedom,
                 probability_floor_pct=runtime.strategy_config.probability_floor_pct,
@@ -2330,7 +2397,7 @@ async def bootstrap_runtime() -> EngineServices:
         runtime.current_balance = await fetch_live_balance(runtime, force=True)
         logger.info("[INIT] Live balance initialized: $%.2f", runtime.current_balance)
 
-    await sync_target_market(runtime)
+    await sync_target_market(runtime, force=True)
     await runtime.stream_manager.load_initial_history(runtime.http_session, runtime.state)
     initial_context = await build_context_from_state(runtime)
     if initial_context is not None and runtime.state.target_slug:
@@ -2339,7 +2406,7 @@ async def bootstrap_runtime() -> EngineServices:
             if seed_odds.market_found:
                 seeded_context = apply_probabilistic_model(
                     initial_context,
-                    strike_price=seed_odds.strike_price,
+                    strike_price=seed_odds.reference_price or seed_odds.strike_price,
                     seconds_remaining=seed_odds.seconds_remaining,
                     degrees_of_freedom=runtime.strategy_config.degrees_of_freedom,
                     probability_floor_pct=runtime.strategy_config.probability_floor_pct,

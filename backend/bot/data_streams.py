@@ -14,7 +14,7 @@ import aiohttp
 import websockets
 
 from .indicators import update_vwap_accumulators
-from .models import DataSource, MarketOddsSnapshot, MarketTick
+from .models import DataSource, MarketOddsSnapshot, MarketResolution, MarketTick
 from .state import EngineState
 
 log = logging.getLogger("alpha_z_engine.data_streams")
@@ -106,6 +106,18 @@ def _infer_fee_curve(slug: str, market: dict[str, Any], event: dict[str, Any]) -
     if any(token in fee_text for token in ("sport", "nba", "nfl", "mlb", "nhl", "soccer", "epl", "game")):
         return market_category or "SPORTS", True, 0.0175, 1.0
     return market_category or "FEE_ENABLED", True, 0.25, 2.0
+
+
+def _is_hourly_up_or_down_slug(slug: str) -> bool:
+    return bool(re.fullmatch(r"bitcoin-up-or-down-[a-z]+-\d+-\d+(am|pm)-et", slug))
+
+
+def _infer_market_resolution(slug: str, title: str) -> MarketResolution:
+    if re.search(r"\$([\d,]+(?:\.\d+)?)", title):
+        return MarketResolution.STRIKE
+    if _is_hourly_up_or_down_slug(slug):
+        return MarketResolution.CANDLE_OPEN
+    return MarketResolution.UNKNOWN
 
 
 def _parse_kline_message(raw_payload: dict[str, Any]) -> MarketTick:
@@ -443,13 +455,8 @@ class PolymarketFetcher:
             return 0.0
 
         try:
-            if "-15m" in slug:
-                start_dt = end_dt - timedelta(minutes=15)
-                variant = "fiveminute"
-            else:
-                start_dt = end_dt - timedelta(hours=1)
-                variant = "hourly"
-
+            start_dt = end_dt - timedelta(hours=1)
+            variant = "hourly"
             params = {
                 "symbol": "BTC",
                 "eventStartTime": start_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -468,12 +475,8 @@ class PolymarketFetcher:
             pass
 
         try:
-            if "-15m" in slug:
-                start_dt = end_dt - timedelta(minutes=15)
-                interval = "15m"
-            else:
-                start_dt = end_dt - timedelta(hours=1)
-                interval = "1h"
+            start_dt = end_dt - timedelta(hours=1)
+            interval = "1h"
             params = {
                 "symbol": self.config.symbol,
                 "interval": interval,
@@ -493,12 +496,16 @@ class PolymarketFetcher:
         return 0.0
 
     async def fetch_market_odds(self, session: aiohttp.ClientSession, slug: str) -> MarketOddsSnapshot:
+        if not _is_hourly_up_or_down_slug(slug):
+            return MarketOddsSnapshot(slug=slug, market_found=False)
+
         meta = await self.fetch_market_meta_from_slug(session, slug)
         if meta is None:
             return MarketOddsSnapshot(slug=slug, market_found=False)
 
         market = meta["market"]
         event = meta["event"]
+        title = str(market.get("question") or event.get("title") or "")
         raw_prices = market.get("outcomePrices", "[]")
         raw_token_ids = market.get("clobTokenIds", "[]")
 
@@ -511,9 +518,10 @@ class PolymarketFetcher:
         if len(prices) < 2:
             return MarketOddsSnapshot(slug=slug, market_found=False)
 
-        strike_price = await self.fetch_price_to_beat_for_market(session, slug, meta=meta)
+        reference_price = await self.fetch_price_to_beat_for_market(session, slug, meta=meta)
         seconds_remaining = _parse_seconds_remaining(str(market.get("endDate") or event.get("endDate") or ""))
         market_category, fees_enabled, fee_curve_rate, fee_curve_exponent = _infer_fee_curve(slug, market, event)
+        market_resolution = _infer_market_resolution(slug, title)
 
         up_prob = float(prices[0]) * 100.0
         down_prob = float(prices[1]) * 100.0
@@ -524,7 +532,9 @@ class PolymarketFetcher:
             slug=slug,
             market_found=True,
             seconds_remaining=seconds_remaining,
-            strike_price=strike_price,
+            reference_price=reference_price,
+            strike_price=reference_price,
+            market_resolution=market_resolution,
             market_category=market_category,
             fees_enabled=fees_enabled,
             fee_curve_rate=fee_curve_rate,

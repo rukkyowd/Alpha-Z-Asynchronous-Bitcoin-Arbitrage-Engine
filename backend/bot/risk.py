@@ -210,7 +210,10 @@ class RiskManager:
         hour_count = self.trades_this_hour if trades_this_hour is None else trades_this_hour
         daily_loss_limit = current_balance * self.config.max_daily_loss_pct
         pct_cap = current_balance * self.config.max_trade_pct
-        max_trade_size = pct_cap if self.config.max_absolute_bet_usd <= 0 else min(pct_cap, self.config.max_absolute_bet_usd)
+        raw_trade_cap = pct_cap if self.config.max_absolute_bet_usd <= 0 else min(pct_cap, self.config.max_absolute_bet_usd)
+        # Sizing rounds to cents before orders are staged, so the guardrail must compare against
+        # the same cent-rounded cap or exact-cap trades will be falsely rejected.
+        max_trade_size = round(raw_trade_cap + EPSILON, 2)
         effective_hourly_limit = self._effective_hourly_trade_limit(day_pnl, daily_loss_limit)
 
         if day_pnl <= -daily_loss_limit:
