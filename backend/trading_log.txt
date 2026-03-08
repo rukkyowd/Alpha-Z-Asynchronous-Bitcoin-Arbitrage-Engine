@@ -10312,3 +10312,41 @@
 2026-03-08 16:31:09,527 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Score 1 requires EV >= 15.00% (got 12.98%)
 2026-03-08 16:31:37,575 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Entry premium 1.5c > 1.0c max
 2026-03-08 16:31:38,087 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.50% <= 0 after slippage
+2026-03-08 16:31:46,298 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:32:02,689 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:32:19,031 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:32:27,240 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.86% <= 0 after slippage
+2026-03-08 16:32:35,444 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:32:51,926 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:33:08,367 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:33:24,764 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:33:41,168 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:33:57,637 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:34:14,279 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:34:30,313 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:34:46,700 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:35:03,084 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:35:19,519 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:35:36,023 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:35:52,415 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:36:08,849 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:36:25,192 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:36:41,652 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:36:58,142 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:37:14,543 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:37:31,016 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:37:47,450 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:38:03,888 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:38:20,347 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:38:36,786 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:38:53,586 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:39:09,917 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:39:26,087 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:39:42,530 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:39:58,947 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:40:15,371 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:40:31,911 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:40:48,709 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:41:04,726 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:41:21,128 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:41:37,554 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
