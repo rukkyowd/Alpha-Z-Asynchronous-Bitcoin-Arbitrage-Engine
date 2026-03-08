@@ -1301,9 +1301,9 @@ function RegimeBadge({ regime, atr }: { regime: string; atr: number }) {
 
 function EnhancedStatCard({ icon, label, value, trend, subtitle }: any) {
   const trendColors = { up: "text-[var(--az-profit)]", down: "text-[var(--az-loss)]", neutral: "text-[var(--az-text-secondary)]" } as const;
-  const glowClass = trend === "up" ? "glass-card-profit" : trend === "down" ? "glass-card-loss" : "glass-card";
+  const glowClass = trend === "up" ? "glass-card-profit" : trend === "down" ? "glass-card-loss" : "";
   return (
-    <div className={`${glowClass} group relative overflow-hidden p-5 transition-all duration-300`}>
+    <div className={`glass-card ${glowClass} group relative overflow-hidden p-5 transition-all duration-300`}>
       <div className="absolute inset-0 bg-gradient-to-br from-[var(--az-accent-subtle)] via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       <div className="relative z-10 transition-transform duration-300 group-hover:translate-y-[-2px]">
         <div className="mb-3 flex items-start justify-between">
