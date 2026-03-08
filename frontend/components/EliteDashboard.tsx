@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -32,6 +32,10 @@ import PriceChart from "../components/PriceChart";
 import EquityCurve from "../components/EquityCurve";
 import WinHeatmap from "../components/WinHeatmap";
 import AiInsights from "../components/AiInsights";
+import BrierScoreGauge from "../components/BrierScoreGauge";
+import DrawdownRiskGauge from "../components/DrawdownRiskGauge";
+import CalibrationBand from "../components/CalibrationBand";
+import OrderFlowStrip, { logsToFlowEvents } from "../components/OrderFlowStrip";
 import GrowthChart from "../components/GrowthChart";
 import {
   type DashboardLiveData,
@@ -1005,29 +1009,29 @@ export default function EliteDashboard() {
   const intradayVolatilityPct = Math.max(0, safeNumber(liveData.quant.garman_klass_volatility) * 100);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100 font-sans selection:bg-blue-500/30">
-      <nav className="fixed bottom-0 left-0 right-0 top-auto z-50 flex h-16 w-full items-center justify-around border-t border-zinc-800/60 bg-zinc-950/90 px-2 backdrop-blur-xl shadow-2xl lg:left-0 lg:right-auto lg:top-0 lg:h-full lg:w-20 lg:flex-col lg:items-center lg:justify-start lg:gap-8 lg:border-r lg:border-t-0 lg:bg-zinc-950/80 lg:px-0 lg:py-8">
+    <div className="min-h-screen bg-[var(--az-bg-base)] text-[var(--az-text-primary)] font-sans selection:bg-blue-500/25">
+      <nav className="fixed bottom-0 left-0 right-0 top-auto z-50 flex h-16 w-full items-center justify-around border-t border-[var(--az-border)] bg-[var(--az-bg-surface)]/95 px-2 backdrop-blur-2xl shadow-2xl lg:left-0 lg:right-auto lg:top-0 lg:h-full lg:w-20 lg:flex-col lg:items-center lg:justify-start lg:gap-8 lg:border-r lg:border-t-0 lg:px-0 lg:py-8">
         <motion.div
           className="hidden h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-500 text-sm font-black text-white shadow-lg shadow-blue-500/30 lg:flex"
           whileHover={{ scale: 1.05, rotate: 5 }}
           whileTap={{ scale: 0.95 }}
         >
-          OZ
+          αZ
         </motion.div>
         <NavIcon icon={<LayoutDashboard size={20} />} active={activeTab === "terminal"} onClick={() => setActiveTab("terminal")} label="Terminal" />
         <NavIcon icon={<BookOpen size={20} />} active={activeTab === "journal"} onClick={() => setActiveTab("journal")} label="Journal" />
         <NavIcon icon={<BarChart3 size={20} />} active={activeTab === "analytics"} onClick={() => setActiveTab("analytics")} label="Analytics" />
       </nav>
 
-      <main className="px-4 py-5 pb-24 sm:px-6 sm:py-6 sm:pb-24 lg:px-10 lg:py-10 lg:pb-10 lg:pl-32">
-        <header className="mb-6 flex flex-col gap-4 sm:mb-8 lg:mb-10 lg:flex-row lg:items-start lg:justify-between">
+      <main className="px-4 py-5 pb-24 sm:px-6 sm:py-6 sm:pb-24 lg:px-10 lg:py-8 lg:pb-10 lg:pl-32">
+        <header className="mb-6 flex flex-col gap-4 sm:mb-8 lg:mb-8 lg:flex-row lg:items-start lg:justify-between">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <div>
               <div className="mb-2 flex items-center gap-3">
-                <h1 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Portfolio Value</h1>
+                <h1 className="section-label">Portfolio Value</h1>
                 {liveData.is_paper && (
-                  <div className="flex items-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-tight text-amber-400">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400" />
+                  <div className="badge badge-paper">
+                    <span className="h-1.5 w-1.5 animate-breathe rounded-full bg-amber-400" />
                     Paper Trading
                   </div>
                 )}
@@ -1037,7 +1041,7 @@ export default function EliteDashboard() {
                 <SkeletonBox className="h-14 w-80" />
               ) : (
                 <motion.div
-                  className={`text-4xl font-black tabular-nums sm:text-5xl ${isPnlPositive ? "text-white" : "text-red-400"}`}
+                  className={`text-4xl font-black tabular-nums tracking-tight sm:text-5xl ${isPnlPositive ? "text-[var(--az-text-primary)]" : "text-[var(--az-loss)]"}`}
                   key={portfolioValue}
                   initial={{ scale: 1.03, opacity: 0.85 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -1120,7 +1124,7 @@ export default function EliteDashboard() {
           </div>
         </header>
 
-        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6">
+        <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
           {metricsLoading ? (
             <>
               <SkeletonCard />
@@ -1230,14 +1234,14 @@ function NavIcon({ icon, active, onClick, label }: any) {
     <motion.button
       onClick={onClick}
       className={`group relative flex h-12 w-20 flex-col items-center justify-center gap-0.5 rounded-xl transition-all lg:h-14 lg:w-14 ${
-        active ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" : "bg-zinc-900/50 text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
+        active ? "bg-[var(--az-accent)] text-white shadow-lg shadow-blue-500/30" : "bg-[var(--az-bg-elevated)]/50 text-[var(--az-text-muted)] hover:bg-[var(--az-bg-elevated)] hover:text-[var(--az-text-secondary)]"
       }`}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
     >
       {icon}
       <span className="text-[9px] font-semibold uppercase tracking-wide lg:hidden">{label}</span>
-      <div className="pointer-events-none absolute left-full ml-4 hidden whitespace-nowrap rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-medium opacity-0 transition-opacity group-hover:opacity-100 lg:block">
+      <div className="pointer-events-none absolute left-full ml-4 hidden whitespace-nowrap rounded-lg border border-[var(--az-border)] bg-[var(--az-bg-surface)] px-3 py-1.5 text-xs font-medium opacity-0 transition-opacity group-hover:opacity-100 lg:block">
         {label}
       </div>
     </motion.button>
@@ -1295,34 +1299,34 @@ function RegimeBadge({ regime, atr }: { regime: string; atr: number }) {
 }
 
 function EnhancedStatCard({ icon, label, value, trend, subtitle }: any) {
-  const trendColors = { up: "text-green-400", down: "text-red-400", neutral: "text-zinc-400" } as const;
+  const trendColors = { up: "text-[var(--az-profit)]", down: "text-[var(--az-loss)]", neutral: "text-[var(--az-text-secondary)]" } as const;
   return (
     <motion.div
-      className="group relative overflow-hidden rounded-2xl border border-zinc-800/50 bg-zinc-900/50 p-5 backdrop-blur-sm transition-all hover:border-zinc-700/50"
+      className="glass-card group relative overflow-hidden p-5"
       whileHover={{ scale: 1.02 }}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[var(--az-accent-subtle)] via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
       <div className="relative z-10">
         <div className="mb-3 flex items-start justify-between">
-          <div className="rounded-lg bg-zinc-900/80 p-2">{icon}</div>
+          <div className="rounded-lg bg-[var(--az-bg-elevated)] p-2">{icon}</div>
         </div>
-        <div className={`mb-1 text-2xl font-black ${trendColors[trend as keyof typeof trendColors]}`}>{value}</div>
-        <div className="mb-1 text-xs font-medium uppercase tracking-wide text-zinc-500">{label}</div>
-        {subtitle && <div className="font-mono text-[10px] text-zinc-600">{subtitle}</div>}
+        <div className={`mb-1 text-2xl font-black tracking-tight data-mono ${trendColors[trend as keyof typeof trendColors]}`}>{value}</div>
+        <div className="section-label mb-1">{label}</div>
+        {subtitle && <div className="data-mono text-[10px] text-[var(--az-text-dim)]">{subtitle}</div>}
       </div>
     </motion.div>
   );
 }
 
 function SkeletonBox({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-zinc-800/70 ${className}`} />;
+  return <div className={`skeleton-shimmer ${className}`} />;
 }
 
 function SkeletonCard() {
   return (
-    <div className="rounded-2xl border border-zinc-800/50 bg-zinc-900/50 p-5">
+    <div className="glass-card p-5">
       <SkeletonBox className="mb-4 h-8 w-8" />
       <SkeletonBox className="mb-2 h-8 w-20" />
       <SkeletonBox className="h-3 w-32" />
@@ -1332,9 +1336,9 @@ function SkeletonCard() {
 
 function Panel({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
   return (
-    <motion.div className={`overflow-hidden rounded-2xl border border-zinc-800/50 bg-zinc-900/30 backdrop-blur-sm ${className}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="border-b border-zinc-800/50 bg-zinc-900/50 px-3 py-2 sm:px-5 sm:py-3">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">{title}</h3>
+    <motion.div className={`glass-panel overflow-hidden ${className}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="border-b border-[var(--az-border)] bg-[var(--az-bg-elevated)]/50 px-3 py-2.5 sm:px-5 sm:py-3">
+        <h3 className="section-label">{title}</h3>
       </div>
       <div className="p-3 sm:p-5">{children}</div>
     </motion.div>
@@ -1618,29 +1622,32 @@ function AdaptiveThresholdPanel({ atr, cvd, thresholds }: { atr: number; cvd: an
 function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMode }: any) {
   const strategy = liveData?.strategy || DEFAULT_DASHBOARD_LIVE_DATA.strategy;
   const chartCandle = liveData?.candle || (Array.isArray(liveData?.history) && liveData.history.length > 0 ? liveData.history[liveData.history.length - 1] : null);
+  const flowEvents = useMemo(() => logsToFlowEvents(liveData?.logs || []), [liveData?.logs]);
+  const brierSummary = portfolio?.brier_summary;
   return (
-    <motion.div key="terminal" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="grid grid-cols-12 gap-6">
-      <div className="col-span-12 space-y-6 xl:col-span-8">
-              <Panel title="Live Price Action • 1H Candles">
-            {liveLoading ? (
-              <div className="grid grid-cols-1 gap-3">
-                <SkeletonBox className="h-64 w-full" />
-                <SkeletonBox className="h-4 w-44" />
-              </div>
-            ) : chartCandle || (Array.isArray(liveData?.history) && liveData.history.length > 0) ? (
-              <PriceChart
-                candle={chartCandle}
-                history={liveData.history}
-                vwap={liveData.vwap}
-              />
-            ) : (
-            <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-zinc-800">
-              <div className="text-center text-xs uppercase tracking-wider text-zinc-500">Awaiting stream...</div>
+    <motion.div key="terminal" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="grid grid-cols-12 gap-5">
+      <div className="col-span-12 space-y-5 xl:col-span-8">
+        <Panel title="Live Price Action • 1H Candles">
+          {liveLoading ? (
+            <div className="grid grid-cols-1 gap-3">
+              <SkeletonBox className="h-64 w-full" />
+              <SkeletonBox className="h-4 w-44" />
+            </div>
+          ) : chartCandle || (Array.isArray(liveData?.history) && liveData.history.length > 0) ? (
+            <PriceChart candle={chartCandle} history={liveData.history} vwap={liveData.vwap} />
+          ) : (
+            <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-[var(--az-border)]">
+              <div className="section-label">Awaiting stream...</div>
             </div>
           )}
         </Panel>
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        {/* Order Flow Strip */}
+        <Panel title="Order Flow">
+          <OrderFlowStrip events={flowEvents} />
+        </Panel>
+
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
           <Panel title="Arbitrage Gap (Math vs Poly)">
             <ArbitrageGapPanel edge={strategy.edge_tracker} />
           </Panel>
@@ -1649,7 +1656,7 @@ function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMo
           </Panel>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
           <Panel title="Equity Curve">{portfolio ? <EquityCurve data={portfolio?.equity_curve || []} /> : <SkeletonBox className="h-48 w-full" />}</Panel>
           <Panel title="Monte Carlo Projection">{portfolio ? <GrowthChart data={portfolio?.projections?.paths || []} /> : <SkeletonBox className="h-48 w-full" />}</Panel>
         </div>
@@ -1660,7 +1667,17 @@ function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMo
         </Panel>
       </div>
 
-      <div className="col-span-12 space-y-6 xl:col-span-4">
+      <div className="col-span-12 space-y-5 xl:col-span-4">
+        {/* Brier Score Gauge */}
+        {brierSummary && (
+          <Panel title="Brier Score · Model vs Market">
+            <BrierScoreGauge
+              modelBrier={safeNumber(brierSummary.model_brier, 0.25)}
+              marketBrier={safeNumber(brierSummary.market_brier, 0.25)}
+              calibratedBrier={brierSummary.calibrated_brier != null ? safeNumber(brierSummary.calibrated_brier) : undefined}
+            />
+          </Panel>
+        )}
         <Panel title="Signal Alignment Matrix">
           <SignalAlignmentMatrix signal={strategy.signal_alignment} />
         </Panel>
@@ -1683,7 +1700,7 @@ function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMo
           </Panel>
         )}
         <Panel title="Replay Shortcut">
-          <button onClick={() => setReplayTrade((portfolio?.journal || [])[0] || null)} className="rounded-lg border border-blue-500/40 bg-blue-500/10 px-3 py-2 text-xs font-bold text-blue-300 transition hover:bg-blue-500/20">
+          <button onClick={() => setReplayTrade((portfolio?.journal || [])[0] || null)} className="w-full rounded-lg border border-[var(--az-border-active)] bg-[var(--az-accent-subtle)] px-3 py-2.5 text-xs font-bold text-blue-300 transition hover:bg-blue-500/15">
             Replay Most Recent Trade
           </button>
         </Panel>
@@ -2041,31 +2058,36 @@ function TooltipLabel({ label, tooltip }: { label: string; tooltip: string }) {
 function AnalyticsView({ portfolio, engineHealth, liveData }: { portfolio: any; engineHealth: EngineHealth; liveData: any }) {
   const attr = portfolio?.attribution;
   const aiStatus = String(engineHealth?.ai_status || "ACTIVE").toUpperCase();
-  const aiStatusClass = aiStatus === "DEGRADED" ? "text-red-400" : aiStatus === "SLOW" ? "text-amber-400" : "text-emerald-400";
+  const aiStatusClass = aiStatus === "DEGRADED" ? "text-[var(--az-loss)]" : aiStatus === "SLOW" ? "text-[var(--az-warning)]" : "text-[var(--az-profit)]";
   const drawdownGuard = liveData?.strategy?.drawdown_guard || {};
   const dailyPnl = Array.isArray(portfolio?.daily_pnl) ? portfolio.daily_pnl : [];
   const executionMetrics = Array.isArray(portfolio?.execution_metrics) ? portfolio.execution_metrics : [];
+  const calibrationBuckets = Array.isArray(portfolio?.calibration_buckets) ? portfolio.calibration_buckets : [];
 
   return (
-    <motion.div key="analytics" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+    <motion.div key="analytics" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
         <Panel title="Risk Profile">
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-3">
               <TooltipLabel label="Value at Risk (95%)" tooltip="Estimated one-day loss threshold that should only be exceeded about 5% of the time." />
-              <span className="text-sm font-black text-rose-400">${safeNumber(portfolio?.metrics?.var_95).toFixed(2)}</span>
+              <span className="data-mono text-sm font-black text-[var(--az-loss)]">${safeNumber(portfolio?.metrics?.var_95).toFixed(2)}</span>
             </div>
             <div className="flex items-center justify-between gap-3">
               <TooltipLabel label="Profit Expectancy" tooltip="Average expected profit per trade based on historical outcomes." />
-              <span className="text-sm font-black text-emerald-400">${safeNumber(portfolio?.metrics?.expectancy).toFixed(2)}</span>
+              <span className="data-mono text-sm font-black text-[var(--az-profit)]">${safeNumber(portfolio?.metrics?.expectancy).toFixed(2)}</span>
             </div>
             <div className="flex items-center justify-between gap-3">
               <TooltipLabel label="Optimal Kelly" tooltip="Suggested bankroll percentage to risk per trade from historical win rate and payoff ratio." />
-              <span className="text-sm font-black text-blue-400">{portfolio?.metrics?.kelly_optimal || "0.0%"}</span>
+              <span className="data-mono text-sm font-black text-[var(--az-accent)]">{portfolio?.metrics?.kelly_optimal || "0.0%"}</span>
             </div>
-            <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 p-3 text-[11px] leading-relaxed text-zinc-300">
-              {String(drawdownGuard?.text || "Drawdown guard status is syncing...")}
-            </div>
+            {/* Drawdown Risk Gauge */}
+            <DrawdownRiskGauge
+              dailyPnl={safeNumber(drawdownGuard?.daily_pnl)}
+              maxDailyLossPct={safeNumber(drawdownGuard?.max_daily_loss_pct, 0.2)}
+              currentBalance={safeNumber(drawdownGuard?.current_balance, safeNumber(drawdownGuard?.bankroll))}
+              regime={String(drawdownGuard?.regime || "NORMAL")}
+            />
           </div>
         </Panel>
 
@@ -2073,60 +2095,60 @@ function AnalyticsView({ portfolio, engineHealth, liveData }: { portfolio: any; 
           {attr && (safeNumber(attr?.ai_confirmed?.trades) > 0 || safeNumber(attr?.system_only?.trades) > 0) ? (
             <div className="mt-1 space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-tighter text-zinc-500">AI Confirmed ({safeNumber(attr.ai_confirmed.trades)})</span>
-                <span className="text-sm font-black text-blue-400">
+                <span className="section-label">AI Confirmed ({safeNumber(attr.ai_confirmed.trades)})</span>
+                <span className="data-mono text-sm font-black text-[var(--az-accent)]">
                   {safeNumber(attr.ai_confirmed.win_rate).toFixed(1)}%{" "}
-                  <span className={safeNumber(attr.ai_confirmed.pnl) >= 0 ? "text-emerald-400" : "text-rose-400"}>
+                  <span className={safeNumber(attr.ai_confirmed.pnl) >= 0 ? "text-[var(--az-profit)]" : "text-[var(--az-loss)]"}>
                     ({safeNumber(attr.ai_confirmed.pnl) >= 0 ? "+" : ""}${safeNumber(attr.ai_confirmed.pnl).toFixed(2)})
                   </span>
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-tighter text-zinc-500">System Only ({safeNumber(attr.system_only.trades)})</span>
-                <span className="text-sm font-black text-purple-400">
+                <span className="section-label">System Only ({safeNumber(attr.system_only.trades)})</span>
+                <span className="data-mono text-sm font-black text-purple-400">
                   {safeNumber(attr.system_only.win_rate).toFixed(1)}%{" "}
-                  <span className={safeNumber(attr.system_only.pnl) >= 0 ? "text-emerald-400" : "text-rose-400"}>
+                  <span className={safeNumber(attr.system_only.pnl) >= 0 ? "text-[var(--az-profit)]" : "text-[var(--az-loss)]"}>
                     ({safeNumber(attr.system_only.pnl) >= 0 ? "+" : ""}${safeNumber(attr.system_only.pnl).toFixed(2)})
                   </span>
                 </span>
               </div>
             </div>
           ) : (
-            <div className="font-mono text-[10px] uppercase italic text-zinc-600">Awaiting high-volume data...</div>
+            <div className="data-mono text-[10px] uppercase italic text-[var(--az-text-dim)]">Awaiting high-volume data...</div>
           )}
         </Panel>
 
         <Panel title="Engine Health">
           <div className="space-y-3 text-xs">
             <div className="flex items-center justify-between">
-              <span className="text-zinc-500">WS Latency</span>
-              <span className="font-mono text-zinc-300">{safeNumber(engineHealth.ws_latency_ms)} ms</span>
+              <span className="text-[var(--az-text-muted)]">WS Latency</span>
+              <span className="data-mono text-[var(--az-text-secondary)]">{safeNumber(engineHealth.ws_latency_ms)} ms</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-zinc-500">Feed Stale</span>
-              <span className="font-mono text-zinc-300">{safeNumber(engineHealth.feed_stale_ms)} ms</span>
+              <span className="text-[var(--az-text-muted)]">Feed Stale</span>
+              <span className="data-mono text-[var(--az-text-secondary)]">{safeNumber(engineHealth.feed_stale_ms)} ms</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-zinc-500">Memory</span>
-              <span className="font-mono text-zinc-300">
+              <span className="text-[var(--az-text-muted)]">Memory</span>
+              <span className="data-mono text-[var(--az-text-secondary)]">
                 {safeNumber(engineHealth.memory_mb).toFixed(1)} MB (peak {safeNumber(engineHealth.memory_peak_mb).toFixed(1)} MB)
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-zinc-500">AI Response</span>
-              <span className="font-mono text-zinc-300">
+              <span className="text-[var(--az-text-muted)]">AI Response</span>
+              <span className="data-mono text-[var(--az-text-secondary)]">
                 {safeNumber(engineHealth.ai_response_ms).toFixed(0)} ms (EMA {safeNumber(engineHealth.ai_response_ema_ms).toFixed(0)} ms)
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-zinc-500">API Saturation</span>
-              <span className="font-mono text-zinc-300">
+              <span className="text-[var(--az-text-muted)]">API Saturation</span>
+              <span className="data-mono text-[var(--az-text-secondary)]">
                 {safeNumber(engineHealth.api_saturation_pct).toFixed(1)}% ({safeNumber(engineHealth.api_inflight)}/{safeNumber(engineHealth.api_capacity)})
               </span>
             </div>
-            <div className="flex items-center justify-between border-t border-zinc-800 pt-2">
-              <span className="text-zinc-500">ML Status</span>
-              <span className={`font-mono font-bold ${aiStatusClass}`}>
+            <div className="flex items-center justify-between border-t border-[var(--az-border)] pt-2">
+              <span className="text-[var(--az-text-muted)]">ML Status</span>
+              <span className={`data-mono font-bold ${aiStatusClass}`}>
                 {aiStatus}
                 {safeNumber(engineHealth.ai_response_ema_ms) > 5000 ? " (Bottleneck)" : ""}
               </span>
@@ -2135,9 +2157,15 @@ function AnalyticsView({ portfolio, engineHealth, liveData }: { portfolio: any; 
         </Panel>
       </div>
 
-      <Panel title="Daily P&L Bars">
-        <DailyPnlBarChart rows={dailyPnl} />
-      </Panel>
+      {/* Calibration Band */}
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+        <Panel title="Model Calibration Curve">
+          <CalibrationBand buckets={calibrationBuckets} />
+        </Panel>
+        <Panel title="Daily P&L Bars">
+          <DailyPnlBarChart rows={dailyPnl} />
+        </Panel>
+      </div>
 
       <Panel title="Execution Slippage Scatter (bps)">
         <SlippageScatterPlot rows={executionMetrics} />
