@@ -2270,24 +2270,28 @@ async def build_metrics_snapshot(runtime: EngineServices, *, force: bool = False
             journal_rows.append(_journal_row(item, running_wr))
         journal_rows = list(reversed(journal_rows))[:200]
 
-        hourly_buckets: dict[int, dict[str, int]] = defaultdict(lambda: {"wins": 0, "losses": 0})
+        hourly_buckets: dict[int, dict[str, Any]] = defaultdict(lambda: {"wins": 0, "losses": 0, "pnl": 0.0})
         for item in resolved:
             hour = _safe_timestamp(item["timestamp"]).hour
             if str(item["result"]).upper() == "WIN":
                 hourly_buckets[hour]["wins"] += 1
             else:
                 hourly_buckets[hour]["losses"] += 1
+            hourly_buckets[hour]["pnl"] += item.get("pnl_impact", 0.0)
 
         heatmap = []
         for hour in range(24):
             wins = hourly_buckets[hour]["wins"]
             losses = hourly_buckets[hour]["losses"]
+            total_pnl_hour = hourly_buckets[hour]["pnl"]
             trades_count = wins + losses
             heatmap.append(
                 {
                     "hour": hour,
                     "win_rate": round((wins / trades_count) * 100.0, 1) if trades_count else 0.0,
                     "trades": trades_count,
+                    "avg_pnl": round(total_pnl_hour / trades_count, 2) if trades_count > 0 else 0.0,
+                    "total_pnl": round(total_pnl_hour, 2),
                 }
             )
 
