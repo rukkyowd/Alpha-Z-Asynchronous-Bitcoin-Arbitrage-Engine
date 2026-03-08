@@ -1,57 +1,102 @@
-# Alpha-Z Asynchronous Bitcoin Arbitrage Engine
+﻿# Alpha-Z Hourly Polymarket BTC Engine
 
-Alpha-Z is a full-stack Polymarket BTC binary trading engine with a modular Python backend and a typed Next.js dashboard.
+Alpha-Z is a full-stack trading engine for Binance-referenced hourly Polymarket BTC binary markets.
 
-- Backend: FastAPI + asyncio orchestration
-- Frontend: Next.js live dashboard
-- Market data: Binance WebSocket + REST backfill
-- Venue data: Polymarket Gamma + CLOB
-- Validation path: local Ollama / OpenAI-compatible chat endpoint
-- Persistence: SQLite + CSV feature logging
+Today, the active runtime is an hourly-only engine:
+- underlying source: Binance `BTCUSDT` spot
+- market class: Polymarket `bitcoin-up-or-down-...-et` hourly markets
+- resolution rule: `UP` if the finalized Binance `1h` candle closes at or above its open (`Close >= Open`), otherwise `DOWN`
+- backend: FastAPI + asyncio
+- frontend: Next.js dashboard
+- persistence: SQLite + CSV feature logging
+- AI gate: local Ollama / OpenAI-compatible chat endpoint
+
+## What The Bot Trades
+
+This codebase is intentionally focused on one market type only:
+- hourly BTC Polymarket candle-open markets
+
+It does not target:
+- 5 minute markets
+- 15 minute markets
+- 24 hour markets
+- generic strike-style BTC markets
+
+The current strategy and settlement logic are aligned to the hourly candle-open contract structure.
+
+## Market Resolution Rule
+
+For a market such as `bitcoin-up-or-down-march-8-3am-et`:
+- the reference is the Binance `BTCUSDT` `1h` candle that begins at that market hour
+- the market resolves `UP` if the finalized candle satisfies `close >= open`
+- otherwise it resolves `DOWN`
+- the strict fallback source is Binance `BTCUSDT` `1h` data only
+
+The backend treats this as a `CANDLE_OPEN` market internally.
 
 ## Current Status
 
-- The active backend path is the new modular engine wired through `backend/main.py`.
-- Paper trading startup and dashboard synchronization are in working shape.
-- Live trading support exists, but it is not yet proven safe enough to trust with real money.
+The active engine path is the modular runtime under `backend/`.
 
-Use paper mode first. Validate fills, exits, reconnect/backfill behavior, and UI state before enabling live execution.
+Current state:
+- hourly-only market targeting is wired
+- Binance `1h` candles are the primary feature timeframe
+- market audit logging is present
+- paper trading with live CLOB shadow pricing is working
+- strict settlement fails closed to `RESOLVING` if neither official outcome nor finalized Binance `1h` data is available
 
-## Active Architecture
+Live trading support exists, but paper and shadow validation should still come first.
+
+## Active Backend Architecture
 
 The current runtime is built from the modular `backend/bot/` stack:
-
-- `backend/bot/models.py`: strict dataclasses and typed payload models
+- `backend/bot/models.py`: typed dataclasses and payload models
 - `backend/bot/state.py`: centralized async engine state
 - `backend/bot/indicators.py`: technical context, Bayesian probability, volatility models
-- `backend/bot/strategy.py`: EV, Kelly sizing, gatekeeping, signal generation
+- `backend/bot/strategy.py`: edge, EV, Kelly sizing, gatekeeping, signal generation
 - `backend/bot/risk.py`: drawdown guards, TP/SL logic, position monitoring
-- `backend/bot/execution.py`: Polymarket CLOB routing and fill handling
+- `backend/bot/execution.py`: Polymarket CLOB routing, paper shadow pricing, fill handling
 - `backend/bot/ai_agent.py`: local LLM validation with circuit breaker
 - `backend/bot/data_streams.py`: Binance ingestion, reconnects, REST backfill, Polymarket odds
-- `backend/main.py`: orchestration, API, workers, websocket broadcast
+- `backend/bot/clob_ws.py`: live CLOB websocket book manager
+- `backend/main.py`: orchestration, API, workers, settlement, websocket broadcast
 
-`backend/bot/core.py` is still present in the repo as legacy reference code, but it is not the active orchestrator path.
+Legacy note:
+- `backend/bot/core.py` is still present in the repo as reference code, but it is not the active orchestrator path.
 
-## Quantitative Stack
+## Quantitative Model
 
-The refactored engine is centered on:
-
+The current strategy stack is centered on:
+- Binance `1h` candle-aligned features
 - Bayesian log-odds probability updates
-- Student-t move estimation
-- Square-root market impact and slippage
-- Continuous exponential time decay for sizing
-- Parkinson and Garman-Klass intraday volatility
-- Typed `TechnicalContext`, `TradeSignal`, and `ActivePosition` state
+- Student-t move estimation around the hourly candle open
+- Parkinson and Garman-Klass volatility
+- square-root market impact and slippage
+- fee-aware EV and Kelly sizing
+- typed `TechnicalContext`, `TradeSignal`, and `ActivePosition` models
+- calibration support plus Brier benchmarking in analytics
 
-The frontend websocket payload now reflects this richer model and includes fields such as:
+Important practical note:
+- the EV math is binary-outcome math, not continuous directional trading PnL math
+- the edge is computed against Polymarket entry price / fair probability for a contract that resolves on `Close >= Open`
 
-- `bayesian_probability`
-- `garman_klass_volatility`
-- `cvd_candle_delta`
-- `expected_move_sigma`
-- `tp_delta`
-- `sl_delta`
+## Operating Modes
+
+### Paper mode
+- simulated bankroll
+- no real order posting
+- strategy, risk, and monitoring all run normally
+
+### Paper shadow CLOB mode
+- paper mode plus real Polymarket CLOB reads for pricing, spread, and liquidity shadowing
+- no live heartbeat kill-switch is armed in this mode
+- useful for validating execution assumptions without risking capital
+
+### Live mode
+- real balance
+- real CLOB interaction
+- heartbeat kill-switch active
+- should only be used after paper and shadow validation
 
 ## Requirements
 
@@ -60,16 +105,7 @@ The frontend websocket payload now reflects this richer model and includes field
 - npm
 - Ollama if you want local AI validation enabled
 
-Python dependencies are defined in `backend/requirements.txt`:
-
-- `fastapi`
-- `uvicorn[standard]`
-- `aiohttp`
-- `websockets`
-- `numpy`
-- `pandas`
-- `scipy`
-- `py-clob-client`
+Backend Python dependencies are defined in `backend/requirements.txt`.
 
 ## Backend Setup
 
@@ -83,18 +119,35 @@ py -m pip install --upgrade pip
 py -m pip install -r requirements.txt
 ```
 
-Create `backend/.env`:
+Create `backend/.env`.
+
+Minimum example:
 
 ```ini
 # Operating mode
 PAPER_TRADING=true
 DRY_RUN=false
+PAPER_USE_LIVE_CLOB=true
 BANKROLL=5000
 
-# Local AI
+# AI
 LOCAL_AI_MODEL=llama3.2:3b-instruct-q4_K_M
 
-# Polymarket credentials (required for live trading)
+# Core risk / edge controls
+MAX_TRADES_PER_HOUR=2
+EXPECTED_EXIT_FEE_MULTIPLIER=0.50
+LATENCY_EV_HAIRCUT_PCT=0.25
+CLOSE_EQUALS_OPEN_UP_BIAS_PROB=0.0005
+
+# Optional debugging
+TRACE_MALLOC=false
+
+# Optional control endpoint auth
+ENGINE_CONTROL_API_KEY=
+
+# Polymarket credentials
+# Required for live trading
+# Also required if you want paper shadow mode to read the private-auth CLOB path used by this codebase
 POLY_PRIVATE_KEY=
 POLY_FUNDER=
 POLY_SIG_TYPE=2
@@ -121,174 +174,164 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Frontend connection config is environment-driven through `frontend/config.ts`.
 
-For local development, the frontend falls back to:
-
+Local fallback defaults:
 - `http://localhost:8000`
 - `ws://localhost:8000/ws/live`
 
-For Vercel or any remote frontend deployment, set these public environment variables:
+For remote frontend deployments, set:
 
 ```ini
 NEXT_PUBLIC_API_URL=https://your-public-backend-host
 NEXT_PUBLIC_WS_URL=wss://your-public-backend-host/ws/live
 ```
 
-### Vercel Deployment
-
-In the Vercel project settings for the frontend, add:
+Optional browser-side control auth header support:
 
 ```ini
-NEXT_PUBLIC_API_URL=https://your-public-backend-host
-NEXT_PUBLIC_WS_URL=wss://your-public-backend-host/ws/live
+NEXT_PUBLIC_ENGINE_CONTROL_API_KEY=your-control-key
 ```
 
-If you are tunneling the backend from your local machine, use the public ngrok URL for both values:
+Use the same value as `ENGINE_CONTROL_API_KEY` only if you intentionally want browser control writes enabled.
 
-```ini
-NEXT_PUBLIC_API_URL=https://<your-ngrok-subdomain>.ngrok-free.app
-NEXT_PUBLIC_WS_URL=wss://<your-ngrok-subdomain>.ngrok-free.app/ws/live
+## Clean Reset For A New Evaluation Regime
+
+Because the engine logic has changed significantly over time, do not mix old trade history into a fresh validation pass unless that is intentional.
+
+Recommended approach:
+- rename old persistence files instead of deleting them
+- start a clean paper run for the current hourly-only strategy
+
+From `backend/`:
+
+```powershell
+Rename-Item alpha_z_history.db alpha_z_history.pre_reset.db -ErrorAction SilentlyContinue
+Rename-Item ai_training_data.csv ai_training_data.pre_reset.csv -ErrorAction SilentlyContinue
+Rename-Item trading_log.txt trading_log.pre_reset.txt -ErrorAction SilentlyContinue
 ```
 
-Deployment rule:
+If you really want a full wipe:
 
-- `NEXT_PUBLIC_API_URL` must be the public HTTPS base URL of the backend
-- `NEXT_PUBLIC_WS_URL` must be the matching websocket endpoint ending in `/ws/live`
-- if you rotate the ngrok URL, update both Vercel environment variables and redeploy
-- if only `NEXT_PUBLIC_API_URL` is set, `frontend/config.ts` will derive the websocket URL automatically, but setting both explicitly is safer
+```powershell
+Remove-Item .\alpha_z_history.db -Force -ErrorAction SilentlyContinue
+Remove-Item .\ai_training_data.csv -Force -ErrorAction SilentlyContinue
+Remove-Item .\trading_log.txt -Force -ErrorAction SilentlyContinue
+```
 
-`frontend/config.ts` also still accepts the older compatibility names:
+## Startup Validation Checklist
 
-- `NEXT_PUBLIC_BACKEND_HTTP_URL`
-- `NEXT_PUBLIC_BACKEND_WS_URL`
+Use this as the minimum validation bar before trusting a run.
 
-but the preferred names are:
+1. Start the backend in paper mode.
+2. Confirm the backend logs `Monitoring 1h WebSocket...`
+3. Confirm `Loaded 120 candles` appears.
+4. Confirm a `[MARKET AUDIT]` line appears for the active hourly market.
+5. If using shadow pricing, confirm:
+   - `[INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.`
+   - `[SYSTEM] CLOB WebSocket book manager started in paper shadow mode (heartbeat disabled).`
+6. Confirm the frontend opens without websocket parse errors.
+7. Confirm `/api/metrics`, `/api/engine/health`, `/api/engine/control`, and `/api/history` return successfully.
 
-- `NEXT_PUBLIC_API_URL`
-- `NEXT_PUBLIC_WS_URL`
+Expected startup pattern:
 
-The dashboard listens to the backend websocket and now expects a typed payload with these top-level keys:
+```text
+[INIT] Simulated balance initialized: $5000.00 ...
+[SYSTEM] Loaded 120 candles. VWAP=...
+[MARKET AUDIT] requested_slug=... | matched_slug=... | outcomes=Up, Down | resolution=CANDLE_OPEN | ...
+[SYSTEM] Warming up local AI (...)
+[SYSTEM] AI Warmup complete. Engine is hot and ready.
+```
 
+## Runtime Behaviors To Expect
+
+Normal skip reasons include:
+- `Crowd skew too high`
+- `Too early`
+- `Too close to expiry`
+- `Entry premium ... > ... max`
+- `Net EV ... <= 0 after slippage`
+- `Score 1 requires EV >= ...`
+- `Countertrend blocked ...`
+
+Normal position logs include:
+- `[POSITION] OPEN ... | Mark: ... | U-PnL: ... | TP: ... | SL: ...`
+- `TP Armed: Y/N`
+- `SL Disabled: Y/N`
+
+Normal settlement behavior:
+- official outcome if available
+- strict Binance `BTCUSDT` `1h` candle fallback otherwise
+- `RESOLVING` if neither strict source is available yet
+
+## APIs And WebSocket
+
+Backend base URL:
+- `http://localhost:8000`
+
+Main endpoints:
+- `GET /api/engine/health`
+- `GET /api/engine/control`
+- `POST /api/engine/control`
+- `GET /api/metrics`
+- `GET /api/history`
+- `GET /api/history/replay?timestamp=<unix_seconds>`
+- `GET /api/analysis/post-mortem`
+- `WS /ws/live`
+
+The dashboard websocket payload uses these top-level keys:
 - `market`
 - `positions`
 - `telemetry`
 - `runtime`
 - `drawdown_guard`
 
-## Clean Paper Trading Reset
-
-Before validating a new backend build, wipe the old persistence files so you do not mix old schema/data into the new run:
-
-```powershell
-cd backend
-Remove-Item ".\alpha_z_history.db" -Force -ErrorAction SilentlyContinue
-Remove-Item ".\ai_training_data.csv" -Force -ErrorAction SilentlyContinue
-Remove-Item ".\trading_log.txt" -Force -ErrorAction SilentlyContinue
-```
-
-Then restart with:
-
-```powershell
-$env:PAPER_TRADING="True"
-$env:DRY_RUN="False"
-$env:BANKROLL="5000"
-py -m uvicorn main:app --host 0.0.0.0 --port 8000
-```
-
-Expected clean startup log pattern:
-
-```text
-[INIT] Simulated balance initialized: $5000.00 (base: $5000.0 + historical: $0.00)
-[SYSTEM] Loaded 120 candles. VWAP=...
-[SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
-[SYSTEM] AI Warmup complete. Engine is hot and ready.
-```
-
-## Paper Validation Checklist
-
-Use this as the minimum validation bar before even considering live execution:
-
-1. Start from a wiped `alpha_z_history.db` and `ai_training_data.csv`.
-2. Confirm the backend seeds `120` Binance candles on boot.
-3. Confirm the dashboard renders without websocket parse errors.
-4. Confirm the dashboard shows the new quant metrics:
-   - `Bayesian Win Prob`
-   - `Intraday Volatility`
-5. Let the engine run long enough to generate at least one signal evaluation.
-6. Verify open positions, if any, display dynamic `tp_delta` and `sl_delta`.
-7. Verify the backend can recover from a Binance websocket disconnect.
-
-On reconnect, you want to see logs like:
-
-```text
-[KLINE WS] Disconnected: ...
-[TRADE WS] Disconnected: ...
-[KLINE REST] Backfilled ... missing closed candles after reconnect.
-[TRADE REST] Backfilled ... agg trades after reconnect.
-```
-
-## API and WebSocket
-
-Backend base URL: `http://localhost:8000`
-
-- `GET /api/engine/health`: runtime health and mode summary
-- `GET /api/engine/control`: current control flags and risk caps
-- `POST /api/engine/control`: update kill switch / paper mode / risk caps
-- `GET /api/metrics`: live metrics snapshot for the dashboard
-- `GET /api/history`: typed candle history used by charts
-- `GET /api/history/replay?timestamp=<unix_seconds>`: replay window around a trade/event
-- `GET /api/analysis/post-mortem`: recent execution and mismatch diagnostics
-- `WS /ws/live`: live typed engine payload for the dashboard
-
-## One-Click Windows Start
-
-```powershell
-start_quant.bat
-```
-
-This launches the backend and frontend in separate command windows.
-
 ## Data Files
 
 When the backend runs from `backend/`, it writes:
-
-- `alpha_z_history.db`: trade/execution history and analytics
-- `ai_training_data.csv`: ML feature rows
+- `alpha_z_history.db`: trade and execution history
+- `ai_training_data.csv`: model / feature rows
 - `trading_log.txt`: runtime log output
-
-## Live Trading Warning
-
-Do not treat the current engine as production-ready for live capital yet.
-
-Open items that still need paper or shadow validation:
-
-- real CLOB fill quality across multiple market regimes
-- entry/exit reliability under fast-moving books
-- AI-gated decision latency under load
-- reconnect/backfill correctness during active positions
-- end-to-end consistency between backend state, DB writes, and dashboard display
-
-A reasonable go/no-go bar before live trading is:
-
-1. One full paper session with no crashes or state corruption.
-2. Verified entry attempts using executable CLOB-adjusted prices.
-3. Verified TP/SL exits on at least a few completed paper trades.
-4. At least one clean websocket reconnect with successful REST backfill.
-5. No frontend websocket/type parsing failures.
 
 ## Troubleshooting
 
-- Frontend cannot reach backend:
-  - Confirm backend is listening on port `8000`.
-  - Confirm local firewall rules allow `8000`.
-- Paper balance is not resetting:
-  - Delete `backend/alpha_z_history.db` before restart.
-- AI is slow on startup:
-  - The model warmup is real; the first load can take tens of seconds.
-- No trades are appearing:
-  - Check gate logs first. The engine can legitimately skip on EV, crowd skew, time-to-expiry, or confirmation filters.
-- Live mode is not placing orders:
-  - Confirm Polymarket credentials are set.
-  - Confirm the market has executable CLOB depth, not just public odds.
+### Dashboard websocket disconnects
+If you see:
+- `[WS] /ws/live send timed out; closing slow client.`
+
+that means the server intentionally dropped a slow dashboard client to avoid backlog. This is not a trade-execution failure. The frontend should reconnect automatically.
+
+### No trades are appearing
+Check gate logs first. The engine can legitimately skip on:
+- crowd skew
+- time-to-expiry window
+- negative EV after slippage and fees
+- confirmation filters
+- entry premium caps
+
+### Paper shadow CLOB is not active
+Check:
+- `PAPER_USE_LIVE_CLOB=true`
+- Polymarket credentials are present in the environment used by the backend
+- the startup log explicitly says paper shadow CLOB mode is active
+
+### Live mode is not placing orders
+Check:
+- Polymarket credentials
+- market audit log for the active slug
+- CLOB subscription log and websocket stability
+- executable depth on the actual outcome token, not just public odds
+
+## Safety Warning
+
+Do not treat the current engine as production-safe by default.
+
+Before using real money, validate all of the following in paper or shadow mode:
+- multiple clean startups
+- market rotation correctness
+- CLOB websocket stability
+- position monitoring behavior
+- TP / SL / settlement correctness
+- reconnect and backfill behavior
+- frontend consistency with backend state
 
 ## Disclaimer
 

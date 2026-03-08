@@ -10683,3 +10683,111 @@
 2026-03-08 17:41:48,909 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
 2026-03-08 17:42:05,358 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
 2026-03-08 17:42:21,896 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:42:38,353 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:42:54,785 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:43:11,291 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:43:27,725 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:43:44,268 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:44:00,705 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:44:17,203 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:44:25,555 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV -1.10% <= 0 after slippage
+2026-03-08 17:44:33,794 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:44:42,232 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV -0.88% <= 0 after slippage
+2026-03-08 17:44:50,463 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV -2.45% <= 0 after slippage
+2026-03-08 17:44:58,760 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:45:15,225 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:45:23,444 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV -0.11% <= 0 after slippage
+2026-03-08 17:45:31,658 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:45:39,855 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV -0.52% <= 0 after slippage
+2026-03-08 17:45:48,026 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:46:04,425 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:46:12,690 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV 0.36% below AI trigger (1.00%)
+2026-03-08 17:46:20,884 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:46:37,181 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:46:53,427 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:47:09,862 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:47:26,603 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:47:42,683 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:47:59,178 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:48:15,621 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:48:32,064 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:48:48,493 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:49:04,970 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:49:21,458 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:49:37,942 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV 0.27% below AI trigger (1.00%)
+2026-03-08 17:49:46,146 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:50:02,612 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:50:19,058 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:50:35,564 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:50:52,121 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:51:08,535 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV -3.88% <= 0 after slippage
+2026-03-08 17:51:16,694 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:51:33,068 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:51:41,382 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV -2.94% <= 0 after slippage
+2026-03-08 17:51:49,640 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV -3.21% <= 0 after slippage
+2026-03-08 17:51:57,818 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:52:06,055 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV -2.86% <= 0 after slippage
+2026-03-08 17:52:14,276 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV -1.51% <= 0 after slippage
+2026-03-08 17:52:22,441 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV -0.50% <= 0 after slippage
+2026-03-08 17:52:30,718 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV -2.53% <= 0 after slippage
+2026-03-08 17:52:38,939 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Score 2 requires EV >= 6.00% (got 0.97%)
+2026-03-08 17:52:47,124 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV -0.47% <= 0 after slippage
+2026-03-08 17:52:55,304 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:53:11,762 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:53:28,311 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:53:44,733 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:54:01,201 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:54:17,865 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:54:34,293 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:54:50,729 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:54:59,055 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV 0.00% below AI trigger (1.00%)
+2026-03-08 17:55:07,313 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV -4.35% <= 0 after slippage
+2026-03-08 17:55:15,534 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:55:23,830 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV -0.29% <= 0 after slippage
+2026-03-08 17:55:32,070 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:55:48,579 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:56:05,046 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:56:21,541 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:56:38,046 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:56:54,553 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:57:11,052 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:57:27,536 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:57:43,963 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Max trades per hour (2) reached.
+2026-03-08 17:57:52,183 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Crowd skew too high
+2026-03-08 17:58:08,608 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Crowd skew too high
+2026-03-08 17:58:25,100 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Crowd skew too high
+2026-03-08 17:58:41,549 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Crowd skew too high
+2026-03-08 17:58:58,064 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Crowd skew too high
+2026-03-08 17:59:06,300 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV 0.00% <= 0 after slippage
+2026-03-08 17:59:22,850 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Net EV 0.00% <= 0 after slippage
+2026-03-08 17:59:31,302 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Too close to expiry (28s < 30s)
+2026-03-08 17:59:39,381 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Too close to expiry (20s < 30s)
+2026-03-08 17:59:48,565 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Too close to expiry (11s < 30s)
+2026-03-08 17:59:57,688 [INFO] [SKIP] bitcoin-up-or-down-march-8-4pm-et: Too close to expiry (2s < 30s)
+2026-03-08 18:00:05,388 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-8-5pm-et | Prefix: bitcoin-up-or-down-march-8-5pm
+2026-03-08 18:00:11,689 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-8-5pm-et | matched_slug=bitcoin-up-or-down-march-8-5pm-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=3989454324223779775567144570177324629992993884795087945994848796954101548592 | down_token=17241209260481589617726527941007580080907275175165614185070422287790513892200
+2026-03-08 18:00:11,689 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-8-5pm-et
+2026-03-08 18:00:11,691 [INFO] [SKIP] bitcoin-up-or-down-march-8-5pm-et: Too early (3588s > 3540s)
+2026-03-08 18:00:11,692 [INFO] [CLOB WS] Reconnecting to apply subscription update.
+2026-03-08 18:00:12,198 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-08 18:00:19,503 [INFO] [SKIP] bitcoin-up-or-down-march-8-5pm-et: Too early (3580s > 3540s)
+2026-03-08 18:00:27,733 [INFO] [SKIP] bitcoin-up-or-down-march-8-5pm-et: Too early (3572s > 3540s)
+2026-03-08 18:00:36,005 [INFO] [SKIP] bitcoin-up-or-down-march-8-5pm-et: Too early (3563s > 3540s)
+2026-03-08 18:00:44,199 [INFO] [SKIP] bitcoin-up-or-down-march-8-5pm-et: Too early (3555s > 3540s)
+2026-03-08 18:00:52,472 [INFO] [SKIP] bitcoin-up-or-down-march-8-5pm-et: Too early (3547s > 3540s)
+2026-03-08 18:01:24,939 [INFO] [ENTRY LOCKUP] bitcoin-up-or-down-march-8-5pm-et: capital locked for ~1.0h (threshold 0.8h)
+2026-03-08 18:01:24,940 [INFO] [BET] BET PLACED [PAPER] UP on bitcoin-up-or-down-march-8-5pm-et | Filled: $156.29 | Avg Px: 0.5119 | Shares: 305.2885 | Liq: PAPER_CLOB_SHADOW | Expected: 0.5394
+2026-03-08 18:01:25,052 [INFO] [SKIP] bitcoin-up-or-down-march-8-5pm-et: Position already active
+2026-03-08 18:01:25,668 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-5pm-et | Mark: 0.4954 | U-PnL: $-5.06 (-3.24%) | TP: +10.0c @ 0.6119 | SL: -14.4c @ 0.3679 | T-58:34 | TP Armed: N | SL Disabled: N
+2026-03-08 18:01:38,471 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-5pm-et | Mark: 0.4900 | U-PnL: $-6.70 (-4.29%) | TP: +10.0c @ 0.6119 | SL: -14.4c @ 0.3679 | T-58:21 | TP Armed: N | SL Disabled: N
+2026-03-08 18:01:49,764 [INFO] [SKIP] bitcoin-up-or-down-march-8-5pm-et: Score 1 requires EV >= 15.00% (got 5.76%)
+2026-03-08 18:01:51,384 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-5pm-et | Mark: 0.4867 | U-PnL: $-7.71 (-4.93%) | TP: +10.0c @ 0.6119 | SL: -14.4c @ 0.3679 | T-58:08 | TP Armed: N | SL Disabled: N
+2026-03-08 18:01:57,996 [INFO] [SKIP] bitcoin-up-or-down-march-8-5pm-et: Score 1 requires EV >= 15.00% (got 8.58%)
+2026-03-08 18:02:04,296 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-5pm-et | Mark: 0.4713 | U-PnL: $-12.41 (-7.94%) | TP: +10.0c @ 0.6119 | SL: -14.4c @ 0.3679 | T-57:55 | TP Armed: N | SL Disabled: N
+2026-03-08 18:02:06,168 [INFO] [SKIP] bitcoin-up-or-down-march-8-5pm-et: Score 1 requires EV >= 15.00% (got 7.76%)
+2026-03-08 18:02:17,137 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-5pm-et | Mark: 0.4659 | U-PnL: $-14.07 (-9.00%) | TP: +10.0c @ 0.6119 | SL: -14.4c @ 0.3679 | T-57:42 | TP Armed: N | SL Disabled: N
+2026-03-08 18:02:22,583 [INFO] [SKIP] bitcoin-up-or-down-march-8-5pm-et: Score 1 requires EV >= 15.00% (got 7.76%)
+2026-03-08 18:02:29,970 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-5pm-et | Mark: 0.4600 | U-PnL: $-15.86 (-10.15%) | TP: +10.0c @ 0.6119 | SL: -14.4c @ 0.3679 | T-57:30 | TP Armed: N | SL Disabled: N
+2026-03-08 18:02:30,833 [INFO] [SKIP] bitcoin-up-or-down-march-8-5pm-et: Score 1 requires EV >= 15.00% (got 4.88%)
+2026-03-08 18:02:39,066 [INFO] [SKIP] bitcoin-up-or-down-march-8-5pm-et: Score 1 requires EV >= 15.00% (got 5.06%)
+2026-03-08 18:02:42,825 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-5pm-et | Mark: 0.4708 | U-PnL: $-12.56 (-8.04%) | TP: +10.0c @ 0.6119 | SL: -14.4c @ 0.3679 | T-57:17 | TP Armed: N | SL Disabled: N
