@@ -83,6 +83,8 @@ class PositionRiskConfig:
     base_sl_token_delta: float = -0.10
     min_tp_token_delta: float = 0.08
     max_sl_token_delta: float = -0.08
+    cheap_token_threshold_price: float = 0.30
+    cheap_token_soft_sl_max_loss_pct: float = 0.30
     volatility_reference: float = 0.0040
     volatility_floor: float = 0.60
     volatility_ceiling: float = 1.80
@@ -502,6 +504,12 @@ class RiskManager:
             sl_delta *= cfg.settling_sl_breath_multiplier
 
         sl_delta = max(sl_delta, cfg.max_sl_token_delta)
+        if position.bought_price <= cfg.cheap_token_threshold_price:
+            cheap_token_sl = -max(
+                cfg.sl_entry_rel_min_cents,
+                position.bought_price * cfg.cheap_token_soft_sl_max_loss_pct,
+            )
+            sl_delta = max(sl_delta, cheap_token_sl)
         entry_based_sl = -max(cfg.sl_entry_rel_min_cents, position.bought_price * cfg.sl_entry_rel_max_loss_pct)
         reachable_floor = -(max(position.bought_price - 0.01, 0.0))
         if reachable_floor < 0:
