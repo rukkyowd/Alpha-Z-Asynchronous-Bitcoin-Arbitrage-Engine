@@ -1621,7 +1621,7 @@ function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMo
   return (
     <motion.div key="terminal" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="grid grid-cols-12 gap-6">
       <div className="col-span-12 space-y-6 xl:col-span-8">
-          <Panel title="Live Price Action • 15m Candles">
+              <Panel title="Live Price Action • 1H Candles">
             {liveLoading ? (
               <div className="grid grid-cols-1 gap-3">
                 <SkeletonBox className="h-64 w-full" />

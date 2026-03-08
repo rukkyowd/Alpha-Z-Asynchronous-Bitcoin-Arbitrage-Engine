@@ -146,6 +146,7 @@ class MarketOddsSnapshot(SerializableModel):
     reference_price: float = 0.0
     strike_price: float = 0.0
     market_resolution: MarketResolution = MarketResolution.UNKNOWN
+    market_end_time: datetime | None = None
     market_category: str = ""
     fees_enabled: bool = False
     fee_curve_rate: float = 0.0
@@ -175,6 +176,32 @@ class MarketOddsSnapshot(SerializableModel):
         if direction == Direction.DOWN:
             return self.down_entry_prob_pct or self.down_public_prob_pct
         return 0.0
+
+    def fair_public_prob_pct(self, direction: Direction) -> float:
+        total = self.up_public_prob_pct + self.down_public_prob_pct
+        if total <= 0:
+            return self.public_prob_pct(direction)
+        if direction == Direction.UP:
+            return (self.up_public_prob_pct / total) * 100.0
+        if direction == Direction.DOWN:
+            return (self.down_public_prob_pct / total) * 100.0
+        return 0.0
+
+    def fair_entry_prob_pct(self, direction: Direction) -> float:
+        total = self.up_entry_prob_pct + self.down_entry_prob_pct
+        if total <= 0:
+            return self.entry_prob_pct(direction)
+        if direction == Direction.UP:
+            return (self.up_entry_prob_pct / total) * 100.0
+        if direction == Direction.DOWN:
+            return (self.down_entry_prob_pct / total) * 100.0
+        return 0.0
+
+    def public_vig_pct(self) -> float:
+        return max(0.0, (self.up_public_prob_pct + self.down_public_prob_pct) - 100.0)
+
+    def entry_vig_pct(self) -> float:
+        return max(0.0, (self.up_entry_prob_pct + self.down_entry_prob_pct) - 100.0)
 
     def token_id(self, direction: Direction) -> str:
         if direction == Direction.UP:
@@ -219,8 +246,10 @@ class TechnicalContext(SerializableModel):
     adaptive_atr_floor: float = 0.0
     adaptive_cvd_threshold: float = 0.0
     market_regime: MarketRegime = MarketRegime.UNKNOWN
+    base_probability: float = 0.5
     bayesian_logit: float = 0.0
     bayesian_probability: float = 0.5
+    indicator_logit_shift: float = 0.0
     expected_move_sigma: float = 0.0
     expected_move_t: float = 0.0
     notes: tuple[str, ...] = field(default_factory=tuple)

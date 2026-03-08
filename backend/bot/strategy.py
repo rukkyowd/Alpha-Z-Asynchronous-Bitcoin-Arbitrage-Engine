@@ -37,6 +37,7 @@ class StrategyConfig:
     probability_floor_pct: float = 2.0
     probability_ceil_pct: float = 98.0
     degrees_of_freedom: int = 4
+    max_indicator_logit_shift: float = 2.0
     ema_squeeze_pct: float = 0.00005
     min_score_to_trade: int = 1
     min_seconds_remaining: float = 30.0
@@ -333,6 +334,7 @@ class StrategyEngine:
             degrees_of_freedom=self.config.degrees_of_freedom,
             probability_floor_pct=self.config.probability_floor_pct,
             probability_ceil_pct=self.config.probability_ceil_pct,
+            max_indicator_logit_shift=self.config.max_indicator_logit_shift,
         )
 
         if enriched_context.market_regime == MarketRegime.UNKNOWN:
@@ -344,7 +346,7 @@ class StrategyEngine:
                 f"EMA Squeeze (spread {abs(enriched_context.ema_spread_pct) * 100:.3f}%)",
             )
 
-        if max(odds.up_entry_prob_pct, odds.down_entry_prob_pct) > self.config.max_crowd_prob_to_call:
+        if max(odds.fair_entry_prob_pct(Direction.UP), odds.fair_entry_prob_pct(Direction.DOWN)) > self.config.max_crowd_prob_to_call:
             return _skip_signal(slug, "Crowd skew too high")
 
         up_ev = self.compute_expected_value(
@@ -373,15 +375,17 @@ class StrategyEngine:
         signal_alignment = build_signal_alignment(enriched_context, target_direction, volume_ratio=self.config.volume_confirmation_ratio)
 
         up_probability, down_probability = directional_probabilities(enriched_context)
-        up_edge = up_probability - odds.up_entry_prob_pct
-        down_edge = down_probability - odds.down_entry_prob_pct
+        fair_up_market_prob = odds.fair_entry_prob_pct(Direction.UP)
+        fair_down_market_prob = odds.fair_entry_prob_pct(Direction.DOWN)
+        up_edge = up_probability - fair_up_market_prob
+        down_edge = down_probability - fair_down_market_prob
         edge_snapshot = EdgeSnapshot(
             slug=slug,
             direction=target_direction,
             up_math_prob=round(up_probability, 2),
             down_math_prob=round(down_probability, 2),
-            up_poly_prob=round(odds.up_entry_prob_pct, 2),
-            down_poly_prob=round(odds.down_entry_prob_pct, 2),
+            up_poly_prob=round(fair_up_market_prob, 2),
+            down_poly_prob=round(fair_down_market_prob, 2),
             up_public_prob=round(odds.up_public_prob_pct, 2),
             down_public_prob=round(odds.down_public_prob_pct, 2),
             up_edge=round(up_edge, 2),
@@ -528,6 +532,9 @@ class StrategyEngine:
         if not approved:
             return _skip_signal(slug, approval_reason, score=score)
 
+        fair_target_market_prob = odds.fair_entry_prob_pct(target_direction)
+        raw_target_market_prob = odds.entry_prob_pct(target_direction)
+        target_vig_pct = odds.entry_vig_pct()
         return TradeSignal(
             slug=slug,
             direction=target_direction,
@@ -538,7 +545,7 @@ class StrategyEngine:
             expected_value_pct=target_ev.ev_pct,
             expected_value_gross_pct=target_ev.ev_pct_gross,
             true_probability_pct=target_ev.true_prob_pct,
-            market_probability_pct=target_ev.market_prob_pct,
+            market_probability_pct=round(fair_target_market_prob, 2),
             entry_probability_pct=target_ev.market_prob_pct,
             token_price=token_price,
             kelly_bet_usd=target_ev.kelly_bet_usd,
@@ -561,6 +568,15 @@ class StrategyEngine:
                 "up_edge_pct": edge_snapshot.up_edge,
                 "down_edge_pct": edge_snapshot.down_edge,
                 "fee_cost_pct": target_ev.fee_cost_pct,
+                "predicted_win_prob_pct": target_ev.true_prob_pct,
+                "base_up_probability_pct": round(enriched_context.base_probability * 100.0, 2),
+                "posterior_up_probability_pct": round(enriched_context.bayesian_probability * 100.0, 2),
+                "indicator_logit_shift": round(enriched_context.indicator_logit_shift, 4),
+                "raw_market_probability_pct": round(raw_target_market_prob, 2),
+                "fair_market_probability_pct": round(fair_target_market_prob, 2),
+                "entry_vig_pct": round(target_vig_pct, 2),
+                "public_vig_pct": round(odds.public_vig_pct(), 2),
+                "reference_price": round(reference_price, 6),
             },
         )
 

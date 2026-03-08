@@ -11,7 +11,7 @@ from scipy.special import stdtr
 from .models import MarketRegime, MarketTick, TechnicalContext
 
 EPSILON = 1e-9
-DEFAULT_BAR_SECONDS = 900.0
+DEFAULT_BAR_SECONDS = 3600.0
 
 
 def _clamp(value: float, lower: float, upper: float) -> float:
@@ -374,14 +374,17 @@ def apply_probabilistic_model(
     weights: IndicatorWeights = DEFAULT_INDICATOR_WEIGHTS,
     probability_floor_pct: float = 2.0,
     probability_ceil_pct: float = 98.0,
+    max_indicator_logit_shift: float = 2.0,
     bar_seconds: float | None = None,
 ) -> TechnicalContext:
     if context.price <= 0 or strike_price <= 0:
         return replace(
             context,
             strike_price=strike_price,
+            base_probability=0.5,
             bayesian_logit=0.0,
             bayesian_probability=0.5,
+            indicator_logit_shift=0.0,
             expected_move_sigma=0.0,
             expected_move_t=0.0,
         )
@@ -395,18 +398,21 @@ def apply_probabilistic_model(
 
     threshold = max(abs(context.adaptive_cvd_threshold), 1.0)
     volume_ratio = _safe_div(context.current_volume, context.vol_sma_20, default=1.0) - 1.0
-    posterior_logit = logit(base_probability)
-    posterior_logit += weights.rsi * ((context.rsi_14 - 50.0) / 12.5)
-    posterior_logit += weights.ema_spread * math.tanh(context.ema_spread_pct / 0.0015)
-    posterior_logit += weights.vwap_distance * math.tanh(context.price_vs_vwap_pct / 0.0025)
-    posterior_logit += weights.cvd_candle * math.tanh(context.cvd_candle_delta / threshold)
-    posterior_logit += weights.cvd_micro * math.tanh(context.cvd_1min_delta / max(threshold * 0.35, 1.0))
-    posterior_logit += weights.volume * math.tanh(volume_ratio)
-    posterior_logit += weights.regime * _regime_feature(
+    base_logit = logit(base_probability)
+    indicator_logit_shift = 0.0
+    indicator_logit_shift += weights.rsi * ((context.rsi_14 - 50.0) / 12.5)
+    indicator_logit_shift += weights.ema_spread * math.tanh(context.ema_spread_pct / 0.0015)
+    indicator_logit_shift += weights.vwap_distance * math.tanh(context.price_vs_vwap_pct / 0.0025)
+    indicator_logit_shift += weights.cvd_candle * math.tanh(context.cvd_candle_delta / threshold)
+    indicator_logit_shift += weights.cvd_micro * math.tanh(context.cvd_1min_delta / max(threshold * 0.35, 1.0))
+    indicator_logit_shift += weights.volume * math.tanh(volume_ratio)
+    indicator_logit_shift += weights.regime * _regime_feature(
         context.market_regime,
         context.ema_spread_pct,
         context.price_vs_vwap_pct,
     )
+    bounded_shift = _clamp(indicator_logit_shift, -abs(max_indicator_logit_shift), abs(max_indicator_logit_shift))
+    posterior_logit = base_logit + bounded_shift
 
     bounded_probability = _clamp(
         sigmoid(posterior_logit),
@@ -417,8 +423,10 @@ def apply_probabilistic_model(
     return replace(
         context,
         strike_price=strike_price,
+        base_probability=base_probability,
         bayesian_logit=posterior_logit,
         bayesian_probability=bounded_probability,
+        indicator_logit_shift=bounded_shift,
         expected_move_sigma=expected_move_sigma,
         expected_move_t=t_score,
     )

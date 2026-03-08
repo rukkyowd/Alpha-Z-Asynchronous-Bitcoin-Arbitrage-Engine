@@ -659,6 +659,17 @@ class ClobExecutionEngine:
                 "market_impact_pct": signal.market_impact_pct,
                 "available_depth_usd": liquidity.available_depth_usd,
                 "clob_levels": liquidity.levels,
+                "market_resolution": odds.market_resolution.value,
+                "reference_price": round(odds.reference_price or odds.strike_price, 6),
+                "market_end_iso": odds.market_end_time.isoformat() if odds.market_end_time is not None else "",
+                "predicted_win_prob_pct": round(signal.true_probability_pct, 4),
+                "fair_market_probability_pct": round(signal.market_probability_pct, 4),
+                "raw_market_probability_pct": round(signal.entry_probability_pct, 4),
+                "expected_ev_pct": round(signal.expected_value_pct, 4),
+                "expected_ev_gross_pct": round(signal.expected_value_gross_pct, 4),
+                "signal_token_price": round(signal.token_price, 6),
+                "price_cap": round(signal.price_cap, 6),
+                **signal.metadata,
             },
         )
     async def submit_entry_order(

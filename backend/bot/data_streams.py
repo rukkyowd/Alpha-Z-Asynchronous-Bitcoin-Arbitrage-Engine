@@ -27,7 +27,7 @@ class DataStreamsConfig:
     polymarket_crypto_price_api: str = "https://polymarket.com/api/crypto/crypto-price"
     binance_rest_api: str = "https://api.binance.com"
     binance_ws_api: str = "wss://stream.binance.com:9443/ws"
-    kline_interval: str = "15m"
+    kline_interval: str = "1h"
     history_limit: int = 120
     strike_cache_ttl_seconds: float = 300.0
     ws_backoff_initial_seconds: float = 1.0
@@ -85,6 +85,15 @@ def _parse_seconds_remaining(end_date_str: str) -> float:
         return (end_dt - datetime.now(timezone.utc)).total_seconds()
     except Exception:
         return -1.0
+
+
+def _parse_end_datetime(end_date_str: str) -> datetime | None:
+    if not end_date_str:
+        return None
+    try:
+        return datetime.fromisoformat(end_date_str.replace("Z", "+00:00"))
+    except Exception:
+        return None
 
 
 def _infer_fee_curve(slug: str, market: dict[str, Any], event: dict[str, Any]) -> tuple[str, bool, float, float]:
@@ -399,7 +408,7 @@ class PolymarketFetcher:
 
     def __init__(self, config: DataStreamsConfig | None = None):
         self.config = config or DataStreamsConfig()
-        self._strike_cache: dict[str, tuple[float, float]] = {}
+        self._strike_cache: dict[str, tuple[float, float, bool]] = {}
 
     async def fetch_market_meta_from_slug(self, session: aiohttp.ClientSession, slug: str) -> dict[str, Any] | None:
         try:
@@ -426,11 +435,6 @@ class PolymarketFetcher:
         *,
         meta: dict[str, Any] | None = None,
     ) -> float:
-        cached = self._strike_cache.get(slug)
-        now_ts = time.time()
-        if cached and (now_ts - cached[1]) < self.config.strike_cache_ttl_seconds:
-            return cached[0]
-
         if meta is None:
             meta = await self.fetch_market_meta_from_slug(session, slug)
         if meta is None:
@@ -440,26 +444,54 @@ class PolymarketFetcher:
         event = meta["event"]
         title = str(market.get("question") or event.get("title") or "")
         match = re.search(r"\$([\d,]+(?:\.\d+)?)", title)
+        now_ts = time.time()
         if match:
             strike = float(match.group(1).replace(",", ""))
-            self._strike_cache[slug] = (strike, now_ts)
+            self._strike_cache[slug] = (strike, now_ts, True)
             return strike
 
         end_date_str = str(market.get("endDate") or event.get("endDate") or "")
-        if not end_date_str:
+        end_dt = _parse_end_datetime(end_date_str)
+        if end_dt is None:
             return 0.0
+        market_start_dt = end_dt - timedelta(hours=1)
+        market_started = datetime.now(timezone.utc) >= market_start_dt
+
+        cached = self._strike_cache.get(slug)
+        if cached is not None:
+            cached_value, cached_at, finalized = cached
+            if finalized or ((not market_started) and (now_ts - cached_at) < self.config.strike_cache_ttl_seconds):
+                return cached_value
+
+        async def _fetch_binance_hour_open() -> float:
+            params = {
+                "symbol": self.config.symbol,
+                "interval": "1h",
+                "startTime": int(market_start_dt.timestamp() * 1000),
+                "limit": 1,
+            }
+            async with session.get(f"{self.config.binance_rest_api}/api/v3/klines", params=params) as response:
+                if response.status != 200:
+                    return 0.0
+                payload = await response.json()
+                if not payload:
+                    return 0.0
+                return float(payload[0][1])
+
+        if market_started:
+            try:
+                strike = await _fetch_binance_hour_open()
+                if strike > 0:
+                    self._strike_cache[slug] = (strike, now_ts, True)
+                    return strike
+            except Exception:
+                pass
 
         try:
-            end_dt = datetime.fromisoformat(end_date_str.replace("Z", "+00:00"))
-        except ValueError:
-            return 0.0
-
-        try:
-            start_dt = end_dt - timedelta(hours=1)
             variant = "hourly"
             params = {
                 "symbol": "BTC",
-                "eventStartTime": start_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "eventStartTime": market_start_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "variant": variant,
                 "endDate": end_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
             }
@@ -469,27 +501,16 @@ class PolymarketFetcher:
                     open_price = payload.get("openPrice")
                     if open_price is not None:
                         strike = float(open_price)
-                        self._strike_cache[slug] = (strike, now_ts)
+                        self._strike_cache[slug] = (strike, now_ts, False)
                         return strike
         except Exception:
             pass
 
         try:
-            start_dt = end_dt - timedelta(hours=1)
-            interval = "1h"
-            params = {
-                "symbol": self.config.symbol,
-                "interval": interval,
-                "startTime": int(start_dt.timestamp() * 1000),
-                "limit": 1,
-            }
-            async with session.get(f"{self.config.binance_rest_api}/api/v3/klines", params=params) as response:
-                if response.status == 200:
-                    payload = await response.json()
-                    if payload:
-                        strike = float(payload[0][1])
-                        self._strike_cache[slug] = (strike, now_ts)
-                        return strike
+            strike = await _fetch_binance_hour_open()
+            if strike > 0:
+                self._strike_cache[slug] = (strike, now_ts, market_started)
+                return strike
         except Exception:
             pass
 
@@ -518,8 +539,10 @@ class PolymarketFetcher:
         if len(prices) < 2:
             return MarketOddsSnapshot(slug=slug, market_found=False)
 
+        end_date_str = str(market.get("endDate") or event.get("endDate") or "")
+        end_dt = _parse_end_datetime(end_date_str)
         reference_price = await self.fetch_price_to_beat_for_market(session, slug, meta=meta)
-        seconds_remaining = _parse_seconds_remaining(str(market.get("endDate") or event.get("endDate") or ""))
+        seconds_remaining = _parse_seconds_remaining(end_date_str)
         market_category, fees_enabled, fee_curve_rate, fee_curve_exponent = _infer_fee_curve(slug, market, event)
         market_resolution = _infer_market_resolution(slug, title)
 
@@ -535,6 +558,7 @@ class PolymarketFetcher:
             reference_price=reference_price,
             strike_price=reference_price,
             market_resolution=market_resolution,
+            market_end_time=end_dt,
             market_category=market_category,
             fees_enabled=fees_enabled,
             fee_curve_rate=fee_curve_rate,

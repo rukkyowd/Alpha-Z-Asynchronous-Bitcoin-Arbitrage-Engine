@@ -1,5 +1,7 @@
 import os
 import sqlite3
+import json
+import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -121,6 +123,79 @@ def analyze_mismatches(df):
         print("\n Payout Integrity: Local calc matched Poly Official 100%.")
     print("="*80 + "\n")
 
+def _parse_metadata_blob(raw_value):
+    if isinstance(raw_value, dict):
+        return raw_value
+    if isinstance(raw_value, str) and raw_value.strip():
+        try:
+            parsed = json.loads(raw_value)
+            return parsed if isinstance(parsed, dict) else {}
+        except Exception:
+            return {}
+    return {}
+
+def run_probability_calibration_report(df):
+    """Computes calibration diagnostics for stored trade probabilities."""
+    if 'metadata_json' not in df.columns:
+        print("\n Probability Calibration: metadata_json column missing.")
+        print("="*80)
+        return
+
+    resolved = df[df['result'].isin(['WIN', 'LOSS'])].copy()
+    if resolved.empty:
+        print("\n Probability Calibration: no resolved trades yet.")
+        print("="*80)
+        return
+
+    metadata = resolved['metadata_json'].apply(_parse_metadata_blob)
+    resolved['predicted_win_prob_pct'] = metadata.apply(lambda item: float(item.get('predicted_win_prob_pct', np.nan)))
+    resolved['fair_market_probability_pct'] = metadata.apply(lambda item: float(item.get('fair_market_probability_pct', np.nan)))
+    resolved['raw_market_probability_pct'] = metadata.apply(lambda item: float(item.get('raw_market_probability_pct', np.nan)))
+    resolved['base_up_probability_pct'] = metadata.apply(lambda item: float(item.get('base_up_probability_pct', np.nan)))
+    resolved['indicator_logit_shift'] = metadata.apply(lambda item: float(item.get('indicator_logit_shift', np.nan)))
+    resolved['outcome_numeric'] = resolved['result'].apply(lambda value: 1.0 if value == 'WIN' else 0.0)
+
+    calibration = resolved.dropna(subset=['predicted_win_prob_pct']).copy()
+    if calibration.empty:
+        print("\n Probability Calibration: no stored prediction probabilities yet.")
+        print("="*80)
+        return
+
+    calibration['predicted_prob'] = calibration['predicted_win_prob_pct'] / 100.0
+    calibration['brier_component'] = (calibration['predicted_prob'] - calibration['outcome_numeric']) ** 2
+    brier_score = calibration['brier_component'].mean()
+    avg_pred = calibration['predicted_win_prob_pct'].mean()
+    realized_wr = calibration['outcome_numeric'].mean() * 100.0
+    avg_edge = (calibration['predicted_win_prob_pct'] - calibration['fair_market_probability_pct']).mean()
+
+    bins = [0, 40, 50, 60, 70, 80, 100]
+    calibration['bucket'] = pd.cut(calibration['predicted_win_prob_pct'], bins=bins, right=False, include_lowest=True)
+    bucket_rows = []
+    for bucket, group in calibration.groupby('bucket', observed=False):
+        if group.empty:
+            continue
+        bucket_rows.append({
+            'Bucket': str(bucket),
+            'Trades': len(group),
+            'Avg Pred %': round(group['predicted_win_prob_pct'].mean(), 2),
+            'Realized Win %': round(group['outcome_numeric'].mean() * 100.0, 2),
+            'Avg Fair Mkt %': round(group['fair_market_probability_pct'].mean(), 2),
+        })
+
+    print("\n" + "="*80)
+    print(" PROBABILITY CALIBRATION REPORT")
+    print("="*80)
+    print(f" Brier Score        : {brier_score:.4f}")
+    print(f" Avg Predicted Win  : {avg_pred:.2f}%")
+    print(f" Realized Win Rate  : {realized_wr:.2f}%")
+    print(f" Avg Edge vs Fair   : {avg_edge:+.2f}%")
+    print("-" * 80)
+    if bucket_rows:
+        print(pd.DataFrame(bucket_rows).to_string(index=False))
+    else:
+        print(" Not enough bucketed trades yet.")
+    print("="*80)
+
 def plot_equity_curve(df):
     """Visualizes account growth over time."""
     df = df.sort_values('timestamp')
@@ -162,8 +237,15 @@ if __name__ == "__main__":
         
         # 4. Check Resolution Integrity
         analyze_mismatches(trades_df)
+
+        # 5. Probability calibration
+        run_probability_calibration_report(trades_df)
         
-        # 5. Visual Output
-        see_plot = input("View Equity Curve Plot? (y/n): ").strip().lower()
-        if see_plot == 'y':
-            plot_equity_curve(trades_df)
+        # 6. Visual Output
+        if sys.stdin.isatty():
+            try:
+                see_plot = input("View Equity Curve Plot? (y/n): ").strip().lower()
+            except EOFError:
+                see_plot = "n"
+            if see_plot == 'y':
+                plot_equity_curve(trades_df)

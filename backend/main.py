@@ -41,6 +41,7 @@ from bot.models import (
     Direction,
     ExecutionTimingSnapshot,
     MarketOddsSnapshot,
+    MarketResolution,
     MarketRegime,
     MarketTick,
     PositionStatus,
@@ -1152,6 +1153,31 @@ async def build_context_from_state(runtime: EngineServices) -> TechnicalContext 
     return context
 
 
+async def _live_binance_reference_price_from_state(runtime: EngineServices, odds: MarketOddsSnapshot) -> float:
+    if odds.market_resolution != MarketResolution.CANDLE_OPEN or odds.market_end_time is None:
+        return 0.0
+
+    market_start_time = odds.market_end_time.astimezone(timezone.utc) - timedelta(hours=1)
+    if utc_now() < market_start_time:
+        return 0.0
+
+    async with runtime.state.market_lock:
+        candidates = []
+        if runtime.state.live_candle is not None:
+            candidates.append(runtime.state.live_candle.clone())
+        candidates.extend(candle.clone() for candle in list(runtime.state.candle_history)[-4:])
+
+    for candle in candidates:
+        candle_start = candle.timestamp.astimezone(timezone.utc)
+        if abs((candle_start - market_start_time).total_seconds()) > 1.0:
+            continue
+        live_open = candle.open if candle.open > 0 else candle.resolved_price
+        if live_open > 0:
+            return live_open
+
+    return 0.0
+
+
 async def fetch_market_odds(runtime: EngineServices, slug: str) -> tuple[MarketOddsSnapshot, dict[Direction, LiquidityProfile]]:
     async with api_slot(runtime):
         odds = await runtime.polymarket_fetcher.fetch_market_odds(runtime.http_session, slug)
@@ -1160,6 +1186,14 @@ async def fetch_market_odds(runtime: EngineServices, slug: str) -> tuple[MarketO
     if not odds.market_found:
         runtime.latest_odds = odds
         return odds, liquidity_by_direction
+
+    live_reference_price = await _live_binance_reference_price_from_state(runtime, odds)
+    if live_reference_price > 0:
+        odds = replace(
+            odds,
+            reference_price=live_reference_price,
+            strike_price=live_reference_price,
+        )
 
     probe_size = min(2.0, max(runtime.execution_config.live_tiny_amm_fallback_max_bet_usd, 1.0))
     if odds.up_token_id:
@@ -1304,6 +1338,40 @@ def _official_outcome_to_underlying(outcome: str, strike_price: float, fallback_
     if outcome == Direction.DOWN.value:
         return strike_price - 0.01
     return strike_price
+
+
+def _parse_iso_datetime(raw: str) -> datetime | None:
+    if not raw:
+        return None
+    with suppress(Exception):
+        return datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    return None
+
+
+async def _fetch_binance_hourly_resolution_candle(
+    runtime: EngineServices,
+    market_end_time: datetime,
+) -> tuple[float, float] | None:
+    candle_end_utc = market_end_time.astimezone(timezone.utc)
+    candle_start_utc = candle_end_utc - timedelta(hours=1)
+    params = {
+        "symbol": runtime.data_config.symbol,
+        "interval": "1h",
+        "startTime": int(candle_start_utc.timestamp() * 1000),
+        "limit": 1,
+    }
+    try:
+        async with api_slot(runtime):
+            async with runtime.http_session.get(f"{runtime.data_config.binance_rest_api}/api/v3/klines", params=params) as response:
+                if response.status != 200:
+                    return None
+                payload = await response.json()
+        if not payload:
+            return None
+        row = payload[0]
+        return float(row[1]), float(row[4])
+    except Exception:
+        return None
 
 
 def _extract_market_from_gamma_payload(payload: Any, slug: str) -> dict[str, Any] | None:
@@ -1497,21 +1565,40 @@ async def settle_expired_position(
     bought_price = _safe_float(position.get("bought_price"))
     shares_owned = bet_size_usd / max(bought_price, 0.0001)
     strike_price = _safe_float(position.get("strike"))
+    position_features = position.get("ml_features", {})
+    market_resolution = str(position_features.get("market_resolution") or MarketResolution.UNKNOWN.value)
+    market_end_time = _parse_iso_datetime(str(position_features.get("market_end_iso") or ""))
     official_outcome, source = await _poll_official_market_outcome(runtime, str(position.get("slug") or ""), position)
     settlement_source = f"POLYMARKET_GAMMA:{source}" if official_outcome is not None else f"LOCAL_BINANCE_FALLBACK:{source}"
     if official_outcome is not None:
         outcome = official_outcome
         resolved_underlying = _official_outcome_to_underlying(official_outcome, strike_price, final_underlying)
     else:
-        outcome = _resolve_outcome(final_underlying, strike_price)
-        resolved_underlying = final_underlying
-        logger.warning(
-            "[SETTLEMENT] %s: official Polymarket outcome unavailable (%s). Falling back to local Binance snapshot %.2f vs strike %.2f.",
-            position.get("slug"),
-            source,
-            final_underlying,
-            strike_price,
-        )
+        hourly_candle = None
+        if market_resolution == MarketResolution.CANDLE_OPEN.value and market_end_time is not None:
+            hourly_candle = await _fetch_binance_hourly_resolution_candle(runtime, market_end_time)
+        if hourly_candle is not None:
+            candle_open, candle_close = hourly_candle
+            outcome = Direction.UP.value if candle_close >= candle_open else Direction.DOWN.value
+            resolved_underlying = candle_close
+            settlement_source = f"LOCAL_BINANCE_1H_CANDLE_FALLBACK:{source}"
+            logger.warning(
+                "[SETTLEMENT] %s: official Polymarket outcome unavailable (%s). Falling back to Binance BTCUSDT 1H candle O=%.2f C=%.2f.",
+                position.get("slug"),
+                source,
+                candle_open,
+                candle_close,
+            )
+        else:
+            outcome = _resolve_outcome(final_underlying, strike_price)
+            resolved_underlying = final_underlying
+            logger.warning(
+                "[SETTLEMENT] %s: official Polymarket outcome unavailable (%s). Falling back to local Binance snapshot %.2f vs reference %.2f.",
+                position.get("slug"),
+                source,
+                final_underlying,
+                strike_price,
+            )
     settlement_price = 0.0
     if outcome == str(position.get("decision")):
         settlement_price = 1.0
@@ -1653,12 +1740,13 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             runtime.latest_odds = odds
             enriched_context = apply_probabilistic_model(
                 context,
-                strike_price=odds.reference_price or odds.strike_price,
-                seconds_remaining=odds.seconds_remaining,
-                degrees_of_freedom=runtime.strategy_config.degrees_of_freedom,
-                probability_floor_pct=runtime.strategy_config.probability_floor_pct,
-                probability_ceil_pct=runtime.strategy_config.probability_ceil_pct,
-            )
+            strike_price=odds.reference_price or odds.strike_price,
+            seconds_remaining=odds.seconds_remaining,
+            degrees_of_freedom=runtime.strategy_config.degrees_of_freedom,
+            probability_floor_pct=runtime.strategy_config.probability_floor_pct,
+            probability_ceil_pct=runtime.strategy_config.probability_ceil_pct,
+            max_indicator_logit_shift=runtime.strategy_config.max_indicator_logit_shift,
+        )
             runtime.latest_context = enriched_context
             await runtime.state.update_telemetry(context=enriched_context)
 
@@ -2379,7 +2467,7 @@ async def bootstrap_runtime() -> EngineServices:
     runtime.strategy_engine.risk_manager = runtime.risk_manager
     _setup_logging(runtime)
     _init_db()
-    logger.info("Elite Quant Engine v2 Initialized. Monitoring 15m WebSocket...")
+    logger.info("Elite Quant Engine v2 Initialized. Monitoring 1h WebSocket...")
 
     await load_persisted_history(runtime)
     if runtime.paper_trading:
