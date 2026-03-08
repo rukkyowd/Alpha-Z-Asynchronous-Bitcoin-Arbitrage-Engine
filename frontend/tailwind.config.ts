@@ -10,42 +10,40 @@ const config: Config = {
     extend: {
       colors: {
         az: {
-          base: "#06080d",
-          surface: "#0c1018",
-          elevated: "#141a26",
-          hover: "#1a2233",
-          accent: "#3b82f6",
-          "accent-hover": "#60a5fa",
-          profit: "#34d399",
-          loss: "#f87171",
-          warning: "#fbbf24",
+          bg: "#0b0e14",         // Nearly black background
+          surface: "#11141d",    // Slightly elevated base panel
+          "surface-2": "#1a1e29",// Secondary panel background or hover
+          border: "#2b2f3a",     // Subtle divider
+          text: "#f8f9fa",       // Primary white-ish text
+          "text-muted": "#848e9c",// Dimmed secondary text
+          accent: "#3b82f6",     // Action color
+          profit: "#2ebc85",     // Sharp crypto green
+          "profit-muted": "rgba(46, 188, 133, 0.15)",
+          loss: "#f6465d",       // Sharp crypto red
+          "loss-muted": "rgba(246, 70, 93, 0.15)",
+          warning: "#f5b300",    // Warning amber
+          chip: "#242835",       // Neutral chip background
+          "chip-active": "#3b82f6",// Active chip outline/bg
         },
       },
       fontFamily: {
         sans: ["Inter", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
         mono: ["JetBrains Mono", "ui-monospace", "Cascadia Code", "Fira Code", "monospace"],
       },
-      boxShadow: {
-        "az-panel": "0 4px 24px rgba(0, 0, 0, 0.4), 0 0 1px rgba(255, 255, 255, 0.05)",
-        "az-glow-blue": "0 0 20px rgba(59, 130, 246, 0.15), 0 0 60px rgba(59, 130, 246, 0.05)",
-        "az-glow-green": "0 0 20px rgba(52, 211, 153, 0.15)",
-        "az-glow-red": "0 0 20px rgba(248, 113, 113, 0.15)",
-      },
-      backdropBlur: {
-        "az": "24px",
-      },
-      borderRadius: {
-        "az-sm": "8px",
-        "az-md": "12px",
-        "az-lg": "16px",
-        "az-xl": "20px",
-      },
       animation: {
-        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
-        "flash-green": "flash-green 0.6s ease-out",
-        "flash-red": "flash-red 0.6s ease-out",
-        "fade-in-up": "fade-in-up 0.4s ease-out forwards",
-        "breathe": "breathe 3s ease-in-out infinite",
+        "flash-up": "flash-up 1s ease-out",
+        "flash-down": "flash-down 1s ease-out",
+        "live-ping": "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+      },
+      keyframes: {
+        "flash-up": {
+          "0%": { backgroundColor: "rgba(46, 188, 133, 0.25)" },
+          "100%": { backgroundColor: "transparent" },
+        },
+        "flash-down": {
+          "0%": { backgroundColor: "rgba(246, 70, 93, 0.25)" },
+          "100%": { backgroundColor: "transparent" },
+        },
       },
     },
   },

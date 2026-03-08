@@ -1250,26 +1250,23 @@ function NavIcon({ icon, active, onClick, label }: any) {
 
 function StatusBadge({ status, reconnectIn, onReconnect }: { status: WsStatus; reconnectIn: number; onReconnect: () => void }) {
   const isLive = status === "LIVE";
-  const icon = isLive ? (
-    <span className="relative mr-1.5 flex h-2 w-2">
-      <span className="live-pulse absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-    </span>
-  ) : <WifiOff size={14} className="mr-1.5" />;
   return (
     <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
       <div
-        className={`flex items-center rounded-full border px-4 py-2 text-xs font-bold tracking-wide transition-all duration-300 ${
-          isLive ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.15)]" : "border-red-500/30 bg-red-500/10 text-red-400"
-        }`}
+        className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-bold uppercase tracking-wider 
+        ${isLive ? "border-az-border bg-az-surface text-az-profit" : "border-az-loss/30 bg-az-loss-muted text-az-loss"}`}
       >
-        {icon} {status}
+        <span className="relative flex h-2 w-2">
+          {isLive && <span className="absolute inline-flex h-full w-full animate-live-ping rounded-full bg-az-profit opacity-75"></span>}
+          <span className={`relative inline-flex h-2 w-2 rounded-full ${isLive ? "bg-az-profit" : "bg-az-loss"}`}></span>
+        </span>
+        {status}
       </div>
 
       {!isLive && (
         <button
           onClick={onReconnect}
-          className="flex items-center gap-1.5 rounded-full border border-zinc-700 bg-zinc-900/70 px-3 py-2 text-[11px] font-bold text-zinc-300 transition-all duration-300 hover:border-zinc-500 hover:text-white"
+          className="flex items-center gap-1.5 rounded-md border border-az-border bg-az-surface-2 px-3 py-1.5 text-xs font-bold text-az-text transition-colors hover:bg-az-border"
         >
           <RefreshCcw size={12} />
           Reconnect{reconnectIn > 0 ? ` (${reconnectIn}s)` : ""}
@@ -1300,19 +1297,26 @@ function RegimeBadge({ regime, atr }: { regime: string; atr: number }) {
 }
 
 function EnhancedStatCard({ icon, label, value, trend, subtitle }: any) {
-  const trendColors = { up: "text-[var(--az-profit)]", down: "text-[var(--az-loss)]", neutral: "text-[var(--az-text-secondary)]" } as const;
-  const glowClass = trend === "up" ? "glass-card-profit" : trend === "down" ? "glass-card-loss" : "";
+  const trendColors = { 
+    up: "text-az-profit", 
+    down: "text-az-loss", 
+    neutral: "text-az-text-muted" 
+  } as const;
+  
   return (
-    <div className={`glass-card ${glowClass} group relative overflow-hidden p-5 transition-all duration-300`}>
-      <div className="absolute inset-0 bg-gradient-to-br from-[var(--az-accent-subtle)] via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      <div className="relative z-10 transition-transform duration-300 group-hover:translate-y-[-2px]">
-        <div className="mb-3 flex items-start justify-between">
-          <div className="rounded-lg bg-[var(--az-bg-elevated)] p-2 shadow-sm">{icon}</div>
-        </div>
-        <div className={`mb-1 text-2xl font-black tabular-nums tracking-tight data-mono ${trendColors[trend as keyof typeof trendColors]}`}>{value}</div>
-        <div className="section-label mb-1">{label}</div>
-        {subtitle && <div className="data-mono tabular-nums text-[10px] text-[var(--az-text-dim)]">{subtitle}</div>}
+    <div className="flex flex-col rounded-md border border-az-border bg-az-surface p-4">
+      <div className="mb-3 flex items-center gap-2">
+        <div className="text-az-text-muted">{icon}</div>
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-az-text-muted">{label}</div>
       </div>
+      <div className={`font-mono text-xl tabular-nums tracking-tight ${trendColors[trend as keyof typeof trendColors]}`}>
+        {value}
+      </div>
+      {subtitle && (
+        <div className="mt-1 font-mono text-[10px] tabular-nums text-az-text-muted">
+          {subtitle}
+        </div>
+      )}
     </div>
   );
 }
@@ -1333,12 +1337,12 @@ function SkeletonCard() {
 
 function Panel({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
   return (
-    <motion.div className={`glass-panel flex flex-col overflow-hidden transition-all duration-300 ${className}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="border-b border-white/5 bg-slate-900/40 px-3 py-2.5 sm:px-5 sm:py-3 backdrop-blur-md">
-        <h3 className="section-label">{title}</h3>
+    <div className={`flex flex-col rounded-md border border-az-border bg-az-surface ${className}`}>
+      <div className="flex items-center border-b border-az-border px-4 py-3">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-az-text-muted">{title}</h3>
       </div>
-      <div className="flex-1 p-3 sm:p-5">{children}</div>
-    </motion.div>
+      <div className="flex-1 p-4">{children}</div>
+    </div>
   );
 }
 
@@ -1355,21 +1359,21 @@ function ArbitrageGapPanel({ edge }: { edge: any }) {
   const row = (label: string, mathProb: number, polyProb: number, gap: number) => (
     <div className="space-y-1">
       <div className="flex items-center justify-between text-[10px] uppercase tracking-wide">
-        <span className="font-bold text-zinc-400">{label}</span>
-        <span className={`font-mono font-bold ${gap >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+        <span className="font-bold text-az-text-muted">{label}</span>
+        <span className={`font-mono font-bold ${gap >= 0 ? "text-az-profit" : "text-az-loss"}`}>
           Gap {gap >= 0 ? "+" : ""}
           {gap.toFixed(2)}%
         </span>
       </div>
       <div className="space-y-1">
-        <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
-          <div className="h-full rounded-full bg-blue-500/70" style={{ width: `${clamp(mathProb, 0, 100)}%` }} />
+        <div className="h-1.5 overflow-hidden rounded-full bg-az-surface-2">
+          <div className="h-full rounded-full bg-az-accent" style={{ width: `${clamp(mathProb, 0, 100)}%` }} />
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
-          <div className="h-full rounded-full bg-fuchsia-500/70" style={{ width: `${clamp(polyProb, 0, 100)}%` }} />
+        <div className="h-1.5 overflow-hidden rounded-full bg-az-surface-2">
+          <div className="h-full rounded-full bg-fuchsia-500" style={{ width: `${clamp(polyProb, 0, 100)}%` }} />
         </div>
       </div>
-      <div className="flex items-center justify-between font-mono text-[10px] text-zinc-500">
+      <div className="flex items-center justify-between font-mono text-[10px] text-az-text-muted">
         <span>Math {mathProb.toFixed(1)}%</span>
         <span>Poly {polyProb.toFixed(1)}%</span>
       </div>
@@ -1377,19 +1381,19 @@ function ArbitrageGapPanel({ edge }: { edge: any }) {
   );
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2">
-        <span className="text-xs font-bold uppercase tracking-wide text-zinc-500">Best Edge</span>
-        <span className={`text-sm font-black ${bestEdge >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+    <div className="space-y-4 pt-1">
+      <div className="flex items-center justify-between rounded-md border border-az-border bg-az-surface p-2">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-az-text-muted">Best Edge</span>
+        <span className={`text-xs font-black tabular-nums ${bestEdge >= 0 ? "text-az-profit" : "text-az-loss"}`}>
           {bestDir} {bestEdge >= 0 ? "+" : ""}
           {bestEdge.toFixed(2)}%
         </span>
       </div>
       {row("UP", upMath, upPoly, upGap)}
       {row("DOWN", downMath, downPoly, downGap)}
-      <div className="flex items-center gap-3 text-[10px] text-zinc-500">
-        <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-blue-500/80" /> Math Prob</span>
-        <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-fuchsia-500/80" /> Poly Prob</span>
+      <div className="flex items-center gap-3 text-[10px] text-az-text-muted">
+        <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-az-accent" /> Math Prob</span>
+        <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-fuchsia-500" /> Poly Prob</span>
       </div>
     </div>
   );
@@ -1407,19 +1411,19 @@ function SignalAlignmentMatrix({ signal }: { signal: any }) {
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2">
-        <span className="text-xs font-bold uppercase tracking-wide text-zinc-500">Direction</span>
-        <span className={`text-sm font-black ${direction === "UP" ? "text-emerald-400" : direction === "DOWN" ? "text-rose-400" : "text-zinc-400"}`}>
+    <div className="space-y-4 pt-1">
+      <div className="flex items-center justify-between rounded-md border border-az-border bg-az-surface p-2">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-az-text-muted">Direction</span>
+        <span className={`text-xs font-black tabular-nums ${direction === "UP" ? "text-az-profit" : direction === "DOWN" ? "text-az-loss" : "text-az-text-muted"}`}>
           {direction} • {score}/{maxScore}
         </span>
       </div>
       <div className="grid grid-cols-2 gap-2">
         {cells.map((cell) => (
-          <div key={cell.key} className={`rounded-lg border px-3 py-2 ${cell.ok ? "border-emerald-500/40 bg-emerald-500/10" : "border-rose-500/40 bg-rose-500/10"}`}>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wide text-zinc-400">{cell.label}</span>
-              <span className={`text-xs font-black ${cell.ok ? "text-emerald-400" : "text-rose-400"}`}>{cell.ok ? "PASS" : "FAIL"}</span>
+          <div key={cell.key} className={`rounded-md border p-2 ${cell.ok ? "border-az-profit/30 bg-az-profit-muted" : "border-az-loss/30 bg-az-loss-muted"}`}>
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-az-text-muted">{cell.label}</span>
+              <span className={`font-black ${cell.ok ? "text-az-profit" : "text-az-loss"}`}>{cell.ok ? "PASS" : "FAIL"}</span>
             </div>
           </div>
         ))}
@@ -1435,25 +1439,25 @@ function LatencyWaterfallPanel({ latency }: { latency: any }) {
   const confirmMs = safeNumber(latency?.confirmation_ms);
   const totalMs = Math.max(1, safeNumber(latency?.total_ms, signalMs + aiMs + clobMs + confirmMs));
   const segments = [
-    { label: "Signal", ms: signalMs, cls: "bg-blue-500/70" },
-    { label: "AI", ms: aiMs, cls: "bg-amber-500/70" },
-    { label: "CLOB", ms: clobMs, cls: "bg-fuchsia-500/70" },
-    { label: "Confirm", ms: confirmMs, cls: "bg-emerald-500/70" },
+    { label: "Signal", ms: signalMs, cls: "bg-az-accent" },
+    { label: "AI", ms: aiMs, cls: "bg-az-warning" },
+    { label: "CLOB", ms: clobMs, cls: "bg-fuchsia-500" },
+    { label: "Confirm", ms: confirmMs, cls: "bg-az-profit" },
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="h-4 overflow-hidden rounded-full border border-zinc-800 bg-zinc-950/70">
+    <div className="space-y-4 pt-1">
+      <div className="h-3 overflow-hidden rounded-full border border-az-border bg-az-surface-2">
         <div className="flex h-full w-full">
           {segments.map((seg) => (
             <div key={seg.label} className={seg.cls} style={{ width: `${clamp((seg.ms / totalMs) * 100, 0, 100)}%` }} />
           ))}
         </div>
       </div>
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {segments.map((seg) => (
-          <div key={seg.label} className="flex items-center justify-between text-[11px]">
-            <span className="text-zinc-500">{seg.label}</span>
+          <div key={seg.label} className="flex items-center justify-between text-xs">
+            <span className="text-az-text-muted">{seg.label}</span>
             <span className="font-mono text-zinc-300">{seg.ms.toFixed(0)} ms</span>
           </div>
         ))}
@@ -1477,16 +1481,16 @@ function CvdPressureGauge({ cvd }: { cvd: any }) {
   const divergence = String(cvd?.divergence || "NONE").toUpperCase();
   const divergenceStrength = safeNumber(cvd?.divergence_strength);
   const pressureLabel = isNeutral ? "Neutral" : isPositive ? "Buy Pressure" : "Sell Pressure";
-  const pressureClass = isNeutral ? "text-zinc-300" : isPositive ? "text-emerald-300" : "text-rose-300";
-  const fillClass = isNeutral ? "bg-zinc-500/40" : isPositive ? "bg-emerald-500/80" : "bg-rose-500/80";
+  const pressureClass = isNeutral ? "text-az-text" : isPositive ? "text-az-profit" : "text-az-loss";
+  const fillClass = isNeutral ? "bg-az-surface-2" : isPositive ? "bg-az-profit" : "bg-az-loss";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pt-1">
       <div className="grid grid-cols-[52px,1fr] items-center gap-4">
-        <div className="relative h-40 w-12 overflow-hidden rounded-xl border border-zinc-700/80 bg-zinc-950/90 shadow-inner">
-          <div className="absolute inset-x-1 top-1 h-1/4 rounded-md bg-zinc-900/70" />
-          <div className="absolute inset-x-1 bottom-1 h-1/4 rounded-md bg-zinc-900/70" />
-          <div className="absolute inset-x-1 top-1/2 border-t border-zinc-700/80" />
+        <div className="relative h-40 w-12 overflow-hidden rounded-md border border-az-border bg-az-surface shadow-inner">
+          <div className="absolute inset-x-1 top-1 h-1/4 rounded bg-az-surface-2" />
+          <div className="absolute inset-x-1 bottom-1 h-1/4 rounded bg-az-surface-2" />
+          <div className="absolute inset-x-1 top-1/2 border-t border-az-border/80" />
           <div
             className={`absolute bottom-0 left-0 w-full transition-all duration-300 ${fillClass}`}
             style={{ height: `${Math.max(4, magnitudePct)}%` }}
@@ -1495,30 +1499,30 @@ function CvdPressureGauge({ cvd }: { cvd: any }) {
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <div className="text-[10px] uppercase tracking-wider text-zinc-500">Pressure</div>
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-az-text-muted">Pressure</div>
             <div className={`text-[11px] font-bold uppercase tracking-wide ${pressureClass}`}>{pressureLabel}</div>
           </div>
 
-          <div className="rounded-lg border border-zinc-800/70 bg-zinc-950/70 px-3 py-2">
+          <div className="rounded-md border border-az-border bg-az-surface-2 px-3 py-2">
             <div className="flex items-end justify-between">
-              <div className={`font-mono text-xl font-black ${isNeutral ? "text-zinc-200" : isPositive ? "text-emerald-400" : "text-rose-400"}`}>
+              <div className={`font-mono text-xl font-black tabular-nums ${isNeutral ? "text-az-text" : isPositive ? "text-az-profit" : "text-az-loss"}`}>
                 {formatSignedInt(delta)}
               </div>
-              <div className="text-[11px] font-mono text-zinc-400">{magnitudePct.toFixed(0)}% of min</div>
+              <div className="text-[10px] font-mono tabular-nums text-az-text-muted">{magnitudePct.toFixed(0)}% of min</div>
             </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-zinc-900">
+            <div className="mt-2 h-1 overflow-hidden rounded-full bg-az-surface">
               <div className={`h-full rounded-full ${fillClass}`} style={{ width: `${Math.max(3, magnitudePct)}%` }} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2 text-[10px]">
-            <div className="rounded-md border border-zinc-800 bg-zinc-950/70 px-2 py-1.5 text-zinc-400">
+            <div className="rounded-md border border-az-border bg-az-surface-2 px-2 py-1.5 text-az-text-muted">
               Threshold
-              <div className="font-mono text-zinc-200">{normalizeSignedInt(threshold)}</div>
+              <div className="font-mono tabular-nums text-az-text">{normalizeSignedInt(threshold)}</div>
             </div>
-            <div className="rounded-md border border-zinc-800 bg-zinc-950/70 px-2 py-1.5 text-zinc-400">
+            <div className="rounded-md border border-az-border bg-az-surface-2 px-2 py-1.5 text-az-text-muted">
               1m Flow
-              <div className={`font-mono ${normalizeSignedInt(oneMinFlow) >= 0 ? "text-emerald-300" : "text-rose-300"}`}>
+              <div className={`font-mono tabular-nums ${normalizeSignedInt(oneMinFlow) >= 0 ? "text-az-profit" : "text-az-loss"}`}>
                 {formatSignedInt(oneMinFlow)}
               </div>
             </div>
@@ -1527,10 +1531,10 @@ function CvdPressureGauge({ cvd }: { cvd: any }) {
       </div>
 
       {divergence !== "NONE" && (
-        <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2">
-          <div className="text-[10px] font-black uppercase tracking-wide text-amber-300">Divergence Alert</div>
-          <div className="mt-1 text-xs font-semibold text-amber-200">
-            {divergence} <span className="font-mono text-amber-300">({(divergenceStrength * 100).toFixed(0)}%)</span>
+        <div className="rounded-md border border-az-warning/40 bg-az-warning/10 px-3 py-2">
+          <div className="text-[10px] font-black uppercase tracking-wide text-az-warning">Divergence Alert</div>
+          <div className="mt-1 text-xs font-semibold text-az-warning/80">
+            {divergence} <span className="font-mono tabular-nums text-az-warning">({(divergenceStrength * 100).toFixed(0)}%)</span>
           </div>
         </div>
       )}
@@ -1545,32 +1549,32 @@ function SystemLocksPanel({ locksData }: { locksData: any }) {
   const aiFailures = safeNumber(locksData?.ai_failures);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 text-xs">
       {aiCircuitOpen && (
-        <div className="rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2">
-          <div className="text-[10px] font-black uppercase tracking-wide text-rose-300">AI Circuit Breaker</div>
-          <div className="mt-1 flex items-center justify-between text-xs">
-            <span className="text-rose-200">Reopening in {formatDuration(aiCircuitRemaining)}</span>
-            <span className="font-mono text-rose-300">{aiFailures} failures</span>
+        <div className="rounded-md border border-az-loss/50 bg-az-loss-muted p-3">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-az-loss">AI Circuit Breaker</div>
+          <div className="mt-1 flex items-center justify-between">
+            <span className="text-az-loss/80">Reopening in {formatDuration(aiCircuitRemaining)}</span>
+            <span className="font-mono text-az-loss">{aiFailures} failures</span>
           </div>
         </div>
       )}
 
       {locks.length === 0 ? (
-        <div className="rounded-lg border border-zinc-800 bg-zinc-950/50 px-3 py-2 text-xs text-zinc-500">No active cooldowns.</div>
+        <div className="rounded-md border border-az-border bg-az-surface-2 p-3 text-az-text-muted">No active cooldowns.</div>
       ) : (
         <div className="space-y-2">
           {locks.map((lock: any, idx: number) => (
-            <div key={`${String(lock?.key || idx)}`} className="rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2">
-              <div className="flex items-center justify-between text-[11px]">
-                <span className="font-semibold text-zinc-300">{String(lock?.label || "LOCK")}</span>
+            <div key={`${String(lock?.key || idx)}`} className="rounded-md border border-az-border bg-az-surface-2 p-3">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-az-text">{String(lock?.label || "LOCK")}</span>
                 {safeNumber(lock?.remaining_secs) > 0 ? (
-                  <span className="font-mono text-amber-300">{formatDuration(safeNumber(lock?.remaining_secs))}</span>
+                  <span className="font-mono text-az-warning">{formatDuration(safeNumber(lock?.remaining_secs))}</span>
                 ) : (
-                  <span className="font-mono text-zinc-500">state</span>
+                  <span className="font-mono text-az-text-muted">state</span>
                 )}
               </div>
-              <div className="mt-1 truncate font-mono text-[10px] text-zinc-500">{String(lock?.scope || "global")}</div>
+              <div className="mt-1 truncate font-mono text-[10px] text-az-text-muted">{String(lock?.scope || "global")}</div>
             </div>
           ))}
         </div>
@@ -1588,30 +1592,29 @@ function AdaptiveThresholdPanel({ atr, cvd, thresholds }: { atr: number; cvd: an
   const cvdThreshold = Math.max(1, safeNumber(thresholds?.cvd_threshold, safeNumber(cvd?.threshold, 12000)));
   const cvdRatio = cvdDeltaAbs / cvdThreshold;
 
-  const row = (label: string, nowValue: number, minValue: number, ratio: number, tone: "blue" | "emerald") => {
+  const row = (label: string, nowValue: number, minValue: number, ratio: number, tone: "accent" | "profit") => {
     const progress = clamp(ratio * 100, 0, 100);
-    const color = tone === "blue" ? "bg-blue-500/70" : "bg-emerald-500/70";
+    const color = tone === "accent" ? "bg-az-accent" : "bg-az-profit";
     return (
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-[11px]">
-          <span className="text-zinc-500">{label}</span>
-          <span className={`font-mono ${ratio >= 1 ? "text-emerald-400" : "text-amber-300"}`}>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-az-text-muted">{label}</span>
+          <span className={`font-mono tabular-nums ${ratio >= 1 ? "text-az-profit" : "text-az-warning"}`}>
             {nowValue.toFixed(2)} / {minValue.toFixed(2)}
           </span>
         </div>
-        <div className="relative h-2 overflow-hidden rounded-full bg-zinc-900">
+        <div className="relative h-1.5 overflow-hidden rounded-full bg-az-surface-2 border border-az-border">
           <div className={`h-full ${color}`} style={{ width: `${progress}%` }} />
-          <div className="pointer-events-none absolute inset-y-0 left-[50%] border-l border-dashed border-zinc-300/60" />
+          <div className="pointer-events-none absolute inset-y-0 left-[50%] border-l border-dashed border-az-text-muted/40" />
         </div>
       </div>
     );
   };
 
   return (
-    <div className="space-y-3">
-      {row("ATR vs Adaptive Min", atrNow, atrMin, atrRatio, "blue")}
-      {row("CVD |delta| vs Adaptive Min", cvdDeltaAbs, cvdThreshold, cvdRatio, "emerald")}
-      <div className="text-[10px] text-zinc-500">Dashed marker = threshold line (1.0x).</div>
+    <div className="space-y-4 pt-1">
+      {row("ATR vs Min", atrNow, atrMin, atrRatio, "accent")}
+      {row("CVD vs Thresh", cvdDeltaAbs, cvdThreshold, cvdRatio, "profit")}
     </div>
   );
 }
@@ -1622,7 +1625,7 @@ function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMo
   const flowEvents = useMemo(() => logsToFlowEvents(liveData?.logs || []), [liveData?.logs]);
   const brierSummary = portfolio?.brier_summary;
   return (
-    <motion.div key="terminal" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="grid grid-cols-1 gap-5 md:grid-cols-4 lg:grid-cols-6">
+    <motion.div key="terminal" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="grid grid-cols-1 gap-2 md:grid-cols-4 md:gap-3 lg:grid-cols-6">
       <Panel title="Live Price Action • 1H Candles" className="md:col-span-4 lg:col-span-4">
         {liveLoading ? (
           <div className="grid grid-cols-1 gap-3">
@@ -1775,102 +1778,50 @@ function ActiveTradesPanel({ trades, currentUnderlying }: { trades: Record<strin
   const entries = Object.entries(trades || {});
   if (entries.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 py-8">
-        <Crosshair size={24} className="mb-2 text-zinc-700" />
-        <div className="font-mono text-xs uppercase tracking-wide text-zinc-500">No Active Positions</div>
+      <div className="flex h-32 items-center justify-center text-xs text-az-text-muted">
+        No Active Positions
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
-      {entries.map(([slug, trade]) => {
-        const direction = trade.decision === "UP" ? "UP" : "DOWN";
-        const entryPrice = safeNumber(trade.bought_price);
-        const markPrice = safeNumber(trade.mark_price, entryPrice);
-        const entryUnderlying = safeNumber(trade.entry_underlying_price, currentUnderlying);
-        const liveUnderlying = safeNumber(trade.live_underlying_price, currentUnderlying);
-        const strike = safeNumber(trade.strike, entryUnderlying);
-        const minUnderlying = Math.min(entryUnderlying, strike, liveUnderlying);
-        const maxUnderlying = Math.max(entryUnderlying, strike, liveUnderlying);
-        const span = maxUnderlying - minUnderlying || 1;
-        const currentPos = clamp(((liveUnderlying - minUnderlying) / span) * 100, 0, 100);
-        const strikePos = clamp(((strike - minUnderlying) / span) * 100, 0, 100);
-        const tokenMoveCents = (markPrice - entryPrice) * 100;
-        const tpToken = safeNumber(trade.tp_token_price, entryPrice + Math.max(0, safeNumber(trade.tp_delta)));
-        const slToken = safeNumber(trade.sl_token_price, Math.max(0, entryPrice + safeNumber(trade.sl_delta)));
-        const hasBounds =
-          (Math.abs(safeNumber(trade.tp_delta)) > 0 || Math.abs(safeNumber(trade.sl_delta)) > 0) &&
-          Number.isFinite(tpToken) &&
-          Number.isFinite(slToken);
-        const tokenMin = Math.min(slToken, entryPrice, markPrice, tpToken);
-        const tokenMax = Math.max(slToken, entryPrice, markPrice, tpToken);
-        const tokenSpan = tokenMax - tokenMin || 0.0001;
-        const tokenMarkPos = clamp(((markPrice - tokenMin) / tokenSpan) * 100, 0, 100);
-        const tokenEntryPos = clamp(((entryPrice - tokenMin) / tokenSpan) * 100, 0, 100);
-        const tokenTpPos = clamp(((tpToken - tokenMin) / tokenSpan) * 100, 0, 100);
-        const tokenSlPos = clamp(((slToken - tokenMin) / tokenSpan) * 100, 0, 100);
+    <div className="w-full overflow-x-auto">
+      <table className="w-full text-left text-xs">
+        <thead>
+          <tr className="border-b border-az-border text-az-text-muted">
+            <th className="py-2 pl-4 pr-2 font-normal">Market</th>
+            <th className="px-2 py-2 font-normal">Side</th>
+            <th className="px-2 py-2 font-normal">Size</th>
+            <th className="px-2 py-2 text-right font-normal">Entry</th>
+            <th className="px-2 py-2 text-right font-normal">Mark</th>
+            <th className="py-2 pl-2 pr-4 text-right font-normal">PnL (c)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {entries.map(([slug, trade]) => {
+            const direction = trade.decision === "UP" ? "LONG" : "SHORT";
+            const isLong = direction === "LONG";
+            const entryPrice = safeNumber(trade.bought_price);
+            const markPrice = safeNumber(trade.mark_price, entryPrice);
+            const tokenMoveCents = (markPrice - entryPrice) * 100;
+            const pnlColor = tokenMoveCents >= 0 ? "text-az-profit" : "text-az-loss";
+            const marketName = slug.split("-").slice(-2).join("-");
 
-        return (
-          <div key={slug} className="rounded-xl border border-zinc-800/50 bg-zinc-950/50 p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <div className="flex flex-col">
-                <span className={`mb-1 w-fit rounded px-2 py-0.5 text-[10px] font-black ${direction === "UP" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-                  {direction} {safeNumber(trade.score)}/4 CORE
-                </span>
-                <span className="font-mono text-[9px] italic text-zinc-600">{trade.signals?.[0] || "Awaiting signal context..."}</span>
-              </div>
-              <span className="rounded border border-zinc-800 bg-zinc-900 px-2 py-1 font-mono text-[10px] text-zinc-500">{slug.split("-").slice(-2).join("-")}</span>
-            </div>
-
-            <div className="mb-3 grid grid-cols-1 gap-3 text-xs sm:grid-cols-2 sm:gap-4">
-              <div>
-                <div className="text-[10px] font-bold uppercase tracking-tighter text-zinc-600">Entry Price</div>
-                <div className="font-mono font-bold text-zinc-300">${entryPrice.toFixed(3)}</div>
-              </div>
-              <div>
-                <div className="text-[10px] font-bold uppercase tracking-tighter text-zinc-600">Mark Price</div>
-                <div className={`font-mono font-bold ${tokenMoveCents >= 0 ? "text-green-400" : "text-red-400"}`}>
-                  ${markPrice.toFixed(3)} ({tokenMoveCents >= 0 ? "+" : ""}
-                  {tokenMoveCents.toFixed(1)}c)
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-2 flex items-center justify-between text-[10px] text-zinc-500">
-              <span>Entry ${entryUnderlying.toFixed(2)}</span>
-              <span>Strike ${strike.toFixed(2)}</span>
-              <span>Live ${liveUnderlying.toFixed(2)}</span>
-            </div>
-
-            <div className="relative h-2 rounded-full bg-zinc-800">
-              <div className="absolute top-0 h-2 rounded-full bg-blue-500/60" style={{ width: `${currentPos}%` }} />
-              <div className="absolute top-[-4px] h-4 w-[2px] bg-fuchsia-400" style={{ left: `${strikePos}%` }} />
-            </div>
-
-            {hasBounds && (
-              <div className="mt-3 rounded-lg border border-zinc-800/70 bg-zinc-950/70 p-2">
-                <div className="mb-1 flex items-center justify-between text-[10px] text-zinc-500">
-                  <span>Token Bounds</span>
-                  <span>{safeNumber(trade.seconds_remaining)}s left</span>
-                </div>
-                <div className="relative h-2 rounded-full bg-zinc-900">
-                  <div className="absolute inset-y-0 border-l border-red-400/80" style={{ left: `${tokenSlPos}%` }} />
-                  <div className="absolute inset-y-0 border-l border-blue-400/80" style={{ left: `${tokenEntryPos}%` }} />
-                  <div className="absolute inset-y-0 border-l border-emerald-400/80" style={{ left: `${tokenTpPos}%` }} />
-                  <div className="absolute top-[-2px] h-3 w-[2px] bg-amber-300" style={{ left: `${tokenMarkPos}%` }} />
-                </div>
-                <div className="mt-1 grid grid-cols-4 gap-1 font-mono text-[9px] text-zinc-500">
-                  <span>SL {slToken.toFixed(3)}</span>
-                  <span>EN {entryPrice.toFixed(3)}</span>
-                  <span>TP {tpToken.toFixed(3)}</span>
-                  <span className="text-right">MK {markPrice.toFixed(3)}</span>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })}
+            return (
+              <tr key={slug} className="group border-b border-az-border/50 transition-colors hover:bg-az-surface-2">
+                <td className="py-2 pl-4 pr-2 font-mono text-az-text">{marketName}</td>
+                <td className={`px-2 py-2 font-bold ${isLong ? "text-az-profit" : "text-az-loss"}`}>{direction}</td>
+                <td className="px-2 py-2 text-az-text-muted">{safeNumber(trade.score)}/4</td>
+                <td className="px-2 py-2 text-right font-mono tabular-nums text-az-text">${entryPrice.toFixed(3)}</td>
+                <td className="px-2 py-2 text-right font-mono tabular-nums text-az-text">${markPrice.toFixed(3)}</td>
+                <td className={`py-2 pl-2 pr-4 text-right font-mono tabular-nums ${pnlColor}`}>
+                  {tokenMoveCents > 0 ? "+" : ""}{tokenMoveCents.toFixed(1)}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -2063,15 +2014,15 @@ function TooltipLabel({ label, tooltip }: { label: string; tooltip: string }) {
 function AnalyticsView({ portfolio, engineHealth, liveData }: { portfolio: any; engineHealth: EngineHealth; liveData: any }) {
   const attr = portfolio?.attribution;
   const aiStatus = String(engineHealth?.ai_status || "ACTIVE").toUpperCase();
-  const aiStatusClass = aiStatus === "DEGRADED" ? "text-[var(--az-loss)]" : aiStatus === "SLOW" ? "text-[var(--az-warning)]" : "text-[var(--az-profit)]";
+  const aiStatusClass = aiStatus === "DEGRADED" ? "text-az-loss" : aiStatus === "SLOW" ? "text-az-warning" : "text-az-profit";
   const drawdownGuard = liveData?.strategy?.drawdown_guard || {};
   const dailyPnl = Array.isArray(portfolio?.daily_pnl) ? portfolio.daily_pnl : [];
   const executionMetrics = Array.isArray(portfolio?.execution_metrics) ? portfolio.execution_metrics : [];
   const calibrationBuckets = Array.isArray(portfolio?.calibration_buckets) ? portfolio.calibration_buckets : [];
 
   return (
-    <motion.div key="analytics" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+    <motion.div key="analytics" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-3">
+      <div className="grid grid-cols-1 gap-2 md:gap-3 xl:grid-cols-3">
         <Panel title="Risk Profile">
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-3">

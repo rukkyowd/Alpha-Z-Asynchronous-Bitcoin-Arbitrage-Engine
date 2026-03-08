@@ -17,12 +17,12 @@ type OrderFlowStripProps = {
 };
 
 const typeConfig: Record<FlowEvent["type"], { icon: React.ReactNode; color: string; bg: string }> = {
-  entry:   { icon: <TrendingUp size={10} />,     color: "text-emerald-400",  bg: "bg-emerald-500/15 border-emerald-500/30" },
-  exit:    { icon: <TrendingDown size={10} />,    color: "text-blue-400",     bg: "bg-blue-500/15 border-blue-500/30" },
-  sl:      { icon: <AlertTriangle size={10} />,   color: "text-red-400",      bg: "bg-red-500/15 border-red-500/30" },
-  tp:      { icon: <Target size={10} />,          color: "text-amber-400",    bg: "bg-amber-500/15 border-amber-500/30" },
-  circuit: { icon: <Zap size={10} />,             color: "text-fuchsia-400",  bg: "bg-fuchsia-500/15 border-fuchsia-500/30" },
-  info:    { icon: <Zap size={10} />,             color: "text-zinc-400",     bg: "bg-zinc-700/15 border-zinc-700/30" },
+  entry:   { icon: <TrendingUp size={10} />,     color: "text-az-profit",  bg: "bg-az-profit-muted border-az-profit/30" },
+  exit:    { icon: <TrendingDown size={10} />,    color: "text-az-accent",  bg: "bg-az-accent/15 border-az-accent/30" },
+  sl:      { icon: <AlertTriangle size={10} />,   color: "text-az-loss",    bg: "bg-az-loss-muted border-az-loss/30" },
+  tp:      { icon: <Target size={10} />,          color: "text-az-warning", bg: "bg-az-warning/15 border-az-warning/30" },
+  circuit: { icon: <Zap size={10} />,             color: "text-fuchsia-400", bg: "bg-fuchsia-500/15 border-fuchsia-500/30" },
+  info:    { icon: <Zap size={10} />,             color: "text-az-text-muted", bg: "bg-az-surface-2 border-az-border" },
 };
 
 function classifyLog(log: string): FlowEvent["type"] {
@@ -61,8 +61,8 @@ export default function OrderFlowStrip({ events, maxVisible = 20 }: OrderFlowStr
 
   if (visible.length === 0) {
     return (
-      <div className="flex h-10 items-center justify-center rounded-lg border border-dashed border-[var(--az-border)]">
-        <span className="section-label">No flow events yet</span>
+      <div className="flex h-10 items-center justify-center text-xs text-az-text-muted">
+        No flow events yet
       </div>
     );
   }
@@ -70,8 +70,8 @@ export default function OrderFlowStrip({ events, maxVisible = 20 }: OrderFlowStr
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="section-label">Order Flow</span>
-        <span className="data-mono text-[10px] text-[var(--az-text-dim)]">{events.length} events</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-az-text-muted">Order Flow</span>
+        <span className="font-mono text-[10px] tabular-nums text-az-text-muted">{events.length} events</span>
       </div>
       <div
         ref={scrollRef}
@@ -88,7 +88,7 @@ export default function OrderFlowStrip({ events, maxVisible = 20 }: OrderFlowStr
                 animate={{ opacity: 1, scale: 1, x: 0 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                className={`flex flex-shrink-0 items-center gap-1 rounded-md border px-2 py-1 text-[9px] font-bold ${cfg.bg} ${cfg.color} cursor-default`}
+                className={`flex flex-shrink-0 items-center gap-1 border px-2 py-1 text-[9px] font-bold ${cfg.bg} ${cfg.color} cursor-default`}
                 title={ev.text}
               >
                 {cfg.icon}
