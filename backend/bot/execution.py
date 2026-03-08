@@ -221,6 +221,15 @@ class ExecutionConfig:
     maker_window_secs: float = 6.0
     maker_poll_interval_secs: float = 0.8
     maker_enabled: bool = True
+    # --- Pillar 3: Profitability leak fixes ---
+    twap_threshold_usd: float = 10.0
+    twap_max_slices: int = 4
+    twap_slice_interval_secs: float = 2.0
+    ny_session_maker_window_multiplier: float = 1.5
+    ny_session_max_entry_premium_cents: float = 0.01
+    smart_entry_min_spread_cents: float = 0.02
+    smart_entry_min_time_remaining_secs: float = 300.0
+    capital_lockup_warning_hours: float = 0.75
 
 
 @dataclass(slots=True, frozen=True)
@@ -305,6 +314,90 @@ class ClobExecutionEngine:
             market_impact_pct=impact,
             levels=1,
         )
+
+    # ───────────────────────────────────────────────────────────────────────
+    # Pillar 3 helper methods
+    # ───────────────────────────────────────────────────────────────────────
+    def _smart_entry_price(
+        self,
+        naive_target: float,
+        *,
+        liquidity: LiquidityCheckResult,
+        seconds_remaining: float,
+        tick_size: str,
+    ) -> float:
+        """Spread-aware entry pricing (Pillar 3A).
+
+        When the spread is wide and there is ample time remaining, place
+        on the *bid* side of the spread (1 tick above best bid) instead
+        of crossing to the ask.  This reduces the effective entry cost
+        by half the spread on average, directly boosting PnL.
+        """
+        if liquidity.best_bid is None or liquidity.best_ask is None:
+            return naive_target
+
+        spread_cents = liquidity.best_ask - liquidity.best_bid
+        wide_enough = spread_cents >= self.config.smart_entry_min_spread_cents
+        time_ok = seconds_remaining >= self.config.smart_entry_min_time_remaining_secs
+
+        if wide_enough and time_ok:
+            # Join 1 tick above best bid (maker side)
+            smart_price = _quantize(
+                liquidity.best_bid + float(Decimal(tick_size)),
+                tick_size,
+                ROUND_UP,
+            )
+            # Never price higher than the naive target
+            smart_price = min(smart_price, naive_target)
+            log.info(
+                "[ENTRY SMART] Spread %.1fc wide, time %.0fs remaining — "
+                "joining bid side @ %.4f (vs naive %.4f, ask %.4f)",
+                spread_cents * 100,
+                seconds_remaining,
+                smart_price,
+                naive_target,
+                liquidity.best_ask,
+            )
+            return max(smart_price, 0.01)
+
+        return naive_target
+
+    def _compute_twap_slices(self, total_usd: float) -> list[float]:
+        """TWAP slice computation (Pillar 3B).
+
+        If the order exceeds twap_threshold_usd, split into N equal-ish
+        slices.  Each slice is submitted sequentially with a delay of
+        twap_slice_interval_secs.
+        """
+        if total_usd <= self.config.twap_threshold_usd:
+            return [total_usd]
+
+        n_slices = min(
+            self.config.twap_max_slices,
+            max(2, int(total_usd / self.config.twap_threshold_usd) + 1),
+        )
+        base = round(total_usd / n_slices, 2)
+        slices = [base] * n_slices
+        # Distribute rounding remainder into the last slice
+        remainder = round(total_usd - sum(slices), 2)
+        slices[-1] = round(slices[-1] + remainder, 2)
+        log.info(
+            "[ENTRY TWAP] $%.2f split into %d slices of ~$%.2f each (interval %.1fs)",
+            total_usd, n_slices, base, self.config.twap_slice_interval_secs,
+        )
+        return slices
+
+    @staticmethod
+    def _is_ny_session() -> bool:
+        """NY session latency guard (Pillar 3D).
+
+        Returns True during NYSE core hours (13:30–20:00 UTC), when Bitcoin
+        volatility and CLOB latency typically spike.
+        """
+        now = datetime.now(timezone.utc)
+        # NYSE core session: 13:30 – 20:00 UTC
+        minutes_since_midnight = now.hour * 60 + now.minute
+        return 810 <= minutes_since_midnight <= 1200  # 13:30=810, 20:00=1200
 
     async def _resolve_market_params(self, token_id: str) -> tuple[str, bool, int]:
         """Resolve tick_size, neg_risk, and fee_rate_bps via the SDK's built-in caches.
@@ -905,16 +998,44 @@ class ClobExecutionEngine:
             if bet_size_usd <= self.config.live_tiny_amm_fallback_max_bet_usd
             else self.config.live_entry_slippage_cents
         )
-        target_price = max(liquidity.entry_price, expected_price, signal.price_cap or 0.0)
-        limit_price = _quantize(_clamp(target_price + slippage_cents, 0.01, 0.99), tick_size, ROUND_UP)
+
+        # --- Pillar 3A: Spread-aware entry pricing ---
+        naive_target = max(liquidity.entry_price, expected_price, signal.price_cap or 0.0)
+        target_price = self._smart_entry_price(
+            naive_target,
+            liquidity=liquidity,
+            seconds_remaining=odds.seconds_remaining,
+            tick_size=tick_size,
+        )
+
+        # --- Pillar 3C: Fee-aware limit price ---
+        gross_edge_cents = max(0.0, signal.true_probability_pct / 100.0 - expected_price)
+        effective_fee_cents = authoritative_fee_rate * expected_price if authoritative_fee_rate > 0 else 0.0
+        max_acceptable_premium = max(0.0, gross_edge_cents - effective_fee_cents)
+        adjusted_slippage = min(slippage_cents, max_acceptable_premium) if max_acceptable_premium > 0 else slippage_cents
+
+        # --- Pillar 3D: NY session entry premium tightening ---
+        active_premium_cap = self.config.max_entry_premium_cents
+        if self._is_ny_session():
+            active_premium_cap = min(active_premium_cap, self.config.ny_session_max_entry_premium_cents)
+
+        limit_price = _quantize(_clamp(target_price + adjusted_slippage, 0.01, 0.99), tick_size, ROUND_UP)
         entry_premium = limit_price - expected_price
-        if entry_premium > self.config.max_entry_premium_cents:
+        if entry_premium > active_premium_cap:
             reason = (
                 f"Entry premium {entry_premium * 100:.1f}c > "
-                f"{self.config.max_entry_premium_cents * 100:.1f}c max"
+                f"{active_premium_cap * 100:.1f}c max"
             )
             await state.record_execution_failure(signal.slug, reason=reason, ev_pct=signal.expected_value_pct)
             return None
+
+        # --- Pillar 3E: Capital lockup warning ---
+        lockup_hours = odds.seconds_remaining / 3600.0
+        if lockup_hours > self.config.capital_lockup_warning_hours:
+            log.info(
+                "[ENTRY LOCKUP] %s: capital locked for ~%.1fh (threshold %.1fh)",
+                signal.slug, lockup_hours, self.config.capital_lockup_warning_hours,
+            )
 
         if self.config.paper_trading or self.config.dry_run:
             synthetic_fill_cost = round(bet_size_usd, 2)
@@ -986,6 +1107,9 @@ class ClobExecutionEngine:
         # If filled within maker_window_secs, bypass the taker path entirely.
         # ═══════════════════════════════════════════════════════════════════
         maker_filled = False
+        effective_maker_window = self.config.maker_window_secs
+        if self._is_ny_session():
+            effective_maker_window *= self.config.ny_session_maker_window_multiplier
         if self.config.maker_enabled and not self.config.paper_trading and not self.config.dry_run:
             maker_price = _quantize(
                 _clamp(target_price, 0.01, 0.99), tick_size, ROUND_DOWN,
@@ -998,12 +1122,13 @@ class ClobExecutionEngine:
             if maker_shares > 0:
                 try:
                     log.info(
-                        "[ENTRY MAKER] Posting GTC limit %s on %s | Px: %.4f | Shares: %.4f | Window: %.1fs",
+                        "[ENTRY MAKER] Posting GTC limit %s on %s | Px: %.4f | Shares: %.4f | Window: %.1fs%s",
                         signal.direction.value,
                         signal.slug,
                         maker_price,
                         maker_shares,
-                        self.config.maker_window_secs,
+                        effective_maker_window,
+                        " (NY session)" if self._is_ny_session() else "",
                     )
                     maker_resp = await asyncio.wait_for(
                         self._submit_limit_order(
@@ -1021,7 +1146,7 @@ class ClobExecutionEngine:
 
                     if maker_order_id:
                         # Poll for fill within the maker window
-                        deadline = asyncio.get_event_loop().time() + self.config.maker_window_secs
+                        deadline = asyncio.get_event_loop().time() + effective_maker_window
                         while asyncio.get_event_loop().time() < deadline:
                             await asyncio.sleep(self.config.maker_poll_interval_secs)
                             maker_status = await self._get_order_status(maker_order_id)
@@ -1042,7 +1167,7 @@ class ClobExecutionEngine:
                             log.info(
                                 "[ENTRY MAKER] GTC unfilled for %s after %.1fs — cancelling, falling through to taker.",
                                 signal.slug,
-                                self.config.maker_window_secs,
+                                effective_maker_window,
                             )
                 except Exception as maker_exc:
                     log.warning("[ENTRY MAKER] Maker phase failed for %s: %s — falling through to taker.", signal.slug, maker_exc)

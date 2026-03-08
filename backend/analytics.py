@@ -188,6 +188,19 @@ def run_probability_calibration_report(df):
         if not recent_market.empty:
             rolling_market_brier = (recent_market['market_prob'] - recent_market['outcome_numeric']).pow(2).mean()
 
+    # --- Calibrated Brier Score (post-calibration comparison) ---
+    cal_brier = np.nan
+    cal_brier_advantage = np.nan
+    cal_subset = calibration.dropna(subset=['calibrated_prob_pct']).copy()
+    if not cal_subset.empty:
+        cal_subset['cal_prob'] = cal_subset['calibrated_prob_pct'] / 100.0
+        cal_subset['cal_brier'] = (cal_subset['cal_prob'] - cal_subset['outcome_numeric']) ** 2
+        cal_brier = cal_subset['cal_brier'].mean()
+        cal_brier_advantage = model_brier - cal_brier
+    calibration['cal_brier_per_row'] = np.nan
+    if not cal_subset.empty:
+        calibration.loc[cal_subset.index, 'cal_brier_per_row'] = cal_subset['cal_brier']
+
     avg_pred = calibration['predicted_win_prob_pct'].mean()
     realized_wr = calibration['outcome_numeric'].mean() * 100.0
     avg_edge = (calibration['predicted_win_prob_pct'] - calibration['fair_market_probability_pct']).mean()
@@ -198,12 +211,18 @@ def run_probability_calibration_report(df):
 
     print("\n  BRIER SCORES (lower is better, 0.25 = coin flip)")
     print("-" * 80)
-    print(f"  Alpha-Z Model (all)    : {model_brier:.4f}")
+    print(f"  Alpha-Z Raw Model (all)   : {model_brier:.4f}")
+    if not np.isnan(cal_brier):
+        sign_cal = "+" if cal_brier_advantage > 0 else ""
+        verdict_cal = "CALIBRATION HELPS" if cal_brier_advantage > 0 else "RAW BETTER"
+        print(f"  Alpha-Z Calibrated (all)  : {cal_brier:.4f}  [{sign_cal}{cal_brier_advantage:.4f} improvement, {verdict_cal}]")
     if not np.isnan(market_brier):
-        print(f"  Polymarket Crowd (all) : {market_brier:.4f}")
-        sign = "+" if brier_advantage > 0 else ""
-        verdict = "MODEL WINS" if brier_advantage > 0 else "MARKET WINS"
-        print(f"  Advantage              : {sign}{brier_advantage:.4f}  [{verdict}]")
+        print(f"  Polymarket Crowd (all)    : {market_brier:.4f}")
+        best_model = cal_brier if not np.isnan(cal_brier) else model_brier
+        advantage = market_brier - best_model
+        sign = "+" if advantage > 0 else ""
+        verdict = "MODEL WINS" if advantage > 0 else "MARKET WINS"
+        print(f"  Best Model Advantage      : {sign}{advantage:.4f}  [{verdict}]")
     print(f"\n  Rolling (last {rolling_n}):")
     print(f"    Model  : {rolling_model_brier:.4f}")
     if not np.isnan(rolling_market_brier):
@@ -222,6 +241,7 @@ def run_probability_calibration_report(df):
         if group.empty:
             continue
         mkt_pred = group['fair_market_probability_pct'].mean()
+        cal_brier_bucket = group['cal_brier_per_row'].dropna()
         bucket_rows.append({
             'Bucket': str(bucket),
             'N': len(group),
@@ -229,6 +249,7 @@ def run_probability_calibration_report(df):
             'Mkt %': round(mkt_pred, 1) if not np.isnan(mkt_pred) else '-',
             'Real %': round(group['outcome_numeric'].mean() * 100.0, 1),
             'Brier': round(group['model_brier'].mean(), 4),
+            'Cal Brier': round(cal_brier_bucket.mean(), 4) if not cal_brier_bucket.empty else '-',
         })
 
     print("\n  CALIBRATION BY PREDICTION BUCKET")
@@ -266,6 +287,21 @@ def run_probability_calibration_report(df):
             print(pd.DataFrame(edge_rows).to_string(index=False))
 
     print("=" * 80)
+
+    return {
+        'model_brier': round(float(model_brier), 6),
+        'calibrated_brier': round(float(cal_brier), 6) if not np.isnan(cal_brier) else None,
+        'market_brier': round(float(market_brier), 6) if not np.isnan(market_brier) else None,
+        'calibration_improvement': round(float(cal_brier_advantage), 6) if not np.isnan(cal_brier_advantage) else None,
+        'rolling_model_brier': round(float(rolling_model_brier), 6),
+        'rolling_market_brier': round(float(rolling_market_brier), 6) if not np.isnan(rolling_market_brier) else None,
+        'rolling_window': rolling_n,
+        'total_resolved': len(calibration),
+        'avg_predicted_pct': round(float(avg_pred), 2),
+        'realized_win_rate_pct': round(float(realized_wr), 2),
+        'avg_edge_vs_fair_pct': round(float(avg_edge), 2) if not np.isnan(avg_edge) else None,
+        'bucket_breakdown': bucket_rows,
+    }
 
 
 def plot_equity_curve(df):

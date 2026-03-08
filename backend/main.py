@@ -52,6 +52,7 @@ from bot.models import (
 from bot.risk import LiquidityProfile, RiskConfig, RiskManager
 from bot.state import EngineState
 from bot.strategy import StrategyConfig, StrategyEngine
+from bot.calibration import CalibrationConfig, ProbabilityCalibrator
 
 BASE_DIR = Path(__file__).resolve().parent
 ENV_PATH = BASE_DIR / ".env"
@@ -1581,6 +1582,19 @@ async def finalize_closed_position(
         exit_reason,
     )
 
+    # --- Auto-refit calibration layer after trade resolution ---
+    calibrator = getattr(runtime.strategy_engine, "calibrator", None)
+    if calibrator is not None:
+        resolved_n = wins + losses
+        if calibrator.should_refit(resolved_n):
+            refitted = calibrator.fit_from_history()
+            if refitted:
+                diag = calibrator.diagnostics()
+                logger.info(
+                    "[CALIBRATION] Refit triggered at %d resolved trades: A=%.4f B=%.4f",
+                    diag["fitted_on_n"], diag.get("platt_a") or 0.0, diag.get("platt_b") or 0.0,
+                )
+
 
 async def settle_expired_position(
     runtime: EngineServices,
@@ -2536,13 +2550,30 @@ async def bootstrap_runtime() -> EngineServices:
     if clob_client is not None:
         clob_ws_mgr = ClobWebSocketManager(token_ids=[])
 
+    # --- Calibration layer ---
+    calibrator = ProbabilityCalibrator(
+        config=CalibrationConfig(
+            method="platt",
+            min_samples=30,
+            refit_interval=50,
+            db_path=str(DB_PATH),
+        )
+    )
+    calibrator.fit_from_history()
+    diag = calibrator.diagnostics()
+    logger.info(
+        "[CALIBRATION] Startup fit: method=%s fitted=%s n=%d A=%.4f B=%.4f",
+        diag["method"], diag["is_fitted"], diag["fitted_on_n"],
+        diag.get("platt_a") or 0.0, diag.get("platt_b") or 0.0,
+    )
+
     risk_manager = RiskManager(risk_config)
     runtime = EngineServices(
         state=state,
         http_session=http_session,
         stream_manager=BinanceStreamManager(data_config),
         polymarket_fetcher=PolymarketFetcher(data_config),
-        strategy_engine=StrategyEngine(strategy_config),
+        strategy_engine=StrategyEngine(strategy_config, calibrator=calibrator),
         risk_manager=risk_manager,
         execution_engine=ClobExecutionEngine(
             clob_client,

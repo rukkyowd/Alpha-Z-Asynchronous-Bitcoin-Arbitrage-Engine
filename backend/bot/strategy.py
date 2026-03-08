@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace as _dc_replace
 
+from .calibration import ProbabilityCalibrator
 from .indicators import apply_probabilistic_model, directional_probabilities
 from .models import (
     ConfidenceLevel,
@@ -271,11 +272,12 @@ def _post_stop_reentry_reason(
 
 
 class StrategyEngine:
-    __slots__ = ("config", "risk_manager")
+    __slots__ = ("config", "risk_manager", "calibrator")
 
-    def __init__(self, config: StrategyConfig | None = None):
+    def __init__(self, config: StrategyConfig | None = None, calibrator: ProbabilityCalibrator | None = None):
         self.config = config or StrategyConfig()
         self.risk_manager = RiskManager(self.config.risk)
+        self.calibrator = calibrator
 
     def compute_expected_value(
         self,
@@ -338,6 +340,16 @@ class StrategyEngine:
             max_indicator_logit_shift=self.config.max_indicator_logit_shift,
             close_equals_open_up_bias_prob=self.config.close_equals_open_up_bias_prob,
         )
+
+        # --- Calibration layer: map raw Bayesian probability to calibrated ---
+        raw_bayesian_prob = enriched_context.bayesian_probability
+        calibrated_prob = raw_bayesian_prob
+        if self.calibrator is not None and self.calibrator.is_fitted:
+            calibrated_prob = self.calibrator.calibrate(raw_bayesian_prob)
+            floor = self.config.probability_floor_pct / 100.0
+            ceil = self.config.probability_ceil_pct / 100.0
+            calibrated_prob = max(floor, min(ceil, calibrated_prob))
+            enriched_context = _dc_replace(enriched_context, bayesian_probability=calibrated_prob)
 
         if enriched_context.market_regime == MarketRegime.UNKNOWN:
             return _skip_signal(slug, "Market UNKNOWN - insufficient data")
@@ -573,6 +585,9 @@ class StrategyEngine:
                 "predicted_win_prob_pct": target_ev.true_prob_pct,
                 "base_up_probability_pct": round(enriched_context.base_probability * 100.0, 2),
                 "posterior_up_probability_pct": round(enriched_context.bayesian_probability * 100.0, 2),
+                "raw_bayesian_prob_pct": round(raw_bayesian_prob * 100.0, 2),
+                "calibrated_prob_pct": round(calibrated_prob * 100.0, 2),
+                "calibration_active": self.calibrator is not None and self.calibrator.is_fitted,
                 "indicator_logit_shift": round(enriched_context.indicator_logit_shift, 4),
                 "raw_market_probability_pct": round(raw_target_market_prob, 2),
                 "fair_market_probability_pct": round(fair_target_market_prob, 2),
