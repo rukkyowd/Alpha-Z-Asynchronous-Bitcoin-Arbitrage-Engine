@@ -294,6 +294,10 @@ class EngineState:
             self.reentry_state[slug] = updated
             return updated.clone()
 
+    async def clear_reentry_state(self, slug: str) -> None:
+        async with self.positions_lock:
+            self.reentry_state.pop(slug, None)
+
     async def record_ai_state(
         self,
         slug: str,
@@ -312,6 +316,10 @@ class EngineState:
             )
             self.ai_state[slug] = updated
             return updated.clone()
+
+    async def clear_ai_state(self, slug: str) -> None:
+        async with self.ai_lock:
+            self.ai_state.pop(slug, None)
 
     async def record_execution_failure(self, slug: str, *, reason: str, ev_pct: float = 0.0) -> ExecutionFailureState:
         async with self.positions_lock:
@@ -455,6 +463,29 @@ class EngineState:
     async def release_ai_call(self, slug: str) -> None:
         async with self.risk_lock:
             self.ai_call_in_flight.discard(slug)
+
+    async def increment_ai_failures(self) -> int:
+        async with self.risk_lock:
+            self.ai_consecutive_failures += 1
+            return self.ai_consecutive_failures
+
+    async def set_ai_circuit_open_until(self, opened_until: float) -> float:
+        async with self.risk_lock:
+            self.ai_circuit_open_until = max(self.ai_circuit_open_until, opened_until)
+            return self.ai_circuit_open_until
+
+    async def register_ai_success(self, *, response_ms: float) -> float:
+        async with self.risk_lock:
+            updated_ema = (
+                response_ms
+                if self.ai_response_ema_ms <= 0
+                else (0.7 * self.ai_response_ema_ms + 0.3 * response_ms)
+            )
+            self.ai_consecutive_failures = 0
+            self.ai_circuit_open_until = 0.0
+            self.last_ai_response_ms = response_ms
+            self.ai_response_ema_ms = updated_ema
+            return updated_ema
 
     async def build_drawdown_guard(self, current_balance: float | None = None) -> DrawdownGuardSnapshot:
         async with self.risk_lock:

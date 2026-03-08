@@ -178,6 +178,7 @@ export interface EngineRuntimeSnapshot {
   kill_switch_enabled?: boolean;
   simulated_balance?: number;
   latest_rejected_reason?: string;
+   locks?: Array<string | Partial<SystemLockItem>>;
   paper_trading?: boolean;
   logs?: string[];
 }

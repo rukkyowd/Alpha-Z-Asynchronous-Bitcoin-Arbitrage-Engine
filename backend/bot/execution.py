@@ -202,10 +202,11 @@ class ExecutionConfig:
     live_tiny_amm_fallback_max_spread_pct: float = 0.015
     live_clob_recovery_wait_secs: float = 12.0
     live_clob_recovery_poll_secs: float = 1.0
-    live_entry_slippage_cents: float = 0.02
+    live_entry_slippage_cents: float = 0.01
     live_tiny_entry_slippage_cents: float = 0.01
     live_tiny_reprice_buffer_cents: float = 0.005
     live_tiny_reprice_max_extra_cents: float = 0.01
+    max_entry_premium_cents: float = 0.015
     max_spread_pct: float = 0.05
     min_liquidity_multiplier: float = 1.15
     paper_sim_estimated_depth_usd: float = 1000.0
@@ -292,6 +293,7 @@ class ClobExecutionEngine:
         bet_size_usd: float,
         expected_price: float,
         side: str = "buy",
+        shares_to_sell: float | None = None,
         odds: MarketOddsSnapshot | None = None,
         allow_tiny_amm_fallback: bool = True,
     ) -> LiquidityCheckResult:
@@ -404,6 +406,7 @@ class ClobExecutionEngine:
                 levels=0,
             )
 
+        requested_notional_usd = max(bet_size_usd, 0.0)
         if side.lower() == "buy":
             if not ask_levels:
                 return LiquidityCheckResult(
@@ -438,8 +441,12 @@ class ClobExecutionEngine:
                     market_impact_pct=1.0,
                     levels=0,
                 )
-            shares_to_sell = max(bet_size_usd / max(expected_price, 0.01), 0.0)
-            _, filled_shares, avg_price = _simulate_sell_fill(bid_levels, shares_to_sell)
+            effective_shares_to_sell = max(
+                shares_to_sell if shares_to_sell is not None else (bet_size_usd / max(expected_price, 0.01)),
+                0.0,
+            )
+            requested_notional_usd = effective_shares_to_sell * max(expected_price, 0.01)
+            _, filled_shares, avg_price = _simulate_sell_fill(bid_levels, effective_shares_to_sell)
             entry_price = avg_price if filled_shares > 0 else bid_levels[0][0]
             depth_usd = sum(price * size for price, size in bid_levels)
             spread_pct = max(0.0, (best_ask - best_bid) if best_bid is not None and best_ask is not None else 0.0)
@@ -451,13 +458,16 @@ class ClobExecutionEngine:
             best_ask=best_ask,
             levels=max(len(bid_levels), len(ask_levels)),
         )
-        expected_slippage_pct, market_impact_pct = self.risk_manager.estimate_total_slippage_pct(bet_size_usd, profile)
+        expected_slippage_pct, market_impact_pct = self.risk_manager.estimate_total_slippage_pct(
+            requested_notional_usd,
+            profile,
+        )
 
-        if depth_usd < (bet_size_usd * self.config.min_liquidity_multiplier):
+        if depth_usd < (requested_notional_usd * self.config.min_liquidity_multiplier):
             return LiquidityCheckResult(
                 ok=False,
                 mode="THIN_BOOK",
-                reason=f"Insufficient depth (${depth_usd:.2f} < ${bet_size_usd * self.config.min_liquidity_multiplier:.2f})",
+                reason=f"Insufficient depth (${depth_usd:.2f} < ${requested_notional_usd * self.config.min_liquidity_multiplier:.2f})",
                 entry_price=entry_price,
                 best_bid=best_bid,
                 best_ask=best_ask,
@@ -626,6 +636,20 @@ class ClobExecutionEngine:
     ) -> ActivePosition | None:
         if signal.direction not in (Direction.UP, Direction.DOWN):
             return None
+        if signal.kelly_bet_usd <= 0:
+            await state.record_execution_failure(
+                signal.slug,
+                reason="Bet size resolved to $0.00 after sizing",
+                ev_pct=signal.expected_value_pct,
+            )
+            return None
+        if signal.kelly_bet_usd < self.risk_manager.config.min_bet_usd:
+            await state.record_execution_failure(
+                signal.slug,
+                reason=f"Bet size ${signal.kelly_bet_usd:.2f} below min ${self.risk_manager.config.min_bet_usd:.2f}",
+                ev_pct=signal.expected_value_pct,
+            )
+            return None
 
         token_id = odds.token_id(signal.direction)
         if not token_id:
@@ -686,6 +710,14 @@ class ClobExecutionEngine:
         )
         target_price = max(liquidity.entry_price, expected_price, signal.price_cap or 0.0)
         limit_price = _quantize(_clamp(target_price + slippage_cents, 0.01, 0.99), tick_size, ROUND_UP)
+        entry_premium = limit_price - expected_price
+        if entry_premium > self.config.max_entry_premium_cents:
+            reason = (
+                f"Entry premium {entry_premium * 100:.1f}c > "
+                f"{self.config.max_entry_premium_cents * 100:.1f}c max"
+            )
+            await state.record_execution_failure(signal.slug, reason=reason, ev_pct=signal.expected_value_pct)
+            return None
 
         if self.config.paper_trading or self.config.dry_run:
             synthetic_fill_cost = round(signal.kelly_bet_usd, 2)

@@ -80,7 +80,7 @@ class DrawdownStatus:
 class PositionRiskConfig:
     base_tp_token_delta: float = 0.08
     base_sl_token_delta: float = -0.10
-    min_tp_token_delta: float = 0.06
+    min_tp_token_delta: float = 0.08
     max_sl_token_delta: float = -0.08
     volatility_reference: float = 0.0040
     volatility_floor: float = 0.60
@@ -100,8 +100,8 @@ class PositionRiskConfig:
     sl_confirm_breach_mid: int = 8
     sl_confirm_breach_late: int = 6
     sl_recovery_reset_buffer: float = 0.01
-    hard_sl_extra_cents: float = 0.06
-    hard_sl_extra_frac: float = 0.50
+    hard_sl_extra_cents: float = 0.03
+    hard_sl_extra_frac: float = 0.35
     underlying_soft_sl_min_confirms: int = 2
     underlying_vwap_buffer_frac: float = 0.0005
     sl_entry_rel_max_loss_pct: float = 0.55
@@ -239,6 +239,10 @@ class RiskManager:
         current_daily_pnl: float | None = None,
         trades_this_hour: int | None = None,
     ) -> tuple[bool, str]:
+        if trade_size <= 0:
+            return False, "Bet size resolved to $0.00 after sizing"
+        if trade_size < self.config.min_bet_usd:
+            return False, f"Bet size ${trade_size:.2f} below min ${self.config.min_bet_usd:.2f}"
         status = self.drawdown_status(
             current_balance,
             trade_size=trade_size,
@@ -448,7 +452,8 @@ class RiskManager:
         )
 
         tp_delta = max(cfg.base_tp_token_delta * volatility_modifier, cfg.min_tp_token_delta)
-        sl_delta = min(cfg.base_sl_token_delta * volatility_modifier, cfg.max_sl_token_delta)
+        # `max_sl_token_delta` is the widest allowed soft stop in token-price terms.
+        sl_delta = max(cfg.base_sl_token_delta * volatility_modifier, cfg.max_sl_token_delta)
         sl_disabled = False
         sl_confirms_needed = cfg.sl_confirm_breach_mid
         phase = "MID"
@@ -476,6 +481,7 @@ class RiskManager:
         if entry_age < cfg.settling_window_seconds:
             sl_delta *= cfg.settling_sl_breath_multiplier
 
+        sl_delta = max(sl_delta, cfg.max_sl_token_delta)
         entry_based_sl = -max(cfg.sl_entry_rel_min_cents, position.bought_price * cfg.sl_entry_rel_max_loss_pct)
         reachable_floor = -(max(position.bought_price - 0.01, 0.0))
         if reachable_floor < 0:
@@ -579,7 +585,7 @@ class RiskManager:
                         exit_price=current_token_price,
                     )
 
-        if price_delta <= snapshot.hard_sl_delta:
+        if not snapshot.sl_disabled and price_delta <= snapshot.hard_sl_delta:
             return PositionMonitorDecision(
                 position=replace(updated, status=PositionStatus.CLOSING),
                 should_exit=True,
@@ -591,13 +597,18 @@ class RiskManager:
             )
 
         if not snapshot.sl_disabled and price_delta <= snapshot.sl_delta:
-            breach_count = int(updated.sl_breach_count) + 1
-            updated = replace(updated, sl_breach_count=breach_count)
             underlying_confirmed = self._underlying_soft_sl_confirmed(
                 position,
                 context,
                 current_underlying_price=current_underlying_price,
             )
+            if not underlying_confirmed:
+                if updated.sl_breach_count > 0:
+                    updated = replace(updated, sl_breach_count=0)
+                return PositionMonitorDecision(position=updated)
+
+            breach_count = int(updated.sl_breach_count) + 1
+            updated = replace(updated, sl_breach_count=breach_count)
             if underlying_confirmed and breach_count >= snapshot.sl_confirms_needed:
                 return PositionMonitorDecision(
                     position=replace(updated, status=PositionStatus.CLOSING),

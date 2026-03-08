@@ -97,6 +97,7 @@ const WS_RECONNECT_SECONDS = 3;
 const TOAST_DURATION_MS = 4200;
 const OFFLINE_FALLBACK_POLL_MS = 4_000;
 const ALERT_SETTINGS_STORAGE_KEY = "elite-alert-settings-v1";
+const ENGINE_CONTROL_API_KEY = process.env.NEXT_PUBLIC_ENGINE_CONTROL_API_KEY?.trim() ?? "";
 
 const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   volume: 0.25,
@@ -462,6 +463,9 @@ function normalizeWsPayload(raw: unknown, previous: DashboardLiveData): Dashboar
   const logs = Array.isArray(runtime.logs)
     ? runtime.logs.map((item) => String(item))
     : previous.logs;
+  const aiInFlight = Array.isArray(runtime.ai_call_in_flight)
+    ? runtime.ai_call_in_flight.length > 0
+    : Boolean(runtime.ai_call_in_flight);
 
   const strategy = {
     edge_tracker: {
@@ -492,11 +496,11 @@ function normalizeWsPayload(raw: unknown, previous: DashboardLiveData): Dashboar
     system_locks: {
       ...DEFAULT_DASHBOARD_LIVE_DATA.strategy.system_locks,
       ...previous.strategy.system_locks,
-      locks: normalizeSystemLocks(previous.strategy.system_locks.locks, runtime.latest_rejected_reason),
+      locks: normalizeSystemLocks(runtime.locks ?? previous.strategy.system_locks.locks, runtime.latest_rejected_reason),
       ai_circuit_open: safeNumber(runtime.ai_circuit_open_until) > Date.now() / 1000,
       ai_circuit_remaining_secs: Math.max(0, Math.floor(safeNumber(runtime.ai_circuit_open_until) - Date.now() / 1000)),
       ai_failures: safeNumber(runtime.ai_consecutive_failures),
-      ai_in_flight: Boolean(runtime.ai_call_in_flight),
+      ai_in_flight: aiInFlight,
     },
     drawdown_guard,
   };
@@ -966,9 +970,13 @@ export default function EliteDashboard() {
     }
     setSavingControl(true);
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (ENGINE_CONTROL_API_KEY) {
+        headers["x-api-key"] = ENGINE_CONTROL_API_KEY;
+      }
       const res = await fetchBackend("/api/engine/control", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(controlDraft),
       });
       const data = await res.json();
@@ -989,7 +997,8 @@ export default function EliteDashboard() {
   }, [controlDraft, addToast]);
 
   const metrics = portfolio?.metrics;
-  const isPnlPositive = safeNumber(metrics?.current_pnl) >= 0;
+  const portfolioValue = safeNumber(metrics?.current_balance, safeNumber(metrics?.current_pnl));
+  const isPnlPositive = portfolioValue >= 0;
   const isPriceUp = priceChange > 0;
   const activePositions = Object.keys(liveData.active_trades || {}).length;
   const bayesianWinProbPct = clamp(safeNumber(liveData.quant.bayesian_probability) * 100, 0, 100);
@@ -1029,12 +1038,12 @@ export default function EliteDashboard() {
               ) : (
                 <motion.div
                   className={`text-4xl font-black tabular-nums sm:text-5xl ${isPnlPositive ? "text-white" : "text-red-400"}`}
-                  key={metrics?.current_pnl}
+                  key={portfolioValue}
                   initial={{ scale: 1.03, opacity: 0.85 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: "spring", stiffness: 280, damping: 22 }}
                 >
-                  ${safeNumber(metrics?.current_pnl).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  ${portfolioValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </motion.div>
               )}
             </div>

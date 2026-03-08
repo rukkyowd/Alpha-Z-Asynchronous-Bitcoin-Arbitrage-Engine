@@ -20,6 +20,7 @@ class AIConfig:
     max_retries: int = 2
     retry_delay_seconds: float = 2.0
     max_calls_per_slug: int = 6
+    max_calls_per_slug_paper: int = 18
     circuit_breaker_threshold: int = 5
     circuit_breaker_base_cooldown_seconds: float = 30.0
     circuit_breaker_max_cooldown_seconds: float = 300.0
@@ -147,6 +148,7 @@ class LocalAIAgent:
         odds_snapshot: MarketOddsSnapshot,
         *,
         counter_signal: TradeSignal | None = None,
+        max_calls_override: int | None = None,
     ) -> AIDecision:
         now_ts = time.time()
         runtime = await state.build_runtime_counters()
@@ -158,12 +160,13 @@ class LocalAIAgent:
                 circuit_open=True,
             )
 
-        reserved, slug_calls = await state.reserve_ai_call(signal.slug, max_calls=self.config.max_calls_per_slug)
+        max_calls = max_calls_override if max_calls_override is not None else self.config.max_calls_per_slug
+        reserved, slug_calls = await state.reserve_ai_call(signal.slug, max_calls=max_calls)
         if not reserved:
             return AIDecision(
                 decision=Direction.SKIP,
                 raw_response="",
-                reason=f"AI cap reached ({slug_calls}/{self.config.max_calls_per_slug})",
+                reason=f"AI cap reached ({slug_calls}/{max_calls})",
             )
 
         prompt = self.build_prompt(signal, context, odds_snapshot, counter_signal=counter_signal)
@@ -214,15 +217,9 @@ class LocalAIAgent:
                         await asyncio.sleep(self.config.retry_delay_seconds)
 
             if decision is not None:
-                updated_ema = (
-                    response_ms
-                    if runtime.ai_response_ema_ms <= 0
-                    else (0.7 * runtime.ai_response_ema_ms + 0.3 * response_ms)
-                )
+                updated_ema = await state.register_ai_success(response_ms=response_ms)
                 await state.release_ai_call(signal.slug)
                 await state.update_runtime_counters(
-                    ai_consecutive_failures=0,
-                    ai_circuit_open_until=0.0,
                     last_ai_response_ms=response_ms,
                     ai_response_ema_ms=updated_ema,
                 )
@@ -248,9 +245,11 @@ class LocalAIAgent:
                     response_ms=response_ms,
                 )
 
-            current_failures = runtime.ai_consecutive_failures + 1
+            current_failures = await state.increment_ai_failures()
             cooldown = self._cooldown_seconds(current_failures)
             circuit_until = time.time() + cooldown if cooldown > 0 else 0.0
+            if circuit_until > 0:
+                circuit_until = await state.set_ai_circuit_open_until(circuit_until)
             await state.release_ai_call(signal.slug)
             await state.record_ai_state(
                 signal.slug,
@@ -299,6 +298,7 @@ async def call_local_ai(
     *,
     counter_signal: TradeSignal | None = None,
     agent: LocalAIAgent | None = None,
+    max_calls_override: int | None = None,
 ) -> AIDecision:
     runtime_agent = agent or _DEFAULT_AGENT
     return await runtime_agent.call_local_ai(
@@ -308,6 +308,7 @@ async def call_local_ai(
         context,
         odds_snapshot,
         counter_signal=counter_signal,
+        max_calls_override=max_calls_override,
     )
 
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
 
 from .indicators import apply_probabilistic_model, directional_probabilities
@@ -9,6 +10,7 @@ from .models import (
     EdgeSnapshot,
     MarketOddsSnapshot,
     MarketRegime,
+    ReentryState,
     SignalAlignmentSnapshot,
     TechnicalContext,
     TradeSignal,
@@ -53,6 +55,9 @@ class StrategyConfig:
     countertrend_min_vwap_dist_pct: float = 0.0010
     countertrend_min_strike_dist_pct: float = 0.0010
     countertrend_force_ai: bool = True
+    post_stop_cooldown_secs: float = 600.0
+    post_stop_reentry_min_ev_improvement_pct: float = 5.0
+    post_stop_reentry_min_score: int = 3
     default_depth_usd: float = 40.0
     default_spread_pct: float = 0.01
 
@@ -210,6 +215,46 @@ def _skip_signal(slug: str, reason: str, *, score: int = 0) -> TradeSignal:
     )
 
 
+def _post_stop_reentry_reason(
+    reentry_state: ReentryState | None,
+    direction: Direction,
+    score: int,
+    ev_pct: float,
+    config: StrategyConfig,
+) -> str | None:
+    if reentry_state is None:
+        return None
+
+    if reentry_state.last_exit_direction != direction:
+        return None
+
+    if "STOP_LOSS" not in reentry_state.last_exit_reason.upper():
+        return None
+
+    elapsed = time.time() - reentry_state.last_exit_ts
+    if elapsed < config.post_stop_cooldown_secs:
+        remaining = max(0, int(config.post_stop_cooldown_secs - elapsed))
+        return (
+            f"Post-stop cooldown active ({remaining}s left) for {direction.value} "
+            f"after {reentry_state.last_exit_reason}"
+        )
+
+    required_ev = reentry_state.last_entry_ev_pct + config.post_stop_reentry_min_ev_improvement_pct
+    if ev_pct < required_ev:
+        return (
+            f"Post-stop re-entry blocked: EV {ev_pct:.2f}% < {required_ev:.2f}% "
+            f"needed after last {direction.value} stop"
+        )
+
+    if score < config.post_stop_reentry_min_score:
+        return (
+            f"Post-stop re-entry blocked: score {score}/4 < "
+            f"{config.post_stop_reentry_min_score}/4 after last {direction.value} stop"
+        )
+
+    return None
+
+
 class StrategyEngine:
     __slots__ = ("config", "risk_manager")
 
@@ -364,6 +409,21 @@ class StrategyEngine:
         )
         if countertrend_reason:
             return _skip_signal(slug, countertrend_reason, score=score)
+
+        reentry_snapshot = None
+        if state is not None:
+            async with state.positions_lock:
+                existing = state.reentry_state.get(slug)
+                reentry_snapshot = existing.clone() if existing is not None else None
+        post_stop_reason = _post_stop_reentry_reason(
+            reentry_snapshot,
+            target_direction,
+            score,
+            target_ev.ev_pct,
+            self.config,
+        )
+        if post_stop_reason:
+            return _skip_signal(slug, post_stop_reason, score=score)
 
         reasons: list[str] = []
         if signal_alignment.vwap:

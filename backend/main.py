@@ -836,6 +836,10 @@ async def load_persisted_history(runtime: EngineServices) -> None:
     )
 
 
+def _paper_balance(runtime: EngineServices) -> float:
+    return runtime.bankroll + sum(item["pnl_impact"] for item in runtime.trade_history)
+
+
 
 def _extract_balance_value(payload: Any) -> float:
     if payload is None:
@@ -879,6 +883,34 @@ def _extract_balance_value(payload: Any) -> float:
     return 0.0
 
 
+def _parse_collateral_balance_usd(payload: Any) -> float:
+    raw_balance: Any = None
+    if isinstance(payload, dict):
+        raw_balance = payload.get("balance")
+    elif isinstance(payload, (int, float, str)):
+        raw_balance = payload
+
+    if raw_balance is None:
+        return 0.0
+
+    raw_text = str(raw_balance).strip()
+    if not raw_text:
+        return 0.0
+
+    try:
+        value = float(raw_text)
+    except ValueError:
+        return 0.0
+
+    if value <= 0:
+        return 0.0
+
+    # Polymarket collateral balances are returned in 6-decimal USDC.e base units.
+    if "." not in raw_text and "e" not in raw_text.lower():
+        return value / 1_000_000.0
+    return value
+
+
 async def build_clob_client() -> ClobClient | None:
     if not POLY_PRIVATE_KEY:
         return None
@@ -910,11 +942,12 @@ async def fetch_live_balance(runtime: EngineServices, *, force: bool = False) ->
         params = BalanceAllowanceParams(asset_type=AssetType.COLLATERAL, signature_type=POLY_SIG_TYPE)
         try:
             balance_payload = await asyncio.to_thread(runtime.clob_client.get_balance_allowance, params)
-            balance = _extract_balance_value(balance_payload)
+            balance = _parse_collateral_balance_usd(balance_payload)
             if balance > 0:
                 runtime.current_balance = balance
                 await runtime.state.update_runtime_counters(simulated_balance=balance, kill_switch_last_log_ts=time.time())
                 return balance
+            logger.warning("[BALANCE] Live balance payload returned no usable collateral balance: %s", balance_payload)
         except Exception as exc:
             logger.warning("[BALANCE] Failed to fetch live balance: %s", exc)
         return existing if existing > 0 else runtime.bankroll
@@ -1375,6 +1408,16 @@ async def finalize_closed_position(
     }
     await _record_trade(runtime, trade_record)
     await runtime.state.clear_slug_commit(trade_record["slug"])
+    await runtime.state.clear_ai_state(trade_record["slug"])
+    if "STOP_LOSS" in exit_reason.upper():
+        await runtime.state.record_reentry_state(
+            trade_record["slug"],
+            exit_reason=exit_reason,
+            direction=Direction(trade_record["decision"]) if trade_record["decision"] in Direction._value2member_map_ else Direction.UNKNOWN,
+            entry_ev_pct=_safe_float(position.get("ml_features", {}).get("expected_ev_pct")),
+        )
+    else:
+        await runtime.state.clear_reentry_state(trade_record["slug"])
     runtime.position_heartbeat_ts.pop(trade_record["slug"], None)
     logger.info(
         "[TRADE CLOSED] %s | %s | PnL: $%+.2f | Exit: %.4f | Underlying: %.2f | Reason: %s",
@@ -1472,6 +1515,11 @@ async def maybe_validate_with_ai(
         context,
         odds,
         agent=runtime.ai_agent,
+        max_calls_override=(
+            runtime.ai_config.max_calls_per_slug_paper
+            if runtime.paper_trading
+            else runtime.ai_config.max_calls_per_slug
+        ),
     )
     if ai_decision.approved:
         return replace(signal, approved=True, ai_validated=True, needs_ai=False), ""
@@ -1592,7 +1640,7 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             ai_reason = ""
             if signal.needs_ai:
                 ai_started = time.perf_counter()
-                signal, ai_reason = await maybe_validate_with_ai(runtime, signal, context, odds)
+                signal, ai_reason = await maybe_validate_with_ai(runtime, signal, enriched_context, odds)
                 ai_ms = (time.perf_counter() - ai_started) * 1000.0
                 runtime.latest_signal = signal
 
@@ -1739,6 +1787,7 @@ async def position_monitor_loop(runtime: EngineServices) -> None:
                     bet_size_usd=position.bet_size_usd,
                     expected_price=public_price,
                     side="sell",
+                    shares_to_sell=position.shares_owned,
                     odds=odds,
                     allow_tiny_amm_fallback=False,
                 )
@@ -1886,12 +1935,13 @@ async def build_metrics_snapshot(runtime: EngineServices, *, force: bool = False
             snapshot = {
                 "metrics": {
                     "win_rate": 0.0,
-                    "total_trades": 0,
-                    "total_wins": 0,
-                    "total_losses": 0,
-                    "max_drawdown": 0.0,
-                    "current_pnl": round(current_balance, 2),
-                    "sharpe": 0.0,
+                "total_trades": 0,
+                "total_wins": 0,
+                "total_losses": 0,
+                "max_drawdown": 0.0,
+                "current_pnl": 0.0,
+                "current_balance": round(current_balance, 2),
+                "sharpe": 0.0,
                     "var_95": 0.0,
                     "expectancy": 0.0,
                     "kelly_optimal": "0.0%",
@@ -2044,7 +2094,8 @@ async def build_metrics_snapshot(runtime: EngineServices, *, force: bool = False
                 "total_wins": total_wins,
                 "total_losses": total_losses,
                 "max_drawdown": round(max_drawdown, 2),
-                "current_pnl": round(current_effective_balance, 2),
+                "current_pnl": round(total_pnl, 2),
+                "current_balance": round(current_effective_balance, 2),
                 "sharpe": round(sharpe, 2),
                 "var_95": round(var_95, 2),
                 "expectancy": round(expectancy, 2),
@@ -2394,7 +2445,10 @@ async def update_engine_control(update: EngineControlUpdate, request: Request) -
         runtime.paper_trading = bool(update.paper_trading)
         runtime.execution_config = replace(runtime.execution_config, paper_trading=runtime.paper_trading)
         runtime.execution_engine.config = replace(runtime.execution_engine.config, paper_trading=runtime.paper_trading)
-        if not runtime.paper_trading:
+        if runtime.paper_trading:
+            runtime.current_balance = _paper_balance(runtime)
+            await runtime.state.update_runtime_counters(simulated_balance=runtime.current_balance)
+        else:
             runtime.current_balance = await fetch_live_balance(runtime, force=True)
 
     if update.max_trade_pct is not None:
