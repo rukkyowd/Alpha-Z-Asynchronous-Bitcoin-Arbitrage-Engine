@@ -135,7 +135,7 @@ def _parse_metadata_blob(raw_value):
     return {}
 
 def run_probability_calibration_report(df):
-    """Computes calibration diagnostics for stored trade probabilities."""
+    """Computes calibration diagnostics with Model vs Market Brier benchmarking."""
     if 'metadata_json' not in df.columns:
         print("\n Probability Calibration: metadata_json column missing.")
         print("="*80)
@@ -153,6 +153,7 @@ def run_probability_calibration_report(df):
     resolved['raw_market_probability_pct'] = metadata.apply(lambda item: float(item.get('raw_market_probability_pct', np.nan)))
     resolved['base_up_probability_pct'] = metadata.apply(lambda item: float(item.get('base_up_probability_pct', np.nan)))
     resolved['indicator_logit_shift'] = metadata.apply(lambda item: float(item.get('indicator_logit_shift', np.nan)))
+    resolved['calibrated_prob_pct'] = metadata.apply(lambda item: float(item.get('calibrated_prob_pct', np.nan)))
     resolved['outcome_numeric'] = resolved['result'].apply(lambda value: 1.0 if value == 'WIN' else 0.0)
 
     calibration = resolved.dropna(subset=['predicted_win_prob_pct']).copy()
@@ -161,52 +162,111 @@ def run_probability_calibration_report(df):
         print("="*80)
         return
 
-    calibration['predicted_prob'] = calibration['predicted_win_prob_pct'] / 100.0
-    calibration['brier_component'] = (calibration['predicted_prob'] - calibration['outcome_numeric']) ** 2
-    brier_score = calibration['brier_component'].mean()
-    market_calibration = calibration.dropna(subset=['fair_market_probability_pct']).copy()
-    market_brier_score = np.nan
-    if not market_calibration.empty:
-        market_calibration['market_prob'] = market_calibration['fair_market_probability_pct'] / 100.0
-        market_calibration['market_brier_component'] = (
-            market_calibration['market_prob'] - market_calibration['outcome_numeric']
-        ) ** 2
-        market_brier_score = market_calibration['market_brier_component'].mean()
-    brier_improvement = (market_brier_score - brier_score) if not np.isnan(market_brier_score) else np.nan
+    # --- Model Brier Score ---
+    calibration['model_prob'] = calibration['predicted_win_prob_pct'] / 100.0
+    calibration['model_brier'] = (calibration['model_prob'] - calibration['outcome_numeric']) ** 2
+    model_brier = calibration['model_brier'].mean()
+
+    # --- Market Brier Score (benchmark) ---
+    market_cal = calibration.dropna(subset=['fair_market_probability_pct']).copy()
+    if not market_cal.empty:
+        market_cal['market_prob'] = market_cal['fair_market_probability_pct'] / 100.0
+        market_cal['market_brier'] = (market_cal['market_prob'] - market_cal['outcome_numeric']) ** 2
+        market_brier = market_cal['market_brier'].mean()
+        brier_advantage = market_brier - model_brier
+    else:
+        market_brier = np.nan
+        brier_advantage = np.nan
+
+    # --- Rolling Brier (last 50 trades) ---
+    rolling_n = min(50, len(calibration))
+    recent = calibration.tail(rolling_n)
+    rolling_model_brier = recent['model_brier'].mean()
+    rolling_market_brier = np.nan
+    if not market_cal.empty:
+        recent_market = market_cal.tail(rolling_n)
+        if not recent_market.empty:
+            rolling_market_brier = (recent_market['market_prob'] - recent_market['outcome_numeric']).pow(2).mean()
+
     avg_pred = calibration['predicted_win_prob_pct'].mean()
     realized_wr = calibration['outcome_numeric'].mean() * 100.0
     avg_edge = (calibration['predicted_win_prob_pct'] - calibration['fair_market_probability_pct']).mean()
 
+    print("\n" + "="*80)
+    print(" PROBABILITY CALIBRATION & BRIER BENCHMARK REPORT")
+    print("="*80)
+
+    print("\n  BRIER SCORES (lower is better, 0.25 = coin flip)")
+    print("-" * 80)
+    print(f"  Alpha-Z Model (all)    : {model_brier:.4f}")
+    if not np.isnan(market_brier):
+        print(f"  Polymarket Crowd (all) : {market_brier:.4f}")
+        sign = "+" if brier_advantage > 0 else ""
+        verdict = "MODEL WINS" if brier_advantage > 0 else "MARKET WINS"
+        print(f"  Advantage              : {sign}{brier_advantage:.4f}  [{verdict}]")
+    print(f"\n  Rolling (last {rolling_n}):")
+    print(f"    Model  : {rolling_model_brier:.4f}")
+    if not np.isnan(rolling_market_brier):
+        print(f"    Market : {rolling_market_brier:.4f}")
+    print("-" * 80)
+    print(f"  Avg Predicted Win  : {avg_pred:.2f}%")
+    print(f"  Realized Win Rate  : {realized_wr:.2f}%")
+    print(f"  Avg Edge vs Fair   : {avg_edge:+.2f}%")
+    print(f"  Total Resolved     : {len(calibration)}")
+
+    # --- Per-bucket calibration with market benchmark ---
     bins = [0, 40, 50, 60, 70, 80, 100]
     calibration['bucket'] = pd.cut(calibration['predicted_win_prob_pct'], bins=bins, right=False, include_lowest=True)
     bucket_rows = []
     for bucket, group in calibration.groupby('bucket', observed=False):
         if group.empty:
             continue
+        mkt_pred = group['fair_market_probability_pct'].mean()
         bucket_rows.append({
             'Bucket': str(bucket),
-            'Trades': len(group),
-            'Avg Pred %': round(group['predicted_win_prob_pct'].mean(), 2),
-            'Realized Win %': round(group['outcome_numeric'].mean() * 100.0, 2),
-            'Avg Fair Mkt %': round(group['fair_market_probability_pct'].mean(), 2),
+            'N': len(group),
+            'Model %': round(group['predicted_win_prob_pct'].mean(), 1),
+            'Mkt %': round(mkt_pred, 1) if not np.isnan(mkt_pred) else '-',
+            'Real %': round(group['outcome_numeric'].mean() * 100.0, 1),
+            'Brier': round(group['model_brier'].mean(), 4),
         })
 
-    print("\n" + "="*80)
-    print(" PROBABILITY CALIBRATION REPORT")
-    print("="*80)
-    print(f" Brier Score        : {brier_score:.4f}")
-    if not np.isnan(market_brier_score):
-        print(f" Market Brier Score : {market_brier_score:.4f}")
-        print(f" Brier Improvement  : {brier_improvement:+.4f}")
-    print(f" Avg Predicted Win  : {avg_pred:.2f}%")
-    print(f" Realized Win Rate  : {realized_wr:.2f}%")
-    print(f" Avg Edge vs Fair   : {avg_edge:+.2f}%")
+    print("\n  CALIBRATION BY PREDICTION BUCKET")
     print("-" * 80)
     if bucket_rows:
         print(pd.DataFrame(bucket_rows).to_string(index=False))
     else:
-        print(" Not enough bucketed trades yet.")
-    print("="*80)
+        print("  Not enough bucketed trades yet.")
+
+    # --- Edge magnitude analysis ---
+    edge_cal = calibration.dropna(subset=['fair_market_probability_pct']).copy()
+    if len(edge_cal) >= 5:
+        edge_cal['edge_pct'] = edge_cal['predicted_win_prob_pct'] - edge_cal['fair_market_probability_pct']
+        edge_bins = [0, 3, 6, 10, 15, 100]
+        edge_labels = ['0-3%', '3-6%', '6-10%', '10-15%', '15%+']
+        edge_cal['edge_bucket'] = pd.cut(
+            edge_cal['edge_pct'].abs(), bins=edge_bins, labels=edge_labels,
+            right=False, include_lowest=True,
+        )
+        edge_rows = []
+        for ebucket, egroup in edge_cal.groupby('edge_bucket', observed=False):
+            if egroup.empty:
+                continue
+            avg_pnl = round(egroup['pnl_impact'].mean(), 2) if 'pnl_impact' in egroup.columns else '-'
+            edge_rows.append({
+                'Edge': str(ebucket),
+                'N': len(egroup),
+                'Win %': round(egroup['outcome_numeric'].mean() * 100.0, 1),
+                'Avg PnL': avg_pnl,
+                'Brier': round(egroup['model_brier'].mean(), 4),
+            })
+        if edge_rows:
+            print("\n  PERFORMANCE BY EDGE MAGNITUDE")
+            print("-" * 80)
+            print(pd.DataFrame(edge_rows).to_string(index=False))
+
+    print("=" * 80)
+
 
 def plot_equity_curve(df):
     """Visualizes account growth over time."""
