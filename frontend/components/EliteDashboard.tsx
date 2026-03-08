@@ -1492,8 +1492,8 @@ function CvdPressureGauge({ cvd }: { cvd: any }) {
           <div className="absolute inset-x-1 bottom-1 h-1/4 rounded bg-az-surface-2" />
           <div className="absolute inset-x-1 top-1/2 border-t border-az-border/80" />
           <div
-            className={`absolute bottom-0 left-0 w-full transition-all duration-300 ${fillClass}`}
-            style={{ height: `${Math.max(4, magnitudePct)}%` }}
+            className={`absolute inset-x-0 bottom-0 transition-all duration-300 ${fillClass}`}
+            style={{ height: `${Math.max(2, magnitudePct)}%` }}
           />
         </div>
 
