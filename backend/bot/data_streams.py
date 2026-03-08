@@ -87,6 +87,27 @@ def _parse_seconds_remaining(end_date_str: str) -> float:
         return -1.0
 
 
+def _infer_fee_curve(slug: str, market: dict[str, Any], event: dict[str, Any]) -> tuple[str, bool, float, float]:
+    market_category = str(market.get("category") or event.get("category") or "").strip()
+    fees_enabled = bool(market.get("feesEnabled", False) or event.get("feesEnabled", False))
+    if not fees_enabled:
+        return market_category, False, 0.0, 0.0
+
+    fee_text = " ".join(
+        [
+            slug,
+            market_category,
+            str(market.get("question") or ""),
+            str(event.get("title") or ""),
+        ]
+    ).lower()
+    if any(token in fee_text for token in ("bitcoin", "btc", "ethereum", "eth", "solana", "sol", "crypto")):
+        return market_category or "CRYPTO", True, 0.25, 2.0
+    if any(token in fee_text for token in ("sport", "nba", "nfl", "mlb", "nhl", "soccer", "epl", "game")):
+        return market_category or "SPORTS", True, 0.0175, 1.0
+    return market_category or "FEE_ENABLED", True, 0.25, 2.0
+
+
 def _parse_kline_message(raw_payload: dict[str, Any]) -> MarketTick:
     payload = raw_payload.get("data", raw_payload)
     kline = payload["k"]
@@ -492,6 +513,7 @@ class PolymarketFetcher:
 
         strike_price = await self.fetch_price_to_beat_for_market(session, slug, meta=meta)
         seconds_remaining = _parse_seconds_remaining(str(market.get("endDate") or event.get("endDate") or ""))
+        market_category, fees_enabled, fee_curve_rate, fee_curve_exponent = _infer_fee_curve(slug, market, event)
 
         up_prob = float(prices[0]) * 100.0
         down_prob = float(prices[1]) * 100.0
@@ -503,6 +525,10 @@ class PolymarketFetcher:
             market_found=True,
             seconds_remaining=seconds_remaining,
             strike_price=strike_price,
+            market_category=market_category,
+            fees_enabled=fees_enabled,
+            fee_curve_rate=fee_curve_rate,
+            fee_curve_exponent=fee_curve_exponent,
             up_token_id=up_token_id,
             down_token_id=down_token_id,
             up_public_prob_pct=up_prob,

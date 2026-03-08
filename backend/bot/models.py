@@ -138,6 +138,10 @@ class MarketOddsSnapshot(SerializableModel):
     market_found: bool = False
     seconds_remaining: float = 0.0
     strike_price: float = 0.0
+    market_category: str = ""
+    fees_enabled: bool = False
+    fee_curve_rate: float = 0.0
+    fee_curve_exponent: float = 0.0
     up_token_id: str = ""
     down_token_id: str = ""
     up_public_prob_pct: float = 0.0
@@ -170,6 +174,18 @@ class MarketOddsSnapshot(SerializableModel):
         if direction == Direction.DOWN:
             return self.down_token_id
         return ""
+
+    def effective_taker_fee_rate(self, direction: Direction, entry_price: float | None = None) -> float:
+        if not self.fees_enabled or self.fee_curve_rate <= 0 or self.fee_curve_exponent <= 0:
+            return 0.0
+
+        reference_price = entry_price
+        if reference_price is None:
+            reference_price = self.entry_prob_pct(direction) / 100.0
+
+        bounded_price = min(max(reference_price, 0.001), 0.999)
+        probability_term = bounded_price * (1.0 - bounded_price)
+        return max(0.0, self.fee_curve_rate * (probability_term ** self.fee_curve_exponent))
 
 
 @dataclass(slots=True, kw_only=True)

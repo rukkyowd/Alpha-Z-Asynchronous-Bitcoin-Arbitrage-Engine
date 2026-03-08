@@ -64,6 +64,7 @@ class EVComputation:
     market_prob_pct: float
     approved: bool
     available_depth_usd: float
+    fee_cost_pct: float = 0.0
 
 
 @dataclass(slots=True, frozen=True)
@@ -274,16 +275,21 @@ class RiskManager:
         self,
         bet_size_usd: float,
         liquidity: LiquidityProfile | None = None,
+        *,
+        token_price: float | None = None,
+        taker_fee_rate: float = 0.0,
     ) -> tuple[float, float]:
         if liquidity is None:
             depth = self.config.default_depth_usd
-            spread_pct = 0.0
+            spread_abs = 0.0
         else:
             depth = max(liquidity.available_depth_usd, self.config.min_bet_usd)
-            spread_pct = max(liquidity.estimated_spread_pct, 0.0)
+            spread_abs = max(liquidity.estimated_spread_pct, 0.0)
 
+        reference_price = max(token_price or 0.5, self.config.min_token_price)
+        spread_pct = (spread_abs * 0.5) / reference_price
         market_impact_pct = self.square_root_market_impact_pct(bet_size_usd, depth)
-        slippage_pct = (spread_pct * 0.5) + market_impact_pct
+        slippage_pct = spread_pct + market_impact_pct + max(taker_fee_rate, 0.0)
         return slippage_pct, market_impact_pct
 
     @staticmethod
@@ -305,6 +311,7 @@ class RiskManager:
         current_balance: float,
         seconds_remaining: float,
         liquidity: LiquidityProfile | None = None,
+        taker_fee_rate: float = 0.0,
     ) -> EVComputation:
         token_price = market_prob_pct / 100.0
         true_probability = true_prob_pct / 100.0
@@ -325,6 +332,7 @@ class RiskManager:
                 market_prob_pct=round(market_prob_pct, 2),
                 approved=False,
                 available_depth_usd=0.0 if liquidity is None else liquidity.available_depth_usd,
+                fee_cost_pct=0.0,
             )
 
         gross_ev = true_probability * (1.0 - token_price) - ((1.0 - true_probability) * token_price)
@@ -345,7 +353,12 @@ class RiskManager:
         market_impact_pct = 0.0
 
         for _ in range(2):
-            total_slippage_pct, market_impact_pct = self.estimate_total_slippage_pct(candidate_bet, liquidity)
+            total_slippage_pct, market_impact_pct = self.estimate_total_slippage_pct(
+                candidate_bet,
+                liquidity,
+                token_price=token_price,
+                taker_fee_rate=taker_fee_rate,
+            )
             adjusted_token_price = _clamp(token_price * (1.0 + total_slippage_pct), 0.0001, 0.9999)
             adjusted_fraction = self._kelly_fraction(true_probability, adjusted_token_price)
             recalculated = adjusted_fraction * current_balance * self.config.fractional_kelly_dampener * time_decay
@@ -355,11 +368,17 @@ class RiskManager:
                 break
             candidate_bet = recalculated
 
-        total_slippage_pct, market_impact_pct = self.estimate_total_slippage_pct(candidate_bet, liquidity)
+        total_slippage_pct, market_impact_pct = self.estimate_total_slippage_pct(
+            candidate_bet,
+            liquidity,
+            token_price=token_price,
+            taker_fee_rate=taker_fee_rate,
+        )
         adjusted_token_price = _clamp(token_price * (1.0 + total_slippage_pct), 0.0001, 0.9999)
         adjusted_fraction = self._kelly_fraction(true_probability, adjusted_token_price)
         net_ev = true_probability * (1.0 - adjusted_token_price) - ((1.0 - true_probability) * adjusted_token_price)
         net_ev_pct = _safe_div(net_ev, adjusted_token_price, default=0.0) * 100.0
+        fee_cost_pct = max(taker_fee_rate, 0.0) * 100.0
 
         final_bet = round(min(candidate_bet, max_risk_cap), 2)
         if final_bet < self.config.min_bet_usd:
@@ -384,6 +403,7 @@ class RiskManager:
                 self.config.default_depth_usd if liquidity is None else liquidity.available_depth_usd,
                 2,
             ),
+            fee_cost_pct=round(fee_cost_pct, 3),
         )
 
     def _volatility_for_position(self, context: TechnicalContext) -> float:

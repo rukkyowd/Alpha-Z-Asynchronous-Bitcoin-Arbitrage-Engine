@@ -303,6 +303,7 @@ class ClobExecutionEngine:
             slippage, impact = self.risk_manager.estimate_total_slippage_pct(
                 bet_size_usd,
                 LiquidityProfile(available_depth_usd=depth, estimated_spread_pct=spread),
+                token_price=expected_price,
             )
             return LiquidityCheckResult(
                 ok=True,
@@ -461,6 +462,7 @@ class ClobExecutionEngine:
         expected_slippage_pct, market_impact_pct = self.risk_manager.estimate_total_slippage_pct(
             requested_notional_usd,
             profile,
+            token_price=expected_price,
         )
 
         if depth_usd < (requested_notional_usd * self.config.min_liquidity_multiplier):

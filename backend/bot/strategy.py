@@ -52,9 +52,11 @@ class StrategyConfig:
     trend_lock_cvd_confirm_threshold: float = 15000.0
     countertrend_min_score: int = 3
     countertrend_min_ev_pct: float = 20.0
+    countertrend_min_ev_lead_pct: float = 5.0
     countertrend_min_vwap_dist_pct: float = 0.0010
     countertrend_min_strike_dist_pct: float = 0.0010
     countertrend_force_ai: bool = True
+    min_directional_ev_lead_pct: float = 2.0
     post_stop_cooldown_secs: float = 600.0
     post_stop_reentry_min_ev_improvement_pct: float = 5.0
     post_stop_reentry_min_score: int = 3
@@ -171,6 +173,7 @@ def _countertrend_reason(
     direction: Direction,
     score: int,
     ev_pct: float,
+    ev_lead_pct: float,
     config: StrategyConfig,
 ) -> str | None:
     trend_direction = _infer_trend_direction(context)
@@ -190,6 +193,11 @@ def _countertrend_reason(
         return (
             f"Countertrend blocked: EV {ev_pct:.2f}% < {config.countertrend_min_ev_pct:.2f}% "
             f"against {trend_direction.value} trend"
+        )
+    if ev_lead_pct < config.countertrend_min_ev_lead_pct:
+        return (
+            f"Countertrend blocked: EV lead {ev_lead_pct:.2f}% < "
+            f"{config.countertrend_min_ev_lead_pct:.2f}% over {trend_direction.value}"
         )
     if vwap_dist_pct < config.countertrend_min_vwap_dist_pct:
         return (
@@ -271,9 +279,11 @@ class StrategyEngine:
         *,
         liquidity: LiquidityProfile | None = None,
     ) -> EVComputation:
-        up_probability, down_probability = directional_probabilities(context)
+        up_probability = max(0.0, min(context.bayesian_probability * 100.0, 100.0))
+        down_probability = max(0.0, 100.0 - up_probability)
         true_prob_pct = up_probability if direction == Direction.UP else down_probability
         market_prob_pct = odds.entry_prob_pct(direction)
+        taker_fee_rate = odds.effective_taker_fee_rate(direction, market_prob_pct / 100.0)
         profile = _derive_liquidity_profile(odds, direction, config=self.config, explicit_liquidity=liquidity)
         return self.risk_manager.evaluate_trade(
             true_prob_pct=true_prob_pct,
@@ -281,6 +291,7 @@ class StrategyEngine:
             current_balance=bankroll,
             seconds_remaining=odds.seconds_remaining,
             liquidity=profile,
+            taker_fee_rate=taker_fee_rate,
         )
 
     async def evaluate_trade_signal(
@@ -345,8 +356,14 @@ class StrategyEngine:
             liquidity=None if liquidity_by_direction is None else liquidity_by_direction.get(Direction.DOWN),
         )
 
-        target_direction = Direction.UP if up_ev.ev_pct > down_ev.ev_pct else Direction.DOWN
-        target_ev = up_ev if target_direction == Direction.UP else down_ev
+        if up_ev.ev_pct > down_ev.ev_pct:
+            target_direction = Direction.UP
+            target_ev = up_ev
+            alternate_ev = down_ev
+        else:
+            target_direction = Direction.DOWN
+            target_ev = down_ev
+            alternate_ev = up_ev
         signal_alignment = build_signal_alignment(enriched_context, target_direction, volume_ratio=self.config.volume_confirmation_ratio)
 
         up_probability, down_probability = directional_probabilities(enriched_context)
@@ -377,6 +394,14 @@ class StrategyEngine:
         if not target_ev.approved:
             return _skip_signal(slug, f"Net EV {target_ev.ev_pct:.2f}% <= 0 after slippage", score=signal_alignment.score)
 
+        ev_lead_pct = target_ev.ev_pct - alternate_ev.ev_pct
+        if ev_lead_pct < self.config.min_directional_ev_lead_pct:
+            return _skip_signal(
+                slug,
+                f"Directional EV lead too weak ({ev_lead_pct:.2f}% < {self.config.min_directional_ev_lead_pct:.2f}%)",
+                score=signal_alignment.score,
+            )
+
         score = signal_alignment.score
         token_price = target_ev.adjusted_token_price
         allow_score0_extreme_ev = (
@@ -405,6 +430,7 @@ class StrategyEngine:
             target_direction,
             score,
             target_ev.ev_pct,
+            ev_lead_pct,
             self.config,
         )
         if countertrend_reason:
@@ -519,8 +545,10 @@ class StrategyEngine:
                 "market_regime": enriched_context.market_regime.value,
                 "up_ev_pct": up_ev.ev_pct,
                 "down_ev_pct": down_ev.ev_pct,
+                "ev_lead_pct": ev_lead_pct,
                 "up_edge_pct": edge_snapshot.up_edge,
                 "down_edge_pct": edge_snapshot.down_edge,
+                "fee_cost_pct": target_ev.fee_cost_pct,
             },
         )
 

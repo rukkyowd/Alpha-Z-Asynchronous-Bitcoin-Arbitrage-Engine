@@ -37,9 +37,9 @@ def run_edge_attribution(db_path=DEFAULT_DB_PATH):
     query = """
     SELECT 
         CASE 
-            WHEN trigger_reason LIKE '%AI confirmed%' THEN '🤖 AI-Confirmed Trades'
-            WHEN trigger_reason LIKE '%AI vetoed%' THEN '🛑 AI-Vetoed (Skipped)'
-            ELSE '⚙️ System-Only Trades (High Conviction)'
+            WHEN trigger_reason LIKE '%AI confirmed%' THEN 'AI-Confirmed Trades'
+            WHEN trigger_reason LIKE '%AI vetoed%' THEN 'AI-Vetoed (Skipped)'
+            ELSE 'System-Only Trades (High Conviction)'
         END AS category,
         COUNT(*) as total_executed,
         SUM(CASE WHEN result LIKE '%WIN%' THEN 1 ELSE 0 END) as wins,
@@ -56,7 +56,7 @@ def run_edge_attribution(db_path=DEFAULT_DB_PATH):
             df = pd.read_sql_query(query, conn)
             
             print("\n" + "="*80)
-            print(" 📊 ALPHA Z: AI EDGE ATTRIBUTION REPORT")
+            print(" ALPHA Z: AI EDGE ATTRIBUTION REPORT")
             print("="*80)
             
             if df.empty:
@@ -82,14 +82,14 @@ def run_performance_report(df):
     win_rate = (wins / total_trades) * 100 if total_trades > 0 else 0
 
     print("\n" + "="*80)
-    print(" 📈 ALPHA-Z CORE PERFORMANCE REPORT")
+    print(" ALPHA-Z CORE PERFORMANCE REPORT")
     print("="*80)
     print(f" Net PnL            : ${total_pnl:+.2f}")
     print(f" Core Win Rate      : {win_rate:.2f}% ({wins}/{total_trades})")
     
     # --- REGIME ANALYSIS ---
     print("-" * 80)
-    print(" 🎯 EARLY EXIT & REGIME BREAKDOWN")
+    print(" EARLY EXIT & REGIME BREAKDOWN")
     print("-" * 80)
     
     regimes = ['SIGNAL_REVERSAL', 'TAKE_PROFIT', 'STOP_LOSS']
@@ -115,10 +115,10 @@ def analyze_mismatches(df):
     count = len(mismatches)
     
     if count > 0:
-        print(f"\n⚠️  ALERT: Detected {count} Resolution Mismatches")
+        print(f"\n ALERT: Detected {count} Resolution Mismatches")
         print("This usually indicates high volatility during the expiry window.")
     else:
-        print("\n✅ Payout Integrity: Local calc matched Poly Official 100%.")
+        print("\n Payout Integrity: Local calc matched Poly Official 100%.")
     print("="*80 + "\n")
 
 def plot_equity_curve(df):
