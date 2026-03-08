@@ -38,6 +38,8 @@ class RiskConfig:
     time_decay_floor: float = 0.30
     min_token_price: float = 0.01
     max_token_price: float = 0.99
+    expected_exit_fee_multiplier: float = 0.50
+    latency_ev_haircut_pct: float = 0.25
 
 
 @dataclass(slots=True, frozen=True)
@@ -67,6 +69,8 @@ class EVComputation:
     approved: bool
     available_depth_usd: float
     fee_cost_pct: float = 0.0
+    exit_fee_cost_pct: float = 0.0
+    latency_haircut_pct: float = 0.0
 
 
 @dataclass(slots=True, frozen=True)
@@ -361,6 +365,8 @@ class RiskManager:
                 approved=False,
                 available_depth_usd=0.0 if liquidity is None else liquidity.available_depth_usd,
                 fee_cost_pct=0.0,
+                exit_fee_cost_pct=0.0,
+                latency_haircut_pct=0.0,
             )
 
         gross_ev = true_probability * (1.0 - token_price) - ((1.0 - true_probability) * token_price)
@@ -405,16 +411,23 @@ class RiskManager:
         )
         adjusted_token_price = _clamp(token_price * (1.0 + total_slippage_pct), 0.0001, 0.9999)
         adjusted_fraction = self._kelly_fraction(true_probability, adjusted_token_price)
-        net_ev = true_probability * (1.0 - adjusted_token_price) - ((1.0 - true_probability) * adjusted_token_price)
+        effective_exit_fee_rate = max(taker_fee_rate, 0.0) * max(self.config.expected_exit_fee_multiplier, 0.0)
+        expected_win_proceeds = max(0.0, 1.0 - effective_exit_fee_rate)
+        net_ev = true_probability * (expected_win_proceeds - adjusted_token_price) - (
+            (1.0 - true_probability) * adjusted_token_price
+        )
         net_ev_pct = _safe_div(net_ev, adjusted_token_price, default=0.0) * 100.0
+        latency_haircut_pct = max(self.config.latency_ev_haircut_pct, 0.0)
+        net_ev_pct_after_haircut = net_ev_pct - latency_haircut_pct
         fee_cost_pct = max(taker_fee_rate, 0.0) * 100.0
+        exit_fee_cost_pct = effective_exit_fee_rate * 100.0
 
         final_bet = round(min(candidate_bet, max_risk_cap), 2)
         if final_bet < self.config.min_bet_usd:
             final_bet = 0.0
 
         return EVComputation(
-            ev_pct=round(net_ev_pct, 2),
+            ev_pct=round(net_ev_pct_after_haircut, 2),
             ev_pct_gross=round(gross_ev_pct, 2),
             kelly_bet_usd=final_bet,
             raw_kelly_fraction=round(raw_kelly_fraction, 6),
@@ -427,12 +440,14 @@ class RiskManager:
             edge_pct=round(true_prob_pct - market_prob_pct, 2),
             true_prob_pct=round(true_prob_pct, 2),
             market_prob_pct=round(market_prob_pct, 2),
-            approved=net_ev_pct > 0.0 and time_decay > 0.0,
+            approved=net_ev_pct_after_haircut > 0.0 and time_decay > 0.0,
             available_depth_usd=round(
                 self.config.default_depth_usd if liquidity is None else liquidity.available_depth_usd,
                 2,
             ),
             fee_cost_pct=round(fee_cost_pct, 3),
+            exit_fee_cost_pct=round(exit_fee_cost_pct, 3),
+            latency_haircut_pct=round(latency_haircut_pct, 3),
         )
 
     def _volatility_for_position(self, context: TechnicalContext) -> float:

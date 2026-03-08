@@ -38,6 +38,7 @@ class StrategyConfig:
     probability_ceil_pct: float = 98.0
     degrees_of_freedom: int = 4
     max_indicator_logit_shift: float = 2.0
+    close_equals_open_up_bias_prob: float = 0.0005
     ema_squeeze_pct: float = 0.00005
     min_score_to_trade: int = 1
     min_seconds_remaining: float = 30.0
@@ -335,6 +336,7 @@ class StrategyEngine:
             probability_floor_pct=self.config.probability_floor_pct,
             probability_ceil_pct=self.config.probability_ceil_pct,
             max_indicator_logit_shift=self.config.max_indicator_logit_shift,
+            close_equals_open_up_bias_prob=self.config.close_equals_open_up_bias_prob,
         )
 
         if enriched_context.market_regime == MarketRegime.UNKNOWN:
@@ -577,6 +579,8 @@ class StrategyEngine:
                 "entry_vig_pct": round(target_vig_pct, 2),
                 "public_vig_pct": round(odds.public_vig_pct(), 2),
                 "reference_price": round(reference_price, 6),
+                "expected_exit_fee_cost_pct": target_ev.exit_fee_cost_pct,
+                "latency_haircut_pct": target_ev.latency_haircut_pct,
             },
         )
 

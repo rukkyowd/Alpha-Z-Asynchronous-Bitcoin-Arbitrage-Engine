@@ -236,6 +236,7 @@ class PolymarketFetcher:
                     return strike
             except Exception:
                 pass
+            return 0.0
 
         try:
             variant = "hourly"

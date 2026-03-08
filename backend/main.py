@@ -1785,13 +1785,14 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             runtime.latest_odds = odds
             enriched_context = apply_probabilistic_model(
                 context,
-            strike_price=odds.reference_price or odds.strike_price,
-            seconds_remaining=odds.seconds_remaining,
-            degrees_of_freedom=runtime.strategy_config.degrees_of_freedom,
-            probability_floor_pct=runtime.strategy_config.probability_floor_pct,
-            probability_ceil_pct=runtime.strategy_config.probability_ceil_pct,
-            max_indicator_logit_shift=runtime.strategy_config.max_indicator_logit_shift,
-        )
+                strike_price=odds.reference_price or odds.strike_price,
+                seconds_remaining=odds.seconds_remaining,
+                degrees_of_freedom=runtime.strategy_config.degrees_of_freedom,
+                probability_floor_pct=runtime.strategy_config.probability_floor_pct,
+                probability_ceil_pct=runtime.strategy_config.probability_ceil_pct,
+                max_indicator_logit_shift=runtime.strategy_config.max_indicator_logit_shift,
+                close_equals_open_up_bias_prob=runtime.strategy_config.close_equals_open_up_bias_prob,
+            )
             runtime.latest_context = enriched_context
             await runtime.state.update_telemetry(context=enriched_context)
 
@@ -2501,8 +2502,13 @@ async def bootstrap_runtime() -> EngineServices:
         hourly_trade_limit_drawdown_step2=_env_float("HOURLY_TRADE_LIMIT_DRAWDOWN_STEP2", 0.50),
         min_bet_usd=_env_float("MIN_BET_USD", 1.0),
         max_absolute_bet_usd=_env_float("MAX_BET_USD", 0.0),
+        expected_exit_fee_multiplier=_env_float("EXPECTED_EXIT_FEE_MULTIPLIER", 0.50),
+        latency_ev_haircut_pct=_env_float("LATENCY_EV_HAIRCUT_PCT", 0.25),
     )
-    strategy_config = StrategyConfig(risk=risk_config)
+    strategy_config = StrategyConfig(
+        risk=risk_config,
+        close_equals_open_up_bias_prob=_env_float("CLOSE_EQUALS_OPEN_UP_BIAS_PROB", 0.0005),
+    )
     execution_config = ExecutionConfig(
         paper_trading=PAPER_TRADING,
         dry_run=DRY_RUN,
@@ -2592,6 +2598,7 @@ async def bootstrap_runtime() -> EngineServices:
                     degrees_of_freedom=runtime.strategy_config.degrees_of_freedom,
                     probability_floor_pct=runtime.strategy_config.probability_floor_pct,
                     probability_ceil_pct=runtime.strategy_config.probability_ceil_pct,
+                    close_equals_open_up_bias_prob=runtime.strategy_config.close_equals_open_up_bias_prob,
                 )
                 runtime.latest_context = seeded_context
                 await runtime.state.update_telemetry(context=seeded_context)

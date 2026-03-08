@@ -375,6 +375,7 @@ def apply_probabilistic_model(
     probability_floor_pct: float = 2.0,
     probability_ceil_pct: float = 98.0,
     max_indicator_logit_shift: float = 2.0,
+    close_equals_open_up_bias_prob: float = 0.0005,
     bar_seconds: float | None = None,
 ) -> TechnicalContext:
     if context.price <= 0 or strike_price <= 0:
@@ -395,6 +396,12 @@ def apply_probabilistic_model(
     expected_move_sigma = max(context.price * sigma_bar * math.sqrt(horizon_bars), context.price * 1e-4)
     t_score = (context.price - strike_price) / expected_move_sigma
     base_probability = float(stdtr(max(3, degrees_of_freedom), t_score))
+    if close_equals_open_up_bias_prob > 0:
+        base_probability = _clamp(
+            base_probability + (close_equals_open_up_bias_prob * (1.0 - base_probability)),
+            1e-6,
+            1.0 - 1e-6,
+        )
 
     threshold = max(abs(context.adaptive_cvd_threshold), 1.0)
     volume_ratio = _safe_div(context.current_volume, context.vol_sma_20, default=1.0) - 1.0

@@ -164,6 +164,15 @@ def run_probability_calibration_report(df):
     calibration['predicted_prob'] = calibration['predicted_win_prob_pct'] / 100.0
     calibration['brier_component'] = (calibration['predicted_prob'] - calibration['outcome_numeric']) ** 2
     brier_score = calibration['brier_component'].mean()
+    market_calibration = calibration.dropna(subset=['fair_market_probability_pct']).copy()
+    market_brier_score = np.nan
+    if not market_calibration.empty:
+        market_calibration['market_prob'] = market_calibration['fair_market_probability_pct'] / 100.0
+        market_calibration['market_brier_component'] = (
+            market_calibration['market_prob'] - market_calibration['outcome_numeric']
+        ) ** 2
+        market_brier_score = market_calibration['market_brier_component'].mean()
+    brier_improvement = (market_brier_score - brier_score) if not np.isnan(market_brier_score) else np.nan
     avg_pred = calibration['predicted_win_prob_pct'].mean()
     realized_wr = calibration['outcome_numeric'].mean() * 100.0
     avg_edge = (calibration['predicted_win_prob_pct'] - calibration['fair_market_probability_pct']).mean()
@@ -186,6 +195,9 @@ def run_probability_calibration_report(df):
     print(" PROBABILITY CALIBRATION REPORT")
     print("="*80)
     print(f" Brier Score        : {brier_score:.4f}")
+    if not np.isnan(market_brier_score):
+        print(f" Market Brier Score : {market_brier_score:.4f}")
+        print(f" Brier Improvement  : {brier_improvement:+.4f}")
     print(f" Avg Predicted Win  : {avg_pred:.2f}%")
     print(f" Realized Win Rate  : {realized_wr:.2f}%")
     print(f" Avg Edge vs Fair   : {avg_edge:+.2f}%")

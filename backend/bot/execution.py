@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from decimal import Decimal, ROUND_DOWN, ROUND_UP
 from typing import Any
@@ -786,17 +786,18 @@ class ClobExecutionEngine:
     ) -> ActivePosition | None:
         if signal.direction not in (Direction.UP, Direction.DOWN):
             return None
-        if signal.kelly_bet_usd <= 0:
+        bet_size_usd = signal.kelly_bet_usd
+        if bet_size_usd <= 0:
             await state.record_execution_failure(
                 signal.slug,
                 reason="Bet size resolved to $0.00 after sizing",
                 ev_pct=signal.expected_value_pct,
             )
             return None
-        if signal.kelly_bet_usd < self.risk_manager.config.min_bet_usd:
+        if bet_size_usd < self.risk_manager.config.min_bet_usd:
             await state.record_execution_failure(
                 signal.slug,
-                reason=f"Bet size ${signal.kelly_bet_usd:.2f} below min ${self.risk_manager.config.min_bet_usd:.2f}",
+                reason=f"Bet size ${bet_size_usd:.2f} below min ${self.risk_manager.config.min_bet_usd:.2f}",
                 ev_pct=signal.expected_value_pct,
             )
             return None
@@ -809,7 +810,7 @@ class ClobExecutionEngine:
         bankroll = state.simulated_balance
         approved, reason = self.risk_manager.can_trade(
             bankroll,
-            signal.kelly_bet_usd,
+            bet_size_usd,
             current_daily_pnl=state.current_daily_pnl,
             trades_this_hour=state.trades_this_hour,
         )
@@ -820,7 +821,7 @@ class ClobExecutionEngine:
         expected_price = signal.token_price or (odds.entry_prob_pct(signal.direction) / 100.0)
         liquidity = await self.check_liquidity_and_spread(
             token_id,
-            bet_size_usd=signal.kelly_bet_usd,
+            bet_size_usd=bet_size_usd,
             expected_price=expected_price,
             side="buy",
             odds=odds,
@@ -839,7 +840,7 @@ class ClobExecutionEngine:
             )
             recovered = await self.wait_for_live_clob_recovery(
                 token_id,
-                bet_size_usd=signal.kelly_bet_usd,
+                bet_size_usd=bet_size_usd,
                 expected_price=expected_price,
                 side="buy",
             )
@@ -853,9 +854,55 @@ class ClobExecutionEngine:
                 )
 
         tick_size, neg_risk, _fee_rate_bps = await self._resolve_market_params(token_id)
+        authoritative_odds = replace(odds, sdk_fee_rate_bps=_fee_rate_bps) if _fee_rate_bps > 0 else odds
+        authoritative_market_prob_pct = authoritative_odds.entry_prob_pct(signal.direction)
+        authoritative_fee_rate = authoritative_odds.effective_taker_fee_rate(
+            signal.direction,
+            entry_price=(authoritative_market_prob_pct / 100.0) if authoritative_market_prob_pct > 0 else None,
+        )
+        authoritative_ev = self.risk_manager.evaluate_trade(
+            true_prob_pct=signal.true_probability_pct,
+            market_prob_pct=authoritative_market_prob_pct,
+            current_balance=bankroll,
+            seconds_remaining=odds.seconds_remaining,
+            liquidity=liquidity.as_profile(),
+            taker_fee_rate=authoritative_fee_rate,
+        )
+        if not authoritative_ev.approved:
+            await state.record_execution_failure(
+                signal.slug,
+                reason=f"Authoritative EV {authoritative_ev.ev_pct:.2f}% <= 0 after SDK fee recheck",
+                ev_pct=authoritative_ev.ev_pct,
+            )
+            return None
+        if authoritative_ev.kelly_bet_usd <= 0:
+            await state.record_execution_failure(
+                signal.slug,
+                reason="Bet size resolved to $0.00 after authoritative fee recheck",
+                ev_pct=authoritative_ev.ev_pct,
+            )
+            return None
+        if authoritative_ev.kelly_bet_usd < self.risk_manager.config.min_bet_usd:
+            await state.record_execution_failure(
+                signal.slug,
+                reason=(
+                    f"Bet size ${authoritative_ev.kelly_bet_usd:.2f} below min "
+                    f"${self.risk_manager.config.min_bet_usd:.2f} after authoritative fee recheck"
+                ),
+                ev_pct=authoritative_ev.ev_pct,
+            )
+            return None
+        if authoritative_ev.kelly_bet_usd + 1e-9 < bet_size_usd:
+            log.info(
+                "[ENTRY RISK] %s: SDK fee recheck resized bet $%.2f -> $%.2f",
+                signal.slug,
+                bet_size_usd,
+                authoritative_ev.kelly_bet_usd,
+            )
+            bet_size_usd = authoritative_ev.kelly_bet_usd
         slippage_cents = (
             self.config.live_tiny_entry_slippage_cents
-            if signal.kelly_bet_usd <= self.config.live_tiny_amm_fallback_max_bet_usd
+            if bet_size_usd <= self.config.live_tiny_amm_fallback_max_bet_usd
             else self.config.live_entry_slippage_cents
         )
         target_price = max(liquidity.entry_price, expected_price, signal.price_cap or 0.0)
@@ -870,7 +917,7 @@ class ClobExecutionEngine:
             return None
 
         if self.config.paper_trading or self.config.dry_run:
-            synthetic_fill_cost = round(signal.kelly_bet_usd, 2)
+            synthetic_fill_cost = round(bet_size_usd, 2)
             synthetic_fill_price = min(limit_price, max(liquidity.entry_price, 0.01))
             synthetic_shares = synthetic_fill_cost / max(synthetic_fill_price, 0.01)
             risk_snapshot = self.risk_manager.position_risk_snapshot(
@@ -916,7 +963,7 @@ class ClobExecutionEngine:
             "[BET ATTEMPT] LIVE %s on %s | Bet: $%.2f | Expected: %.4f | Liq: OK (%s) | spread=%.2fc | impact=%.2f%% | levels=%s",
             signal.direction.value,
             signal.slug,
-            signal.kelly_bet_usd,
+            bet_size_usd,
             expected_price,
             liquidity.mode,
             liquidity.spread_pct * 100.0,
@@ -944,7 +991,7 @@ class ClobExecutionEngine:
                 _clamp(target_price, 0.01, 0.99), tick_size, ROUND_DOWN,
             )
             maker_shares = float(
-                Decimal(str(signal.kelly_bet_usd / max(maker_price, 0.01))).quantize(
+                Decimal(str(bet_size_usd / max(maker_price, 0.01))).quantize(
                     Decimal("0.01"), rounding=ROUND_DOWN,
                 )
             )
@@ -1009,7 +1056,7 @@ class ClobExecutionEngine:
                     order_response = await asyncio.wait_for(
                         self._submit_market_order(
                             token_id,
-                            amount=signal.kelly_bet_usd,
+                            amount=bet_size_usd,
                             limit_price=limit_price,
                             order_type=OrderType.FOK,
                             tick_size=tick_size,
@@ -1026,7 +1073,7 @@ class ClobExecutionEngine:
                         order_response = await asyncio.wait_for(
                             self._submit_market_order(
                                 token_id,
-                                amount=signal.kelly_bet_usd,
+                                amount=bet_size_usd,
                                 limit_price=limit_price,
                                 order_type=OrderType.FAK,
                                 tick_size=tick_size,
@@ -1037,12 +1084,12 @@ class ClobExecutionEngine:
                         order_type_used = "FAK"
                     except Exception as fak_exc:
                         if (
-                            signal.kelly_bet_usd <= self.config.live_tiny_amm_fallback_max_bet_usd
+                            bet_size_usd <= self.config.live_tiny_amm_fallback_max_bet_usd
                             and "no orders found to match with fak order" in str(fak_exc).lower()
                         ):
                             recovered = await self.check_liquidity_and_spread(
                                 token_id,
-                                bet_size_usd=signal.kelly_bet_usd,
+                                bet_size_usd=bet_size_usd,
                                 expected_price=expected_price,
                                 side="buy",
                                 odds=odds,
@@ -1064,7 +1111,7 @@ class ClobExecutionEngine:
                                     order_response = await asyncio.wait_for(
                                         self._submit_market_order(
                                             token_id,
-                                            amount=signal.kelly_bet_usd,
+                                            amount=bet_size_usd,
                                             limit_price=limit_price,
                                             order_type=OrderType.FAK,
                                             tick_size=tick_size,
@@ -1086,7 +1133,7 @@ class ClobExecutionEngine:
         status = str(order_response.get("status", "") or "")
         fill_cost_usd, fill_shares, average_price, fill_inference_status = _infer_fill_stats(
             order_response,
-            signal.kelly_bet_usd,
+            bet_size_usd,
             limit_price,
         )
         if fill_inference_status == "UNCERTAIN":
