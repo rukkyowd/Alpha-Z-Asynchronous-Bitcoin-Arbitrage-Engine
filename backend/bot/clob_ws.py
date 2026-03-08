@@ -81,12 +81,19 @@ class ClobWebSocketManager:
     def get_book(self, token_id: str) -> LiveOrderBook:
         return self.books[token_id]
 
+    def _prune_books(self, active_token_ids: list[str]) -> None:
+        active = set(active_token_ids)
+        stale_tokens = [token_id for token_id in self.books.keys() if token_id not in active]
+        for token_id in stale_tokens:
+            self.books.pop(token_id, None)
+
     def update_subscriptions(self, token_ids: list[str]) -> None:
         """Update monitored token IDs and reconnect immediately if needed."""
         normalized = [token_id for token_id in dict.fromkeys(token_ids) if token_id]
         if normalized == self.token_ids:
             return
         self.token_ids = normalized
+        self._prune_books(normalized)
         if self._loop is not None and self._ws is not None:
             self._loop.call_soon_threadsafe(
                 lambda: self._loop.create_task(self._close_current_socket("subscription update"))

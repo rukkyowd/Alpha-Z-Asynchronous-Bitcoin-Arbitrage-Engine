@@ -2,20 +2,16 @@ node_modules/
 .next/
 dist/
 build/
+
 .env
 *.log
+
+__pycache__/
+*.pyc
+
 backend/alpha_z_history.db
 backend/alpha_z_history.db-shm
-backend/__pycache__/main.cpython-313.pyc
-backend/bot/__pycache__/core.cpython-313.pyc
-backend/bot/__pycache__/core.cpython-313.pyc
-backend/__pycache__/main.cpython-313.pyc
 backend/alpha_z_history.db-wal
-backend/__pycache__/main.cpython-313.pyc
-backend/bot/__pycache__/core.cpython-313.pyc
-backend/__pycache__/main.cpython-313.pyc
-backend/bot/__pycache__/core.cpython-313.pyc
 backend/ai_training_data.csv
-backend/__pycache__/main.cpython-313.pyc
+
 backend/bot/core - Copy.py
-backend/bot/__pycache__/core.cpython-313.pyc

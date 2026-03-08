@@ -157,8 +157,8 @@ class MarketOddsSnapshot(SerializableModel):
     down_token_id: str = ""
     up_public_prob_pct: float = 0.0
     down_public_prob_pct: float = 0.0
-    up_entry_prob_pct: float = 0.0
-    down_entry_prob_pct: float = 0.0
+    up_entry_prob_pct: float | None = None
+    down_entry_prob_pct: float | None = None
     up_best_bid: float | None = None
     up_best_ask: float | None = None
     down_best_bid: float | None = None
@@ -170,8 +170,10 @@ class MarketOddsSnapshot(SerializableModel):
         """Runtime validation — clamp probabilities and sanitize inputs."""
         self.up_public_prob_pct = max(0.0, min(100.0, self.up_public_prob_pct))
         self.down_public_prob_pct = max(0.0, min(100.0, self.down_public_prob_pct))
-        self.up_entry_prob_pct = max(0.0, min(100.0, self.up_entry_prob_pct))
-        self.down_entry_prob_pct = max(0.0, min(100.0, self.down_entry_prob_pct))
+        if self.up_entry_prob_pct is not None:
+            self.up_entry_prob_pct = max(0.0, min(100.0, self.up_entry_prob_pct))
+        if self.down_entry_prob_pct is not None:
+            self.down_entry_prob_pct = max(0.0, min(100.0, self.down_entry_prob_pct))
         self.seconds_remaining = max(0.0, self.seconds_remaining)
 
     def public_prob_pct(self, direction: Direction) -> float:
@@ -183,9 +185,9 @@ class MarketOddsSnapshot(SerializableModel):
 
     def entry_prob_pct(self, direction: Direction) -> float:
         if direction == Direction.UP:
-            return self.up_entry_prob_pct or self.up_public_prob_pct
+            return self.up_entry_prob_pct if self.up_entry_prob_pct is not None else self.up_public_prob_pct
         if direction == Direction.DOWN:
-            return self.down_entry_prob_pct or self.down_public_prob_pct
+            return self.down_entry_prob_pct if self.down_entry_prob_pct is not None else self.down_public_prob_pct
         return 0.0
 
     def fair_public_prob_pct(self, direction: Direction) -> float:
@@ -199,9 +201,11 @@ class MarketOddsSnapshot(SerializableModel):
         return 0.0
 
     def fair_entry_prob_pct(self, direction: Direction) -> float:
+        if self.up_entry_prob_pct is None or self.down_entry_prob_pct is None:
+            return self.fair_public_prob_pct(direction)
         total = self.up_entry_prob_pct + self.down_entry_prob_pct
         if total <= 0:
-            return self.entry_prob_pct(direction)
+            return self.fair_public_prob_pct(direction)
         if direction == Direction.UP:
             return (self.up_entry_prob_pct / total) * 100.0
         if direction == Direction.DOWN:
@@ -212,6 +216,8 @@ class MarketOddsSnapshot(SerializableModel):
         return max(0.0, (self.up_public_prob_pct + self.down_public_prob_pct) - 100.0)
 
     def entry_vig_pct(self) -> float:
+        if self.up_entry_prob_pct is None or self.down_entry_prob_pct is None:
+            return 0.0
         return max(0.0, (self.up_entry_prob_pct + self.down_entry_prob_pct) - 100.0)
 
     def token_id(self, direction: Direction) -> str:

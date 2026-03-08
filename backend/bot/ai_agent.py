@@ -61,6 +61,8 @@ class LocalAIAgent:
         entry_price = signal.token_price or (odds_snapshot.entry_prob_pct(signal.direction) / 100.0)
         opposite = Direction.DOWN if signal.direction == Direction.UP else Direction.UP
         opposite_prob = odds_snapshot.entry_prob_pct(opposite)
+        up_entry_prob = odds_snapshot.entry_prob_pct(Direction.UP)
+        down_entry_prob = odds_snapshot.entry_prob_pct(Direction.DOWN)
         counter_line = ""
         if counter_signal is not None:
             counter_line = (
@@ -96,7 +98,7 @@ class LocalAIAgent:
             f"Market regime: {context.market_regime.value}\n"
             f"Seconds remaining: {odds_snapshot.seconds_remaining:.0f}\n"
             f"Public UP/DOWN probabilities: {odds_snapshot.up_public_prob_pct:.2f}% / {odds_snapshot.down_public_prob_pct:.2f}%\n"
-            f"Executable UP/DOWN entry probabilities: {odds_snapshot.up_entry_prob_pct:.2f}% / {odds_snapshot.down_entry_prob_pct:.2f}%\n"
+            f"Executable UP/DOWN entry probabilities: {up_entry_prob:.2f}% / {down_entry_prob:.2f}%\n"
             f"Opposite-side executable probability: {opposite_prob:.2f}%\n"
             f"Reasons: {' | '.join(signal.reasons) if signal.reasons else 'None'}\n"
             f"{counter_line}"

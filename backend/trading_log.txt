@@ -9868,3 +9868,218 @@
 2026-03-08 13:55:29,124 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Crowd skew too high
 2026-03-08 13:55:45,827 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Crowd skew too high
 2026-03-08 13:56:01,976 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Crowd skew too high
+2026-03-08 13:56:18,604 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Crowd skew too high
+2026-03-08 13:56:35,440 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Crowd skew too high
+2026-03-08 13:56:52,255 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Crowd skew too high
+2026-03-08 13:57:08,754 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Crowd skew too high
+2026-03-08 13:57:25,195 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Crowd skew too high
+2026-03-08 13:57:41,647 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Crowd skew too high
+2026-03-08 13:57:58,228 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Crowd skew too high
+2026-03-08 13:58:14,392 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Crowd skew too high
+2026-03-08 13:58:30,584 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Crowd skew too high
+2026-03-08 13:58:47,058 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Crowd skew too high
+2026-03-08 13:59:03,507 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Crowd skew too high
+2026-03-08 13:59:20,483 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Crowd skew too high
+2026-03-08 13:59:36,943 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Too close to expiry (23s < 30s)
+2026-03-08 13:59:45,318 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Too close to expiry (14s < 30s)
+2026-03-08 13:59:55,143 [INFO] [SKIP] bitcoin-up-or-down-march-8-12pm-et: Too close to expiry (4s < 30s)
+2026-03-08 14:00:04,874 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-8-1pm-et | Prefix: bitcoin-up-or-down-march-8-1pm
+2026-03-08 14:00:05,528 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-8-1pm-et | matched_slug=bitcoin-up-or-down-march-8-1pm-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=86186424439167356606992718049392238219831778308342474513008527150238520833747 | down_token=53579424611416561323816226290866812555622691694627145222089777612203727502207
+2026-03-08 14:00:05,528 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-8-1pm-et
+2026-03-08 14:00:05,533 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Too early (3595s > 3540s)
+2026-03-08 14:00:05,534 [INFO] [CLOB WS] Reconnecting to apply subscription update.
+2026-03-08 14:00:06,200 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-08 14:00:13,284 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Too early (3586s > 3540s)
+2026-03-08 14:00:21,342 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Too early (3578s > 3540s)
+2026-03-08 14:00:29,689 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Too early (3570s > 3540s)
+2026-03-08 14:00:38,160 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Too early (3561s > 3540s)
+2026-03-08 14:00:46,554 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Too early (3553s > 3540s)
+2026-03-08 14:00:55,009 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Too early (3544s > 3540s)
+2026-03-08 14:01:03,298 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Entry premium 1.5c > 1.5c max
+2026-03-08 14:01:11,498 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Entry premium 2.0c > 1.5c max
+2026-03-08 14:01:19,892 [INFO] [BET] BET PLACED [PAPER] DOWN on bitcoin-up-or-down-march-8-1pm-et | Filled: $264.26 | Avg Px: 0.5513 | Shares: 479.3159 | Liq: PAPER_CLOB_SHADOW | Expected: 0.5654
+2026-03-08 14:01:20,482 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-1pm-et | Mark: 0.5300 | U-PnL: $-10.22 (-3.87%) | TP: +10.0c @ 0.6513 | SL: -14.4c @ 0.4073 | T-58:39 | TP Armed: N | SL Disabled: N
+2026-03-08 14:01:33,171 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-1pm-et | Mark: 0.4882 | U-PnL: $-30.24 (-11.44%) | TP: +10.0c @ 0.6513 | SL: -14.4c @ 0.4073 | T-58:26 | TP Armed: N | SL Disabled: N
+2026-03-08 14:01:45,719 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-1pm-et | Mark: 0.5000 | U-PnL: $-24.60 (-9.31%) | TP: +10.0c @ 0.6513 | SL: -14.4c @ 0.4073 | T-58:14 | TP Armed: N | SL Disabled: N
+2026-03-08 14:01:58,270 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-1pm-et | Mark: 0.5144 | U-PnL: $-17.69 (-6.69%) | TP: +10.0c @ 0.6513 | SL: -14.4c @ 0.4073 | T-58:01 | TP Armed: N | SL Disabled: N
+2026-03-08 14:02:10,290 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-1pm-et | Mark: 0.4972 | U-PnL: $-25.92 (-9.81%) | TP: +10.0c @ 0.6513 | SL: -14.4c @ 0.4073 | T-57:49 | TP Armed: N | SL Disabled: N
+2026-03-08 14:02:22,312 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-1pm-et | Mark: 0.5109 | U-PnL: $-19.40 (-7.34%) | TP: +10.0c @ 0.6513 | SL: -14.4c @ 0.4073 | T-57:37 | TP Armed: N | SL Disabled: N
+2026-03-08 14:02:34,592 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-1pm-et | Mark: 0.4962 | U-PnL: $-26.44 (-10.00%) | TP: +10.0c @ 0.6513 | SL: -14.4c @ 0.4073 | T-57:25 | TP Armed: N | SL Disabled: N
+2026-03-08 14:02:47,658 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-1pm-et | Mark: 0.4700 | U-PnL: $-38.98 (-14.75%) | TP: +10.0c @ 0.6513 | SL: -14.4c @ 0.4073 | T-57:12 | TP Armed: N | SL Disabled: N
+2026-03-08 14:03:01,043 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-1pm-et | Mark: 0.4027 | U-PnL: $-71.24 (-26.96%) | TP: +10.0c @ 0.6513 | SL: -14.4c @ 0.4073 | T-56:58 | TP Armed: N | SL Disabled: N
+2026-03-08 14:03:09,629 [INFO] [EXIT] EXIT FILLED [PAPER] DOWN on bitcoin-up-or-down-march-8-1pm-et | Reason: HARD_STOP_LOSS (-19.5c <= -19.4c hard floor) | Exit Px: 0.3563 | Proceeds: $170.76 | PnL: $-93.50
+2026-03-08 14:03:09,648 [INFO] [TRADE CLOSED] bitcoin-up-or-down-march-8-1pm-et | DOWN | PnL: $-93.50 | Exit: 0.3563 | Underlying: 66939.60 | Reason: HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:03:16,039 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (593s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:03:24,645 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (585s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:03:33,173 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (576s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:03:41,580 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (568s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:03:49,968 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (559s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:03:58,179 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (551s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:04:06,270 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (543s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:04:14,842 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (534s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:04:22,965 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -0.77% <= 0 after slippage
+2026-03-08 14:04:30,976 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (518s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:04:39,286 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 0.03%)
+2026-03-08 14:04:47,905 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.81% <= 0 after slippage
+2026-03-08 14:04:55,995 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (493s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:05:04,169 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 1 requires EV >= 15.00% (got 1.44%)
+2026-03-08 14:05:12,463 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (477s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:05:21,030 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 1 requires EV >= 15.00% (got 4.41%)
+2026-03-08 14:05:29,575 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 1 requires EV >= 15.00% (got 3.25%)
+2026-03-08 14:05:38,035 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (451s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:05:46,443 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -0.14% <= 0 after slippage
+2026-03-08 14:05:54,716 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 1 requires EV >= 15.00% (got 0.67%)
+2026-03-08 14:06:02,739 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (426s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:06:11,242 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (418s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:06:19,917 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (409s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:06:27,988 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 1 requires EV >= 15.00% (got 0.19%)
+2026-03-08 14:06:36,162 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.12% <= 0 after slippage
+2026-03-08 14:06:44,248 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 2.07%)
+2026-03-08 14:06:52,311 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -2.32% <= 0 after slippage
+2026-03-08 14:07:00,751 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 1.28%)
+2026-03-08 14:07:09,070 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 1 requires EV >= 15.00% (got 1.19%)
+2026-03-08 14:07:17,491 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 1 requires EV >= 15.00% (got 1.20%)
+2026-03-08 14:07:25,891 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 1 requires EV >= 15.00% (got 1.46%)
+2026-03-08 14:07:34,014 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 1 requires EV >= 15.00% (got 1.05%)
+2026-03-08 14:07:42,228 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 1 requires EV >= 15.00% (got 0.82%)
+2026-03-08 14:07:50,749 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 1 requires EV >= 15.00% (got 0.30%)
+2026-03-08 14:07:58,756 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 1 requires EV >= 15.00% (got 0.73%)
+2026-03-08 14:08:06,853 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (302s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:08:14,856 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -2.08% <= 0 after slippage
+2026-03-08 14:08:23,423 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -2.80% <= 0 after slippage
+2026-03-08 14:08:31,892 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (277s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:08:39,926 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (269s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:08:48,179 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (261s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:08:56,660 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (252s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:09:04,733 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (244s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:09:12,918 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -0.64% <= 0 after slippage
+2026-03-08 14:09:21,430 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -0.08% <= 0 after slippage
+2026-03-08 14:09:29,627 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (220s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:09:38,175 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (211s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:09:46,623 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (203s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:09:54,825 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.69% <= 0 after slippage
+2026-03-08 14:10:02,997 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -0.51% <= 0 after slippage
+2026-03-08 14:10:11,009 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.26% <= 0 after slippage
+2026-03-08 14:10:19,505 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (170s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:10:27,860 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (161s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:10:36,291 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (153s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:10:44,608 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (145s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:10:53,135 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (136s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:11:01,625 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (128s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:11:10,141 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (119s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:11:18,421 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 0.36%)
+2026-03-08 14:11:26,786 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (102s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:11:35,063 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (94s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:11:43,162 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (86s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:11:51,390 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (78s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:11:59,805 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 4.47%)
+2026-03-08 14:12:08,183 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (61s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:12:16,458 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (53s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:12:24,514 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (45s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:12:32,790 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (36s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:12:41,186 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (28s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:12:49,759 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (19s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:12:58,310 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (11s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:13:06,843 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop cooldown active (2s left) for DOWN after HARD_STOP_LOSS (-19.5c <= -19.4c hard floor)
+2026-03-08 14:13:15,223 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 53.00% < 67.00% needed after last DOWN stop
+2026-03-08 14:13:23,530 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 14.69% < 67.00% needed after last DOWN stop
+2026-03-08 14:13:31,576 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 18.96% < 67.00% needed after last DOWN stop
+2026-03-08 14:13:39,796 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 15.89% < 67.00% needed after last DOWN stop
+2026-03-08 14:13:48,089 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 11.39% < 67.00% needed after last DOWN stop
+2026-03-08 14:13:56,103 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 7.25% < 67.00% needed after last DOWN stop
+2026-03-08 14:14:04,655 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 0.51%)
+2026-03-08 14:14:13,113 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 2.01%)
+2026-03-08 14:14:21,141 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 3.02%)
+2026-03-08 14:14:29,782 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 6.20% < 67.00% needed after last DOWN stop
+2026-03-08 14:14:38,375 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 5.98%)
+2026-03-08 14:14:46,972 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 7.60% < 67.00% needed after last DOWN stop
+2026-03-08 14:14:55,137 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 0.76%)
+2026-03-08 14:15:03,676 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 51.85% < 67.00% needed after last DOWN stop
+2026-03-08 14:15:11,700 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 54.23% < 67.00% needed after last DOWN stop
+2026-03-08 14:15:20,185 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -2.86% <= 0 after slippage
+2026-03-08 14:15:28,234 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -0.95% <= 0 after slippage
+2026-03-08 14:15:36,722 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -2.05% <= 0 after slippage
+2026-03-08 14:15:45,056 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -2.00% <= 0 after slippage
+2026-03-08 14:15:53,358 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.48% <= 0 after slippage
+2026-03-08 14:16:01,375 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.64% <= 0 after slippage
+2026-03-08 14:16:09,828 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 55.80% < 67.00% needed after last DOWN stop
+2026-03-08 14:16:17,860 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 54.95% < 67.00% needed after last DOWN stop
+2026-03-08 14:16:26,349 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 30.88% < 67.00% needed after last DOWN stop
+2026-03-08 14:16:34,634 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -2.13% <= 0 after slippage
+2026-03-08 14:16:43,007 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -3.49% <= 0 after slippage
+2026-03-08 14:16:51,292 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 41.76% < 67.00% needed after last DOWN stop
+2026-03-08 14:16:59,337 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 50.19% < 67.00% needed after last DOWN stop
+2026-03-08 14:17:07,774 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.69% <= 0 after slippage
+2026-03-08 14:17:16,107 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.24% <= 0 after slippage
+2026-03-08 14:17:24,392 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -2.39% <= 0 after slippage
+2026-03-08 14:17:32,591 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 55.21% < 67.00% needed after last DOWN stop
+2026-03-08 14:17:40,675 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.50% <= 0 after slippage
+2026-03-08 14:17:48,741 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.44% <= 0 after slippage
+2026-03-08 14:17:56,846 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.36% <= 0 after slippage
+2026-03-08 14:18:04,907 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.49% <= 0 after slippage
+2026-03-08 14:18:13,294 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.52% <= 0 after slippage
+2026-03-08 14:18:21,745 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -3.66% <= 0 after slippage
+2026-03-08 14:18:30,158 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.95% <= 0 after slippage
+2026-03-08 14:18:38,461 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -0.80% <= 0 after slippage
+2026-03-08 14:18:46,451 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -2.41% <= 0 after slippage
+2026-03-08 14:18:54,850 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -2.68% <= 0 after slippage
+2026-03-08 14:19:02,893 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.44% <= 0 after slippage
+2026-03-08 14:19:11,022 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.05% <= 0 after slippage
+2026-03-08 14:19:19,229 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 47.58% < 67.00% needed after last DOWN stop
+2026-03-08 14:19:27,309 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 50.50% < 67.00% needed after last DOWN stop
+2026-03-08 14:19:35,675 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 48.92% < 67.00% needed after last DOWN stop
+2026-03-08 14:19:43,957 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -2.97% <= 0 after slippage
+2026-03-08 14:19:51,967 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -2.08% <= 0 after slippage
+2026-03-08 14:20:00,298 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -2.03% <= 0 after slippage
+2026-03-08 14:20:08,485 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 5.13%)
+2026-03-08 14:20:16,542 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: score 2/4 < 3/4 after last DOWN stop
+2026-03-08 14:20:33,227 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 17.40% < 67.00% needed after last DOWN stop
+2026-03-08 14:20:41,328 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 0.19%)
+2026-03-08 14:20:49,627 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 0.32%)
+2026-03-08 14:20:57,852 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 11.24% < 67.00% needed after last DOWN stop
+2026-03-08 14:21:05,928 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 1.11%)
+2026-03-08 14:21:14,401 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 8.23% < 67.00% needed after last DOWN stop
+2026-03-08 14:21:22,785 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: score 2/4 < 3/4 after last DOWN stop
+2026-03-08 14:21:31,334 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 30.97% < 67.00% needed after last DOWN stop
+2026-03-08 14:21:39,347 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: score 2/4 < 3/4 after last DOWN stop
+2026-03-08 14:21:47,591 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 7.29% < 67.00% needed after last DOWN stop
+2026-03-08 14:21:55,952 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 7.85% < 67.00% needed after last DOWN stop
+2026-03-08 14:22:04,458 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 9.21% < 67.00% needed after last DOWN stop
+2026-03-08 14:22:12,785 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 8.95% < 67.00% needed after last DOWN stop
+2026-03-08 14:22:21,253 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.31% <= 0 after slippage
+2026-03-08 14:22:29,436 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -0.82% <= 0 after slippage
+2026-03-08 14:22:37,875 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 49.54% < 67.00% needed after last DOWN stop
+2026-03-08 14:22:45,998 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 27.60% < 67.00% needed after last DOWN stop
+2026-03-08 14:22:54,457 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 48.05% < 67.00% needed after last DOWN stop
+2026-03-08 14:23:02,986 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 31.48% < 67.00% needed after last DOWN stop
+2026-03-08 14:23:11,262 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 8.52% < 67.00% needed after last DOWN stop
+2026-03-08 14:23:19,408 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 15.33% < 67.00% needed after last DOWN stop
+2026-03-08 14:23:27,694 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 4.47%)
+2026-03-08 14:23:35,858 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: score 2/4 < 3/4 after last DOWN stop
+2026-03-08 14:23:51,996 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: score 2/4 < 3/4 after last DOWN stop
+2026-03-08 14:24:08,708 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 14.13% < 67.00% needed after last DOWN stop
+2026-03-08 14:24:16,834 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 51.78% < 67.00% needed after last DOWN stop
+2026-03-08 14:24:24,993 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 24.99% < 67.00% needed after last DOWN stop
+2026-03-08 14:24:33,480 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: score 2/4 < 3/4 after last DOWN stop
+2026-03-08 14:24:41,969 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 27.73% < 67.00% needed after last DOWN stop
+2026-03-08 14:24:50,453 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 22.99% < 67.00% needed after last DOWN stop
+2026-03-08 14:24:58,581 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 65.53% < 67.00% needed after last DOWN stop
+2026-03-08 14:25:06,958 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: score 2/4 < 3/4 after last DOWN stop
+2026-03-08 14:25:15,305 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 10.24% < 67.00% needed after last DOWN stop
+2026-03-08 14:25:23,354 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 56.06% < 67.00% needed after last DOWN stop
+2026-03-08 14:25:31,854 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -1.71% <= 0 after slippage
+2026-03-08 14:25:40,551 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Net EV -2.02% <= 0 after slippage
+2026-03-08 14:25:48,558 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: score 2/4 < 3/4 after last DOWN stop
+2026-03-08 14:26:04,995 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: score 2/4 < 3/4 after last DOWN stop
+2026-03-08 14:26:13,270 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 10.88% < 67.00% needed after last DOWN stop
+2026-03-08 14:26:21,377 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 20.51% < 67.00% needed after last DOWN stop
+2026-03-08 14:26:29,771 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: score 2/4 < 3/4 after last DOWN stop
+2026-03-08 14:26:46,330 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 24.56% < 67.00% needed after last DOWN stop
+2026-03-08 14:26:54,784 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 2.27%)
+2026-03-08 14:27:03,311 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 2.29%)
+2026-03-08 14:27:11,363 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: score 2/4 < 3/4 after last DOWN stop
+2026-03-08 14:27:28,426 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: score 2/4 < 3/4 after last DOWN stop
+2026-03-08 14:27:45,584 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 14.41% < 67.00% needed after last DOWN stop
+2026-03-08 14:27:53,675 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 14.10% < 67.00% needed after last DOWN stop
+2026-03-08 14:28:01,766 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Score 2 requires EV >= 6.00% (got 2.05%)
+2026-03-08 14:28:10,182 [INFO] [SKIP] bitcoin-up-or-down-march-8-1pm-et: Post-stop re-entry blocked: EV 6.11% < 67.00% needed after last DOWN stop

@@ -71,8 +71,9 @@ SOFT_EVAL_REFRESH_SECS = 8.0
 RESOLVING_SETTLEMENT_RETRY_SECS = 30.0
 
 logger = logging.getLogger("alpha_z_engine")
-tracemalloc.start()
 load_dotenv(ENV_PATH)
+if os.getenv("TRACE_MALLOC", os.getenv("ENABLE_TRACEMALLOC", "false")).strip().lower() in {"1", "true", "yes", "on"}:
+    tracemalloc.start()
 
 
 def _env_bool(name: str, default: bool) -> bool:
@@ -176,6 +177,9 @@ class EngineServices:
     metrics_cache: dict[str, Any] | None = None
     metrics_cache_ts: float = 0.0
     metrics_lock: asyncio.Lock = field(default_factory=asyncio.Lock)
+    live_payload_cache: dict[str, Any] | None = None
+    live_payload_cache_ts: float = 0.0
+    live_payload_lock: asyncio.Lock = field(default_factory=asyncio.Lock)
     api_semaphore: asyncio.Semaphore = field(default_factory=lambda: asyncio.Semaphore(8))
     api_capacity: int = 8
     api_inflight: int = 0
@@ -1214,7 +1218,7 @@ async def fetch_market_odds(runtime: EngineServices, slug: str) -> tuple[MarketO
             odds,
             up_best_bid=up_check.best_bid,
             up_best_ask=up_check.best_ask,
-            up_entry_prob_pct=round((up_check.entry_price or odds.up_public_prob_pct / 100.0) * 100.0, 2),
+            up_entry_prob_pct=round(up_check.entry_price * 100.0, 2) if up_check.ok and up_check.entry_price > 0 else None,
         )
     if odds.down_token_id:
         down_check = await runtime.execution_engine.check_liquidity_and_spread(
@@ -1229,7 +1233,7 @@ async def fetch_market_odds(runtime: EngineServices, slug: str) -> tuple[MarketO
             odds,
             down_best_bid=down_check.best_bid,
             down_best_ask=down_check.best_ask,
-            down_entry_prob_pct=round((down_check.entry_price or odds.down_public_prob_pct / 100.0) * 100.0, 2),
+            down_entry_prob_pct=round(down_check.entry_price * 100.0, 2) if down_check.ok and down_check.entry_price > 0 else None,
         )
 
     if slug not in runtime.market_audit_logged:
@@ -1830,6 +1834,15 @@ async def evaluation_loop(runtime: EngineServices) -> None:
                         updated_at=time.time(),
                     )
                 )
+                await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
+                continue
+
+            async with runtime.state.positions_lock:
+                already_open = slug in runtime.state.active_positions or slug in runtime.state.committed_slugs
+            if already_open:
+                runtime.latest_rejected_reason = "Position already active"
+                runtime.latest_locks = [runtime.latest_rejected_reason]
+                log_skip_reason(runtime, slug, runtime.latest_rejected_reason, min_repeat_secs=30.0)
                 await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
                 continue
 
@@ -2462,6 +2475,20 @@ async def build_live_payload(runtime: EngineServices) -> dict[str, Any]:
     return sanitize_data(payload)
 
 
+async def get_cached_live_payload(runtime: EngineServices) -> dict[str, Any]:
+    now = time.monotonic()
+    async with runtime.live_payload_lock:
+        if (
+            runtime.live_payload_cache is not None
+            and (now - runtime.live_payload_cache_ts) < WS_PUSH_INTERVAL_SECS
+        ):
+            return dict(runtime.live_payload_cache)
+        payload = await build_live_payload(runtime)
+        runtime.live_payload_cache = payload
+        runtime.live_payload_cache_ts = now
+        return dict(payload)
+
+
 async def bootstrap_runtime() -> EngineServices:
     state = EngineState()
     await state.initialize()
@@ -2503,17 +2530,18 @@ async def bootstrap_runtime() -> EngineServices:
     if clob_client is not None:
         clob_ws_mgr = ClobWebSocketManager(token_ids=[])
 
+    risk_manager = RiskManager(risk_config)
     runtime = EngineServices(
         state=state,
         http_session=http_session,
         stream_manager=BinanceStreamManager(data_config),
         polymarket_fetcher=PolymarketFetcher(data_config),
         strategy_engine=StrategyEngine(strategy_config),
-        risk_manager=RiskManager(risk_config),
+        risk_manager=risk_manager,
         execution_engine=ClobExecutionEngine(
             clob_client,
             config=replace(execution_config, paper_trading=not live_enabled, dry_run=DRY_RUN),
-            risk_manager=RiskManager(risk_config),
+            risk_manager=risk_manager,
             clob_ws=clob_ws_mgr,
         ),
         ai_agent=LocalAIAgent(ai_config),
@@ -2897,22 +2925,29 @@ async def websocket_live(websocket: WebSocket) -> None:
     last_metrics_push = 0.0
     try:
         while True:
+            loop_started = time.monotonic()
             if runtime.stop_event.is_set():
                 break
             if websocket.client_state != WebSocketState.CONNECTED:
                 break
 
-            payload = await build_live_payload(runtime)
+            payload = await get_cached_live_payload(runtime)
             now = time.monotonic()
             if (now - last_metrics_push) < WS_PORTFOLIO_PUSH_INTERVAL_SECS:
                 payload["portfolio"] = runtime.metrics_cache or DEFAULT_MARKET_DATA.get("portfolio", {})
             else:
                 last_metrics_push = now
 
-            await websocket.send_json(jsonable_encoder(sanitize_data(payload)))
-            await asyncio.sleep(WS_PUSH_INTERVAL_SECS)
+            await asyncio.wait_for(
+                websocket.send_json(jsonable_encoder(sanitize_data(payload))),
+                timeout=WS_PUSH_INTERVAL_SECS,
+            )
+            sleep_for = max(0.0, WS_PUSH_INTERVAL_SECS - (time.monotonic() - loop_started))
+            await asyncio.sleep(sleep_for)
     except WebSocketDisconnect:
         return
+    except asyncio.TimeoutError:
+        logger.warning("[WS] /ws/live send timed out; closing slow client.")
     except asyncio.CancelledError:
         raise
     except Exception as exc:
