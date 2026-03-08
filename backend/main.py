@@ -92,6 +92,7 @@ def _env_int(name: str, default: int) -> int:
 
 PAPER_TRADING = _env_bool("PAPER_TRADING", True)
 DRY_RUN = _env_bool("DRY_RUN", False)
+PAPER_USE_LIVE_CLOB = _env_bool("PAPER_USE_LIVE_CLOB", True)
 BASE_BANKROLL = _env_float("BANKROLL", 5000.0)
 POLY_PRIVATE_KEY = os.getenv("POLY_PRIVATE_KEY", "").strip()
 POLY_FUNDER = os.getenv("POLY_FUNDER", "").strip()
@@ -2259,19 +2260,27 @@ async def bootstrap_runtime() -> EngineServices:
         max_absolute_bet_usd=_env_float("MAX_BET_USD", 50.0),
     )
     strategy_config = StrategyConfig(risk=risk_config)
-    execution_config = ExecutionConfig(paper_trading=PAPER_TRADING, dry_run=DRY_RUN)
+    execution_config = ExecutionConfig(
+        paper_trading=PAPER_TRADING,
+        dry_run=DRY_RUN,
+        paper_use_live_clob=PAPER_USE_LIVE_CLOB,
+    )
     ai_config = AIConfig(model=os.getenv("LOCAL_AI_MODEL", AIConfig().model))
 
     http_session = create_http_session(data_config)
 
     clob_client: ClobClient | None = None
     live_enabled = not PAPER_TRADING and not DRY_RUN
-    if live_enabled:
+    should_initialize_clob = live_enabled or (PAPER_TRADING and PAPER_USE_LIVE_CLOB)
+    if should_initialize_clob:
         try:
             clob_client = await build_clob_client()
         except Exception as exc:
-            live_enabled = False
-            logger.warning("[CLOB] Initialization failed. Falling back to paper mode: %s", exc)
+            if live_enabled:
+                live_enabled = False
+                logger.warning("[CLOB] Initialization failed. Falling back to paper mode: %s", exc)
+            else:
+                logger.warning("[CLOB] Paper shadow CLOB unavailable. Falling back to PAPER_SIM: %s", exc)
 
     runtime = EngineServices(
         state=state,
@@ -2310,6 +2319,10 @@ async def bootstrap_runtime() -> EngineServices:
             runtime.bankroll,
             runtime.current_balance - runtime.bankroll,
         )
+        if runtime.execution_config.paper_use_live_clob and runtime.clob_client is not None:
+            logger.info("[INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.")
+        elif runtime.execution_config.paper_use_live_clob:
+            logger.info("[INIT] Paper mode falling back to PAPER_SIM liquidity (no CLOB client).")
     else:
         runtime.current_balance = await fetch_live_balance(runtime, force=True)
         logger.info("[INIT] Live balance initialized: $%.2f", runtime.current_balance)

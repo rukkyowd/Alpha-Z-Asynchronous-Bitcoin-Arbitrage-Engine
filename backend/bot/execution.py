@@ -197,6 +197,7 @@ def _infer_fill_stats(
 class ExecutionConfig:
     paper_trading: bool = True
     dry_run: bool = False
+    paper_use_live_clob: bool = True
     live_require_clob_liquidity: bool = True
     live_tiny_amm_fallback_max_bet_usd: float = 2.0
     live_tiny_amm_fallback_max_spread_pct: float = 0.015
@@ -271,6 +272,34 @@ class ClobExecutionEngine:
         self.config = config or ExecutionConfig()
         self.risk_manager = risk_manager or RiskManager()
 
+    def _paper_sim_liquidity(
+        self,
+        *,
+        bet_size_usd: float,
+        expected_price: float,
+        reason: str = "Paper simulation liquidity",
+    ) -> LiquidityCheckResult:
+        spread = self.config.paper_sim_fallback_spread_pct
+        depth = max(bet_size_usd * self.config.paper_sim_scale_haircut, self.config.paper_sim_estimated_depth_usd)
+        slippage, impact = self.risk_manager.estimate_total_slippage_pct(
+            bet_size_usd,
+            LiquidityProfile(available_depth_usd=depth, estimated_spread_pct=spread),
+            token_price=expected_price,
+        )
+        return LiquidityCheckResult(
+            ok=True,
+            mode="PAPER_SIM",
+            reason=reason,
+            entry_price=expected_price,
+            best_bid=expected_price - (spread * 0.5),
+            best_ask=expected_price + (spread * 0.5),
+            spread_pct=spread,
+            available_depth_usd=depth,
+            expected_slippage_pct=slippage,
+            market_impact_pct=impact,
+            levels=1,
+        )
+
     async def _fetch_tick_and_neg_risk(self, token_id: str) -> tuple[str, bool]:
         tick_size = "0.01"
         neg_risk = False
@@ -297,29 +326,20 @@ class ClobExecutionEngine:
         odds: MarketOddsSnapshot | None = None,
         allow_tiny_amm_fallback: bool = True,
     ) -> LiquidityCheckResult:
-        if self.config.paper_trading or self.config.dry_run:
-            spread = self.config.paper_sim_fallback_spread_pct
-            depth = max(bet_size_usd * self.config.paper_sim_scale_haircut, self.config.paper_sim_estimated_depth_usd)
-            slippage, impact = self.risk_manager.estimate_total_slippage_pct(
-                bet_size_usd,
-                LiquidityProfile(available_depth_usd=depth, estimated_spread_pct=spread),
-                token_price=expected_price,
-            )
-            return LiquidityCheckResult(
-                ok=True,
-                mode="PAPER_SIM",
-                reason="Paper simulation liquidity",
-                entry_price=expected_price,
-                best_bid=expected_price - (spread * 0.5),
-                best_ask=expected_price + (spread * 0.5),
-                spread_pct=spread,
-                available_depth_usd=depth,
-                expected_slippage_pct=slippage,
-                market_impact_pct=impact,
-                levels=1,
+        use_paper_shadow_clob = self.config.paper_trading and self.config.paper_use_live_clob and self.client is not None
+        if self.config.dry_run or (self.config.paper_trading and not use_paper_shadow_clob):
+            return self._paper_sim_liquidity(
+                bet_size_usd=bet_size_usd,
+                expected_price=expected_price,
             )
 
         if not token_id or self.client is None:
+            if self.config.paper_trading:
+                return self._paper_sim_liquidity(
+                    bet_size_usd=bet_size_usd,
+                    expected_price=expected_price,
+                    reason="Paper simulation liquidity (CLOB unavailable)",
+                )
             return LiquidityCheckResult(
                 ok=False,
                 mode="NO_CLOB",
@@ -337,6 +357,12 @@ class ClobExecutionEngine:
         try:
             book = await asyncio.to_thread(self.client.get_order_book, token_id)
         except Exception as exc:
+            if self.config.paper_trading:
+                return self._paper_sim_liquidity(
+                    bet_size_usd=bet_size_usd,
+                    expected_price=expected_price,
+                    reason=f"Paper simulation liquidity (CLOB unavailable: {exc})",
+                )
             if allow_tiny_amm_fallback and bet_size_usd <= self.config.live_tiny_amm_fallback_max_bet_usd:
                 fallback_spread = 0.0
                 if odds is not None:
@@ -378,6 +404,12 @@ class ClobExecutionEngine:
         best_ask = ask_levels[0][0] if ask_levels else None
 
         if best_bid is not None and best_ask is not None and best_bid <= 0.002 and best_ask >= 0.998:
+            if self.config.paper_trading:
+                return self._paper_sim_liquidity(
+                    bet_size_usd=bet_size_usd,
+                    expected_price=expected_price,
+                    reason="Paper simulation liquidity (CLOB stub quotes)",
+                )
             if allow_tiny_amm_fallback and bet_size_usd <= self.config.live_tiny_amm_fallback_max_bet_usd:
                 return LiquidityCheckResult(
                     ok=True,
@@ -496,7 +528,7 @@ class ClobExecutionEngine:
 
         return LiquidityCheckResult(
             ok=True,
-            mode="CLOB",
+            mode="PAPER_CLOB_SHADOW" if self.config.paper_trading else "CLOB",
             reason="Executable CLOB depth available",
             entry_price=entry_price,
             best_bid=best_bid,
@@ -723,7 +755,8 @@ class ClobExecutionEngine:
 
         if self.config.paper_trading or self.config.dry_run:
             synthetic_fill_cost = round(signal.kelly_bet_usd, 2)
-            synthetic_shares = synthetic_fill_cost / max(limit_price, 0.01)
+            synthetic_fill_price = min(limit_price, max(liquidity.entry_price, 0.01))
+            synthetic_shares = synthetic_fill_cost / max(synthetic_fill_price, 0.01)
             risk_snapshot = self.risk_manager.position_risk_snapshot(
                 ActivePosition(
                     slug=signal.slug,
@@ -731,7 +764,7 @@ class ClobExecutionEngine:
                     token_id=token_id,
                     strike=odds.strike_price,
                     bet_size_usd=synthetic_fill_cost,
-                    bought_price=limit_price,
+                    bought_price=synthetic_fill_price,
                 ),
                 context,
                 seconds_remaining=odds.seconds_remaining,
@@ -742,7 +775,7 @@ class ClobExecutionEngine:
                 context,
                 token_id=token_id,
                 fill_cost_usd=synthetic_fill_cost,
-                average_price=limit_price,
+                average_price=synthetic_fill_price,
                 fill_shares=synthetic_shares,
                 risk_snapshot=risk_snapshot,
                 liquidity=liquidity,
@@ -756,7 +789,7 @@ class ClobExecutionEngine:
                 signal.direction.value,
                 signal.slug,
                 synthetic_fill_cost,
-                limit_price,
+                synthetic_fill_price,
                 synthetic_shares,
                 liquidity.mode,
                 expected_price,
