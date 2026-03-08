@@ -25,11 +25,13 @@ def _safe_div(numerator: float, denominator: float, default: float = 0.0) -> flo
 class RiskConfig:
     max_daily_loss_pct: float = 0.15
     max_trade_pct: float = 0.05
-    max_trades_per_hour: int = 3
+    max_trades_per_hour: int = 2
+    hourly_trade_limit_drawdown_step1: float = 0.25
+    hourly_trade_limit_drawdown_step2: float = 0.50
     min_seconds_remaining: float = 30.0
     fractional_kelly_dampener: float = 0.50
     min_bet_usd: float = 1.00
-    max_absolute_bet_usd: float = 50.00
+    max_absolute_bet_usd: float = 0.00
     default_depth_usd: float = 25.0
     market_impact_constant: float = 0.05
     time_decay_tau_seconds: float = 420.0
@@ -81,7 +83,7 @@ class DrawdownStatus:
 class PositionRiskConfig:
     base_tp_token_delta: float = 0.08
     base_sl_token_delta: float = -0.10
-    min_tp_token_delta: float = 0.08
+    min_tp_token_delta: float = 0.10
     max_sl_token_delta: float = -0.08
     cheap_token_threshold_price: float = 0.30
     cheap_token_soft_sl_max_loss_pct: float = 0.30
@@ -96,7 +98,7 @@ class PositionRiskConfig:
     sl_loosen_early_multiplier: float = 1.50
     sl_loosen_mid_multiplier: float = 1.20
     sl_widen_late_multiplier: float = 1.50
-    tp_late_compress_multiplier: float = 0.70
+    tp_late_compress_multiplier: float = 0.85
     settling_window_seconds: int = 180
     settling_sl_breath_multiplier: float = 1.20
     sl_confirm_breach_early: int = 12
@@ -181,6 +183,18 @@ class RiskManager:
         self._roll_session(current)
         self.trades_this_hour += 1
 
+    def _effective_hourly_trade_limit(self, day_pnl: float, daily_loss_limit: float) -> int:
+        base_limit = max(1, self.config.max_trades_per_hour)
+        if daily_loss_limit <= 0 or day_pnl >= 0:
+            return base_limit
+
+        drawdown_frac = abs(day_pnl) / daily_loss_limit
+        if drawdown_frac >= self.config.hourly_trade_limit_drawdown_step2:
+            return 1
+        if drawdown_frac >= self.config.hourly_trade_limit_drawdown_step1:
+            return max(1, base_limit - 1)
+        return base_limit
+
     def drawdown_status(
         self,
         current_balance: float,
@@ -195,7 +209,9 @@ class RiskManager:
         day_pnl = self.current_daily_pnl if current_daily_pnl is None else current_daily_pnl
         hour_count = self.trades_this_hour if trades_this_hour is None else trades_this_hour
         daily_loss_limit = current_balance * self.config.max_daily_loss_pct
-        max_trade_size = min(current_balance * self.config.max_trade_pct, self.config.max_absolute_bet_usd)
+        pct_cap = current_balance * self.config.max_trade_pct
+        max_trade_size = pct_cap if self.config.max_absolute_bet_usd <= 0 else min(pct_cap, self.config.max_absolute_bet_usd)
+        effective_hourly_limit = self._effective_hourly_trade_limit(day_pnl, daily_loss_limit)
 
         if day_pnl <= -daily_loss_limit:
             return DrawdownStatus(
@@ -215,10 +231,17 @@ class RiskManager:
                 trades_this_hour=hour_count,
                 max_trade_size_usd=max_trade_size,
             )
-        if hour_count >= self.config.max_trades_per_hour:
+        if hour_count >= effective_hourly_limit:
+            if effective_hourly_limit < self.config.max_trades_per_hour:
+                reason = (
+                    f"Max trades per hour reduced to {effective_hourly_limit} after drawdown "
+                    f"({abs(day_pnl) / max(daily_loss_limit, EPSILON):.0%} of daily loss limit) reached."
+                )
+            else:
+                reason = f"Max trades per hour ({effective_hourly_limit}) reached."
             return DrawdownStatus(
                 allowed=False,
-                reason=f"Max trades per hour ({self.config.max_trades_per_hour}) reached.",
+                reason=reason,
                 daily_pnl=day_pnl,
                 daily_loss_limit=daily_loss_limit,
                 trades_this_hour=hour_count,
@@ -342,8 +365,9 @@ class RiskManager:
         time_decay = self.continuous_time_decay(seconds_remaining)
         raw_kelly_fraction = self._kelly_fraction(true_probability, token_price)
 
-        max_risk_cap = min(
-            current_balance * self.config.max_trade_pct,
+        pct_cap = current_balance * self.config.max_trade_pct
+        max_risk_cap = pct_cap if self.config.max_absolute_bet_usd <= 0 else min(
+            pct_cap,
             self.config.max_absolute_bet_usd,
         )
         candidate_bet = raw_kelly_fraction * current_balance * self.config.fractional_kelly_dampener * time_decay
@@ -503,7 +527,6 @@ class RiskManager:
         if entry_age < cfg.settling_window_seconds:
             sl_delta *= cfg.settling_sl_breath_multiplier
 
-        sl_delta = max(sl_delta, cfg.max_sl_token_delta)
         if position.bought_price <= cfg.cheap_token_threshold_price:
             cheap_token_sl = -max(
                 cfg.sl_entry_rel_min_cents,

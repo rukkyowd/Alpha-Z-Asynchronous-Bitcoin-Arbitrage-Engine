@@ -2256,8 +2256,11 @@ async def bootstrap_runtime() -> EngineServices:
     risk_config = RiskConfig(
         max_daily_loss_pct=_env_float("MAX_DAILY_LOSS_PCT", 0.15),
         max_trade_pct=_env_float("MAX_TRADE_PCT", 0.05),
+        max_trades_per_hour=_env_int("MAX_TRADES_PER_HOUR", 2),
+        hourly_trade_limit_drawdown_step1=_env_float("HOURLY_TRADE_LIMIT_DRAWDOWN_STEP1", 0.25),
+        hourly_trade_limit_drawdown_step2=_env_float("HOURLY_TRADE_LIMIT_DRAWDOWN_STEP2", 0.50),
         min_bet_usd=_env_float("MIN_BET_USD", 1.0),
-        max_absolute_bet_usd=_env_float("MAX_BET_USD", 50.0),
+        max_absolute_bet_usd=_env_float("MAX_BET_USD", 0.0),
     )
     strategy_config = StrategyConfig(risk=risk_config)
     execution_config = ExecutionConfig(

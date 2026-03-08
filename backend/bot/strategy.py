@@ -41,6 +41,7 @@ class StrategyConfig:
     min_ev_pct_to_call_ai: float = 1.0
     ev_ai_bypass_threshold: float = 3.0
     score1_min_ev_pct: float = 15.0
+    score2_min_ev_pct: float = 6.0
     score0_min_ev_pct: float = 35.0
     score0_max_token_price: float = 0.35
     ev_bypass_min_score: int = 3
@@ -421,6 +422,12 @@ class StrategyEngine:
             return _skip_signal(
                 slug,
                 f"Score 1 requires EV >= {self.config.score1_min_ev_pct:.2f}% (got {target_ev.ev_pct:.2f}%)",
+                score=score,
+            )
+        if score == 2 and target_ev.ev_pct < self.config.score2_min_ev_pct:
+            return _skip_signal(
+                slug,
+                f"Score 2 requires EV >= {self.config.score2_min_ev_pct:.2f}% (got {target_ev.ev_pct:.2f}%)",
                 score=score,
             )
 
