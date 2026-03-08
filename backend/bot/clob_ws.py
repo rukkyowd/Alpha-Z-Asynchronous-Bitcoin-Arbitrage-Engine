@@ -131,6 +131,14 @@ class ClobWebSocketManager:
     def _apply_last_trade(self, token_id: str, data: dict[str, Any]) -> None:
         self.books[token_id].last_trade_price = float(data.get("price", 0))
 
+    @staticmethod
+    def _iter_messages(payload: Any) -> list[dict[str, Any]]:
+        if isinstance(payload, dict):
+            return [payload]
+        if isinstance(payload, list):
+            return [item for item in payload if isinstance(item, dict)]
+        return []
+
     async def run(self, stop_event: asyncio.Event | None = None) -> None:
         """Connect, subscribe, process messages, and reconnect on failure."""
         try:
@@ -170,17 +178,20 @@ class ClobWebSocketManager:
                         if stop_event is not None and stop_event.is_set():
                             break
                         try:
-                            msg = json.loads(raw)
+                            payload = json.loads(raw)
                         except json.JSONDecodeError:
                             continue
-                        event_type = msg.get("event_type", "")
-                        token_id = msg.get("asset_id", "")
-                        if event_type == "book":
-                            self._apply_snapshot(token_id, msg)
-                        elif event_type == "price_change":
-                            self._apply_price_change(token_id, msg)
-                        elif event_type == "last_trade_price":
-                            self._apply_last_trade(token_id, msg)
+                        for msg in self._iter_messages(payload):
+                            event_type = str(msg.get("event_type", msg.get("type", ""))).lower()
+                            token_id = str(msg.get("asset_id", msg.get("assetId", "")))
+                            if not token_id:
+                                continue
+                            if event_type == "book":
+                                self._apply_snapshot(token_id, msg)
+                            elif event_type == "price_change":
+                                self._apply_price_change(token_id, msg)
+                            elif event_type == "last_trade_price":
+                                self._apply_last_trade(token_id, msg)
                 self._ws = None
             except asyncio.CancelledError:
                 raise
