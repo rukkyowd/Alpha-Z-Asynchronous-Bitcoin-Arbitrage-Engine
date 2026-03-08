@@ -10282,3 +10282,33 @@
 2026-03-08 16:26:12,275 [INFO] [ENTRY SMART] Spread 2.0c wide, time 2053s remaining — joining bid side @ 0.0700 (vs naive 0.0700, ask 0.0700)
 2026-03-08 16:26:12,279 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Entry premium 1.5c > 1.0c max
 2026-03-08 16:26:12,909 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.86% <= 0 after slippage
+2026-03-08 16:26:20,816 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.44% <= 0 after slippage
+2026-03-08 16:26:49,157 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Entry premium 1.5c > 1.0c max
+2026-03-08 16:26:49,691 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.40% <= 0 after slippage
+2026-03-08 16:26:57,934 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.95% <= 0 after slippage
+2026-03-08 16:27:06,169 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -2.38% <= 0 after slippage
+2026-03-08 16:27:14,381 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.16% <= 0 after slippage
+2026-03-08 16:27:22,583 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.13% <= 0 after slippage
+2026-03-08 16:27:30,830 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Score 1 requires EV >= 15.00% (got 10.47%)
+2026-03-08 16:27:56,674 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: AI vetoed borderline signal
+2026-03-08 16:27:57,241 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.40% <= 0 after slippage
+2026-03-08 16:28:05,460 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.38% <= 0 after slippage
+2026-03-08 16:28:13,757 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.36% <= 0 after slippage
+2026-03-08 16:28:39,023 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: AI vetoed borderline signal
+2026-03-08 16:28:57,792 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Entry premium 1.5c > 1.0c max
+2026-03-08 16:28:58,389 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Score 2 requires EV >= 6.00% (got 3.45%)
+2026-03-08 16:29:06,584 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Score 2 requires EV >= 6.00% (got 5.80%)
+2026-03-08 16:29:32,552 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Entry premium 1.5c > 1.0c max
+2026-03-08 16:29:52,026 [INFO] [ENTRY RISK] bitcoin-up-or-down-march-8-3pm-et: SDK fee recheck resized bet $16.84 -> $16.82
+2026-03-08 16:29:52,027 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Entry premium 1.5c > 1.0c max
+2026-03-08 16:30:11,587 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Entry premium 1.3c > 1.0c max
+2026-03-08 16:30:12,128 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.62% <= 0 after slippage
+2026-03-08 16:30:20,307 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.60% <= 0 after slippage
+2026-03-08 16:30:28,490 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Crowd skew too high
+2026-03-08 16:30:36,664 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.55% <= 0 after slippage
+2026-03-08 16:30:44,919 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.91% <= 0 after slippage
+2026-03-08 16:30:53,144 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.54% <= 0 after slippage
+2026-03-08 16:31:01,318 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.60% <= 0 after slippage
+2026-03-08 16:31:09,527 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Score 1 requires EV >= 15.00% (got 12.98%)
+2026-03-08 16:31:37,575 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Entry premium 1.5c > 1.0c max
+2026-03-08 16:31:38,087 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.50% <= 0 after slippage
