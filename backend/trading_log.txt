@@ -6518,3 +6518,619 @@
 2026-03-08 01:15:50,583 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-12am-et | Mark: 0.1100 | U-PnL: $-19.02 (-38.04%) | TP: +8.0c @ 0.2575 | SL: -8.0c @ 0.0975 | T-44:09 | TP Armed: N | SL Disabled: N
 2026-03-08 01:16:03,495 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-12am-et | Mark: 0.1121 | U-PnL: $-18.43 (-36.86%) | TP: +8.0c @ 0.2575 | SL: -8.0c @ 0.0975 | T-43:57 | TP Armed: N | SL Disabled: N
 2026-03-08 01:16:16,628 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-12am-et | Mark: 0.1100 | U-PnL: $-19.02 (-38.04%) | TP: +8.0c @ 0.2575 | SL: -8.0c @ 0.0975 | T-43:43 | TP Armed: N | SL Disabled: N
+2026-03-08 01:44:14,915 [INFO] Elite Quant Engine v2 Initialized. Monitoring 15m WebSocket...
+2026-03-08 01:44:14,939 [INFO] [INIT] Simulated balance initialized: $5020.86 (base: $5000.0 + historical: $20.86)
+2026-03-08 01:44:14,940 [INFO] [INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.
+2026-03-08 01:44:14,940 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-8-12am-et | Prefix: bitcoin-up-or-down-march-8-12am
+2026-03-08 01:44:15,193 [INFO] [SYSTEM] Loaded 120 candles. VWAP=67,082.29
+2026-03-08 01:44:15,752 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-08 01:44:41,611 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-08 01:44:42,192 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:44:58,600 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:45:15,057 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:45:31,164 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:45:47,817 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:46:04,502 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:46:20,713 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:46:37,342 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:46:54,004 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:47:10,474 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:47:26,314 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:47:42,691 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:47:59,478 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:48:16,291 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:48:32,609 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:48:49,413 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:49:05,802 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:49:22,864 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:49:38,789 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:49:55,534 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:50:11,842 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:50:28,640 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:50:45,172 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:51:01,380 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:51:18,336 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:51:34,995 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:51:51,726 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:52:08,197 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:52:24,626 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:52:41,111 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:52:57,967 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:53:14,565 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:53:31,241 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:53:47,819 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:54:03,843 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:54:21,017 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:54:37,306 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:54:53,953 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:55:10,686 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:55:27,140 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:55:43,809 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:56:00,497 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:56:17,248 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:56:34,041 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:56:50,572 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:57:07,194 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:57:23,857 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:57:40,405 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:57:57,064 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:58:13,618 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:58:30,064 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:58:46,765 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:59:03,486 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:59:20,065 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Crowd skew too high
+2026-03-08 01:59:36,573 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Too close to expiry (23s < 30s)
+2026-03-08 01:59:44,240 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Too close to expiry (16s < 30s)
+2026-03-08 01:59:52,847 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Too close to expiry (7s < 30s)
+2026-03-08 01:59:58,777 [INFO] [SKIP] bitcoin-up-or-down-march-8-12am-et: Too close to expiry (1s < 30s)
+2026-03-08 03:00:00,405 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-8-1am-et | Prefix: bitcoin-up-or-down-march-8-1am
+2026-03-08 03:00:07,009 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-6s < 30s)
+2026-03-08 03:00:15,144 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-14s < 30s)
+2026-03-08 03:00:23,307 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-22s < 30s)
+2026-03-08 03:00:31,655 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-31s < 30s)
+2026-03-08 03:00:40,018 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-39s < 30s)
+2026-03-08 03:00:48,043 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-47s < 30s)
+2026-03-08 03:00:56,220 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-55s < 30s)
+2026-03-08 03:01:04,567 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-64s < 30s)
+2026-03-08 03:01:12,720 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-72s < 30s)
+2026-03-08 03:01:20,908 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-80s < 30s)
+2026-03-08 03:01:29,289 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-88s < 30s)
+2026-03-08 03:01:37,852 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-97s < 30s)
+2026-03-08 03:01:46,295 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-105s < 30s)
+2026-03-08 03:01:54,602 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-114s < 30s)
+2026-03-08 03:02:02,975 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-122s < 30s)
+2026-03-08 03:02:11,282 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-130s < 30s)
+2026-03-08 03:02:19,461 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-138s < 30s)
+2026-03-08 03:02:27,903 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-147s < 30s)
+2026-03-08 03:02:36,349 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-155s < 30s)
+2026-03-08 03:02:44,808 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-164s < 30s)
+2026-03-08 03:02:53,154 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-172s < 30s)
+2026-03-08 03:03:01,411 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-180s < 30s)
+2026-03-08 03:03:09,862 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-189s < 30s)
+2026-03-08 03:03:17,836 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-197s < 30s)
+2026-03-08 03:03:26,074 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-205s < 30s)
+2026-03-08 03:03:34,578 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-214s < 30s)
+2026-03-08 03:03:43,121 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-222s < 30s)
+2026-03-08 03:03:51,121 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-230s < 30s)
+2026-03-08 03:03:59,290 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-238s < 30s)
+2026-03-08 03:04:07,646 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-246s < 30s)
+2026-03-08 03:04:15,470 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-254s < 30s)
+2026-03-08 03:04:23,798 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-263s < 30s)
+2026-03-08 03:04:32,315 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-271s < 30s)
+2026-03-08 03:04:40,353 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-279s < 30s)
+2026-03-08 03:04:48,791 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-288s < 30s)
+2026-03-08 03:04:57,176 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-296s < 30s)
+2026-03-08 03:05:05,469 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-305s < 30s)
+2026-03-08 03:05:13,893 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-313s < 30s)
+2026-03-08 03:05:21,816 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-321s < 30s)
+2026-03-08 03:05:29,802 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-329s < 30s)
+2026-03-08 03:05:37,800 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-337s < 30s)
+2026-03-08 03:05:46,288 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-345s < 30s)
+2026-03-08 03:05:54,836 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-354s < 30s)
+2026-03-08 03:06:03,222 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-362s < 30s)
+2026-03-08 03:06:11,514 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-371s < 30s)
+2026-03-08 03:06:19,727 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-379s < 30s)
+2026-03-08 03:06:28,096 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-387s < 30s)
+2026-03-08 03:06:36,564 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-396s < 30s)
+2026-03-08 03:06:44,604 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-404s < 30s)
+2026-03-08 03:06:52,862 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-412s < 30s)
+2026-03-08 03:07:01,400 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-420s < 30s)
+2026-03-08 03:07:09,839 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-429s < 30s)
+2026-03-08 03:07:17,949 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-437s < 30s)
+2026-03-08 03:07:26,224 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-445s < 30s)
+2026-03-08 03:07:34,339 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-453s < 30s)
+2026-03-08 03:07:42,307 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-461s < 30s)
+2026-03-08 03:07:50,851 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-470s < 30s)
+2026-03-08 03:07:59,256 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-478s < 30s)
+2026-03-08 03:08:07,590 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-487s < 30s)
+2026-03-08 03:08:15,689 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-495s < 30s)
+2026-03-08 03:08:23,971 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-503s < 30s)
+2026-03-08 03:08:31,942 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-511s < 30s)
+2026-03-08 03:08:40,036 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-519s < 30s)
+2026-03-08 03:08:48,426 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-527s < 30s)
+2026-03-08 03:08:56,681 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-536s < 30s)
+2026-03-08 03:09:05,135 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-544s < 30s)
+2026-03-08 03:09:13,418 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-552s < 30s)
+2026-03-08 03:09:21,810 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-561s < 30s)
+2026-03-08 03:09:30,019 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-569s < 30s)
+2026-03-08 03:09:38,505 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-577s < 30s)
+2026-03-08 03:09:46,911 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-586s < 30s)
+2026-03-08 03:09:55,259 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-594s < 30s)
+2026-03-08 03:10:03,704 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-603s < 30s)
+2026-03-08 03:10:11,764 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-611s < 30s)
+2026-03-08 03:10:20,035 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-619s < 30s)
+2026-03-08 03:10:28,361 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-627s < 30s)
+2026-03-08 03:10:36,708 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-636s < 30s)
+2026-03-08 03:10:45,161 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-644s < 30s)
+2026-03-08 03:10:53,631 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-653s < 30s)
+2026-03-08 03:11:02,025 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-661s < 30s)
+2026-03-08 03:11:10,174 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-669s < 30s)
+2026-03-08 03:11:18,686 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-678s < 30s)
+2026-03-08 03:11:26,953 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-686s < 30s)
+2026-03-08 03:11:35,333 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-694s < 30s)
+2026-03-08 03:11:43,677 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-703s < 30s)
+2026-03-08 03:11:52,052 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-711s < 30s)
+2026-03-08 03:12:00,087 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-719s < 30s)
+2026-03-08 03:12:08,491 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-727s < 30s)
+2026-03-08 03:12:16,487 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-736s < 30s)
+2026-03-08 03:12:24,711 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-744s < 30s)
+2026-03-08 03:12:33,285 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-752s < 30s)
+2026-03-08 03:12:41,657 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-761s < 30s)
+2026-03-08 03:12:49,710 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-769s < 30s)
+2026-03-08 03:12:58,009 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-777s < 30s)
+2026-03-08 03:13:06,336 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-785s < 30s)
+2026-03-08 03:13:14,849 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-794s < 30s)
+2026-03-08 03:13:23,258 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-802s < 30s)
+2026-03-08 03:13:31,588 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-811s < 30s)
+2026-03-08 03:13:39,585 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-819s < 30s)
+2026-03-08 03:13:48,143 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-827s < 30s)
+2026-03-08 03:13:56,642 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-836s < 30s)
+2026-03-08 03:14:04,470 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-844s < 30s)
+2026-03-08 03:14:12,984 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-852s < 30s)
+2026-03-08 03:14:21,097 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-860s < 30s)
+2026-03-08 03:14:29,168 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-868s < 30s)
+2026-03-08 03:14:37,448 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-876s < 30s)
+2026-03-08 03:14:45,870 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-885s < 30s)
+2026-03-08 03:14:53,972 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-893s < 30s)
+2026-03-08 03:14:58,346 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-898s < 30s)
+2026-03-08 03:15:06,810 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-906s < 30s)
+2026-03-08 03:15:15,085 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-914s < 30s)
+2026-03-08 03:15:23,933 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-923s < 30s)
+2026-03-08 03:15:32,046 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-931s < 30s)
+2026-03-08 03:15:40,448 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-939s < 30s)
+2026-03-08 03:15:48,729 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-948s < 30s)
+2026-03-08 03:15:56,746 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-956s < 30s)
+2026-03-08 03:16:05,299 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-964s < 30s)
+2026-03-08 03:16:13,832 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-973s < 30s)
+2026-03-08 03:16:22,051 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-981s < 30s)
+2026-03-08 03:16:30,290 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-989s < 30s)
+2026-03-08 03:16:38,768 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-998s < 30s)
+2026-03-08 03:16:47,228 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1006s < 30s)
+2026-03-08 03:16:55,482 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1014s < 30s)
+2026-03-08 03:17:04,031 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1023s < 30s)
+2026-03-08 03:17:12,507 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1032s < 30s)
+2026-03-08 03:17:20,960 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1040s < 30s)
+2026-03-08 03:17:29,217 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1048s < 30s)
+2026-03-08 03:17:37,781 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1057s < 30s)
+2026-03-08 03:17:46,231 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1065s < 30s)
+2026-03-08 03:17:54,197 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1073s < 30s)
+2026-03-08 03:18:02,557 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1082s < 30s)
+2026-03-08 03:18:11,010 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1090s < 30s)
+2026-03-08 03:18:19,146 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1098s < 30s)
+2026-03-08 03:18:27,171 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1106s < 30s)
+2026-03-08 03:18:35,496 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1115s < 30s)
+2026-03-08 03:18:44,170 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1123s < 30s)
+2026-03-08 03:18:52,198 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1131s < 30s)
+2026-03-08 03:19:00,557 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1140s < 30s)
+2026-03-08 03:19:08,828 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1148s < 30s)
+2026-03-08 03:19:17,104 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1156s < 30s)
+2026-03-08 03:19:25,436 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1164s < 30s)
+2026-03-08 03:19:33,747 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1173s < 30s)
+2026-03-08 03:19:41,971 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1181s < 30s)
+2026-03-08 03:19:50,460 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1189s < 30s)
+2026-03-08 03:19:58,695 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1198s < 30s)
+2026-03-08 03:20:06,811 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1206s < 30s)
+2026-03-08 03:20:15,039 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1214s < 30s)
+2026-03-08 03:20:23,416 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1222s < 30s)
+2026-03-08 03:20:31,965 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1231s < 30s)
+2026-03-08 03:20:40,369 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1239s < 30s)
+2026-03-08 03:20:48,740 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1248s < 30s)
+2026-03-08 03:20:57,337 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1256s < 30s)
+2026-03-08 03:21:05,741 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1265s < 30s)
+2026-03-08 03:21:14,014 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1273s < 30s)
+2026-03-08 03:21:22,341 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1281s < 30s)
+2026-03-08 03:21:30,874 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1290s < 30s)
+2026-03-08 03:21:39,190 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1298s < 30s)
+2026-03-08 03:21:47,298 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1306s < 30s)
+2026-03-08 03:21:55,547 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1315s < 30s)
+2026-03-08 03:22:03,554 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1323s < 30s)
+2026-03-08 03:22:11,850 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1331s < 30s)
+2026-03-08 03:22:20,317 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1339s < 30s)
+2026-03-08 03:22:28,679 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1348s < 30s)
+2026-03-08 03:22:37,117 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1356s < 30s)
+2026-03-08 03:22:45,623 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1365s < 30s)
+2026-03-08 03:22:53,817 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1373s < 30s)
+2026-03-08 03:23:02,037 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1381s < 30s)
+2026-03-08 03:23:10,222 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1389s < 30s)
+2026-03-08 03:23:18,692 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1398s < 30s)
+2026-03-08 03:23:26,970 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1406s < 30s)
+2026-03-08 03:23:35,188 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1414s < 30s)
+2026-03-08 03:23:43,359 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1422s < 30s)
+2026-03-08 03:23:51,740 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1431s < 30s)
+2026-03-08 03:24:00,374 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1439s < 30s)
+2026-03-08 03:24:08,740 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1448s < 30s)
+2026-03-08 03:24:17,117 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1456s < 30s)
+2026-03-08 03:24:25,265 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1464s < 30s)
+2026-03-08 03:24:33,726 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1473s < 30s)
+2026-03-08 03:24:41,789 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1481s < 30s)
+2026-03-08 03:24:50,036 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1489s < 30s)
+2026-03-08 03:24:58,570 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1498s < 30s)
+2026-03-08 03:25:06,621 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1506s < 30s)
+2026-03-08 03:25:15,029 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1514s < 30s)
+2026-03-08 03:25:22,986 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1522s < 30s)
+2026-03-08 03:25:31,279 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1530s < 30s)
+2026-03-08 03:25:39,739 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1539s < 30s)
+2026-03-08 03:25:47,625 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1547s < 30s)
+2026-03-08 03:25:56,041 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1555s < 30s)
+2026-03-08 03:26:04,296 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1563s < 30s)
+2026-03-08 03:26:12,655 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1572s < 30s)
+2026-03-08 03:26:20,900 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1580s < 30s)
+2026-03-08 03:26:29,403 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1588s < 30s)
+2026-03-08 03:26:37,798 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1597s < 30s)
+2026-03-08 03:26:46,216 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1605s < 30s)
+2026-03-08 03:26:54,369 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1613s < 30s)
+2026-03-08 03:27:02,731 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1622s < 30s)
+2026-03-08 03:27:10,739 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1630s < 30s)
+2026-03-08 03:27:19,152 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1638s < 30s)
+2026-03-08 03:27:27,550 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1647s < 30s)
+2026-03-08 03:27:35,626 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1655s < 30s)
+2026-03-08 03:27:43,657 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1663s < 30s)
+2026-03-08 03:27:52,269 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1671s < 30s)
+2026-03-08 03:28:00,681 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1680s < 30s)
+2026-03-08 03:28:09,040 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1688s < 30s)
+2026-03-08 03:28:17,452 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1696s < 30s)
+2026-03-08 03:28:25,634 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1705s < 30s)
+2026-03-08 03:28:33,962 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1713s < 30s)
+2026-03-08 03:28:42,143 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1721s < 30s)
+2026-03-08 03:28:50,492 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1730s < 30s)
+2026-03-08 03:28:58,893 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1738s < 30s)
+2026-03-08 03:29:07,398 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1746s < 30s)
+2026-03-08 03:29:15,824 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1755s < 30s)
+2026-03-08 03:29:24,352 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1763s < 30s)
+2026-03-08 03:29:32,690 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1772s < 30s)
+2026-03-08 03:29:41,046 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1780s < 30s)
+2026-03-08 03:29:49,424 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1788s < 30s)
+2026-03-08 03:29:57,407 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1796s < 30s)
+2026-03-08 03:29:58,246 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1797s < 30s)
+2026-03-08 03:30:07,010 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1806s < 30s)
+2026-03-08 03:30:15,389 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1814s < 30s)
+2026-03-08 03:30:23,570 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1823s < 30s)
+2026-03-08 03:30:31,797 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1831s < 30s)
+2026-03-08 03:30:40,245 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1839s < 30s)
+2026-03-08 03:30:48,456 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1847s < 30s)
+2026-03-08 03:30:56,920 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1856s < 30s)
+2026-03-08 03:31:05,045 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1864s < 30s)
+2026-03-08 03:31:13,422 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1872s < 30s)
+2026-03-08 03:31:21,760 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1881s < 30s)
+2026-03-08 03:31:30,257 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1889s < 30s)
+2026-03-08 03:31:38,759 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1898s < 30s)
+2026-03-08 03:31:47,110 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1906s < 30s)
+2026-03-08 03:31:55,413 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1914s < 30s)
+2026-03-08 03:32:03,722 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1923s < 30s)
+2026-03-08 03:32:12,017 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1931s < 30s)
+2026-03-08 03:32:20,223 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1939s < 30s)
+2026-03-08 03:32:28,573 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1948s < 30s)
+2026-03-08 03:32:36,711 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1956s < 30s)
+2026-03-08 03:32:44,984 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1964s < 30s)
+2026-03-08 03:32:53,323 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1972s < 30s)
+2026-03-08 03:33:01,857 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1981s < 30s)
+2026-03-08 03:33:10,345 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1989s < 30s)
+2026-03-08 03:33:18,675 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-1998s < 30s)
+2026-03-08 03:33:26,931 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2006s < 30s)
+2026-03-08 03:33:35,174 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2014s < 30s)
+2026-03-08 03:33:43,614 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2023s < 30s)
+2026-03-08 03:33:51,897 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2031s < 30s)
+2026-03-08 03:34:00,158 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2039s < 30s)
+2026-03-08 03:34:08,625 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2048s < 30s)
+2026-03-08 03:34:16,998 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2056s < 30s)
+2026-03-08 03:34:25,092 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2064s < 30s)
+2026-03-08 03:34:33,461 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2072s < 30s)
+2026-03-08 03:34:41,827 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2081s < 30s)
+2026-03-08 03:34:50,129 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2089s < 30s)
+2026-03-08 03:34:58,540 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2098s < 30s)
+2026-03-08 03:35:06,920 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2106s < 30s)
+2026-03-08 03:35:15,228 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2114s < 30s)
+2026-03-08 03:35:23,523 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2122s < 30s)
+2026-03-08 03:35:32,047 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2131s < 30s)
+2026-03-08 03:35:40,466 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2140s < 30s)
+2026-03-08 03:35:48,778 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2148s < 30s)
+2026-03-08 03:35:57,081 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2156s < 30s)
+2026-03-08 03:36:05,519 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2164s < 30s)
+2026-03-08 03:36:13,979 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2173s < 30s)
+2026-03-08 03:36:22,256 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2181s < 30s)
+2026-03-08 03:36:30,536 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2190s < 30s)
+2026-03-08 03:36:38,790 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2198s < 30s)
+2026-03-08 03:36:47,259 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2206s < 30s)
+2026-03-08 03:36:55,452 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2214s < 30s)
+2026-03-08 03:37:03,725 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2223s < 30s)
+2026-03-08 03:37:12,227 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2231s < 30s)
+2026-03-08 03:37:20,243 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2239s < 30s)
+2026-03-08 03:37:28,742 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2248s < 30s)
+2026-03-08 03:37:36,893 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2256s < 30s)
+2026-03-08 03:37:45,380 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2264s < 30s)
+2026-03-08 03:37:53,714 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2273s < 30s)
+2026-03-08 03:38:02,151 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2281s < 30s)
+2026-03-08 03:38:10,459 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2290s < 30s)
+2026-03-08 03:38:18,581 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2298s < 30s)
+2026-03-08 03:38:26,727 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2306s < 30s)
+2026-03-08 03:38:35,113 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2314s < 30s)
+2026-03-08 03:38:43,375 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2322s < 30s)
+2026-03-08 03:38:51,732 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2331s < 30s)
+2026-03-08 03:38:59,799 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2339s < 30s)
+2026-03-08 03:39:08,205 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2347s < 30s)
+2026-03-08 03:39:16,626 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2356s < 30s)
+2026-03-08 03:39:25,017 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2364s < 30s)
+2026-03-08 03:39:33,276 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2372s < 30s)
+2026-03-08 03:39:41,418 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2380s < 30s)
+2026-03-08 03:39:49,535 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2389s < 30s)
+2026-03-08 03:39:58,021 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2397s < 30s)
+2026-03-08 03:40:06,521 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2406s < 30s)
+2026-03-08 03:40:14,780 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2414s < 30s)
+2026-03-08 03:40:22,944 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2422s < 30s)
+2026-03-08 03:40:31,300 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2430s < 30s)
+2026-03-08 03:40:39,511 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2439s < 30s)
+2026-03-08 03:40:47,958 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2447s < 30s)
+2026-03-08 03:40:56,077 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2455s < 30s)
+2026-03-08 03:41:04,542 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2464s < 30s)
+2026-03-08 03:41:12,777 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2472s < 30s)
+2026-03-08 03:41:21,079 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2480s < 30s)
+2026-03-08 03:41:29,169 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2488s < 30s)
+2026-03-08 03:41:37,388 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2496s < 30s)
+2026-03-08 03:41:45,935 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2505s < 30s)
+2026-03-08 03:41:54,385 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2513s < 30s)
+2026-03-08 03:42:02,552 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2522s < 30s)
+2026-03-08 03:42:10,977 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2530s < 30s)
+2026-03-08 03:42:19,257 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2538s < 30s)
+2026-03-08 03:42:27,279 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2546s < 30s)
+2026-03-08 03:42:35,467 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2555s < 30s)
+2026-03-08 03:42:43,512 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2563s < 30s)
+2026-03-08 03:42:52,077 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2571s < 30s)
+2026-03-08 03:43:00,452 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2579s < 30s)
+2026-03-08 03:43:08,846 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2588s < 30s)
+2026-03-08 03:43:17,146 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2596s < 30s)
+2026-03-08 03:43:25,367 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2605s < 30s)
+2026-03-08 03:43:34,033 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2613s < 30s)
+2026-03-08 03:43:42,547 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2622s < 30s)
+2026-03-08 03:43:50,660 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2630s < 30s)
+2026-03-08 03:43:58,688 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2638s < 30s)
+2026-03-08 03:44:07,191 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2646s < 30s)
+2026-03-08 03:44:15,277 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2654s < 30s)
+2026-03-08 03:44:23,627 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2663s < 30s)
+2026-03-08 03:44:32,068 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2671s < 30s)
+2026-03-08 03:44:40,506 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2679s < 30s)
+2026-03-08 03:44:48,951 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2688s < 30s)
+2026-03-08 03:44:57,384 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2696s < 30s)
+2026-03-08 03:44:58,262 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2697s < 30s)
+2026-03-08 03:45:07,164 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2706s < 30s)
+2026-03-08 03:45:15,490 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2714s < 30s)
+2026-03-08 03:45:23,604 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2723s < 30s)
+2026-03-08 03:45:32,072 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2731s < 30s)
+2026-03-08 03:45:40,643 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2740s < 30s)
+2026-03-08 03:45:49,244 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2748s < 30s)
+2026-03-08 03:45:57,585 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2757s < 30s)
+2026-03-08 03:46:05,977 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2765s < 30s)
+2026-03-08 03:46:14,250 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2773s < 30s)
+2026-03-08 03:46:22,536 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2782s < 30s)
+2026-03-08 03:46:30,683 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2790s < 30s)
+2026-03-08 03:46:38,706 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2798s < 30s)
+2026-03-08 03:46:47,138 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2806s < 30s)
+2026-03-08 03:46:55,407 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2814s < 30s)
+2026-03-08 03:47:03,514 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2823s < 30s)
+2026-03-08 03:47:11,651 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2831s < 30s)
+2026-03-08 03:47:19,949 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2839s < 30s)
+2026-03-08 03:47:28,004 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2847s < 30s)
+2026-03-08 03:47:36,502 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2855s < 30s)
+2026-03-08 03:47:44,739 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2864s < 30s)
+2026-03-08 03:47:52,888 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2872s < 30s)
+2026-03-08 03:48:01,171 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2880s < 30s)
+2026-03-08 03:48:09,695 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2889s < 30s)
+2026-03-08 03:48:18,098 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2897s < 30s)
+2026-03-08 03:48:26,473 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2905s < 30s)
+2026-03-08 03:48:34,719 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2914s < 30s)
+2026-03-08 03:48:43,268 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2922s < 30s)
+2026-03-08 03:48:51,639 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2931s < 30s)
+2026-03-08 03:48:59,884 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2939s < 30s)
+2026-03-08 03:49:08,259 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2947s < 30s)
+2026-03-08 03:49:16,241 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2955s < 30s)
+2026-03-08 03:49:24,280 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2963s < 30s)
+2026-03-08 03:49:32,270 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2971s < 30s)
+2026-03-08 03:49:40,758 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2980s < 30s)
+2026-03-08 03:49:49,302 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2988s < 30s)
+2026-03-08 03:49:57,358 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-2997s < 30s)
+2026-03-08 03:50:05,766 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3005s < 30s)
+2026-03-08 03:50:14,350 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3013s < 30s)
+2026-03-08 03:50:22,355 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3021s < 30s)
+2026-03-08 03:50:30,727 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3030s < 30s)
+2026-03-08 03:50:39,117 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3038s < 30s)
+2026-03-08 03:50:47,504 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3046s < 30s)
+2026-03-08 03:50:55,664 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3055s < 30s)
+2026-03-08 03:51:03,614 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3063s < 30s)
+2026-03-08 03:51:12,016 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3071s < 30s)
+2026-03-08 03:51:20,314 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3079s < 30s)
+2026-03-08 03:51:28,338 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3087s < 30s)
+2026-03-08 03:51:36,782 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3096s < 30s)
+2026-03-08 03:51:45,353 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3104s < 30s)
+2026-03-08 03:51:53,332 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3112s < 30s)
+2026-03-08 03:52:01,613 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3121s < 30s)
+2026-03-08 03:52:10,055 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3129s < 30s)
+2026-03-08 03:52:18,347 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3137s < 30s)
+2026-03-08 03:52:26,723 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3146s < 30s)
+2026-03-08 03:52:34,978 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3154s < 30s)
+2026-03-08 03:52:43,421 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3162s < 30s)
+2026-03-08 03:52:51,964 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3171s < 30s)
+2026-03-08 03:53:00,057 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3179s < 30s)
+2026-03-08 03:53:08,297 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3187s < 30s)
+2026-03-08 03:53:16,761 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3196s < 30s)
+2026-03-08 03:53:24,704 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3204s < 30s)
+2026-03-08 03:53:33,271 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3212s < 30s)
+2026-03-08 03:53:41,568 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3221s < 30s)
+2026-03-08 03:53:49,419 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3229s < 30s)
+2026-03-08 03:53:58,093 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3237s < 30s)
+2026-03-08 03:54:06,524 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3245s < 30s)
+2026-03-08 03:54:14,921 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3254s < 30s)
+2026-03-08 03:54:23,286 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3262s < 30s)
+2026-03-08 03:54:31,349 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3270s < 30s)
+2026-03-08 03:54:39,832 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3279s < 30s)
+2026-03-08 03:54:47,934 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3287s < 30s)
+2026-03-08 03:54:56,019 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3295s < 30s)
+2026-03-08 03:55:04,204 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3303s < 30s)
+2026-03-08 03:55:12,553 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3312s < 30s)
+2026-03-08 03:55:20,567 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3320s < 30s)
+2026-03-08 03:55:29,063 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3328s < 30s)
+2026-03-08 03:55:37,490 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3337s < 30s)
+2026-03-08 03:55:45,637 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3345s < 30s)
+2026-03-08 03:55:53,511 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3353s < 30s)
+2026-03-08 03:56:01,920 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3361s < 30s)
+2026-03-08 03:56:10,139 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3369s < 30s)
+2026-03-08 03:56:18,626 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3378s < 30s)
+2026-03-08 03:56:26,951 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3386s < 30s)
+2026-03-08 03:56:35,420 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3394s < 30s)
+2026-03-08 03:56:43,808 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3403s < 30s)
+2026-03-08 03:56:52,278 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3411s < 30s)
+2026-03-08 03:57:00,336 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3419s < 30s)
+2026-03-08 03:57:08,415 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3427s < 30s)
+2026-03-08 03:57:16,490 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3435s < 30s)
+2026-03-08 03:57:24,947 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3444s < 30s)
+2026-03-08 03:57:32,994 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3452s < 30s)
+2026-03-08 03:57:41,319 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3460s < 30s)
+2026-03-08 03:57:49,652 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3469s < 30s)
+2026-03-08 03:57:58,120 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3477s < 30s)
+2026-03-08 03:58:06,593 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3486s < 30s)
+2026-03-08 03:58:14,663 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3494s < 30s)
+2026-03-08 03:58:22,649 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3502s < 30s)
+2026-03-08 03:58:31,222 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3510s < 30s)
+2026-03-08 03:58:39,662 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3519s < 30s)
+2026-03-08 03:58:48,081 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3527s < 30s)
+2026-03-08 03:58:56,161 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3535s < 30s)
+2026-03-08 03:59:04,151 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3543s < 30s)
+2026-03-08 03:59:12,715 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3552s < 30s)
+2026-03-08 03:59:21,206 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3560s < 30s)
+2026-03-08 03:59:29,410 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3568s < 30s)
+2026-03-08 03:59:37,430 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3576s < 30s)
+2026-03-08 03:59:45,945 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3585s < 30s)
+2026-03-08 03:59:54,466 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3593s < 30s)
+2026-03-08 03:59:58,551 [INFO] [SKIP] bitcoin-up-or-down-march-8-1am-et: Too close to expiry (-3598s < 30s)
+2026-03-08 04:00:00,478 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-8-3am-et | Prefix: bitcoin-up-or-down-march-8-3am
+2026-03-08 04:00:07,245 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Too early (3593s > 3540s)
+2026-03-08 04:00:15,333 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Too early (3585s > 3540s)
+2026-03-08 04:00:23,327 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Too early (3577s > 3540s)
+2026-03-08 04:00:31,754 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Too early (3568s > 3540s)
+2026-03-08 04:00:40,005 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Too early (3560s > 3540s)
+2026-03-08 04:00:48,498 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Too early (3552s > 3540s)
+2026-03-08 04:00:56,959 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Too early (3543s > 3540s)
+2026-03-08 04:01:05,594 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Entry premium 1.5c > 1.5c max
+2026-03-08 04:01:22,295 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Entry premium 1.5c > 1.5c max
+2026-03-08 04:01:38,887 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Entry premium 1.5c > 1.5c max
+2026-03-08 04:01:55,329 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Entry premium 1.5c > 1.5c max
+2026-03-08 04:02:12,190 [INFO] [BET] BET PLACED [PAPER] UP on bitcoin-up-or-down-march-8-3am-et | Filled: $251.04 | Avg Px: 0.5321 | Shares: 471.8059 | Liq: PAPER_CLOB_SHADOW | Expected: 0.5452
+2026-03-08 04:02:13,775 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.5152 | U-PnL: $-7.98 (-3.18%) | TP: +10.0c @ 0.6321 | SL: -10.8c @ 0.4241 | T-57:46 | TP Armed: N | SL Disabled: N
+2026-03-08 04:02:26,792 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.5139 | U-PnL: $-8.58 (-3.42%) | TP: +10.0c @ 0.6321 | SL: -10.8c @ 0.4241 | T-57:33 | TP Armed: N | SL Disabled: N
+2026-03-08 04:02:39,722 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.5200 | U-PnL: $-5.70 (-2.27%) | TP: +10.0c @ 0.6321 | SL: -10.8c @ 0.4241 | T-57:20 | TP Armed: N | SL Disabled: N
+2026-03-08 04:02:52,599 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.5383 | U-PnL: $+2.91 (+1.16%) | TP: +10.0c @ 0.6321 | SL: -10.8c @ 0.4241 | T-57:07 | TP Armed: N | SL Disabled: N
+2026-03-08 04:03:05,252 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.5187 | U-PnL: $-6.29 (-2.51%) | TP: +10.0c @ 0.6321 | SL: -10.8c @ 0.4241 | T-56:55 | TP Armed: N | SL Disabled: N
+2026-03-08 04:03:18,129 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.5300 | U-PnL: $-0.98 (-0.39%) | TP: +10.0c @ 0.6321 | SL: -10.8c @ 0.4241 | T-56:42 | TP Armed: N | SL Disabled: N
+2026-03-08 04:03:31,044 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.5544 | U-PnL: $+10.54 (+4.20%) | TP: +10.0c @ 0.6321 | SL: -10.8c @ 0.4241 | T-56:29 | TP Armed: N | SL Disabled: N
+2026-03-08 04:03:42,785 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: EMA Squeeze (spread 0.004%)
+2026-03-08 04:03:43,572 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.5768 | U-PnL: $+21.12 (+8.41%) | TP: +10.0c @ 0.6321 | SL: -10.8c @ 0.4241 | T-56:16 | TP Armed: N | SL Disabled: N
+2026-03-08 04:03:51,345 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: EMA Squeeze (spread 0.002%)
+2026-03-08 04:03:56,432 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.6199 | U-PnL: $+41.45 (+16.51%) | TP: +10.0c @ 0.6321 | SL: -10.8c @ 0.4241 | T-56:04 | TP Armed: N | SL Disabled: N
+2026-03-08 04:03:59,431 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: EMA Squeeze (spread 0.001%)
+2026-03-08 04:04:09,279 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.6085 | U-PnL: $+36.06 (+14.37%) | TP: +10.0c @ 0.6321 | SL: -10.8c @ 0.4241 | T-55:51 | TP Armed: N | SL Disabled: N
+2026-03-08 04:04:15,841 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: EMA Squeeze (spread 0.000%)
+2026-03-08 04:04:21,911 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.6051 | U-PnL: $+34.43 (+13.72%) | TP: +10.0c @ 0.6321 | SL: -10.8c @ 0.4241 | T-55:38 | TP Armed: N | SL Disabled: N
+2026-03-08 04:04:24,243 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: EMA Squeeze (spread 0.002%)
+2026-03-08 04:04:35,065 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.6544 | U-PnL: $+57.71 (+22.99%) | TP: +10.0c @ 0.6321 | SL: -10.8c @ 0.4241 | T-55:25 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:04:40,036 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: EMA Squeeze (spread 0.002%)
+2026-03-08 04:04:47,915 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.6459 | U-PnL: $+53.71 (+21.40%) | TP: +10.0c @ 0.6321 | SL: -10.8c @ 0.4241 | T-55:12 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:04:56,112 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-08 04:05:00,682 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7141 | U-PnL: $+85.86 (+34.20%) | TP: +10.0c @ 0.6321 | SL: -10.8c @ 0.4241 | T-54:59 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:05:12,657 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-08 04:05:14,166 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7502 | U-PnL: $+102.91 (+41.00%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-54:46 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:05:27,055 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8106 | U-PnL: $+131.42 (+52.35%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-54:33 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:05:40,056 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7925 | U-PnL: $+122.88 (+48.95%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-54:20 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:05:52,882 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8079 | U-PnL: $+130.15 (+51.85%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-54:07 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:06:05,643 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7630 | U-PnL: $+108.96 (+43.40%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-53:54 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:06:18,436 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7118 | U-PnL: $+84.81 (+33.78%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-53:42 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:06:31,350 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7378 | U-PnL: $+97.05 (+38.66%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-53:29 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:06:44,427 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7400 | U-PnL: $+98.10 (+39.08%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-53:16 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:06:57,010 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7234 | U-PnL: $+90.26 (+35.96%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-53:03 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:07:09,825 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7289 | U-PnL: $+92.87 (+36.99%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-52:50 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:07:22,626 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7300 | U-PnL: $+93.38 (+37.20%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-52:37 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:07:35,535 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7300 | U-PnL: $+93.38 (+37.20%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-52:25 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:07:48,190 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7334 | U-PnL: $+94.99 (+37.84%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-52:12 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:08:01,285 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7200 | U-PnL: $+88.66 (+35.32%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-51:59 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:08:14,192 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7163 | U-PnL: $+86.91 (+34.62%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-51:46 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:08:27,039 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7330 | U-PnL: $+94.82 (+37.77%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-51:33 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:08:39,965 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7450 | U-PnL: $+100.44 (+40.01%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-51:20 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:08:52,758 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7417 | U-PnL: $+98.88 (+39.39%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-51:07 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:09:05,688 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7400 | U-PnL: $+98.10 (+39.08%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-50:54 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:09:18,799 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7400 | U-PnL: $+98.10 (+39.08%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-50:41 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:09:31,890 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7443 | U-PnL: $+100.12 (+39.88%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-50:28 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:09:44,757 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8022 | U-PnL: $+127.43 (+50.76%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-50:15 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:09:57,726 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7884 | U-PnL: $+120.93 (+48.17%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-50:02 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:10:11,172 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7860 | U-PnL: $+119.80 (+47.72%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-49:49 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:10:24,311 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7742 | U-PnL: $+114.22 (+45.50%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-49:36 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:10:37,083 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7685 | U-PnL: $+111.54 (+44.43%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-49:23 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:10:50,131 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7790 | U-PnL: $+116.52 (+46.41%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-49:10 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:11:03,245 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7880 | U-PnL: $+120.75 (+48.10%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-48:57 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:11:16,202 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7754 | U-PnL: $+114.81 (+45.73%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-48:44 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:11:29,087 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7599 | U-PnL: $+107.47 (+42.81%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-48:31 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:11:42,258 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7604 | U-PnL: $+107.73 (+42.91%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-48:18 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:11:55,338 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7828 | U-PnL: $+118.30 (+47.12%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-48:05 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:12:08,314 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7804 | U-PnL: $+117.17 (+46.67%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-47:52 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:12:21,195 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7997 | U-PnL: $+126.24 (+50.29%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-47:39 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:12:34,270 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8057 | U-PnL: $+129.09 (+51.42%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-47:26 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:12:47,285 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7967 | U-PnL: $+124.87 (+49.74%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-47:13 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:13:00,137 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7938 | U-PnL: $+123.47 (+49.18%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-47:00 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:13:13,089 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7822 | U-PnL: $+118.00 (+47.00%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-46:47 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:13:25,803 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7700 | U-PnL: $+112.25 (+44.71%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-46:34 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:13:38,356 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7790 | U-PnL: $+116.49 (+46.40%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-46:22 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:13:40,225 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-08 04:13:51,318 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7825 | U-PnL: $+118.17 (+47.07%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-46:09 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:14:04,090 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7928 | U-PnL: $+123.02 (+49.00%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-45:56 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:14:16,766 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8135 | U-PnL: $+132.76 (+52.89%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-45:43 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:14:29,688 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8053 | U-PnL: $+128.90 (+51.35%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-45:30 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:14:42,367 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8349 | U-PnL: $+142.87 (+56.91%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-45:18 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:14:55,330 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8185 | U-PnL: $+135.13 (+53.83%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-45:05 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:14:58,398 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Score 2 requires EV >= 6.00% (got 0.72%)
+2026-03-08 04:15:08,425 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8114 | U-PnL: $+131.77 (+52.49%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-44:52 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:15:21,013 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8111 | U-PnL: $+131.62 (+52.43%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-44:39 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:15:33,689 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8100 | U-PnL: $+131.12 (+52.23%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-44:26 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:15:46,377 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7755 | U-PnL: $+114.83 (+45.74%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-44:14 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:15:59,638 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7702 | U-PnL: $+112.35 (+44.75%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-44:01 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:16:12,355 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7685 | U-PnL: $+111.53 (+44.43%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-43:48 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:16:25,258 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7775 | U-PnL: $+115.80 (+46.13%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-43:35 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:16:38,360 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7700 | U-PnL: $+112.25 (+44.71%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-43:22 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:16:51,308 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7652 | U-PnL: $+109.96 (+43.80%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-43:09 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:17:04,118 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7976 | U-PnL: $+125.27 (+49.90%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-42:56 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:17:17,684 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8203 | U-PnL: $+135.99 (+54.17%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-42:42 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:17:30,394 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8300 | U-PnL: $+140.56 (+55.99%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-42:30 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:17:43,103 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8100 | U-PnL: $+131.12 (+52.23%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-42:17 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:17:55,256 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8088 | U-PnL: $+130.53 (+52.00%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-42:05 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:18:08,486 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.7981 | U-PnL: $+125.50 (+49.99%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-41:52 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:18:21,217 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8098 | U-PnL: $+131.04 (+52.20%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-41:39 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:18:34,076 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8133 | U-PnL: $+132.66 (+52.84%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-41:26 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:18:47,063 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8018 | U-PnL: $+127.26 (+50.69%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-41:13 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:19:00,049 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8060 | U-PnL: $+129.25 (+51.49%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-41:00 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:19:13,401 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8135 | U-PnL: $+132.78 (+52.89%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-40:47 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:19:26,638 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8361 | U-PnL: $+143.42 (+57.13%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-40:33 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:19:39,479 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8331 | U-PnL: $+142.01 (+56.57%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-40:21 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:19:52,659 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8328 | U-PnL: $+141.87 (+56.51%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-40:07 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:20:05,987 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3am-et | Mark: 0.8667 | U-PnL: $+157.88 (+62.89%) | TP: +10.0c @ 0.6321 | SL: -9.0c @ 0.4421 | T-39:54 | TP Armed: Y | SL Disabled: N
+2026-03-08 04:20:13,248 [INFO] [EXIT] EXIT FILLED [PAPER] UP on bitcoin-up-or-down-march-8-3am-et | Reason: TAKE_PROFIT (vol-adjusted: +35.1c) | Exit Px: 0.8828 | Proceeds: $416.49 | PnL: $+165.45
+2026-03-08 04:20:13,251 [INFO] [TRADE CLOSED] bitcoin-up-or-down-march-8-3am-et | UP | PnL: $+165.45 | Exit: 0.8828 | Underlying: 67436.36 | Reason: TAKE_PROFIT (vol-adjusted: +35.1c)
+2026-03-08 04:20:21,113 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Trade size $259.32 exceeds max 5.0% risk.
+2026-03-08 04:20:37,426 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Trade size $259.32 exceeds max 5.0% risk.
+2026-03-08 04:20:53,798 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Trade size $259.32 exceeds max 5.0% risk.
+2026-03-08 04:21:10,254 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Trade size $259.32 exceeds max 5.0% risk.
+2026-03-08 04:21:26,901 [INFO] [SKIP] bitcoin-up-or-down-march-8-3am-et: Trade size $259.32 exceeds max 5.0% risk.
