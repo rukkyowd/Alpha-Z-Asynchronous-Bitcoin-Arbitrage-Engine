@@ -2332,6 +2332,44 @@ async def build_metrics_snapshot(runtime: EngineServices, *, force: bool = False
         if paths:
             endings = sorted(path[-1] for path in paths)
             median_180d = endings[len(endings) // 2]
+            
+        bucket_stats = {i: {"sum_pred": 0.0, "sum_cal": 0.0, "count_cal": 0, "wins": 0, "count": 0} for i in range(10)}
+        for item in resolved:
+            raw_pred = _safe_float(item.get("predicted_win_prob_pct", 50.0))
+            cal_pred = item.get("calibrated_prob_pct")
+            idx = int(max(0.0, min(99.99, raw_pred)) // 10)
+            
+            bucket_stats[idx]["sum_pred"] += raw_pred
+            bucket_stats[idx]["count"] += 1
+            if str(item.get("result", "")).upper() == "WIN":
+                bucket_stats[idx]["wins"] += 1
+                
+            if cal_pred is not None:
+                bucket_stats[idx]["sum_cal"] += _safe_float(cal_pred)
+                bucket_stats[idx]["count_cal"] += 1
+                
+        calibration_buckets = []
+        for i in range(10):
+            stats = bucket_stats[i]
+            if stats["count"] == 0:
+                continue
+            
+            avg_pred = (stats["sum_pred"] / stats["count"]) / 100.0
+            observed = stats["wins"] / stats["count"]
+            bucket_label = f"{i*10}-{(i+1)*10}%"
+            
+            bucket_data = {
+                "bucket": bucket_label,
+                "predicted": round(avg_pred, 4),
+                "observed": round(observed, 4),
+                "count": stats["count"]
+            }
+            
+            if stats["count_cal"] > 0:
+                avg_cal = (stats["sum_cal"] / stats["count_cal"]) / 100.0
+                bucket_data["calibrated_observed"] = round(avg_cal, 4)
+                
+            calibration_buckets.append(bucket_data)
 
         snapshot = {
             "metrics": {
@@ -2367,6 +2405,7 @@ async def build_metrics_snapshot(runtime: EngineServices, *, force: bool = False
             "execution_metrics": execution_metrics,
             "signals": signal_stats,
             "attribution": attribution,
+            "calibration_buckets": calibration_buckets,
         }
         runtime.metrics_cache = snapshot
         runtime.metrics_cache_ts = now
