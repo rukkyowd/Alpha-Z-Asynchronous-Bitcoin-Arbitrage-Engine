@@ -911,8 +911,6 @@ class ClobExecutionEngine:
         if self.config.paper_trading or self.config.dry_run or self.client is None:
             exit_notional = shares_owned * current_token_price
             pnl = exit_notional - position.bet_size_usd
-            self.risk_manager.record_pnl(pnl)
-            await state.update_runtime_counters(current_daily_pnl=state.current_daily_pnl + pnl)
             await state.pop_position(position.slug)
             log.info(
                 "[EXIT] EXIT FILLED [PAPER] %s on %s | Reason: %s | Exit Px: %.4f | Proceeds: $%.2f | PnL: $%+.2f",
@@ -968,9 +966,6 @@ class ClobExecutionEngine:
                 if sold_shares > 0:
                     fraction = min(sold_shares / shares_owned, 1.0)
                     realized_cost = position.bet_size_usd * fraction
-                    pnl = proceeds_usd - realized_cost
-                    self.risk_manager.record_pnl(pnl)
-                    await state.update_runtime_counters(current_daily_pnl=state.current_daily_pnl + pnl)
                     if sold_shares >= shares_owned - 1e-4:
                         await state.pop_position(position.slug)
                     else:

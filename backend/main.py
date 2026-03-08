@@ -21,7 +21,7 @@ from zoneinfo import ZoneInfo
 
 import aiohttp
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Query, WebSocket
+from fastapi import FastAPI, HTTPException, Query, Request, WebSocket
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -98,6 +98,15 @@ POLY_FUNDER = os.getenv("POLY_FUNDER", "").strip()
 POLY_SIG_TYPE = _env_int("POLY_SIG_TYPE", 2)
 POLY_HOST = os.getenv("POLY_HOST", "https://clob.polymarket.com").strip()
 POLY_CHAIN_ID = _env_int("POLY_CHAIN_ID", 137)
+ENGINE_CONTROL_API_KEY = os.getenv("ENGINE_CONTROL_API_KEY", "").strip()
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "ALLOWED_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001",
+    ).split(",")
+    if origin.strip()
+]
 
 
 class EngineControlUpdate(BaseModel):
@@ -937,6 +946,14 @@ async def roll_state_clock(runtime: EngineServices) -> None:
     runtime.risk_manager.trades_this_hour = trades_this_hour
 
 
+def _require_control_auth(request: Request) -> None:
+    if not ENGINE_CONTROL_API_KEY:
+        return
+    supplied = request.headers.get("x-api-key", "").strip()
+    if supplied != ENGINE_CONTROL_API_KEY:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+
 async def build_context_from_state(runtime: EngineServices) -> TechnicalContext | None:
     async with runtime.state.market_lock:
         history = list(runtime.state.candle_history)
@@ -1594,25 +1611,30 @@ async def evaluation_loop(runtime: EngineServices) -> None:
                 await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
                 continue
 
-            async with runtime.state.positions_lock:
-                already_open = slug in runtime.state.active_positions or slug in runtime.state.committed_slugs
-                if not already_open:
-                    runtime.state.committed_slugs.add(slug)
-                    runtime.state.soft_skipped_slugs.discard(slug)
-                    runtime.state.best_ev_seen.pop(slug, None)
-            if already_open:
-                runtime.latest_rejected_reason = "Position already active"
-                runtime.latest_locks = [runtime.latest_rejected_reason]
-                log_skip_reason(runtime, slug, runtime.latest_rejected_reason, min_repeat_secs=30.0)
-                await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
-                continue
-
-            execution_started = time.perf_counter()
+            reserved_slug = False
+            position = None
             try:
+                async with runtime.state.positions_lock:
+                    already_open = slug in runtime.state.active_positions or slug in runtime.state.committed_slugs
+                    if not already_open:
+                        runtime.state.committed_slugs.add(slug)
+                        runtime.state.soft_skipped_slugs.discard(slug)
+                        runtime.state.best_ev_seen.pop(slug, None)
+                        reserved_slug = True
+                if already_open:
+                    runtime.latest_rejected_reason = "Position already active"
+                    runtime.latest_locks = [runtime.latest_rejected_reason]
+                    log_skip_reason(runtime, slug, runtime.latest_rejected_reason, min_repeat_secs=30.0)
+                    await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
+                    continue
+
+                execution_started = time.perf_counter()
                 position = await runtime.execution_engine.submit_entry_order(runtime.state, signal, odds, context)
             except Exception:
-                async with runtime.state.positions_lock:
-                    runtime.state.committed_slugs.discard(slug)
+                if reserved_slug:
+                    async with runtime.state.positions_lock:
+                        if slug not in runtime.state.active_positions:
+                            runtime.state.committed_slugs.discard(slug)
                 raise
             execution_ms = (time.perf_counter() - execution_started) * 1000.0
 
@@ -1630,7 +1652,8 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             if position is None:
                 async with runtime.state.positions_lock:
                     failure = runtime.state.execution_failures.get(slug)
-                    runtime.state.committed_slugs.discard(slug)
+                    if slug not in runtime.state.active_positions:
+                        runtime.state.committed_slugs.discard(slug)
                 runtime.latest_rejected_reason = failure.reason if failure is not None else "Entry failed"
                 runtime.latest_locks = [runtime.latest_rejected_reason]
                 log_skip_reason(runtime, slug, runtime.latest_rejected_reason)
@@ -1641,7 +1664,6 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             runtime.latest_locks = []
             runtime.last_logged_rejection_reason = ""
             runtime.last_logged_rejection_ts = 0.0
-            runtime.risk_manager.record_trade()
             merged_features = dict(position.ml_features)
             merged_features.update(
                 {
@@ -1676,6 +1698,10 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             )
             await _record_execution(runtime, execution_record)
         except asyncio.CancelledError:
+            with suppress(Exception):
+                async with runtime.state.positions_lock:
+                    if slug in runtime.state.committed_slugs and slug not in runtime.state.active_positions:
+                        runtime.state.committed_slugs.discard(slug)
             raise
         except Exception as exc:
             runtime.latest_rejected_reason = f"Evaluation loop error: {exc}"
@@ -2135,6 +2161,7 @@ async def build_live_payload(runtime: EngineServices) -> dict[str, Any]:
             "latest_rejected_reason": runtime.latest_rejected_reason,
             "paper_trading": bool(runtime.paper_trading or runtime.dry_run),
             "logs": list(runtime.recent_logs)[-120:],
+            "locks": locks,
         }
     )
 
@@ -2255,12 +2282,12 @@ async def bootstrap_runtime() -> EngineServices:
                 await runtime.state.update_telemetry(context=seeded_context)
     logger.info("[SYSTEM] Warming up local AI (%s) into RAM...", runtime.ai_config.model)
     warm_signal = TradeSignal(
-        slug=runtime.state.target_slug or "warmup",
+        slug="warmup",
         direction=Direction.UP,
         confidence=ConfidenceLevel.LOW,
     )
     warm_context = TechnicalContext(timestamp=utc_now(), price=runtime.state.live_price or 0.0)
-    warm_odds = MarketOddsSnapshot(slug=runtime.state.target_slug or "warmup")
+    warm_odds = MarketOddsSnapshot(slug="warmup")
     with suppress(Exception):
         await call_local_ai(runtime.http_session, runtime.state, warm_signal, warm_context, warm_odds, agent=runtime.ai_agent)
     logger.info("[SYSTEM] AI Warmup complete. Engine is hot and ready.")
@@ -2332,9 +2359,9 @@ async def lifespan(_: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -2352,8 +2379,9 @@ async def get_engine_control() -> dict[str, Any]:
 
 
 @app.post("/api/engine/control")
-async def update_engine_control(update: EngineControlUpdate) -> dict[str, Any]:
+async def update_engine_control(update: EngineControlUpdate, request: Request) -> dict[str, Any]:
     runtime = get_runtime()
+    _require_control_auth(request)
 
     if update.paper_trading is False and runtime.clob_client is None:
         raise HTTPException(status_code=400, detail="Cannot switch to live mode: CLOB client is unavailable.")

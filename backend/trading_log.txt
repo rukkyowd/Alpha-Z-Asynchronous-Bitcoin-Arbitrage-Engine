@@ -5003,3 +5003,59 @@
 2026-03-07 19:39:41,217 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-20:18 | TP Armed: N | SL Disabled: N
 2026-03-07 19:39:54,055 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-20:05 | TP Armed: N | SL Disabled: N
 2026-03-07 19:39:56,745 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:40:06,234 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-19:53 | TP Armed: N | SL Disabled: N
+2026-03-07 19:40:13,499 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:40:18,401 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-19:41 | TP Armed: N | SL Disabled: N
+2026-03-07 19:40:29,712 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:40:31,375 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-19:28 | TP Armed: N | SL Disabled: N
+2026-03-07 19:40:43,386 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-19:16 | TP Armed: N | SL Disabled: N
+2026-03-07 19:40:46,082 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:40:56,173 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-19:03 | TP Armed: N | SL Disabled: N
+2026-03-07 19:41:02,921 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:41:08,393 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-18:51 | TP Armed: N | SL Disabled: N
+2026-03-07 19:41:19,742 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:41:21,413 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-18:38 | TP Armed: N | SL Disabled: N
+2026-03-07 19:41:34,488 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-18:25 | TP Armed: N | SL Disabled: N
+2026-03-07 19:41:35,968 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:41:47,247 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-18:12 | TP Armed: N | SL Disabled: N
+2026-03-07 19:41:52,962 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:42:00,081 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-17:59 | TP Armed: N | SL Disabled: N
+2026-03-07 19:42:09,237 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:42:13,088 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-17:46 | TP Armed: N | SL Disabled: N
+2026-03-07 19:42:25,910 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:42:25,962 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-17:34 | TP Armed: N | SL Disabled: N
+2026-03-07 19:42:38,645 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-17:21 | TP Armed: N | SL Disabled: N
+2026-03-07 19:42:42,710 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:42:51,505 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-17:08 | TP Armed: N | SL Disabled: N
+2026-03-07 19:42:59,440 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:43:04,231 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-16:55 | TP Armed: N | SL Disabled: N
+2026-03-07 19:43:16,051 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:43:17,077 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-16:42 | TP Armed: N | SL Disabled: N
+2026-03-07 19:43:29,968 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-16:30 | TP Armed: N | SL Disabled: N
+2026-03-07 19:43:32,099 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:43:42,715 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-16:17 | TP Armed: N | SL Disabled: N
+2026-03-07 19:43:49,050 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:43:54,891 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-16:05 | TP Armed: N | SL Disabled: N
+2026-03-07 19:44:05,333 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:44:07,555 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-15:52 | TP Armed: N | SL Disabled: N
+2026-03-07 19:44:20,583 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-15:39 | TP Armed: N | SL Disabled: N
+2026-03-07 19:44:22,099 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:44:33,615 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-15:26 | TP Armed: N | SL Disabled: N
+2026-03-07 19:44:38,762 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:44:46,427 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-15:13 | TP Armed: N | SL Disabled: N
+2026-03-07 19:44:55,409 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:44:59,387 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-15:00 | TP Armed: N | SL Disabled: N
+2026-03-07 19:45:12,091 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:45:12,332 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-14:47 | TP Armed: N | SL Disabled: N
+2026-03-07 19:45:25,167 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-14:34 | TP Armed: N | SL Disabled: N
+2026-03-07 19:45:28,348 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:45:37,925 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-14:22 | TP Armed: N | SL Disabled: N
+2026-03-07 19:45:45,219 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:45:50,567 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-14:09 | TP Armed: N | SL Disabled: N
+2026-03-07 19:46:01,678 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:46:03,414 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-13:56 | TP Armed: N | SL Disabled: N
+2026-03-07 19:46:16,268 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-13:43 | TP Armed: N | SL Disabled: N
+2026-03-07 19:46:18,278 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:46:29,470 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-13:30 | TP Armed: N | SL Disabled: N
+2026-03-07 19:46:34,766 [INFO] [SKIP] bitcoin-up-or-down-march-7-6pm-et: AI cap reached (6/6)
+2026-03-07 19:46:41,654 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-7-6pm-et | Mark: 0.1550 | U-PnL: $-14.77 (-29.55%) | TP: +6.0c @ 0.2800 | SL: -9.6c @ 0.1240 | T-13:18 | TP Armed: N | SL Disabled: N

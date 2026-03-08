@@ -251,7 +251,7 @@ class RiskManager:
     def continuous_time_decay(self, seconds_remaining: float) -> float:
         effective_seconds = max(0.0, seconds_remaining - self.config.min_seconds_remaining)
         if seconds_remaining <= self.config.min_seconds_remaining:
-            return 1.0
+            return _clamp(self.config.time_decay_floor, 0.0, 1.0)
         floor = _clamp(self.config.time_decay_floor, 0.0, 0.95)
         decay = floor + ((1.0 - floor) * math.exp(-effective_seconds / self.config.time_decay_tau_seconds))
         return _clamp(decay, floor, 1.0)

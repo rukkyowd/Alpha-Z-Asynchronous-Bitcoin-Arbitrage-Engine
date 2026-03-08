@@ -41,6 +41,7 @@ import {
   type EngineWsPayload,
   type MarketCandleSnapshot,
   type PriceBar,
+  type SystemLockItem,
   type TechnicalContextSnapshot,
   DEFAULT_DASHBOARD_LIVE_DATA,
 } from "../components/engine-types";
@@ -237,6 +238,47 @@ function dedupePriceBars(bars: PriceBar[]): PriceBar[] {
       deduped.set(bar.time, bar);
     });
   return Array.from(deduped.values()).sort((a, b) => a.time - b.time);
+}
+
+function normalizeSystemLocks(rawLocks: unknown, latestRejectedReason: unknown): SystemLockItem[] {
+  const items: SystemLockItem[] = [];
+  const pushItem = (label: string, remainingSecs = 0, scope = "global") => {
+    const trimmed = label.trim();
+    if (!trimmed) {
+      return;
+    }
+    items.push({
+      key: `${scope}:${trimmed}`,
+      label: trimmed,
+      scope,
+      remaining_secs: Math.max(0, Math.floor(remainingSecs)),
+    });
+  };
+
+  if (Array.isArray(rawLocks)) {
+    rawLocks.forEach((lock, index) => {
+      if (typeof lock === "string") {
+        pushItem(lock);
+        return;
+      }
+      if (isRecord(lock)) {
+        const label = String(lock.label ?? lock.type ?? lock.reason ?? "").trim();
+        const scope = String(lock.slug ?? lock.scope ?? "global");
+        const remainingSecs = safeNumber(lock.remaining_secs, 0);
+        pushItem(label || `Lock ${index + 1}`, remainingSecs, scope);
+      }
+    });
+  }
+
+  if (typeof latestRejectedReason === "string" && latestRejectedReason.trim()) {
+    pushItem(latestRejectedReason);
+  }
+
+  const deduped = new Map<string, SystemLockItem>();
+  items.forEach((item) => {
+    deduped.set(item.key, item);
+  });
+  return Array.from(deduped.values()).slice(-6);
 }
 
 function buildBackendFetchCandidates(path: string): string[] {
@@ -450,9 +492,7 @@ function normalizeWsPayload(raw: unknown, previous: DashboardLiveData): Dashboar
     system_locks: {
       ...DEFAULT_DASHBOARD_LIVE_DATA.strategy.system_locks,
       ...previous.strategy.system_locks,
-      locks: runtime.latest_rejected_reason
-        ? Array.from(new Set([...(previous.strategy.system_locks.locks || []), runtime.latest_rejected_reason]))
-        : previous.strategy.system_locks.locks,
+      locks: normalizeSystemLocks(previous.strategy.system_locks.locks, runtime.latest_rejected_reason),
       ai_circuit_open: safeNumber(runtime.ai_circuit_open_until) > Date.now() / 1000,
       ai_circuit_remaining_secs: Math.max(0, Math.floor(safeNumber(runtime.ai_circuit_open_until) - Date.now() / 1000)),
       ai_failures: safeNumber(runtime.ai_consecutive_failures),
@@ -1511,12 +1551,16 @@ function SystemLocksPanel({ locksData }: { locksData: any }) {
       ) : (
         <div className="space-y-2">
           {locks.map((lock: any, idx: number) => (
-            <div key={`${lock?.slug}-${lock?.type}-${idx}`} className="rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2">
+            <div key={`${String(lock?.key || idx)}`} className="rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="font-semibold text-zinc-300">{String(lock?.label || lock?.type || "LOCK")}</span>
-                <span className="font-mono text-amber-300">{formatDuration(safeNumber(lock?.remaining_secs))}</span>
+                <span className="font-semibold text-zinc-300">{String(lock?.label || "LOCK")}</span>
+                {safeNumber(lock?.remaining_secs) > 0 ? (
+                  <span className="font-mono text-amber-300">{formatDuration(safeNumber(lock?.remaining_secs))}</span>
+                ) : (
+                  <span className="font-mono text-zinc-500">state</span>
+                )}
               </div>
-              <div className="mt-1 truncate font-mono text-[10px] text-zinc-500">{String(lock?.slug || "global")}</div>
+              <div className="mt-1 truncate font-mono text-[10px] text-zinc-500">{String(lock?.scope || "global")}</div>
             </div>
           ))}
         </div>

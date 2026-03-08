@@ -42,8 +42,6 @@ def _serialize(value: Any) -> Any:
 
 
 class SerializableModel:
-    __slots__ = ()
-
     def to_dict(self) -> dict[str, Any]:
         return _serialize(self)
 
@@ -364,7 +362,7 @@ class RuntimeCounters(SerializableModel):
     ai_call_count: int = 0
     ai_consecutive_failures: int = 0
     ai_circuit_open_until: float = 0.0
-    ai_call_in_flight: str = ""
+    ai_call_in_flight: tuple[str, ...] = field(default_factory=tuple)
     last_ai_response_ms: float = 0.0
     ai_response_ema_ms: float = 0.0
     kill_switch_enabled: bool = False

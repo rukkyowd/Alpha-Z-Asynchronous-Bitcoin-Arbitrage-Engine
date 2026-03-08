@@ -41,7 +41,7 @@ class EngineState:
     control_lock: asyncio.Lock | None = field(default=None, init=False, repr=False)
 
     candle_history: deque[MarketTick] = field(default_factory=deque, init=False, repr=False)
-    cvd_1min_buffer: deque[float] = field(default_factory=deque, init=False, repr=False)
+    cvd_1min_buffer: deque[tuple[float, float]] = field(default_factory=deque, init=False, repr=False)
     background_tasks: set[asyncio.Task[Any]] = field(default_factory=set, init=False, repr=False)
     ml_queue: asyncio.Queue[dict[str, Any]] | None = field(default=None, init=False, repr=False)
     db_queue: asyncio.Queue[dict[str, Any]] | None = field(default=None, init=False, repr=False)
@@ -94,7 +94,7 @@ class EngineState:
     ai_call_count: int = 0
     ai_consecutive_failures: int = 0
     ai_circuit_open_until: float = 0.0
-    ai_call_in_flight: str = ""
+    ai_call_in_flight: set[str] = field(default_factory=set)
     last_ai_response_ms: float = 0.0
     ai_response_ema_ms: float = 0.0
 
@@ -202,7 +202,7 @@ class EngineState:
         cvd_total: float | None = None,
         cvd_snapshot_at_open: float | None = None,
         last_cvd_1min: float | None = None,
-        cvd_1min_value: float | None = None,
+        cvd_1min_value: tuple[float, float] | None = None,
         vwap_cum_pv: float | None = None,
         vwap_cum_vol: float | None = None,
         vwap_date: str | None = None,
@@ -377,7 +377,7 @@ class EngineState:
         ai_call_count: int | None = None,
         ai_consecutive_failures: int | None = None,
         ai_circuit_open_until: float | None = None,
-        ai_call_in_flight: str | None = None,
+        ai_call_in_flight: set[str] | tuple[str, ...] | list[str] | str | None = None,
         last_ai_response_ms: float | None = None,
         ai_response_ema_ms: float | None = None,
         kill_switch_enabled: bool | None = None,
@@ -409,7 +409,10 @@ class EngineState:
             if ai_circuit_open_until is not None:
                 self.ai_circuit_open_until = ai_circuit_open_until
             if ai_call_in_flight is not None:
-                self.ai_call_in_flight = ai_call_in_flight
+                if isinstance(ai_call_in_flight, str):
+                    self.ai_call_in_flight = {ai_call_in_flight} if ai_call_in_flight else set()
+                else:
+                    self.ai_call_in_flight = {str(item) for item in ai_call_in_flight if str(item)}
             if last_ai_response_ms is not None:
                 self.last_ai_response_ms = last_ai_response_ms
             if ai_response_ema_ms is not None:
@@ -427,12 +430,31 @@ class EngineState:
                 ai_call_count=self.ai_call_count,
                 ai_consecutive_failures=self.ai_consecutive_failures,
                 ai_circuit_open_until=self.ai_circuit_open_until,
-                ai_call_in_flight=self.ai_call_in_flight,
+                ai_call_in_flight=tuple(sorted(self.ai_call_in_flight)),
                 last_ai_response_ms=self.last_ai_response_ms,
                 ai_response_ema_ms=self.ai_response_ema_ms,
                 kill_switch_enabled=self.kill_switch_enabled,
                 simulated_balance=self.simulated_balance,
             )
+
+    async def reserve_ai_call(self, slug: str, *, max_calls: int) -> tuple[bool, int]:
+        async with self.ai_lock:
+            current = self.ai_state.get(slug, AISlugState())
+            if current.ai_calls >= max_calls:
+                return False, current.ai_calls
+            updated = replace(current, ai_calls=current.ai_calls + 1)
+            self.ai_state[slug] = updated
+            reserved_calls = updated.ai_calls
+
+        async with self.risk_lock:
+            self.ai_call_count += 1
+            self.ai_call_in_flight.add(slug)
+
+        return True, reserved_calls
+
+    async def release_ai_call(self, slug: str) -> None:
+        async with self.risk_lock:
+            self.ai_call_in_flight.discard(slug)
 
     async def build_drawdown_guard(self, current_balance: float | None = None) -> DrawdownGuardSnapshot:
         async with self.risk_lock:

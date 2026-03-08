@@ -158,10 +158,8 @@ class LocalAIAgent:
                 circuit_open=True,
             )
 
-        async with state.ai_lock:
-            slug_state = state.ai_state.get(signal.slug)
-            slug_calls = 0 if slug_state is None else slug_state.ai_calls
-        if slug_calls >= self.config.max_calls_per_slug:
+        reserved, slug_calls = await state.reserve_ai_call(signal.slug, max_calls=self.config.max_calls_per_slug)
+        if not reserved:
             return AIDecision(
                 decision=Direction.SKIP,
                 raw_response="",
@@ -170,7 +168,6 @@ class LocalAIAgent:
 
         prompt = self.build_prompt(signal, context, odds_snapshot, counter_signal=counter_signal)
         timestamp_text = datetime.now(timezone.utc).strftime("%H:%M:%S")
-        await state.update_runtime_counters(ai_call_in_flight=signal.slug, ai_call_count=runtime.ai_call_count + 1)
         await state.update_telemetry(ai_interaction=AIInteraction(prompt=prompt, response="PENDING", timestamp=timestamp_text))
 
         payload = {
@@ -222,11 +219,10 @@ class LocalAIAgent:
                     if runtime.ai_response_ema_ms <= 0
                     else (0.7 * runtime.ai_response_ema_ms + 0.3 * response_ms)
                 )
-                await state.record_ai_state(signal.slug, ai_calls=slug_calls + 1)
+                await state.release_ai_call(signal.slug)
                 await state.update_runtime_counters(
                     ai_consecutive_failures=0,
                     ai_circuit_open_until=0.0,
-                    ai_call_in_flight="",
                     last_ai_response_ms=response_ms,
                     ai_response_ema_ms=updated_ema,
                 )
@@ -236,7 +232,6 @@ class LocalAIAgent:
                 if decision == Direction.SKIP:
                     await state.record_ai_state(
                         signal.slug,
-                        ai_calls=slug_calls + 1,
                         last_veto_ts=time.time(),
                         last_veto_ev_pct=signal.expected_value_pct,
                     )
@@ -256,16 +251,15 @@ class LocalAIAgent:
             current_failures = runtime.ai_consecutive_failures + 1
             cooldown = self._cooldown_seconds(current_failures)
             circuit_until = time.time() + cooldown if cooldown > 0 else 0.0
+            await state.release_ai_call(signal.slug)
             await state.record_ai_state(
                 signal.slug,
-                ai_calls=slug_calls + 1,
                 last_veto_ts=time.time(),
                 last_veto_ev_pct=signal.expected_value_pct,
             )
             await state.update_runtime_counters(
                 ai_consecutive_failures=current_failures,
                 ai_circuit_open_until=circuit_until,
-                ai_call_in_flight="",
             )
             await state.update_telemetry(
                 ai_interaction=AIInteraction(prompt=prompt, response=raw_response or last_error or "MALFORMED", timestamp=timestamp_text)
@@ -290,9 +284,7 @@ class LocalAIAgent:
         finally:
             if own_session:
                 await session.close()
-            runtime_after = await state.build_runtime_counters()
-            if runtime_after.ai_call_in_flight == signal.slug:
-                await state.update_runtime_counters(ai_call_in_flight="")
+            await state.release_ai_call(signal.slug)
 
 
 _DEFAULT_AGENT = LocalAIAgent()

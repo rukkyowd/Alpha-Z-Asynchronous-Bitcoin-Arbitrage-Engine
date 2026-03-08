@@ -143,6 +143,13 @@ export interface AdaptiveThresholdSnapshot {
   volatility_lookback?: number;
 }
 
+export interface SystemLockItem {
+  key: string;
+  label: string;
+  scope?: string;
+  remaining_secs?: number;
+}
+
 export interface AiInteractionSnapshot {
   prompt: string;
   response: string;
@@ -165,7 +172,7 @@ export interface EngineRuntimeSnapshot {
   ai_call_count?: number;
   ai_consecutive_failures?: number;
   ai_circuit_open_until?: number;
-  ai_call_in_flight?: string;
+  ai_call_in_flight?: string | string[];
   last_ai_response_ms?: number;
   ai_response_ema_ms?: number;
   kill_switch_enabled?: boolean;
@@ -231,7 +238,7 @@ export interface DashboardLiveData {
     cvd_gauge: CvdGaugeSnapshot;
     adaptive_thresholds: AdaptiveThresholdSnapshot;
     system_locks: {
-      locks: string[];
+      locks: SystemLockItem[];
       ai_circuit_open: boolean;
       ai_circuit_remaining_secs: number;
       ai_failures: number;

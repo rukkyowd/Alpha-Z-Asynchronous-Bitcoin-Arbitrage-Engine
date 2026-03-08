@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
 
 from .indicators import apply_probabilistic_model, directional_probabilities
@@ -56,31 +55,6 @@ class StrategyConfig:
     countertrend_force_ai: bool = True
     default_depth_usd: float = 40.0
     default_spread_pct: float = 0.01
-
-
-def square_root_market_impact(
-    bet_size_usd: float,
-    available_depth_usd: float,
-    *,
-    impact_constant: float = 0.05,
-) -> float:
-    depth = max(available_depth_usd, 1.0)
-    if bet_size_usd <= 0:
-        return 0.0
-    return max(0.0, impact_constant * math.sqrt(bet_size_usd / depth))
-
-
-def continuous_time_decay(
-    time_remaining_seconds: float,
-    *,
-    tau_seconds: float = 420.0,
-    min_seconds_remaining: float = 30.0,
-) -> float:
-    effective_seconds = max(0.0, time_remaining_seconds - min_seconds_remaining)
-    if effective_seconds <= 0:
-        return 0.0
-    return max(0.0, min(1.0, 1.0 - math.exp(-effective_seconds / tau_seconds)))
-
 
 def build_signal_alignment(context: TechnicalContext, direction: Direction, *, volume_ratio: float = 1.05) -> SignalAlignmentSnapshot:
     if direction not in (Direction.UP, Direction.DOWN):
@@ -495,6 +469,4 @@ __all__ = [
     "StrategyConfig",
     "StrategyEngine",
     "build_signal_alignment",
-    "continuous_time_decay",
-    "square_root_market_impact",
 ]
