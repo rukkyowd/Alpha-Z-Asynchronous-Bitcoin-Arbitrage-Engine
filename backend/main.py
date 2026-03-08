@@ -2273,7 +2273,7 @@ async def build_metrics_snapshot(runtime: EngineServices, *, force: bool = False
         hourly_buckets: dict[int, dict[str, Any]] = defaultdict(lambda: {"wins": 0, "losses": 0, "pnl": 0.0})
         for item in resolved:
             hour = _safe_timestamp(item["timestamp"]).hour
-            if str(item["result"]).upper() == "WIN":
+            if str(item["result"]).upper() == "WIN":    
                 hourly_buckets[hour]["wins"] += 1
             else:
                 hourly_buckets[hour]["losses"] += 1

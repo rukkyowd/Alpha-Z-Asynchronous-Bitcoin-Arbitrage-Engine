@@ -1780,46 +1780,108 @@ function TerminalStream({ logs }: { logs: string[] }) {
 
 function ActiveTradesPanel({ trades, currentUnderlying }: { trades: Record<string, any>; currentUnderlying: number }) {
   const entries = Object.entries(trades || {});
-  
   if (entries.length === 0) {
-    return <div className="p-4 text-xs font-mono uppercase text-az-text flex justify-center items-center h-full">No Active Positions</div>;
+    return (
+      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-az-border py-8">
+        <Crosshair size={24} className="mb-2 text-az-text-muted" />
+        <div className="font-mono text-xs uppercase tracking-wide text-az-text-muted">No Active Positions</div>
+      </div>
+    );
   }
 
   return (
-    <div className="w-full overflow-x-auto text-[11px] pb-2">
-      <table className="w-full text-left font-mono whitespace-nowrap">
-        <thead className="text-[10px] uppercase tracking-wider text-az-text border-b border-az-border">
-          <tr>
-            <th className="px-3 py-2 font-medium">Market</th>
-            <th className="px-3 py-2 font-medium">Dir</th>
-            <th className="px-3 py-2 font-medium text-right">Entry</th>
-            <th className="px-3 py-2 font-medium text-right">Mark</th>
-            <th className="px-3 py-2 font-medium text-right">PnL</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-az-border/50">
-          {entries.map(([slug, trade]) => {
-            const entryPrice = Number(trade.bought_price) || 0;
-            const markPrice = Number(trade.mark_price) || entryPrice;
-            const pnlCents = (markPrice - entryPrice) * 100;
-            const isUp = trade.decision === "UP";
+    <div className="space-y-3">
+      {entries.map(([slug, trade]) => {
+        const direction = trade.decision === "UP" ? "UP" : "DOWN";
+        const entryPrice = safeNumber(trade.bought_price);
+        const markPrice = safeNumber(trade.mark_price, entryPrice);
+        const entryUnderlying = safeNumber(trade.entry_underlying_price, currentUnderlying);
+        const liveUnderlying = safeNumber(trade.live_underlying_price, currentUnderlying);
+        const strike = safeNumber(trade.strike, entryUnderlying);
+        const minUnderlying = Math.min(entryUnderlying, strike, liveUnderlying);
+        const maxUnderlying = Math.max(entryUnderlying, strike, liveUnderlying);
+        const span = maxUnderlying - minUnderlying || 1;
+        const currentPos = clamp(((liveUnderlying - minUnderlying) / span) * 100, 0, 100);
+        const strikePos = clamp(((strike - minUnderlying) / span) * 100, 0, 100);
+        const tokenMoveCents = (markPrice - entryPrice) * 100;
+        const tpToken = safeNumber(trade.tp_token_price, entryPrice + Math.max(0, safeNumber(trade.tp_delta)));
+        const slToken = safeNumber(trade.sl_token_price, Math.max(0, entryPrice + safeNumber(trade.sl_delta)));
+        const hasBounds =
+          (Math.abs(safeNumber(trade.tp_delta)) > 0 || Math.abs(safeNumber(trade.sl_delta)) > 0) &&
+          Number.isFinite(tpToken) &&
+          Number.isFinite(slToken);
+        const tokenMin = Math.min(slToken, entryPrice, markPrice, tpToken);
+        const tokenMax = Math.max(slToken, entryPrice, markPrice, tpToken);
+        const tokenSpan = tokenMax - tokenMin || 0.0001;
+        const tokenMarkPos = clamp(((markPrice - tokenMin) / tokenSpan) * 100, 0, 100);
+        const tokenEntryPos = clamp(((entryPrice - tokenMin) / tokenSpan) * 100, 0, 100);
+        const tokenTpPos = clamp(((tpToken - tokenMin) / tokenSpan) * 100, 0, 100);
+        const tokenSlPos = clamp(((slToken - tokenMin) / tokenSpan) * 100, 0, 100);
+        const betSize = safeNumber(trade.bet_size_usd);
 
-            return (
-              <tr key={slug} className="hover:bg-az-surface-2 transition-colors cursor-default">
-                <td className="px-3 py-2.5 text-az-text">{slug.split("-").slice(-2).join("-")}</td>
-                <td className={`px-3 py-2.5 font-bold ${isUp ? 'text-az-profit' : 'text-az-loss'}`}>
-                  {isUp ? "LONG" : "SHORT"}
-                </td>
-                <td className="px-3 py-2.5 text-right text-az-text">${entryPrice.toFixed(3)}</td>
-                <td className="px-3 py-2.5 text-right text-az-text">${markPrice.toFixed(3)}</td>
-                <td className={`px-3 py-2.5 text-right font-bold ${pnlCents >= 0 ? 'text-az-profit' : 'text-az-loss'}`}>
-                  {pnlCents >= 0 ? "+" : ""}{pnlCents.toFixed(1)}c
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+        return (
+          <div key={slug} className="rounded-xl border border-az-border/50 bg-az-surface/50 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className={`mb-1 w-fit rounded px-2 py-0.5 text-[10px] font-black ${direction === "UP" ? "bg-az-profit/20 text-az-profit" : "bg-az-loss/20 text-az-loss"}`}>
+                  {direction} {safeNumber(trade.score)}/4 CORE
+                </span>
+                <span className="font-mono text-[9px] italic text-az-text-muted">{trade.signals?.[0] || "Awaiting signal context..."}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="rounded border border-az-border bg-az-surface-2 px-2 py-1 font-mono text-[10px] font-bold text-az-text">${betSize.toFixed(0)}</span>
+                <span className="rounded border border-az-border bg-az-surface-2 px-2 py-1 font-mono text-[10px] text-az-text-muted">{slug.split("-").slice(-2).join("-")}</span>
+              </div>
+            </div>
+
+            <div className="mb-3 grid grid-cols-1 gap-3 text-xs sm:grid-cols-2 sm:gap-4">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-tighter text-az-text-muted">Entry Price</div>
+                <div className="font-mono font-bold text-az-text">${entryPrice.toFixed(3)}</div>
+              </div>
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-tighter text-az-text-muted">Mark Price</div>
+                <div className={`font-mono font-bold ${tokenMoveCents >= 0 ? "text-az-profit" : "text-az-loss"}`}>
+                  ${markPrice.toFixed(3)} ({tokenMoveCents >= 0 ? "+" : ""}
+                  {tokenMoveCents.toFixed(1)}c)
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-2 flex items-center justify-between text-[10px] text-az-text-muted">
+              <span>Entry ${entryUnderlying.toFixed(2)}</span>
+              <span>Strike ${strike.toFixed(2)}</span>
+              <span>Live ${liveUnderlying.toFixed(2)}</span>
+            </div>
+
+            <div className="relative h-2 rounded-full bg-az-bg">
+              <div className="absolute top-0 h-2 rounded-full bg-blue-500/60" style={{ width: `${currentPos}%` }} />
+              <div className="absolute top-[-4px] h-4 w-[2px] bg-az-accent" style={{ left: `${strikePos}%` }} />
+            </div>
+
+            {hasBounds && (
+              <div className="mt-3 rounded-lg border border-az-border/70 bg-az-surface-2/70 p-2">
+                <div className="mb-1 flex items-center justify-between text-[10px] text-az-text-muted">
+                  <span>Token Bounds</span>
+                  <span>{safeNumber(trade.seconds_remaining)}s left</span>
+                </div>
+                <div className="relative h-2 rounded-full bg-az-bg">
+                  <div className="absolute inset-y-0 border-l border-az-loss/80" style={{ left: `${tokenSlPos}%` }} />
+                  <div className="absolute inset-y-0 border-l border-blue-400/80" style={{ left: `${tokenEntryPos}%` }} />
+                  <div className="absolute inset-y-0 border-l border-az-profit/80" style={{ left: `${tokenTpPos}%` }} />
+                  <div className="absolute top-[-2px] h-3 w-[2px] bg-amber-300" style={{ left: `${tokenMarkPos}%` }} />
+                </div>
+                <div className="mt-1 grid grid-cols-4 gap-1 font-mono text-[9px] text-az-text-muted">
+                  <span>SL {slToken.toFixed(3)}</span>
+                  <span>EN {entryPrice.toFixed(3)}</span>
+                  <span>TP {tpToken.toFixed(3)}</span>
+                  <span className="text-right">MK {markPrice.toFixed(3)}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
