@@ -14,7 +14,7 @@ import aiohttp
 import websockets
 
 from .indicators import update_vwap_accumulators
-from .models import DataSource, MarketOddsSnapshot, MarketResolution, MarketTick
+from .models import DataSource, Direction, MarketOddsSnapshot, MarketResolution, MarketTick
 from .state import EngineState
 
 log = logging.getLogger("alpha_z_engine.data_streams")
@@ -127,6 +127,52 @@ def _infer_market_resolution(slug: str, title: str) -> MarketResolution:
     if _is_hourly_up_or_down_slug(slug):
         return MarketResolution.CANDLE_OPEN
     return MarketResolution.UNKNOWN
+
+
+def _decode_json_array(raw: Any) -> list[Any]:
+    if isinstance(raw, str):
+        try:
+            decoded = json.loads(raw)
+        except Exception:
+            return []
+        return list(decoded) if isinstance(decoded, list) else []
+    if isinstance(raw, list):
+        return list(raw)
+    return []
+
+
+def _normalize_outcome_label(value: Any) -> Direction | None:
+    label = str(value or "").strip().upper()
+    if label in {"UP", "YES"}:
+        return Direction.UP
+    if label in {"DOWN", "NO"}:
+        return Direction.DOWN
+    return None
+
+
+def _extract_directional_market_data(market: dict[str, Any]) -> tuple[dict[Direction, float], dict[Direction, str]] | None:
+    outcomes = _decode_json_array(market.get("outcomes"))
+    outcome_prices = _decode_json_array(market.get("outcomePrices"))
+    token_ids = [str(item) for item in _decode_json_array(market.get("clobTokenIds"))]
+    if len(outcomes) < 2 or len(outcomes) != len(outcome_prices) or len(outcomes) != len(token_ids):
+        return None
+
+    prices_by_direction: dict[Direction, float] = {}
+    token_ids_by_direction: dict[Direction, str] = {}
+    for raw_outcome, raw_price, token_id in zip(outcomes, outcome_prices, token_ids):
+        direction = _normalize_outcome_label(raw_outcome)
+        if direction is None:
+            continue
+        try:
+            price = float(raw_price)
+        except Exception:
+            return None
+        prices_by_direction[direction] = price * 100.0
+        token_ids_by_direction[direction] = str(token_id)
+
+    if Direction.UP not in prices_by_direction or Direction.DOWN not in prices_by_direction:
+        return None
+    return prices_by_direction, token_ids_by_direction
 
 
 def _parse_kline_message(raw_payload: dict[str, Any]) -> MarketTick:
@@ -419,14 +465,40 @@ class PolymarketFetcher:
         except Exception:
             return None
 
-        markets = event.get("markets", [])
-        active_market = next(
-            (market for market in markets if market.get("active") and not market.get("closed")),
+        if isinstance(event, list):
+            for item in event:
+                if not isinstance(item, dict):
+                    continue
+                if str(item.get("slug") or "") == slug and item.get("clobTokenIds") is not None:
+                    return {"event": item, "market": item}
+                markets = item.get("markets", [])
+                exact_market = next(
+                    (
+                        market
+                        for market in markets
+                        if isinstance(market, dict) and str(market.get("slug") or "") == slug
+                    ),
+                    None,
+                )
+                if exact_market is not None:
+                    return {"event": item, "market": exact_market}
+            return None
+
+        if isinstance(event, dict) and str(event.get("slug") or "") == slug and event.get("clobTokenIds") is not None:
+            return {"event": event, "market": event}
+
+        markets = event.get("markets", []) if isinstance(event, dict) else []
+        exact_market = next(
+            (
+                market
+                for market in markets
+                if isinstance(market, dict) and str(market.get("slug") or "") == slug
+            ),
             None,
         )
-        if active_market is None:
+        if exact_market is None:
             return None
-        return {"event": event, "market": active_market}
+        return {"event": event, "market": exact_market}
 
     async def fetch_price_to_beat_for_market(
         self,
@@ -527,17 +599,15 @@ class PolymarketFetcher:
         market = meta["market"]
         event = meta["event"]
         title = str(market.get("question") or event.get("title") or "")
-        raw_prices = market.get("outcomePrices", "[]")
-        raw_token_ids = market.get("clobTokenIds", "[]")
-
-        try:
-            prices = json.loads(raw_prices) if isinstance(raw_prices, str) else list(raw_prices)
-            token_ids = json.loads(raw_token_ids) if isinstance(raw_token_ids, str) else list(raw_token_ids)
-        except Exception:
+        directional_data = _extract_directional_market_data(market)
+        if directional_data is None:
             return MarketOddsSnapshot(slug=slug, market_found=False)
-
-        if len(prices) < 2:
-            return MarketOddsSnapshot(slug=slug, market_found=False)
+        prices_by_direction, token_ids_by_direction = directional_data
+        outcome_labels = tuple(
+            str(label).strip()
+            for label in _decode_json_array(market.get("outcomes"))
+            if str(label).strip()
+        )
 
         end_date_str = str(market.get("endDate") or event.get("endDate") or "")
         end_dt = _parse_end_datetime(end_date_str)
@@ -546,14 +616,15 @@ class PolymarketFetcher:
         market_category, fees_enabled, fee_curve_rate, fee_curve_exponent = _infer_fee_curve(slug, market, event)
         market_resolution = _infer_market_resolution(slug, title)
 
-        up_prob = float(prices[0]) * 100.0
-        down_prob = float(prices[1]) * 100.0
-        up_token_id = str(token_ids[0]) if len(token_ids) > 0 else ""
-        down_token_id = str(token_ids[1]) if len(token_ids) > 1 else ""
+        up_prob = prices_by_direction[Direction.UP]
+        down_prob = prices_by_direction[Direction.DOWN]
+        up_token_id = token_ids_by_direction[Direction.UP]
+        down_token_id = token_ids_by_direction[Direction.DOWN]
 
         return MarketOddsSnapshot(
             slug=slug,
             market_found=True,
+            market_slug=str(market.get("slug") or slug),
             seconds_remaining=seconds_remaining,
             reference_price=reference_price,
             strike_price=reference_price,
@@ -569,6 +640,7 @@ class PolymarketFetcher:
             down_public_prob_pct=down_prob,
             up_entry_prob_pct=up_prob,
             down_entry_prob_pct=down_prob,
+            outcome_labels=outcome_labels,
             fetched_at=datetime.now(timezone.utc),
         )
 

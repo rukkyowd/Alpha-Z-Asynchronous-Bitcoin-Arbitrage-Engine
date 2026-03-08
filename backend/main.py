@@ -32,6 +32,7 @@ from starlette.websockets import WebSocketDisconnect, WebSocketState
 from bot.ai_agent import AIConfig, LocalAIAgent, call_local_ai
 from bot.data_streams import BinanceStreamManager, DataStreamsConfig, PolymarketFetcher, create_http_session
 from bot.execution import ClobExecutionEngine, ExecutionConfig, FillResult
+from bot.clob_ws import ClobWebSocketManager, run_heartbeat_loop
 from bot.indicators import apply_probabilistic_model, blended_intraday_volatility, build_technical_context, compute_vwap
 from bot.models import (
     ActivePosition,
@@ -67,6 +68,7 @@ EVALUATION_IDLE_SLEEP_SECS = 0.40
 POSITION_MONITOR_SLEEP_SECS = 1.00
 POSITION_HEARTBEAT_SECS = 12.0
 SOFT_EVAL_REFRESH_SECS = 8.0
+RESOLVING_SETTLEMENT_RETRY_SECS = 30.0
 
 logger = logging.getLogger("alpha_z_engine")
 tracemalloc.start()
@@ -153,6 +155,7 @@ class EngineServices:
     stop_event: asyncio.Event = field(default_factory=asyncio.Event)
     recent_logs: deque[str] = field(default_factory=lambda: deque(maxlen=200))
     tasks: list[asyncio.Task[Any]] = field(default_factory=list)
+    clob_ws_manager: ClobWebSocketManager | None = None
     task_group: asyncio.TaskGroup | None = None
     log_handler: RecentLogHandler | None = None
     latest_context: TechnicalContext | None = None
@@ -162,7 +165,9 @@ class EngineServices:
     latest_locks: list[str] = field(default_factory=list)
     last_logged_rejection_reason: str = ""
     last_logged_rejection_ts: float = 0.0
+    market_audit_logged: set[str] = field(default_factory=set)
     position_heartbeat_ts: dict[str, float] = field(default_factory=dict)
+    resolving_retry_ts: dict[str, float] = field(default_factory=dict)
     trade_history: list[dict[str, Any]] = field(default_factory=list)
     execution_history: list[dict[str, Any]] = field(default_factory=list)
     equity_curve: list[dict[str, Any]] = field(default_factory=list)
@@ -1227,6 +1232,18 @@ async def fetch_market_odds(runtime: EngineServices, slug: str) -> tuple[MarketO
             down_entry_prob_pct=round((down_check.entry_price or odds.down_public_prob_pct / 100.0) * 100.0, 2),
         )
 
+    if slug not in runtime.market_audit_logged:
+        logger.info(
+            "[MARKET AUDIT] requested_slug=%s | matched_slug=%s | outcomes=%s | resolution=%s | up_token=%s | down_token=%s",
+            slug,
+            odds.market_slug or odds.slug,
+            ", ".join(odds.outcome_labels) if odds.outcome_labels else "UNKNOWN",
+            odds.market_resolution.value,
+            odds.up_token_id or "N/A",
+            odds.down_token_id or "N/A",
+        )
+        runtime.market_audit_logged.add(slug)
+
     runtime.latest_odds = odds
     return odds, liquidity_by_direction
 
@@ -1590,14 +1607,32 @@ async def settle_expired_position(
                 candle_close,
             )
         else:
-            outcome = _resolve_outcome(final_underlying, strike_price)
-            resolved_underlying = final_underlying
-            logger.warning(
-                "[SETTLEMENT] %s: official Polymarket outcome unavailable (%s). Falling back to local Binance snapshot %.2f vs reference %.2f.",
+            await runtime.state.update_position(
+                str(position.get("slug")),
+                status=PositionStatus.RESOLVING,
+                current_token_price=position.get("current_token_price", 0.0) or 0.0,
+                mark_price=position.get("mark_price", 0.0) or 0.0,
+            )
+            await runtime.state.record_execution_failure(
+                str(position.get("slug")),
+                reason="EXPIRY_SETTLEMENT_UNAVAILABLE: finalized Binance BTCUSDT 1H candle unavailable",
+            )
+            logger.error(
+                "[SETTLEMENT] %s: official Polymarket outcome unavailable (%s) and finalized Binance BTCUSDT 1H candle could not be fetched. Position moved to RESOLVING.",
                 position.get("slug"),
                 source,
-                final_underlying,
-                strike_price,
+            )
+            return FillResult(
+                success=False,
+                order_type="SETTLE",
+                response={"status": "unsettled"},
+                filled_cost_usd=0.0,
+                filled_shares=0.0,
+                average_price=0.0,
+                requested_price=0.0,
+                requested_bet_usd=bet_size_usd,
+                status="UNSETTLED",
+                reason="EXPIRY_SETTLEMENT_UNAVAILABLE",
             )
     settlement_price = 0.0
     if outcome == str(position.get("decision")):
@@ -1917,7 +1952,13 @@ async def evaluation_loop(runtime: EngineServices) -> None:
 async def position_monitor_loop(runtime: EngineServices) -> None:
     while not runtime.stop_event.is_set():
         try:
-            positions = await runtime.state.list_positions(statuses={PositionStatus.OPEN.value, PositionStatus.CLOSING.value})
+            positions = await runtime.state.list_positions(
+                statuses={
+                    PositionStatus.OPEN.value,
+                    PositionStatus.CLOSING.value,
+                    PositionStatus.RESOLVING.value,
+                }
+            )
             if not positions:
                 await asyncio.sleep(POSITION_MONITOR_SLEEP_SECS)
                 continue
@@ -1932,9 +1973,19 @@ async def position_monitor_loop(runtime: EngineServices) -> None:
                 slug = position.slug
                 odds, _ = await fetch_market_odds(runtime, slug)
                 seconds_remaining = odds.seconds_remaining if odds.market_found else float(position.seconds_remaining)
+                retry_now = time.monotonic()
 
-                if seconds_remaining <= 0:
-                    await settle_expired_position(runtime, position.to_dict(), final_underlying=live_underlying)
+                if position.status == PositionStatus.RESOLVING:
+                    last_retry = runtime.resolving_retry_ts.get(slug, 0.0)
+                    if (retry_now - last_retry) < RESOLVING_SETTLEMENT_RETRY_SECS:
+                        continue
+
+                if position.status == PositionStatus.RESOLVING or seconds_remaining <= 0:
+                    settlement = await settle_expired_position(runtime, position.to_dict(), final_underlying=live_underlying)
+                    if settlement.status == "UNSETTLED":
+                        runtime.resolving_retry_ts[slug] = retry_now
+                    else:
+                        runtime.resolving_retry_ts.pop(slug, None)
                     continue
 
                 public_price = odds.entry_prob_pct(position.decision) / 100.0 if odds.market_found else position.current_token_price
@@ -1989,6 +2040,7 @@ async def position_monitor_loop(runtime: EngineServices) -> None:
 
                 remaining = await runtime.state.get_position(slug)
                 if exit_fill.success and remaining is None:
+                    runtime.resolving_retry_ts.pop(slug, None)
                     await finalize_closed_position(
                         runtime,
                         monitor_decision.position.to_dict(),
@@ -2525,6 +2577,19 @@ async def bootstrap_runtime() -> EngineServices:
         task_group.create_task(db_writer_worker(runtime)),
         task_group.create_task(ml_writer_worker(runtime)),
     ]
+    # --- Polymarket SDK heartbeat kill-switch + CLOB WS book ---
+    if clob_client is not None:
+        runtime.tasks.append(
+            task_group.create_task(
+                run_heartbeat_loop(
+                    clob_client,
+                    heartbeat_id="alpha_z_btc_hourly",
+                    interval_secs=8.0,
+                    stop_event=runtime.stop_event,
+                )
+            )
+        )
+        logger.info("[SYSTEM] CLOB heartbeat kill-switch ARMED (8s interval).")
     return runtime
 
 

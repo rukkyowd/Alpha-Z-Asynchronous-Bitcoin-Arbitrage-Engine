@@ -142,6 +142,7 @@ class MarketTick(SerializableModel):
 class MarketOddsSnapshot(SerializableModel):
     slug: str
     market_found: bool = False
+    market_slug: str = ""
     seconds_remaining: float = 0.0
     reference_price: float = 0.0
     strike_price: float = 0.0
@@ -151,6 +152,7 @@ class MarketOddsSnapshot(SerializableModel):
     fees_enabled: bool = False
     fee_curve_rate: float = 0.0
     fee_curve_exponent: float = 0.0
+    sdk_fee_rate_bps: int = 0
     up_token_id: str = ""
     down_token_id: str = ""
     up_public_prob_pct: float = 0.0
@@ -161,7 +163,16 @@ class MarketOddsSnapshot(SerializableModel):
     up_best_ask: float | None = None
     down_best_bid: float | None = None
     down_best_ask: float | None = None
+    outcome_labels: tuple[str, ...] = field(default_factory=tuple)
     fetched_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+
+    def __post_init__(self) -> None:
+        """Runtime validation — clamp probabilities and sanitize inputs."""
+        self.up_public_prob_pct = max(0.0, min(100.0, self.up_public_prob_pct))
+        self.down_public_prob_pct = max(0.0, min(100.0, self.down_public_prob_pct))
+        self.up_entry_prob_pct = max(0.0, min(100.0, self.up_entry_prob_pct))
+        self.down_entry_prob_pct = max(0.0, min(100.0, self.down_entry_prob_pct))
+        self.seconds_remaining = max(0.0, self.seconds_remaining)
 
     def public_prob_pct(self, direction: Direction) -> float:
         if direction == Direction.UP:
@@ -211,6 +222,16 @@ class MarketOddsSnapshot(SerializableModel):
         return ""
 
     def effective_taker_fee_rate(self, direction: Direction, entry_price: float | None = None) -> float:
+        # Prefer SDK-authoritative fee rate if available
+        if self.sdk_fee_rate_bps > 0:
+            reference_price = entry_price
+            if reference_price is None:
+                reference_price = self.entry_prob_pct(direction) / 100.0
+            bounded_price = min(max(reference_price, 0.001), 0.999)
+            probability_term = bounded_price * (1.0 - bounded_price)
+            return max(0.0, (self.sdk_fee_rate_bps / 10000.0) * (probability_term ** max(self.fee_curve_exponent, 1.0)))
+
+        # Fallback to heuristic fee curve
         if not self.fees_enabled or self.fee_curve_rate <= 0 or self.fee_curve_exponent <= 0:
             return 0.0
 

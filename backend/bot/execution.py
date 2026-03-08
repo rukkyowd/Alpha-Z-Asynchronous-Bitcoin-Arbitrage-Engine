@@ -9,7 +9,7 @@ from decimal import Decimal, ROUND_DOWN, ROUND_UP
 from typing import Any
 
 from py_clob_client.client import ClobClient
-from py_clob_client.clob_types import MarketOrderArgs, OrderType, PartialCreateOrderOptions
+from py_clob_client.clob_types import MarketOrderArgs, OrderArgs, OrderType, PartialCreateOrderOptions
 from py_clob_client.order_builder.constants import BUY, SELL
 
 from .models import (
@@ -300,21 +300,32 @@ class ClobExecutionEngine:
             levels=1,
         )
 
-    async def _fetch_tick_and_neg_risk(self, token_id: str) -> tuple[str, bool]:
+    async def _resolve_market_params(self, token_id: str) -> tuple[str, bool, int]:
+        """Resolve tick_size, neg_risk, and fee_rate_bps via the SDK's built-in caches.
+
+        The SDK caches tick_size with a configurable TTL (default 300s) and
+        neg_risk permanently after the first call, so repeated invocations
+        are effectively free (<1µs from cache).
+        """
         tick_size = "0.01"
         neg_risk = False
+        fee_rate_bps = 0
         if self.client is None:
-            return tick_size, neg_risk
+            return tick_size, neg_risk, fee_rate_bps
 
         try:
             tick_size = str(await asyncio.to_thread(self.client.get_tick_size, token_id))
         except Exception as exc:
-            log.debug("[ENTRY ORDER] Tick size fetch failed for %s: %s", token_id, exc)
+            log.debug("[MARKET PARAMS] Tick size fetch failed for %s: %s", token_id, exc)
         try:
             neg_risk = bool(await asyncio.to_thread(self.client.get_neg_risk, token_id))
         except Exception as exc:
-            log.debug("[ENTRY ORDER] Neg-risk fetch failed for %s: %s", token_id, exc)
-        return tick_size, neg_risk
+            log.debug("[MARKET PARAMS] Neg-risk fetch failed for %s: %s", token_id, exc)
+        try:
+            fee_rate_bps = int(await asyncio.to_thread(self.client.get_fee_rate_bps, token_id))
+        except Exception as exc:
+            log.debug("[MARKET PARAMS] Fee rate fetch failed for %s: %s", token_id, exc)
+        return tick_size, neg_risk, fee_rate_bps
     async def check_liquidity_and_spread(
         self,
         token_id: str,
@@ -609,6 +620,72 @@ class ClobExecutionEngine:
             response["_entry_limit_price"] = float(limit_price)
         return response
 
+    async def _submit_limit_order(
+        self,
+        token_id: str,
+        *,
+        price: float,
+        size: float,
+        side: str,
+        tick_size: str,
+        neg_risk: bool,
+        order_type: OrderType = OrderType.GTC,
+    ) -> dict[str, Any]:
+        """Submit a limit order (maker) using the SDK's native ``create_order``.
+
+        Maker orders sit on the book and typically pay zero or reduced fees,
+        making them ideal for NY session entries where spread is tight.
+        """
+        if self.client is None:
+            raise RuntimeError("CLOB client is unavailable.")
+
+        def _sign_and_post() -> dict[str, Any]:
+            order_args = OrderArgs(
+                token_id=token_id,
+                price=float(Decimal(str(price)).quantize(Decimal(tick_size), rounding=ROUND_DOWN if side == BUY else ROUND_UP)),
+                size=float(Decimal(str(size)).quantize(Decimal("0.01"), rounding=ROUND_DOWN)),
+                side=side,
+            )
+            options = PartialCreateOrderOptions(tick_size=tick_size, neg_risk=neg_risk)
+            signed = self.client.create_order(order_args, options)
+            return self.client.post_order(signed, order_type)
+
+        response = await asyncio.to_thread(_sign_and_post)
+        if isinstance(response, dict):
+            response["_entry_order_type"] = f"LIMIT_{order_type}"
+            response["_entry_limit_price"] = float(price)
+        return response
+
+    async def _cancel_order(self, order_id: str) -> dict[str, Any] | None:
+        """Cancel an open order by ID via the SDK."""
+        if self.client is None:
+            return None
+        try:
+            return await asyncio.to_thread(self.client.cancel, order_id)
+        except Exception as exc:
+            log.debug("[CANCEL] Failed to cancel order %s: %s", order_id, exc)
+            return None
+
+    async def _get_order_status(self, order_id: str) -> dict[str, Any]:
+        """Fetch current order status via the SDK (L2 auth required)."""
+        if self.client is None:
+            return {}
+        try:
+            return await asyncio.to_thread(self.client.get_order, order_id)
+        except Exception as exc:
+            log.debug("[ORDER STATUS] Failed for %s: %s", order_id, exc)
+            return {}
+
+    async def get_server_spread(self, token_id: str) -> float | None:
+        """Fetch the server-calculated spread for a token via the SDK."""
+        if self.client is None:
+            return None
+        try:
+            result = await asyncio.to_thread(self.client.get_spread, token_id)
+            return float(result.get("spread", 0)) if isinstance(result, dict) else None
+        except Exception:
+            return None
+
     def _build_active_position(
         self,
         signal: TradeSignal,
@@ -747,7 +824,7 @@ class ClobExecutionEngine:
                     self.config.live_clob_recovery_wait_secs,
                 )
 
-        tick_size, neg_risk = await self._fetch_tick_and_neg_risk(token_id)
+        tick_size, neg_risk, _fee_rate_bps = await self._resolve_market_params(token_id)
         slippage_cents = (
             self.config.live_tiny_entry_slippage_cents
             if signal.kelly_bet_usd <= self.config.live_tiny_amm_fallback_max_bet_usd
@@ -1012,7 +1089,7 @@ class ClobExecutionEngine:
                 reason=exit_reason,
             )
 
-        tick_size, neg_risk = await self._fetch_tick_and_neg_risk(position.token_id)
+        tick_size, neg_risk, _fee_rate_bps = await self._resolve_market_params(position.token_id)
         floors = [
             _quantize(_clamp(current_token_price * self.config.exit_floor_first, 0.01, 0.99), tick_size, ROUND_DOWN),
             _quantize(_clamp(current_token_price * self.config.exit_floor_second, 0.01, 0.99), tick_size, ROUND_DOWN),
