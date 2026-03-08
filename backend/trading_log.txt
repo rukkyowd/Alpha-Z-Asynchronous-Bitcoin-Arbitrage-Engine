@@ -10168,3 +10168,110 @@
 2026-03-08 16:07:32,889 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.3445 | U-PnL: $-14.66 (-13.88%) | TP: +10.0c @ 0.5000 | SL: -14.4c @ 0.2560 | T-52:27 | TP Armed: N | SL Disabled: N
 2026-03-08 16:07:45,599 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.3700 | U-PnL: $-7.93 (-7.50%) | TP: +10.0c @ 0.5000 | SL: -14.4c @ 0.2560 | T-52:14 | TP Armed: N | SL Disabled: N
 2026-03-08 16:07:58,454 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.4000 | U-PnL: $+0.00 (+0.00%) | TP: +10.0c @ 0.5000 | SL: -14.4c @ 0.2560 | T-52:01 | TP Armed: N | SL Disabled: N
+2026-03-08 16:08:11,241 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.3698 | U-PnL: $-7.97 (-7.54%) | TP: +10.0c @ 0.5000 | SL: -14.4c @ 0.2560 | T-51:48 | TP Armed: N | SL Disabled: N
+2026-03-08 16:08:24,138 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.2600 | U-PnL: $-36.98 (-35.00%) | TP: +10.0c @ 0.5000 | SL: -14.4c @ 0.2560 | T-51:35 | TP Armed: N | SL Disabled: N
+2026-03-08 16:08:37,019 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.2700 | U-PnL: $-34.34 (-32.50%) | TP: +10.0c @ 0.5000 | SL: -14.4c @ 0.2560 | T-51:22 | TP Armed: N | SL Disabled: N
+2026-03-08 16:08:42,538 [INFO] Elite Quant Engine v2 Initialized. Monitoring 1h WebSocket...
+2026-03-08 16:08:42,544 [INFO] [INIT] Simulated balance initialized: $5000.00 (base: $5000.0 + historical: $0.00)
+2026-03-08 16:08:42,544 [INFO] [INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.
+2026-03-08 16:08:45,164 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-8-3pm-et | Prefix: bitcoin-up-or-down-march-8-3pm
+2026-03-08 16:08:45,347 [INFO] [SYSTEM] Loaded 120 candles. VWAP=67,217.14
+2026-03-08 16:08:45,633 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-8-3pm-et | matched_slug=bitcoin-up-or-down-march-8-3pm-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=61525245965038357297944292936809495205415440958444400614199361831451807817688 | down_token=27614360263394426959068955355343359018965866689729060692617970095618137817130
+2026-03-08 16:08:45,634 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-8-3pm-et
+2026-03-08 16:08:45,634 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-08 16:08:49,718 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.2700 | U-PnL: $-34.34 (-32.50%) | TP: +10.0c @ 0.5000 | SL: -14.4c @ 0.2560 | T-51:10 | TP Armed: N | SL Disabled: N
+2026-03-08 16:09:02,451 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.2721 | U-PnL: $-33.80 (-31.99%) | TP: +10.0c @ 0.5000 | SL: -14.4c @ 0.2560 | T-50:57 | TP Armed: N | SL Disabled: N
+2026-03-08 16:09:15,300 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.2733 | U-PnL: $-33.47 (-31.67%) | TP: +10.0c @ 0.5000 | SL: -14.4c @ 0.2560 | T-50:44 | TP Armed: N | SL Disabled: N
+2026-03-08 16:09:28,142 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.2800 | U-PnL: $-31.70 (-30.00%) | TP: +10.0c @ 0.5000 | SL: -14.4c @ 0.2560 | T-50:31 | TP Armed: N | SL Disabled: N
+2026-03-08 16:09:40,981 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.2793 | U-PnL: $-31.88 (-30.17%) | TP: +10.0c @ 0.5000 | SL: -12.0c @ 0.2800 | T-50:19 | TP Armed: N | SL Disabled: N
+2026-03-08 16:09:52,652 [INFO] [EXIT] EXIT FILLED [PAPER] DOWN on bitcoin-up-or-down-march-8-3pm-et | Reason: STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed) | Exit Px: 0.2685 | Proceeds: $70.93 | PnL: $-34.74
+2026-03-08 16:09:52,654 [INFO] [TRADE CLOSED] bitcoin-up-or-down-march-8-3pm-et | DOWN | PnL: $-34.74 | Exit: 0.2685 | Underlying: 66941.28 | Reason: STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:09:58,189 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (594s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:10:06,353 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (586s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:10:14,572 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (578s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:10:22,786 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (569s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:10:30,955 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (561s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:10:39,149 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (553s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:10:47,424 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (545s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:10:55,624 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (537s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:11:03,788 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (528s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:11:11,995 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (520s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:11:20,232 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (512s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:11:28,428 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (504s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:11:36,634 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (496s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:11:44,909 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (487s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:11:53,128 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (479s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:12:01,166 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (471s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:12:09,388 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (463s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:12:17,562 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (455s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:12:25,890 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (446s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:12:34,156 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (438s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:12:42,467 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (430s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:12:50,715 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (421s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:12:59,061 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (413s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:13:07,310 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (405s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:13:15,568 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (397s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:13:23,802 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (388s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:13:32,014 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (380s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:13:40,314 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (372s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:13:48,595 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (364s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:13:56,809 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Post-stop cooldown active (355s left) for DOWN after STOP_LOSS_CONFIRMED (-13.2c, 12/12, underlying confirmed)
+2026-03-08 16:14:04,998 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Score 2 requires EV >= 6.00% (got 1.26%)
+2026-03-08 16:17:44,992 [INFO] Elite Quant Engine v2 Initialized. Monitoring 1h WebSocket...
+2026-03-08 16:17:45,001 [INFO] [INIT] Simulated balance initialized: $4965.26 (base: $5000.0 + historical: $-34.74)
+2026-03-08 16:17:45,001 [INFO] [INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.
+2026-03-08 16:17:47,636 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-8-3pm-et | Prefix: bitcoin-up-or-down-march-8-3pm
+2026-03-08 16:17:47,821 [INFO] [SYSTEM] Loaded 120 candles. VWAP=67,217.26
+2026-03-08 16:17:48,110 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-8-3pm-et | matched_slug=bitcoin-up-or-down-march-8-3pm-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=61525245965038357297944292936809495205415440958444400614199361831451807817688 | down_token=27614360263394426959068955355343359018965866689729060692617970095618137817130
+2026-03-08 16:17:48,111 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-8-3pm-et
+2026-03-08 16:17:48,114 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-08 16:18:23,636 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-08 16:18:23,636 [INFO] [SYSTEM] CLOB WebSocket book manager started in paper shadow mode (heartbeat disabled).
+2026-03-08 16:18:24,153 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-08 16:18:51,477 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Entry premium 1.4c > 1.0c max
+2026-03-08 16:18:51,995 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.72% <= 0 after slippage
+2026-03-08 16:19:00,278 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.65% <= 0 after slippage
+2026-03-08 16:19:08,505 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.34% <= 0 after slippage
+2026-03-08 16:19:16,733 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.01% <= 0 after slippage
+2026-03-08 16:19:50,574 [INFO] [ENTRY SMART] Spread 2.0c wide, time 2435s remaining — joining bid side @ 0.1000 (vs naive 0.1100, ask 0.1100)
+2026-03-08 16:19:50,585 [INFO] [BET] BET PLACED [PAPER] DOWN on bitcoin-up-or-down-march-8-3pm-et | Filled: $24.42 | Avg Px: 0.1100 | Shares: 222.0000 | Liq: PAPER_CLOB_SHADOW | Expected: 0.1003
+2026-03-08 16:19:50,718 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Max trades per hour (2) reached.
+2026-03-08 16:19:51,547 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.0941 | U-PnL: $-3.54 (-14.50%) | TP: +10.0c @ 0.2100 | SL: -3.3c @ 0.0770 | T-40:08 | TP Armed: N | SL Disabled: N
+2026-03-08 16:20:04,337 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.1107 | U-PnL: $+0.16 (+0.67%) | TP: +10.0c @ 0.2100 | SL: -3.3c @ 0.0770 | T-39:55 | TP Armed: N | SL Disabled: N
+2026-03-08 16:20:07,173 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Max trades per hour (2) reached.
+2026-03-08 16:20:15,426 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.97% <= 0 after slippage
+2026-03-08 16:20:16,971 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.1200 | U-PnL: $+2.22 (+9.09%) | TP: +10.0c @ 0.2100 | SL: -3.3c @ 0.0770 | T-39:43 | TP Armed: N | SL Disabled: N
+2026-03-08 16:20:23,662 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.34% <= 0 after slippage
+2026-03-08 16:20:29,827 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.1300 | U-PnL: $+4.44 (+18.18%) | TP: +10.0c @ 0.2100 | SL: -3.3c @ 0.0770 | T-39:30 | TP Armed: N | SL Disabled: N
+2026-03-08 16:20:31,828 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.24% <= 0 after slippage
+2026-03-08 16:20:40,079 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.86% <= 0 after slippage
+2026-03-08 16:20:42,731 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.1135 | U-PnL: $+0.78 (+3.19%) | TP: +10.0c @ 0.2100 | SL: -3.3c @ 0.0770 | T-39:17 | TP Armed: N | SL Disabled: N
+2026-03-08 16:20:48,314 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.87% <= 0 after slippage
+2026-03-08 16:20:55,635 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.1100 | U-PnL: $+0.00 (+0.00%) | TP: +10.0c @ 0.2100 | SL: -3.3c @ 0.0770 | T-39:04 | TP Armed: N | SL Disabled: N
+2026-03-08 16:20:56,547 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Max trades per hour (2) reached.
+2026-03-08 16:21:08,356 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-8-3pm-et | Mark: 0.1122 | U-PnL: $+0.48 (+1.97%) | TP: +10.0c @ 0.2100 | SL: -3.3c @ 0.0770 | T-38:51 | TP Armed: N | SL Disabled: N
+2026-03-08 16:21:13,170 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Max trades per hour (2) reached.
+2026-03-08 16:21:46,323 [INFO] Elite Quant Engine v2 Initialized. Monitoring 1h WebSocket...
+2026-03-08 16:21:46,334 [INFO] [INIT] Simulated balance initialized: $5000.00 (base: $5000.0 + historical: $0.00)
+2026-03-08 16:21:46,335 [INFO] [INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.
+2026-03-08 16:21:49,020 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-8-3pm-et | Prefix: bitcoin-up-or-down-march-8-3pm
+2026-03-08 16:21:49,212 [INFO] [SYSTEM] Loaded 120 candles. VWAP=67,217.28
+2026-03-08 16:21:49,517 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-8-3pm-et | matched_slug=bitcoin-up-or-down-march-8-3pm-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=61525245965038357297944292936809495205415440958444400614199361831451807817688 | down_token=27614360263394426959068955355343359018965866689729060692617970095618137817130
+2026-03-08 16:21:49,520 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-8-3pm-et
+2026-03-08 16:21:49,520 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-08 16:22:09,972 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-08 16:22:09,978 [INFO] [SYSTEM] CLOB WebSocket book manager started in paper shadow mode (heartbeat disabled).
+2026-03-08 16:22:10,455 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-08 16:22:36,371 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Entry premium 2.5c > 1.0c max
+2026-03-08 16:22:36,935 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.92% <= 0 after slippage
+2026-03-08 16:22:45,136 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.85% <= 0 after slippage
+2026-03-08 16:23:16,045 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Entry premium 1.5c > 1.0c max
+2026-03-08 16:23:16,577 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -2.11% <= 0 after slippage
+2026-03-08 16:23:24,767 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.76% <= 0 after slippage
+2026-03-08 16:23:32,962 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.45% <= 0 after slippage
+2026-03-08 16:24:05,792 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Entry premium 1.5c > 1.0c max
+2026-03-08 16:24:06,316 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -0.30% <= 0 after slippage
+2026-03-08 16:24:14,290 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.44% <= 0 after slippage
+2026-03-08 16:24:22,436 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Net EV -1.52% <= 0 after slippage
+2026-03-08 16:24:30,633 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Score 1 requires EV >= 15.00% (got 0.84%)
+2026-03-08 16:24:38,811 [INFO] [SKIP] bitcoin-up-or-down-march-8-3pm-et: Score 1 requires EV >= 15.00% (got 5.61%)

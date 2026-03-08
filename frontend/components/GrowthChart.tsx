@@ -16,7 +16,7 @@ export default function GrowthChart({ data }: { data: number[][] }) {
       },
       grid: { 
         vertLines: { visible: false }, 
-        horzLines: { color: "#18181b" } 
+        horzLines: { color: "rgba(255,255,255,0.03)" } 
       },
       timeScale: { visible: false },
       height: 150,

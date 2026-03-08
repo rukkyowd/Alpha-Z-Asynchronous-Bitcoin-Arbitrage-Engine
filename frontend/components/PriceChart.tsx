@@ -66,16 +66,16 @@ export default function PriceChart({
     // 1. Initialize Chart
     const chart = createChart(chartContainerRef.current, {
       layout: { background: { type: ColorType.Solid, color: "transparent" }, textColor: "#71717a" },
-      grid: { vertLines: { color: "#18181b" }, horzLines: { color: "#18181b" } },
-      timeScale: { timeVisible: true, secondsVisible: false, borderColor: "#27272a" },
-      rightPriceScale: { borderColor: "#27272a" },
+      grid: { vertLines: { color: "rgba(255,255,255,0.03)" }, horzLines: { color: "rgba(255,255,255,0.03)" } },
+      timeScale: { timeVisible: true, secondsVisible: false, borderColor: "rgba(255,255,255,0.06)" },
+      rightPriceScale: { borderColor: "rgba(255,255,255,0.06)" },
       height: getChartHeight(),
     });
 
     // 2. Add Series
     const candleSeries = chart.addSeries(CandlestickSeries, {
-      upColor: "#22c55e", downColor: "#ef4444", 
-      borderVisible: false, wickUpColor: "#22c55e", wickDownColor: "#ef4444" 
+      upColor: "#34d399", downColor: "#f87171", 
+      borderVisible: false, wickUpColor: "#34d399", wickDownColor: "#f87171" 
     });
     
     const vwapSeries = chart.addSeries(LineSeries, {

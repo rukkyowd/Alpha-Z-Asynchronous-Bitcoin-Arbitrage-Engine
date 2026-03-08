@@ -18,20 +18,21 @@ export default function EquityCurve({ data }: { data: EquityPoint[] }) {
     const chart = createChart(chartContainerRef.current, {
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
-        textColor: "#9ca3af",
+        textColor: "#71717a",
       },
       grid: {
-        vertLines: { color: "#27272a", style: 1 },
-        horzLines: { color: "#27272a", style: 1 },
+        vertLines: { color: "rgba(255,255,255,0.03)", style: 1 },
+        horzLines: { color: "rgba(255,255,255,0.03)", style: 1 },
       },
-      timeScale: { timeVisible: true },
+      timeScale: { timeVisible: true, borderColor: "rgba(255,255,255,0.06)" },
+      rightPriceScale: { borderColor: "rgba(255,255,255,0.06)" },
       height: 300,
     });
 
     // Check if overall PnL is positive or negative for color
     const isProfitable = data[data.length - 1]?.value >= 0;
-    const lineColor = isProfitable ? "#3b82f6" : "#ef4444"; // Blue for profit, red for loss
-    const topColor = isProfitable ? "rgba(59, 130, 246, 0.3)" : "rgba(239, 68, 68, 0.3)";
+    const lineColor = isProfitable ? "#3b82f6" : "#f87171"; // Blue for profit, softer red for loss
+    const topColor = isProfitable ? "rgba(59, 130, 246, 0.4)" : "rgba(248, 113, 113, 0.4)";
 
     const series = chart.addSeries(AreaSeries, {
       lineColor,

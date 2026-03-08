@@ -1250,25 +1250,26 @@ function NavIcon({ icon, active, onClick, label }: any) {
 
 function StatusBadge({ status, reconnectIn, onReconnect }: { status: WsStatus; reconnectIn: number; onReconnect: () => void }) {
   const isLive = status === "LIVE";
-  const icon = isLive ? <Wifi size={14} /> : <WifiOff size={14} />;
+  const icon = isLive ? (
+    <span className="relative mr-1.5 flex h-2 w-2">
+      <span className="live-pulse absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+    </span>
+  ) : <WifiOff size={14} className="mr-1.5" />;
   return (
     <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-      <motion.div
-        className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold tracking-wide ${
-          isLive ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-red-500/30 bg-red-500/10 text-red-400"
+      <div
+        className={`flex items-center rounded-full border px-4 py-2 text-xs font-bold tracking-wide transition-all duration-300 ${
+          isLive ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.15)]" : "border-red-500/30 bg-red-500/10 text-red-400"
         }`}
-        animate={{
-          boxShadow: isLive ? ["0 0 0 0 rgba(16, 185, 129, 0.4)", "0 0 0 8px rgba(16, 185, 129, 0)"] : "none",
-        }}
-        transition={{ duration: 2, repeat: Infinity }}
       >
         {icon} {status}
-      </motion.div>
+      </div>
 
       {!isLive && (
         <button
           onClick={onReconnect}
-          className="flex items-center gap-1.5 rounded-full border border-zinc-700 bg-zinc-900/70 px-3 py-2 text-[11px] font-bold text-zinc-300 transition hover:border-zinc-500 hover:text-white"
+          className="flex items-center gap-1.5 rounded-full border border-zinc-700 bg-zinc-900/70 px-3 py-2 text-[11px] font-bold text-zinc-300 transition-all duration-300 hover:border-zinc-500 hover:text-white"
         >
           <RefreshCcw size={12} />
           Reconnect{reconnectIn > 0 ? ` (${reconnectIn}s)` : ""}
@@ -1300,23 +1301,19 @@ function RegimeBadge({ regime, atr }: { regime: string; atr: number }) {
 
 function EnhancedStatCard({ icon, label, value, trend, subtitle }: any) {
   const trendColors = { up: "text-[var(--az-profit)]", down: "text-[var(--az-loss)]", neutral: "text-[var(--az-text-secondary)]" } as const;
+  const glowClass = trend === "up" ? "glass-card-profit" : trend === "down" ? "glass-card-loss" : "glass-card";
   return (
-    <motion.div
-      className="glass-card group relative overflow-hidden p-5"
-      whileHover={{ scale: 1.02 }}
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-[var(--az-accent-subtle)] via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-      <div className="relative z-10">
+    <div className={`${glowClass} group relative overflow-hidden p-5 transition-all duration-300`}>
+      <div className="absolute inset-0 bg-gradient-to-br from-[var(--az-accent-subtle)] via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      <div className="relative z-10 transition-transform duration-300 group-hover:translate-y-[-2px]">
         <div className="mb-3 flex items-start justify-between">
-          <div className="rounded-lg bg-[var(--az-bg-elevated)] p-2">{icon}</div>
+          <div className="rounded-lg bg-[var(--az-bg-elevated)] p-2 shadow-sm">{icon}</div>
         </div>
-        <div className={`mb-1 text-2xl font-black tracking-tight data-mono ${trendColors[trend as keyof typeof trendColors]}`}>{value}</div>
+        <div className={`mb-1 text-2xl font-black tabular-nums tracking-tight data-mono ${trendColors[trend as keyof typeof trendColors]}`}>{value}</div>
         <div className="section-label mb-1">{label}</div>
-        {subtitle && <div className="data-mono text-[10px] text-[var(--az-text-dim)]">{subtitle}</div>}
+        {subtitle && <div className="data-mono tabular-nums text-[10px] text-[var(--az-text-dim)]">{subtitle}</div>}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -1336,11 +1333,11 @@ function SkeletonCard() {
 
 function Panel({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
   return (
-    <motion.div className={`glass-panel overflow-hidden ${className}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="border-b border-[var(--az-border)] bg-[var(--az-bg-elevated)]/50 px-3 py-2.5 sm:px-5 sm:py-3">
+    <motion.div className={`glass-panel flex flex-col overflow-hidden transition-all duration-300 ${className}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="border-b border-white/5 bg-slate-900/40 px-3 py-2.5 sm:px-5 sm:py-3 backdrop-blur-md">
         <h3 className="section-label">{title}</h3>
       </div>
-      <div className="p-3 sm:p-5">{children}</div>
+      <div className="flex-1 p-3 sm:p-5">{children}</div>
     </motion.div>
   );
 }
@@ -1625,86 +1622,94 @@ function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMo
   const flowEvents = useMemo(() => logsToFlowEvents(liveData?.logs || []), [liveData?.logs]);
   const brierSummary = portfolio?.brier_summary;
   return (
-    <motion.div key="terminal" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="grid grid-cols-12 gap-5">
-      <div className="col-span-12 space-y-5 xl:col-span-8">
-        <Panel title="Live Price Action • 1H Candles">
-          {liveLoading ? (
-            <div className="grid grid-cols-1 gap-3">
-              <SkeletonBox className="h-64 w-full" />
-              <SkeletonBox className="h-4 w-44" />
-            </div>
-          ) : chartCandle || (Array.isArray(liveData?.history) && liveData.history.length > 0) ? (
-            <PriceChart candle={chartCandle} history={liveData.history} vwap={liveData.vwap} />
-          ) : (
-            <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-[var(--az-border)]">
-              <div className="section-label">Awaiting stream...</div>
-            </div>
-          )}
-        </Panel>
-
-        {/* Order Flow Strip */}
-        <Panel title="Order Flow">
-          <OrderFlowStrip events={flowEvents} />
-        </Panel>
-
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-          <Panel title="Arbitrage Gap (Math vs Poly)">
-            <ArbitrageGapPanel edge={strategy.edge_tracker} />
-          </Panel>
-          <Panel title="Execution Latency Waterfall">
-            <LatencyWaterfallPanel latency={strategy.execution_latency} />
-          </Panel>
-        </div>
-
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-          <Panel title="Equity Curve">{portfolio ? <EquityCurve data={portfolio?.equity_curve || []} /> : <SkeletonBox className="h-48 w-full" />}</Panel>
-          <Panel title="Monte Carlo Projection">{portfolio ? <GrowthChart data={portfolio?.projections?.paths || []} /> : <SkeletonBox className="h-48 w-full" />}</Panel>
-        </div>
-
-        <Panel title={`Performance Heatmap • ${timeMode}`}>{portfolio ? <WinHeatmap data={portfolio?.heatmap || []} /> : <SkeletonBox className="h-36 w-full" />}</Panel>
-        <Panel title="Live Engine Terminal">
-          <TerminalStream logs={liveData.logs || []} />
-        </Panel>
-      </div>
-
-      <div className="col-span-12 space-y-5 xl:col-span-4">
-        {/* Brier Score Gauge */}
-        {brierSummary && (
-          <Panel title="Brier Score · Model vs Market">
-            <BrierScoreGauge
-              modelBrier={safeNumber(brierSummary.model_brier, 0.25)}
-              marketBrier={safeNumber(brierSummary.market_brier, 0.25)}
-              calibratedBrier={brierSummary.calibrated_brier != null ? safeNumber(brierSummary.calibrated_brier) : undefined}
-            />
-          </Panel>
+    <motion.div key="terminal" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="grid grid-cols-1 gap-5 md:grid-cols-4 lg:grid-cols-6">
+      <Panel title="Live Price Action • 1H Candles" className="md:col-span-4 lg:col-span-4">
+        {liveLoading ? (
+          <div className="grid grid-cols-1 gap-3">
+            <SkeletonBox className="h-[350px] w-full" />
+          </div>
+        ) : chartCandle || (Array.isArray(liveData?.history) && liveData.history.length > 0) ? (
+          <PriceChart candle={chartCandle} history={liveData.history} vwap={liveData.vwap} />
+        ) : (
+          <div className="flex h-[350px] items-center justify-center rounded-xl border border-dashed border-white/10">
+            <div className="section-label">Awaiting stream...</div>
+          </div>
         )}
-        <Panel title="Signal Alignment Matrix">
-          <SignalAlignmentMatrix signal={strategy.signal_alignment} />
+      </Panel>
+
+      <Panel title="Active Positions" className="md:col-span-4 lg:col-span-2">
+        <ActiveTradesPanel trades={liveData.active_trades} currentUnderlying={safeNumber(liveData.price)} />
+      </Panel>
+
+      <Panel title="Order Flow" className="md:col-span-4 lg:col-span-4">
+        <OrderFlowStrip events={flowEvents} />
+      </Panel>
+      
+      {brierSummary && (
+        <Panel title="Brier Score · Model vs Market" className="md:col-span-2 lg:col-span-2">
+          <BrierScoreGauge
+            modelBrier={safeNumber(brierSummary.model_brier, 0.25)}
+            marketBrier={safeNumber(brierSummary.market_brier, 0.25)}
+            calibratedBrier={brierSummary.calibrated_brier != null ? safeNumber(brierSummary.calibrated_brier) : undefined}
+          />
         </Panel>
-        <Panel title="Smart Money Flow (CVD)">
-          <CvdPressureGauge cvd={strategy.cvd_gauge} />
+      )}
+
+      <Panel title="Arbitrage Gap (Math vs Poly)" className="md:col-span-2 lg:col-span-2">
+        <ArbitrageGapPanel edge={strategy.edge_tracker} />
+      </Panel>
+      
+      <Panel title="Signal Alignment Matrix" className="md:col-span-2 lg:col-span-2">
+        <SignalAlignmentMatrix signal={strategy.signal_alignment} />
+      </Panel>
+      
+      <Panel title="Smart Money Flow (CVD)" className="md:col-span-2 lg:col-span-2">
+        <CvdPressureGauge cvd={strategy.cvd_gauge} />
+      </Panel>
+
+      <Panel title="Equity Curve" className="md:col-span-2 lg:col-span-3">
+        {portfolio ? <EquityCurve data={portfolio?.equity_curve || []} /> : <SkeletonBox className="h-48 w-full" />}
+      </Panel>
+      
+      <Panel title="Monte Carlo Projection" className="md:col-span-2 lg:col-span-3">
+        {portfolio ? <GrowthChart data={portfolio?.projections?.paths || []} /> : <SkeletonBox className="h-48 w-full" />}
+      </Panel>
+
+      <Panel title="Adaptive Thresholds" className="md:col-span-2 lg:col-span-2">
+        <AdaptiveThresholdPanel atr={safeNumber(liveData.atr)} cvd={strategy.cvd_gauge} thresholds={strategy.adaptive_thresholds} />
+      </Panel>
+      
+      <Panel title="Execution Latency" className="md:col-span-2 lg:col-span-2">
+        <LatencyWaterfallPanel latency={strategy.execution_latency} />
+      </Panel>
+
+      <Panel title="System Locks" className="md:col-span-2 lg:col-span-2">
+        <SystemLocksPanel locksData={strategy.system_locks} />
+      </Panel>
+
+      <Panel title={`Performance Heatmap • ${timeMode}`} className="md:col-span-4 lg:col-span-4">
+        {portfolio ? <WinHeatmap data={portfolio?.heatmap || []} /> : <SkeletonBox className="h-36 w-full" />}
+      </Panel>
+      
+      <div className="flex flex-col gap-5 md:col-span-4 lg:col-span-2">
+        <Panel title="AI Context">
+          {portfolio ? <AiInsights insights={portfolio?.insights || []} /> : <SkeletonBox className="h-32 w-full" />}
         </Panel>
-        <Panel title="Adaptive Thresholds">
-          <AdaptiveThresholdPanel atr={safeNumber(liveData.atr)} cvd={strategy.cvd_gauge} thresholds={strategy.adaptive_thresholds} />
-        </Panel>
-        <Panel title="System Locks">
-          <SystemLocksPanel locksData={strategy.system_locks} />
-        </Panel>
-        <Panel title="Active Positions">
-          <ActiveTradesPanel trades={liveData.active_trades} currentUnderlying={safeNumber(liveData.price)} />
-        </Panel>
-        <Panel title="AI Context">{portfolio ? <AiInsights insights={portfolio?.insights || []} /> : <SkeletonBox className="h-32 w-full" />}</Panel>
         {liveData.ai_log && (
           <Panel title="Latest AI Reasoning">
             <AiLogDisplay aiLog={liveData.ai_log} />
           </Panel>
         )}
         <Panel title="Replay Shortcut">
-          <button onClick={() => setReplayTrade((portfolio?.journal || [])[0] || null)} className="w-full rounded-lg border border-[var(--az-border-active)] bg-[var(--az-accent-subtle)] px-3 py-2.5 text-xs font-bold text-blue-300 transition hover:bg-blue-500/15">
+          <button onClick={() => setReplayTrade((portfolio?.journal || [])[0] || null)} className="w-full rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-2.5 text-xs font-bold text-blue-300 transition-all duration-300 hover:scale-[1.02] hover:bg-blue-500/20">
             Replay Most Recent Trade
           </button>
         </Panel>
       </div>
+
+      <Panel title="Live Engine Terminal" className="md:col-span-4 lg:col-span-6">
+        <TerminalStream logs={liveData.logs || []} />
+      </Panel>
     </motion.div>
   );
 }
