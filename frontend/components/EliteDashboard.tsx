@@ -1335,13 +1335,13 @@ function SkeletonCard() {
   );
 }
 
-function Panel({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
+function Panel({ title, children, className = "", contentClassName = "p-4" }: { title: string; children: React.ReactNode; className?: string; contentClassName?: string }) {
   return (
     <div className={`flex flex-col rounded-md border border-az-border bg-az-surface ${className}`}>
-      <div className="flex items-center border-b border-az-border px-4 py-3">
+      <div className="flex shrink-0 items-center border-b border-az-border px-4 py-3">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-az-text-muted">{title}</h3>
       </div>
-      <div className="flex-1 p-4">{children}</div>
+      <div className={`flex-1 ${contentClassName}`}>{children}</div>
     </div>
   );
 }
@@ -1690,11 +1690,17 @@ function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMo
         <SystemLocksPanel locksData={strategy.system_locks} />
       </Panel>
 
-      <Panel title={`Performance Heatmap • ${timeMode}`} className="md:col-span-4 lg:col-span-4">
-        {portfolio ? <WinHeatmap data={portfolio?.heatmap || []} /> : <SkeletonBox className="h-36 w-full" />}
-      </Panel>
+      <div className="flex flex-col gap-2 md:col-span-4 lg:col-span-4 min-h-0">
+        <Panel title={`Performance Heatmap • ${timeMode}`}>
+          {portfolio ? <WinHeatmap data={portfolio?.heatmap || []} /> : <SkeletonBox className="h-36 w-full" />}
+        </Panel>
+
+        <Panel title="Live Engine Terminal" className="flex-1 min-h-0" contentClassName="flex flex-col min-h-0 relative p-4">
+          <TerminalStream logs={liveData.logs || []} />
+        </Panel>
+      </div>
       
-      <div className="flex flex-col gap-5 md:col-span-4 lg:col-span-2">
+      <div className="flex flex-col gap-2 md:col-span-4 lg:col-span-2">
         <Panel title="AI Context">
           {portfolio ? <AiInsights insights={portfolio?.insights || []} /> : <SkeletonBox className="h-32 w-full" />}
         </Panel>
@@ -1704,15 +1710,11 @@ function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMo
           </Panel>
         )}
         <Panel title="Replay Shortcut">
-          <button onClick={() => setReplayTrade((portfolio?.journal || [])[0] || null)} className="w-full rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-2.5 text-xs font-bold text-blue-300 transition-all duration-300 hover:scale-[1.02] hover:bg-blue-500/20">
+          <button onClick={() => setReplayTrade((portfolio?.journal || [])[0] || null)} className="w-full rounded-md border border-az-accent/30 bg-az-accent/10 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-az-accent transition-all duration-300 hover:scale-[1.02] hover:bg-az-accent/20">
             Replay Most Recent Trade
           </button>
         </Panel>
       </div>
-
-      <Panel title="Live Engine Terminal" className="md:col-span-4 lg:col-span-6">
-        <TerminalStream logs={liveData.logs || []} />
-      </Panel>
     </motion.div>
   );
 }
@@ -1742,33 +1744,35 @@ function TerminalStream({ logs }: { logs: string[] }) {
   };
 
   const renderClass = (line: string) => {
-    if (line.includes("[ERROR]")) return "text-red-400";
-    if (line.includes("[WARNING]") || line.includes("[SL HIT]")) return "text-amber-400";
-    if (line.includes("[BET]") || line.includes("DECISION LOCKED")) return "text-green-400";
-    if (line.includes("[GATE]")) return "text-blue-400";
-    return "text-zinc-500";
+    if (line.includes("[ERROR]")) return "text-az-loss";
+    if (line.includes("[WARNING]") || line.includes("[SL HIT]")) return "text-az-warning";
+    if (line.includes("[BET]") || line.includes("DECISION LOCKED")) return "text-az-profit";
+    if (line.includes("[GATE]")) return "text-az-accent";
+    return "text-az-text-muted";
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="text-[10px] uppercase tracking-widest text-zinc-500">{logs.length} entries</div>
+    <div className="flex h-full flex-col gap-3 min-h-0">
+      <div className="flex shrink-0 items-center justify-between">
+        <div className="text-[10px] uppercase tracking-widest text-az-text-muted">{logs.length} entries</div>
         <button
           onClick={() => setAutoScroll((prev) => !prev)}
           className={`flex items-center gap-1.5 rounded-md border px-2 py-1 text-[10px] font-bold transition ${
-            autoScroll ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-zinc-700 bg-zinc-900 text-zinc-300"
+            autoScroll ? "border-az-profit/30 bg-az-profit/10 text-az-profit" : "border-az-border bg-az-surface text-az-text"
           }`}
         >
           {autoScroll ? <Pause size={12} /> : <Play size={12} />}
           {autoScroll ? "Pause Auto-scroll" : "Resume Auto-scroll"}
         </button>
       </div>
-      <div ref={terminalRef} onScroll={onScroll} className="h-64 space-y-1 overflow-y-auto rounded-xl border border-zinc-800/50 bg-zinc-950/80 p-3 font-mono text-[10px] leading-relaxed sm:h-96 sm:p-4">
-        {logs.slice(-200).map((log, i) => (
-          <div key={`${i}-${log.slice(0, 20)}`} className={renderClass(String(log))}>
-            {log}
-          </div>
-        ))}
+      <div className="relative flex-1 min-h-0">
+        <div ref={terminalRef} onScroll={onScroll} className="absolute inset-0 space-y-1 overflow-y-auto rounded bg-az-bg p-3 font-mono text-[10px] leading-relaxed border border-az-border/50">
+          {logs.slice(-200).map((log, i) => (
+            <div key={`${i}-${log.slice(0, 20)}`} className={renderClass(String(log))}>
+              {log}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
