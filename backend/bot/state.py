@@ -85,7 +85,7 @@ class EngineState:
     total_losses: int = 0
     simulated_balance: float = 5000.0
     current_daily_pnl: float = 0.0
-    max_trade_pct: float = 0.05
+    max_trade_pct: float = 0.03
     max_daily_loss_pct: float = 0.15
     trades_this_hour: int = 0
     current_hour: int = field(default_factory=lambda: datetime.now(timezone.utc).hour)

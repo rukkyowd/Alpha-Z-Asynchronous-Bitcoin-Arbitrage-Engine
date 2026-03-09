@@ -258,7 +258,7 @@ DEFAULT_MARKET_DATA = {
             "max_bet_cap": 0.0,
             "drawdown_used": 0.0,
             "drawdown_room_left": 0.0,
-            "max_trade_pct": 0.05,
+            "max_trade_pct": 0.03,
             "max_daily_loss_pct": 0.15,
         },
     },
@@ -2553,7 +2553,7 @@ async def bootstrap_runtime() -> EngineServices:
     data_config = DataStreamsConfig()
     risk_config = RiskConfig(
         max_daily_loss_pct=_env_float("MAX_DAILY_LOSS_PCT", 0.15),
-        max_trade_pct=_env_float("MAX_TRADE_PCT", 0.05),
+        max_trade_pct=_env_float("MAX_TRADE_PCT", 0.03),
         max_trades_per_hour=_env_int("MAX_TRADES_PER_HOUR", 2),
         hourly_trade_limit_drawdown_step1=_env_float("HOURLY_TRADE_LIMIT_DRAWDOWN_STEP1", 0.25),
         hourly_trade_limit_drawdown_step2=_env_float("HOURLY_TRADE_LIMIT_DRAWDOWN_STEP2", 0.50),

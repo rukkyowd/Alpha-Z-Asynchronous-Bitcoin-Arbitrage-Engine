@@ -24,7 +24,7 @@ def _safe_div(numerator: float, denominator: float, default: float = 0.0) -> flo
 @dataclass(slots=True, frozen=True)
 class RiskConfig:
     max_daily_loss_pct: float = 0.15
-    max_trade_pct: float = 0.05
+    max_trade_pct: float = 0.03
     max_trades_per_hour: int = 2
     hourly_trade_limit_drawdown_step1: float = 0.25
     hourly_trade_limit_drawdown_step2: float = 0.50
@@ -91,6 +91,8 @@ class PositionRiskConfig:
     max_sl_token_delta: float = -0.08
     cheap_token_threshold_price: float = 0.30
     cheap_token_soft_sl_max_loss_pct: float = 0.30
+    mid_token_threshold_price: float = 0.75
+    mid_token_soft_sl_max_loss_pct: float = 0.22
     volatility_reference: float = 0.0040
     volatility_floor: float = 0.60
     volatility_ceiling: float = 1.80
@@ -120,6 +122,7 @@ class PositionRiskConfig:
     tp_retrace_exit_frac: float = 0.45
     tp_retrace_exit_min_delta: float = 0.05
     tp_lock_min_profit_delta: float = 0.02
+    max_reachable_token_price: float = 0.99
 
 
 @dataclass(slots=True, frozen=True)
@@ -152,6 +155,8 @@ class RiskManager:
         "trades_this_hour",
         "current_hour",
         "current_day",
+        "current_hour_trade_limit_override",
+        "current_hour_trade_limit_trigger_frac",
     )
 
     def __init__(self, config: RiskConfig | None = None, position_config: PositionRiskConfig | None = None):
@@ -162,6 +167,8 @@ class RiskManager:
         self.trades_this_hour = 0
         self.current_hour = now_utc.hour
         self.current_day = now_utc.date()
+        self.current_hour_trade_limit_override: int | None = None
+        self.current_hour_trade_limit_trigger_frac = 0.0
 
     def reset_stats(self, now: datetime | None = None) -> None:
         current = now or datetime.now(timezone.utc)
@@ -169,6 +176,8 @@ class RiskManager:
         self.trades_this_hour = 0
         self.current_hour = current.hour
         self.current_day = current.date()
+        self.current_hour_trade_limit_override = None
+        self.current_hour_trade_limit_trigger_frac = 0.0
 
     def _roll_session(self, now: datetime) -> None:
         if now.date() != self.current_day:
@@ -176,6 +185,8 @@ class RiskManager:
         elif now.hour != self.current_hour:
             self.trades_this_hour = 0
             self.current_hour = now.hour
+            self.current_hour_trade_limit_override = None
+            self.current_hour_trade_limit_trigger_frac = 0.0
 
     def record_pnl(self, pnl_impact: float, now: datetime | None = None) -> None:
         current = now or datetime.now(timezone.utc)
@@ -189,15 +200,25 @@ class RiskManager:
 
     def _effective_hourly_trade_limit(self, day_pnl: float, daily_loss_limit: float) -> int:
         base_limit = max(1, self.config.max_trades_per_hour)
-        if daily_loss_limit <= 0 or day_pnl >= 0:
-            return base_limit
+        computed_limit = base_limit
+        drawdown_frac = 0.0
 
-        drawdown_frac = abs(day_pnl) / daily_loss_limit
-        if drawdown_frac >= self.config.hourly_trade_limit_drawdown_step2:
-            return 1
-        if drawdown_frac >= self.config.hourly_trade_limit_drawdown_step1:
-            return max(1, base_limit - 1)
-        return base_limit
+        if daily_loss_limit > 0 and day_pnl < 0:
+            drawdown_frac = abs(day_pnl) / daily_loss_limit
+            if drawdown_frac >= self.config.hourly_trade_limit_drawdown_step2:
+                computed_limit = 1
+            elif drawdown_frac >= self.config.hourly_trade_limit_drawdown_step1:
+                computed_limit = max(1, base_limit - 1)
+
+        if computed_limit < base_limit:
+            pinned_limit = self.current_hour_trade_limit_override
+            if pinned_limit is None or computed_limit < pinned_limit:
+                self.current_hour_trade_limit_override = computed_limit
+                self.current_hour_trade_limit_trigger_frac = drawdown_frac
+
+        if self.current_hour_trade_limit_override is not None:
+            return min(self.current_hour_trade_limit_override, computed_limit)
+        return computed_limit
 
     def drawdown_status(
         self,
@@ -240,10 +261,19 @@ class RiskManager:
             )
         if hour_count >= effective_hourly_limit:
             if effective_hourly_limit < self.config.max_trades_per_hour:
-                reason = (
-                    f"Max trades per hour reduced to {effective_hourly_limit} after drawdown "
-                    f"({abs(day_pnl) / max(daily_loss_limit, EPSILON):.0%} of daily loss limit) reached."
-                )
+                if (
+                    self.current_hour_trade_limit_override is not None
+                    and abs(day_pnl) / max(daily_loss_limit, EPSILON) < self.config.hourly_trade_limit_drawdown_step1
+                ):
+                    reason = (
+                        f"Max trades per hour pinned to {effective_hourly_limit} for this hour after drawdown "
+                        f"({self.current_hour_trade_limit_trigger_frac:.0%} of daily loss limit) was breached."
+                    )
+                else:
+                    reason = (
+                        f"Max trades per hour reduced to {effective_hourly_limit} after drawdown "
+                        f"({abs(day_pnl) / max(daily_loss_limit, EPSILON):.0%} of daily loss limit) reached."
+                    )
             else:
                 reason = f"Max trades per hour ({effective_hourly_limit}) reached."
             return DrawdownStatus(
@@ -551,6 +581,14 @@ class RiskManager:
                 position.bought_price * cfg.cheap_token_soft_sl_max_loss_pct,
             )
             sl_delta = max(sl_delta, cheap_token_sl)
+        elif position.bought_price <= cfg.mid_token_threshold_price:
+            mid_token_sl = -max(
+                cfg.sl_entry_rel_min_cents,
+                position.bought_price * cfg.mid_token_soft_sl_max_loss_pct,
+            )
+            sl_delta = max(sl_delta, mid_token_sl)
+        reachable_tp_delta = max(0.0, cfg.max_reachable_token_price - position.bought_price)
+        tp_delta = min(tp_delta, reachable_tp_delta)
         entry_based_sl = -max(cfg.sl_entry_rel_min_cents, position.bought_price * cfg.sl_entry_rel_max_loss_pct)
         reachable_floor = -(max(position.bought_price - 0.01, 0.0))
         if reachable_floor < 0:

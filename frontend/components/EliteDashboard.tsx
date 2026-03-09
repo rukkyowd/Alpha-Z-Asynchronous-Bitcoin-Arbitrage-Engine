@@ -114,7 +114,7 @@ const DEFAULT_ALERT_SETTINGS: AlertSettings = {
 const DEFAULT_ENGINE_CONTROL: EngineControl = {
   kill_switch: false,
   paper_trading: true,
-  max_trade_pct: 0.05,
+  max_trade_pct: 0.03,
   max_daily_loss_pct: 0.2,
 };
 
@@ -763,7 +763,7 @@ export default function EliteDashboard() {
           const nextControl: EngineControl = {
             kill_switch: Boolean(rawPayload.engine_control.kill_switch),
             paper_trading: Boolean(rawPayload.engine_control.paper_trading),
-            max_trade_pct: safeNumber(rawPayload.engine_control.max_trade_pct, 0.05),
+            max_trade_pct: safeNumber(rawPayload.engine_control.max_trade_pct, 0.03),
             max_daily_loss_pct: safeNumber(rawPayload.engine_control.max_daily_loss_pct, 0.2),
           };
           setEngineControl(nextControl);
@@ -843,7 +843,7 @@ export default function EliteDashboard() {
         const nextControl: EngineControl = {
           kill_switch: Boolean(data?.kill_switch),
           paper_trading: Boolean(data?.paper_trading),
-          max_trade_pct: safeNumber(data?.max_trade_pct, 0.05),
+          max_trade_pct: safeNumber(data?.max_trade_pct, 0.03),
           max_daily_loss_pct: safeNumber(data?.max_daily_loss_pct, 0.2),
         };
         setEngineControl(nextControl);

@@ -65,6 +65,7 @@ class StrategyConfig:
     countertrend_min_strike_dist_pct: float = 0.0010
     countertrend_force_ai: bool = True
     min_directional_ev_lead_pct: float = 2.0
+    post_stop_same_direction_lockout_for_slug: bool = True
     post_stop_cooldown_secs: float = 600.0
     post_stop_reentry_min_ev_improvement_pct: float = 5.0
     post_stop_reentry_min_score: int = 3
@@ -246,6 +247,12 @@ def _post_stop_reentry_reason(
 
     if "STOP_LOSS" not in reentry_state.last_exit_reason.upper():
         return None
+
+    if config.post_stop_same_direction_lockout_for_slug:
+        return (
+            f"Post-stop same-direction lockout for {direction.value} "
+            f"for the rest of this market after {reentry_state.last_exit_reason}"
+        )
 
     elapsed = time.time() - reentry_state.last_exit_ts
     if elapsed < config.post_stop_cooldown_secs:
