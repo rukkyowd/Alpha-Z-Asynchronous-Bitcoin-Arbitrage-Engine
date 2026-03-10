@@ -328,10 +328,10 @@ class ClobExecutionEngine:
     ) -> float:
         """Spread-aware entry pricing (Pillar 3A).
 
-        When the spread is wide and there is ample time remaining, place
-        on the *bid* side of the spread (1 tick above best bid) instead
-        of crossing to the ask.  This reduces the effective entry cost
-        by half the spread on average, directly boosting PnL.
+        When the spread is wide and there is ample time remaining, shade
+        the submitted cap toward the bid side of the spread (1 tick above
+        best bid) instead of immediately paying the ask. This improves the
+        target entry price, but it does not guarantee an immediate fill.
         """
         if liquidity.best_bid is None or liquidity.best_ask is None:
             return naive_target
@@ -341,7 +341,7 @@ class ClobExecutionEngine:
         time_ok = seconds_remaining >= self.config.smart_entry_min_time_remaining_secs
 
         if wide_enough and time_ok:
-            # Join 1 tick above best bid (maker side)
+            # Shade the submitted cap toward the bid side of the spread.
             smart_price = _quantize(
                 liquidity.best_bid + float(Decimal(tick_size)),
                 tick_size,
@@ -351,7 +351,7 @@ class ClobExecutionEngine:
             smart_price = min(smart_price, naive_target)
             log.info(
                 "[ENTRY SMART] Spread %.1fc wide, time %.0fs remaining — "
-                "joining bid side @ %.4f (vs naive %.4f, ask %.4f)",
+                "shading entry cap toward bid side @ %.4f (vs naive %.4f, ask %.4f)",
                 spread_cents * 100,
                 seconds_remaining,
                 smart_price,
@@ -1039,6 +1039,19 @@ class ClobExecutionEngine:
 
         if self.config.paper_trading or self.config.dry_run:
             synthetic_fill_cost = round(bet_size_usd, 2)
+            if liquidity.mode == "PAPER_CLOB_SHADOW":
+                current_ask = liquidity.best_ask if liquidity.best_ask is not None else liquidity.entry_price
+                if current_ask is None or limit_price + 1e-9 < current_ask:
+                    reason = (
+                        f"Paper shadow passive cap {limit_price:.4f} below ask "
+                        f"{(current_ask or 0.0):.4f}; immediate fill not simulated"
+                    )
+                    await state.record_execution_failure(
+                        signal.slug,
+                        reason=reason,
+                        ev_pct=signal.expected_value_pct,
+                    )
+                    return None
             synthetic_fill_price = min(limit_price, max(liquidity.entry_price, 0.01))
             synthetic_shares = synthetic_fill_cost / max(synthetic_fill_price, 0.01)
             risk_snapshot = self.risk_manager.position_risk_snapshot(
@@ -1452,3 +1465,4 @@ __all__ = [
     "FillResult",
     "LiquidityCheckResult",
 ]
+

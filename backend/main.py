@@ -265,15 +265,29 @@ DEFAULT_MARKET_DATA = {
 }
 
 
+def _skip_log_repeat_secs(reason: str, default_secs: float = 15.0) -> float:
+    normalized = (reason or "").lower()
+    if "post-stop same-direction lockout" in normalized:
+        return 60.0
+    if "post-win opposite-direction cooldown" in normalized:
+        return 60.0
+    if "crowd skew too high" in normalized:
+        return 45.0
+    if normalized.startswith("too early") or normalized.startswith("too close to expiry"):
+        return 30.0
+    return default_secs
+
+
 def log_skip_reason(runtime: EngineServices, slug: str, reason: str, *, min_repeat_secs: float = 15.0) -> None:
     now_ts = time.time()
+    effective_repeat_secs = _skip_log_repeat_secs(reason, min_repeat_secs)
     if reason == "Position already active":
         last_position_log = runtime.position_heartbeat_ts.get(slug, 0.0)
         if (now_ts - last_position_log) <= (POSITION_HEARTBEAT_SECS + 2.0):
             return
     should_log = (
         reason != runtime.last_logged_rejection_reason
-        or (now_ts - runtime.last_logged_rejection_ts) >= min_repeat_secs
+        or (now_ts - runtime.last_logged_rejection_ts) >= effective_repeat_secs
     )
     if not should_log:
         return
@@ -1569,6 +1583,13 @@ async def finalize_closed_position(
             direction=Direction(trade_record["decision"]) if trade_record["decision"] in Direction._value2member_map_ else Direction.UNKNOWN,
             entry_ev_pct=_safe_float(position.get("ml_features", {}).get("expected_ev_pct")),
         )
+    elif pnl > 0:
+        await runtime.state.record_reentry_state(
+            trade_record["slug"],
+            exit_reason=exit_reason,
+            direction=Direction(trade_record["decision"]) if trade_record["decision"] in Direction._value2member_map_ else Direction.UNKNOWN,
+            entry_ev_pct=_safe_float(position.get("ml_features", {}).get("expected_ev_pct")),
+        )
     else:
         await runtime.state.clear_reentry_state(trade_record["slug"])
     runtime.position_heartbeat_ts.pop(trade_record["slug"], None)
@@ -1797,6 +1818,22 @@ async def evaluation_loop(runtime: EngineServices) -> None:
 
             runtime.latest_context = context
             runtime.latest_odds = odds
+
+            async with runtime.state.positions_lock:
+                already_open = slug in runtime.state.active_positions or slug in runtime.state.committed_slugs
+            if already_open:
+                runtime.latest_rejected_reason = "Position already active"
+                runtime.latest_locks = [runtime.latest_rejected_reason]
+                log_skip_reason(runtime, slug, runtime.latest_rejected_reason, min_repeat_secs=30.0)
+                await runtime.state.update_telemetry(
+                    execution_timing=ExecutionTimingSnapshot(
+                        total_ms=(time.perf_counter() - cycle_started) * 1000.0,
+                        updated_at=time.time(),
+                    )
+                )
+                await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
+                continue
+
             enriched_context = apply_probabilistic_model(
                 context,
                 strike_price=odds.reference_price or odds.strike_price,
@@ -1849,15 +1886,6 @@ async def evaluation_loop(runtime: EngineServices) -> None:
                         updated_at=time.time(),
                     )
                 )
-                await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
-                continue
-
-            async with runtime.state.positions_lock:
-                already_open = slug in runtime.state.active_positions or slug in runtime.state.committed_slugs
-            if already_open:
-                runtime.latest_rejected_reason = "Position already active"
-                runtime.latest_locks = [runtime.latest_rejected_reason]
-                log_skip_reason(runtime, slug, runtime.latest_rejected_reason, min_repeat_secs=30.0)
                 await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
                 continue
 

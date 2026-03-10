@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import time
 from dataclasses import dataclass, field, replace as _dc_replace
 
@@ -69,6 +70,11 @@ class StrategyConfig:
     post_stop_cooldown_secs: float = 600.0
     post_stop_reentry_min_ev_improvement_pct: float = 5.0
     post_stop_reentry_min_score: int = 3
+    post_win_opposite_direction_cooldown_secs: float = 900.0
+    late_cheap_token_threshold_price: float = 0.10
+    late_cheap_token_window_secs: float = 1800.0
+    late_cheap_token_min_ev_pct: float = 20.0
+    late_cheap_token_min_score: int = 3
     default_depth_usd: float = 40.0
     default_spread_pct: float = 0.01
 
@@ -278,6 +284,32 @@ def _post_stop_reentry_reason(
     return None
 
 
+def _post_profit_reentry_reason(
+    reentry_state: ReentryState | None,
+    direction: Direction,
+    config: StrategyConfig,
+) -> str | None:
+    if reentry_state is None:
+        return None
+
+    if reentry_state.last_exit_direction in (Direction.UNKNOWN, direction):
+        return None
+
+    last_reason = reentry_state.last_exit_reason.upper()
+    if "STOP_LOSS" in last_reason:
+        return None
+
+    elapsed = time.time() - reentry_state.last_exit_ts
+    if elapsed >= config.post_win_opposite_direction_cooldown_secs:
+        return None
+
+    remaining = max(0, int(config.post_win_opposite_direction_cooldown_secs - elapsed))
+    return (
+        f"Post-win opposite-direction cooldown active ({remaining}s left): "
+        f"no {direction.value} after profitable {reentry_state.last_exit_direction.value} exit"
+    )
+
+
 class StrategyEngine:
     __slots__ = ("config", "risk_manager", "calibrator")
 
@@ -326,12 +358,12 @@ class StrategyEngine:
         if odds.seconds_remaining < self.config.min_seconds_remaining:
             return _skip_signal(
                 slug,
-                f"Too close to expiry ({int(odds.seconds_remaining)}s < {int(self.config.min_seconds_remaining)}s)",
+                f"Too close to expiry ({max(0, math.ceil(odds.seconds_remaining))}s < {int(self.config.min_seconds_remaining)}s)",
             )
         if odds.seconds_remaining > self.config.max_seconds_for_new_bet:
             return _skip_signal(
                 slug,
-                f"Too early ({int(odds.seconds_remaining)}s > {int(self.config.max_seconds_for_new_bet)}s)",
+                f"Too early ({math.ceil(odds.seconds_remaining)}s > {int(self.config.max_seconds_for_new_bet)}s)",
             )
         reference_price = _reference_price(odds)
         if reference_price <= 0:
@@ -461,6 +493,26 @@ class StrategyEngine:
                 score=score,
             )
 
+        if (
+            odds.seconds_remaining <= self.config.late_cheap_token_window_secs
+            and token_price <= self.config.late_cheap_token_threshold_price
+            and (
+                score < self.config.late_cheap_token_min_score
+                or target_ev.ev_pct < self.config.late_cheap_token_min_ev_pct
+            )
+        ):
+            return _skip_signal(
+                slug,
+                (
+                    f"Late cheap-token blocked: px {token_price:.3f} <= {self.config.late_cheap_token_threshold_price:.2f} "
+                    f"with score {score}/4 and EV {target_ev.ev_pct:.2f}% "
+                    f"(needs score>={self.config.late_cheap_token_min_score}/4, "
+                    f"EV>={self.config.late_cheap_token_min_ev_pct:.2f}% inside "
+                    f"{int(self.config.late_cheap_token_window_secs)}s)"
+                ),
+                score=score,
+            )
+
         countertrend_reason = _countertrend_reason(
             enriched_context,
             odds,
@@ -487,6 +539,13 @@ class StrategyEngine:
         )
         if post_stop_reason:
             return _skip_signal(slug, post_stop_reason, score=score)
+        post_profit_reason = _post_profit_reentry_reason(
+            reentry_snapshot,
+            target_direction,
+            self.config,
+        )
+        if post_profit_reason:
+            return _skip_signal(slug, post_profit_reason, score=score)
 
         reasons: list[str] = []
         if signal_alignment.vwap:

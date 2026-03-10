@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
+from bot.calibration import CalibrationConfig, ProbabilityCalibrator
 
 # ============================================================
 # ALPHA-Z QUANTITATIVE ANALYSIS TOOL
@@ -134,6 +135,69 @@ def _parse_metadata_blob(raw_value):
             return {}
     return {}
 
+
+def _chronological_holdout_calibration(calibration: pd.DataFrame) -> dict | None:
+    if 'timestamp' not in calibration.columns:
+        return None
+
+    ordered = calibration.dropna(subset=['timestamp']).sort_values('timestamp').copy()
+    n = len(ordered)
+    if n < 40:
+        return None
+
+    split_idx = max(int(n * 0.7), 30)
+    split_idx = min(split_idx, n - 10)
+    if split_idx <= 0 or split_idx >= n:
+        return None
+
+    train = ordered.iloc[:split_idx].copy()
+    holdout = ordered.iloc[split_idx:].copy()
+    if len(holdout) < 10 or train['outcome_numeric'].nunique() < 2:
+        return None
+
+    method = os.getenv("CALIBRATION_METHOD", "platt").strip().lower() or "platt"
+    if method not in {"platt", "isotonic"}:
+        method = "platt"
+
+    calibrator = ProbabilityCalibrator(
+        CalibrationConfig(
+            method=method,
+            min_samples=min(30, len(train)),
+            db_path="",
+        )
+    )
+    if not calibrator.fit(train['model_prob'].tolist(), train['outcome_numeric'].tolist()):
+        return None
+
+    holdout['holdout_cal_prob'] = holdout['model_prob'].apply(calibrator.calibrate)
+    holdout_raw_brier = ((holdout['model_prob'] - holdout['outcome_numeric']) ** 2).mean()
+    holdout_cal_brier = ((holdout['holdout_cal_prob'] - holdout['outcome_numeric']) ** 2).mean()
+
+    holdout_market_brier = np.nan
+    market_holdout = holdout.dropna(subset=['fair_market_probability_pct']).copy()
+    if not market_holdout.empty:
+        market_holdout['market_prob'] = market_holdout['fair_market_probability_pct'] / 100.0
+        holdout_market_brier = ((market_holdout['market_prob'] - market_holdout['outcome_numeric']) ** 2).mean()
+
+    return {
+        'train_size': len(train),
+        'holdout_size': len(holdout),
+        'method': method,
+        'raw_brier': float(holdout_raw_brier),
+        'calibrated_brier': float(holdout_cal_brier),
+        'market_brier': float(holdout_market_brier) if not np.isnan(holdout_market_brier) else None,
+        'calibration_improvement': float(holdout_raw_brier - holdout_cal_brier),
+        'market_advantage': (
+            float(holdout_market_brier - holdout_cal_brier)
+            if not np.isnan(holdout_market_brier)
+            else None
+        ),
+        'train_start': train['timestamp'].iloc[0],
+        'train_end': train['timestamp'].iloc[-1],
+        'holdout_start': holdout['timestamp'].iloc[0],
+        'holdout_end': holdout['timestamp'].iloc[-1],
+    }
+
 def run_probability_calibration_report(df):
     """Computes calibration diagnostics with Model vs Market Brier benchmarking."""
     if 'metadata_json' not in df.columns:
@@ -166,6 +230,7 @@ def run_probability_calibration_report(df):
     calibration['model_prob'] = calibration['predicted_win_prob_pct'] / 100.0
     calibration['model_brier'] = (calibration['model_prob'] - calibration['outcome_numeric']) ** 2
     model_brier = calibration['model_brier'].mean()
+    holdout_report = _chronological_holdout_calibration(calibration)
 
     # --- Market Brier Score (benchmark) ---
     market_cal = calibration.dropna(subset=['fair_market_probability_pct']).copy()
@@ -209,20 +274,21 @@ def run_probability_calibration_report(df):
     print(" PROBABILITY CALIBRATION & BRIER BENCHMARK REPORT")
     print("="*80)
 
-    print("\n  BRIER SCORES (lower is better, 0.25 = coin flip)")
+    print("\n  STORED RUNTIME BRIER SCORES (descriptive history)")
     print("-" * 80)
-    print(f"  Alpha-Z Raw Model (all)   : {model_brier:.4f}")
+    print(f"  Raw Model (all resolved)  : {model_brier:.4f}")
     if not np.isnan(cal_brier):
-        sign_cal = "+" if cal_brier_advantage > 0 else ""
-        verdict_cal = "CALIBRATION HELPS" if cal_brier_advantage > 0 else "RAW BETTER"
-        print(f"  Alpha-Z Calibrated (all)  : {cal_brier:.4f}  [{sign_cal}{cal_brier_advantage:.4f} improvement, {verdict_cal}]")
+        print(
+            f"  Calibrated (all resolved) : {cal_brier:.4f}  "
+            f"[descriptive delta {cal_brier_advantage:+.4f}]"
+        )
     if not np.isnan(market_brier):
         print(f"  Polymarket Crowd (all)    : {market_brier:.4f}")
         best_model = cal_brier if not np.isnan(cal_brier) else model_brier
         advantage = market_brier - best_model
         sign = "+" if advantage > 0 else ""
         verdict = "MODEL WINS" if advantage > 0 else "MARKET WINS"
-        print(f"  Best Model Advantage      : {sign}{advantage:.4f}  [{verdict}]")
+        print(f"  Best Model vs Market      : {sign}{advantage:.4f}  [{verdict}]")
     print(f"\n  Rolling (last {rolling_n}):")
     print(f"    Model  : {rolling_model_brier:.4f}")
     if not np.isnan(rolling_market_brier):
@@ -232,6 +298,29 @@ def run_probability_calibration_report(df):
     print(f"  Realized Win Rate  : {realized_wr:.2f}%")
     print(f"  Avg Edge vs Fair   : {avg_edge:+.2f}%")
     print(f"  Total Resolved     : {len(calibration)}")
+
+    print("\n  CHRONOLOGICAL HOLDOUT CHECK (train older trades, score newer trades)")
+    print("-" * 80)
+    if holdout_report is None:
+        print("  Not enough chronological history yet for a reliable holdout split.")
+    else:
+        print(
+            f"  Train window       : {holdout_report['train_start']} -> {holdout_report['train_end']} "
+            f"({holdout_report['train_size']} trades)"
+        )
+        print(
+            f"  Holdout window     : {holdout_report['holdout_start']} -> {holdout_report['holdout_end']} "
+            f"({holdout_report['holdout_size']} trades)"
+        )
+        print(f"  Method             : {holdout_report['method']}")
+        print(f"  Holdout Raw Brier  : {holdout_report['raw_brier']:.4f}")
+        print(
+            f"  Holdout Cal Brier  : {holdout_report['calibrated_brier']:.4f}  "
+            f"[improvement {holdout_report['calibration_improvement']:+.4f}]"
+        )
+        if holdout_report['market_brier'] is not None:
+            print(f"  Holdout Mkt Brier  : {holdout_report['market_brier']:.4f}")
+            print(f"  Cal vs Market      : {holdout_report['market_advantage']:+.4f}")
 
     # --- Per-bucket calibration with market benchmark ---
     bins = [0, 40, 50, 60, 70, 80, 100]
@@ -301,6 +390,16 @@ def run_probability_calibration_report(df):
         'realized_win_rate_pct': round(float(realized_wr), 2),
         'avg_edge_vs_fair_pct': round(float(avg_edge), 2) if not np.isnan(avg_edge) else None,
         'bucket_breakdown': bucket_rows,
+        'holdout': {
+            'train_size': holdout_report['train_size'],
+            'holdout_size': holdout_report['holdout_size'],
+            'method': holdout_report['method'],
+            'raw_brier': round(float(holdout_report['raw_brier']), 6),
+            'calibrated_brier': round(float(holdout_report['calibrated_brier']), 6),
+            'market_brier': round(float(holdout_report['market_brier']), 6) if holdout_report['market_brier'] is not None else None,
+            'calibration_improvement': round(float(holdout_report['calibration_improvement']), 6),
+            'market_advantage': round(float(holdout_report['market_advantage']), 6) if holdout_report['market_advantage'] is not None else None,
+        } if holdout_report is not None else None,
     }
 
 
