@@ -1,0 +1,395 @@
+"""Regression tests for trading-path execution and AI wiring fixes.
+
+Usage:
+    py backend/test_trade_path_fixes.py
+"""
+
+from __future__ import annotations
+
+import asyncio
+import math
+import sys
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+from types import SimpleNamespace
+
+_BACKEND_DIR = Path(__file__).resolve().parent
+if str(_BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(_BACKEND_DIR))
+
+import main as main_module
+from bot.ai_agent import AIConfig, AIDecision, LocalAIAgent
+from bot.execution import ClobExecutionEngine, ExecutionConfig, LiquidityCheckResult
+from bot.models import ConfidenceLevel, Direction, MarketOddsSnapshot, TechnicalContext, TradeSignal
+from bot.risk import RiskManager
+from bot.state import EngineState
+
+PASSED = 0
+FAILED = 0
+
+
+def _assert(condition: bool, name: str, detail: str = "") -> None:
+    global PASSED, FAILED
+    if condition:
+        PASSED += 1
+        print(f"  [PASS] {name}")
+    else:
+        FAILED += 1
+        message = f"  [FAIL] {name}"
+        if detail:
+            message += f" -- {detail}"
+        print(message)
+
+
+def _make_context(*, bayesian_probability: float = 0.62) -> TechnicalContext:
+    return TechnicalContext(
+        timestamp=datetime.now(timezone.utc),
+        price=70000.0,
+        strike_price=69950.0,
+        bayesian_probability=bayesian_probability,
+        bayesian_logit=0.5,
+        expected_move_t=0.8,
+    )
+
+
+def _make_odds(*, entry_prob_pct: float = 40.0) -> MarketOddsSnapshot:
+    return MarketOddsSnapshot(
+        slug="btc-hourly-test",
+        market_found=True,
+        seconds_remaining=1800.0,
+        reference_price=70000.0,
+        strike_price=69950.0,
+        up_token_id="token-up",
+        down_token_id="token-down",
+        up_public_prob_pct=entry_prob_pct,
+        down_public_prob_pct=100.0 - entry_prob_pct,
+        up_entry_prob_pct=entry_prob_pct,
+        down_entry_prob_pct=100.0 - entry_prob_pct,
+    )
+
+
+def _make_signal(
+    *,
+    bet_size_usd: float = 100.0,
+    token_price: float = 0.42,
+    model_context: TechnicalContext | None = None,
+) -> TradeSignal:
+    return TradeSignal(
+        slug="btc-hourly-test",
+        direction=Direction.UP,
+        confidence=ConfidenceLevel.SCOUT,
+        score=2,
+        expected_value_pct=12.0,
+        expected_value_gross_pct=15.0,
+        true_probability_pct=68.0,
+        market_probability_pct=40.0,
+        entry_probability_pct=40.0,
+        token_price=token_price,
+        kelly_bet_usd=bet_size_usd,
+        approved=True,
+        needs_ai=model_context is not None,
+        reasons=("Regression test",),
+        model_context=model_context,
+        price_cap=token_price,
+        metadata={"effective_max_trade_pct": 0.05},
+    )
+
+
+def _make_liquidity(*, entry_price: float) -> LiquidityCheckResult:
+    return LiquidityCheckResult(
+        ok=True,
+        mode="CLOB",
+        reason="OK",
+        entry_price=entry_price,
+        best_bid=max(0.01, entry_price - 0.01),
+        best_ask=entry_price,
+        spread_pct=0.01,
+        available_depth_usd=5000.0,
+        expected_slippage_pct=0.0,
+        market_impact_pct=0.0,
+        levels=5,
+    )
+
+
+async def _build_state() -> EngineState:
+    state = EngineState()
+    await state.initialize()
+    state.simulated_balance = 5000.0
+    return state
+
+
+class TestExecutionEngine(ClobExecutionEngine):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.check_liquidity_hook = None
+        self.resolve_market_params_hook = None
+        self.submit_limit_hook = None
+        self.get_order_status_hook = None
+        self.cancel_order_hook = None
+        self.submit_market_hook = None
+
+    def _is_ny_session(self) -> bool:
+        return False
+
+    async def check_liquidity_and_spread(self, *args, **kwargs):
+        assert self.check_liquidity_hook is not None
+        return await self.check_liquidity_hook(*args, **kwargs)
+
+    async def _resolve_market_params(self, token_id: str):
+        assert self.resolve_market_params_hook is not None
+        return await self.resolve_market_params_hook(token_id)
+
+    async def _submit_limit_order(self, *args, **kwargs):
+        assert self.submit_limit_hook is not None
+        return await self.submit_limit_hook(*args, **kwargs)
+
+    async def _get_order_status(self, order_id: str):
+        assert self.get_order_status_hook is not None
+        return await self.get_order_status_hook(order_id)
+
+    async def _cancel_order(self, order_id: str):
+        assert self.cancel_order_hook is not None
+        return await self.cancel_order_hook(order_id)
+
+    async def _submit_market_order(self, *args, **kwargs):
+        assert self.submit_market_hook is not None
+        return await self.submit_market_hook(*args, **kwargs)
+
+
+class RecordingRiskManager(RiskManager):
+    def __init__(self):
+        super().__init__()
+        self.observed_market_prob_pct: list[float] = []
+
+    def evaluate_trade(self, **kwargs):
+        self.observed_market_prob_pct.append(float(kwargs["market_prob_pct"]))
+        return super().evaluate_trade(**kwargs)
+
+
+async def test_maker_partial_fill_sizes_taker_remainder() -> None:
+    state = await _build_state()
+    risk_manager = RiskManager()
+    engine = TestExecutionEngine(
+        object(),
+        config=ExecutionConfig(
+            paper_trading=False,
+            dry_run=False,
+            maker_enabled=True,
+            maker_window_secs=0.015,
+            maker_poll_interval_secs=0.01,
+            order_submit_timeout_secs=0.5,
+        ),
+        risk_manager=risk_manager,
+    )
+    engine.check_liquidity_hook = lambda *args, **kwargs: asyncio.sleep(0, result=_make_liquidity(entry_price=0.40))
+    engine.resolve_market_params_hook = lambda token_id: asyncio.sleep(0, result=("0.01", False, 0))
+    engine.submit_limit_hook = lambda *args, **kwargs: asyncio.sleep(0, result={"orderID": "maker-1", "status": "live"})
+
+    taker_amounts: list[float] = []
+    taker_limit_prices: list[float] = []
+    status_calls = 0
+
+    async def fake_get_order_status(order_id: str) -> dict[str, object]:
+        nonlocal status_calls
+        status_calls += 1
+        if status_calls == 1:
+            return {
+                "status": "live",
+                "transactions": [{"size": "100", "price": "0.40"}],
+            }
+        return {
+            "status": "cancelled",
+            "transactions": [{"size": "100", "price": "0.40"}],
+        }
+
+    async def fake_cancel_order(order_id: str) -> dict[str, object]:
+        return {
+            "status": "cancelled",
+            "transactions": [{"size": "100", "price": "0.40"}],
+        }
+
+    async def fake_submit_market_order(
+        token_id: str,
+        *,
+        amount: float,
+        limit_price: float,
+        order_type,
+        tick_size: str,
+        neg_risk: bool,
+    ) -> dict[str, object]:
+        taker_amounts.append(amount)
+        taker_limit_prices.append(limit_price)
+        taker_shares = amount / max(limit_price, 0.01)
+        return {
+            "status": "matched",
+            "transactions": [{"size": f"{taker_shares:.6f}", "price": f"{limit_price:.4f}"}],
+        }
+
+    engine.get_order_status_hook = fake_get_order_status
+    engine.cancel_order_hook = fake_cancel_order
+    engine.submit_market_hook = fake_submit_market_order
+
+    position = await engine.submit_entry_order(
+        state,
+        _make_signal(),
+        _make_odds(entry_prob_pct=40.0),
+        _make_context(),
+    )
+
+    expected_avg_price = 0.0
+    if taker_limit_prices:
+        expected_avg_price = 100.0 / (100.0 + (60.0 / taker_limit_prices[0]))
+    _assert(position is not None, "Partial maker fill still opens a position")
+    _assert(len(taker_amounts) == 1 and math.isclose(taker_amounts[0], 60.0, abs_tol=1e-6), "Taker only submits maker remainder", f"amounts={taker_amounts}")
+    if position is not None:
+        _assert(position.bet_size_usd <= 100.0 + 1e-6, "Combined fill cost stays within approved size", f"bet={position.bet_size_usd:.4f}")
+        _assert(math.isclose(position.bought_price, expected_avg_price, rel_tol=1e-6), "Average entry price blends maker and taker fills", f"price={position.bought_price:.6f}")
+
+
+async def test_authoritative_ev_uses_executable_price() -> None:
+    state = await _build_state()
+    risk_manager = RecordingRiskManager()
+    engine = TestExecutionEngine(
+        None,
+        config=ExecutionConfig(
+            paper_trading=True,
+            dry_run=False,
+            maker_enabled=False,
+        ),
+        risk_manager=risk_manager,
+    )
+    engine.check_liquidity_hook = lambda *args, **kwargs: asyncio.sleep(0, result=_make_liquidity(entry_price=0.55))
+    engine.resolve_market_params_hook = lambda token_id: asyncio.sleep(0, result=("0.01", False, 0))
+
+    position = await engine.submit_entry_order(
+        state,
+        _make_signal(bet_size_usd=75.0, token_price=0.58),
+        _make_odds(entry_prob_pct=40.0),
+        _make_context(),
+    )
+
+    _assert(position is not None, "Paper entry still succeeds after authoritative EV recheck")
+    _assert(
+        len(risk_manager.observed_market_prob_pct) == 1 and math.isclose(risk_manager.observed_market_prob_pct[0], 55.0, abs_tol=1e-6),
+        "Authoritative EV is recomputed from size-adjusted executable price",
+        f"market_prob_pct={risk_manager.observed_market_prob_pct}",
+    )
+
+
+async def test_ai_validation_uses_strategy_context() -> None:
+    state = await _build_state()
+    raw_context = _make_context(bayesian_probability=0.41)
+    model_context = _make_context(bayesian_probability=0.83)
+    signal = _make_signal(model_context=model_context)
+    odds = _make_odds(entry_prob_pct=40.0)
+    runtime = SimpleNamespace(
+        http_session=None,
+        state=state,
+        ai_agent=object(),
+        ai_config=AIConfig(),
+        paper_trading=False,
+    )
+
+    captured_probability = 0.0
+    original_call_local_ai = main_module.call_local_ai
+
+    async def fake_call_local_ai(session, state_obj, signal_obj, context_obj, odds_obj, **kwargs):
+        nonlocal captured_probability
+        captured_probability = context_obj.bayesian_probability
+        return AIDecision(decision=Direction.UP, raw_response="FINAL:UP", reason="AI confirmed favored direction")
+
+    main_module.call_local_ai = fake_call_local_ai
+    try:
+        validated_signal, reason = await main_module.maybe_validate_with_ai(runtime, signal, raw_context, odds)
+    finally:
+        main_module.call_local_ai = original_call_local_ai
+
+    _assert(math.isclose(captured_probability, model_context.bayesian_probability, abs_tol=1e-9), "AI gate uses the strategy's prepared model context", f"captured={captured_probability:.4f}")
+    _assert(validated_signal.ai_validated and validated_signal.approved and not validated_signal.needs_ai, "AI approval preserves validated signal state", f"signal={validated_signal}")
+    _assert(reason == "", "AI approval returns no rejection reason", f"reason={reason}")
+
+
+class _SlowResponse:
+    def __init__(self, delay_seconds: float):
+        self.delay_seconds = delay_seconds
+
+    async def __aenter__(self):
+        await asyncio.sleep(self.delay_seconds)
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        return False
+
+    def raise_for_status(self) -> None:
+        return None
+
+    async def json(self) -> dict[str, object]:
+        return {"choices": [{"message": {"content": "FINAL:UP"}}]}
+
+
+class _SlowSession:
+    def __init__(self, delay_seconds: float):
+        self.delay_seconds = delay_seconds
+
+    def post(self, *args, **kwargs):
+        return _SlowResponse(self.delay_seconds)
+
+
+async def test_ai_budget_limits_inline_latency() -> None:
+    state = await _build_state()
+    agent = LocalAIAgent(
+        AIConfig(
+            timeout_total_seconds=1.0,
+            decision_budget_seconds=0.05,
+            max_retries=3,
+            retry_delay_seconds=0.02,
+        )
+    )
+
+    started = time.perf_counter()
+    decision = await agent.call_local_ai(
+        _SlowSession(delay_seconds=0.20),
+        state,
+        _make_signal(),
+        _make_context(),
+        _make_odds(),
+    )
+    elapsed = time.perf_counter() - started
+
+    _assert(decision.decision == Direction.SKIP and decision.transport_error, "Slow AI calls fail closed under the decision budget", f"decision={decision}")
+    _assert(elapsed < 0.20, "AI decision budget caps wall-clock latency", f"elapsed={elapsed:.3f}s")
+
+
+async def run() -> None:
+    print("\n" + "=" * 52)
+    print("  Alpha-Z Trading Path Fixes - Regression Suite")
+    print("=" * 52)
+
+    print("\n--- Maker Partial Fill ---")
+    await test_maker_partial_fill_sizes_taker_remainder()
+
+    print("\n--- Executable EV Recheck ---")
+    await test_authoritative_ev_uses_executable_price()
+
+    print("\n--- AI Context Wiring ---")
+    await test_ai_validation_uses_strategy_context()
+
+    print("\n--- AI Latency Budget ---")
+    await test_ai_budget_limits_inline_latency()
+
+    print("\n" + "=" * 52)
+    print(f"PASSED: {PASSED}")
+    print(f"FAILED: {FAILED}")
+    print("=" * 52)
+
+    if FAILED:
+        raise SystemExit(1)
+
+
+def main() -> None:
+    asyncio.run(run())
+
+
+if __name__ == "__main__":
+    main()

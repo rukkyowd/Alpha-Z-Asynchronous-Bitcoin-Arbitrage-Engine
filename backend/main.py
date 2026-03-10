@@ -1732,11 +1732,12 @@ async def maybe_validate_with_ai(
     if not signal.needs_ai:
         return signal, ""
 
+    ai_context = signal.model_context or context
     ai_decision = await call_local_ai(
         runtime.http_session,
         runtime.state,
         signal,
-        context,
+        ai_context,
         odds,
         agent=runtime.ai_agent,
         max_calls_override=(
@@ -1850,19 +1851,6 @@ async def evaluation_loop(runtime: EngineServices) -> None:
                 await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
                 continue
 
-            enriched_context = apply_probabilistic_model(
-                context,
-                strike_price=odds.reference_price or odds.strike_price,
-                seconds_remaining=odds.seconds_remaining,
-                degrees_of_freedom=runtime.strategy_config.degrees_of_freedom,
-                probability_floor_pct=runtime.strategy_config.probability_floor_pct,
-                probability_ceil_pct=runtime.strategy_config.probability_ceil_pct,
-                max_indicator_logit_shift=runtime.strategy_config.max_indicator_logit_shift,
-                close_equals_open_up_bias_prob=runtime.strategy_config.close_equals_open_up_bias_prob,
-            )
-            runtime.latest_context = enriched_context
-            await runtime.state.update_telemetry(context=enriched_context)
-
             bankroll = runtime.current_balance or runtime.state.simulated_balance or runtime.bankroll
             signal_started = time.perf_counter()
             signal = await runtime.strategy_engine.evaluate_trade_signal(
@@ -1875,6 +1863,8 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             )
             signal_ms = (time.perf_counter() - signal_started) * 1000.0
             runtime.latest_signal = signal
+            runtime.latest_context = signal.model_context or context
+            await runtime.state.update_telemetry(context=runtime.latest_context)
 
             if runtime.state.kill_switch_enabled:
                 runtime.latest_rejected_reason = "Kill switch enabled"
@@ -1909,7 +1899,7 @@ async def evaluation_loop(runtime: EngineServices) -> None:
             ai_reason = ""
             if signal.needs_ai:
                 ai_started = time.perf_counter()
-                signal, ai_reason = await maybe_validate_with_ai(runtime, signal, enriched_context, odds)
+                signal, ai_reason = await maybe_validate_with_ai(runtime, signal, runtime.latest_context or context, odds)
                 ai_ms = (time.perf_counter() - ai_started) * 1000.0
                 runtime.latest_signal = signal
 
@@ -2672,7 +2662,11 @@ async def bootstrap_runtime() -> EngineServices:
         dry_run=DRY_RUN,
         paper_use_live_clob=PAPER_USE_LIVE_CLOB,
     )
-    ai_config = AIConfig(model=os.getenv("LOCAL_AI_MODEL", AIConfig().model))
+    ai_config = AIConfig(
+        model=os.getenv("LOCAL_AI_MODEL", AIConfig().model),
+        groq_api_key=os.getenv("GROQ_API_KEY"),
+        groq_model=os.getenv("GROQ_MODEL", AIConfig().groq_model),
+    )
 
     http_session = create_http_session(data_config)
     runtime: EngineServices | None = None

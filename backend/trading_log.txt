@@ -17518,3 +17518,1264 @@
 2026-03-10 03:44:24,361 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Post-stop same-direction lockout for UP for the rest of this market after STOP_LOSS_CONFIRMED (-9.0c, 12/12, underlying confirmed)
 2026-03-10 03:45:30,136 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Post-stop same-direction lockout for UP for the rest of this market after STOP_LOSS_CONFIRMED (-9.0c, 12/12, underlying confirmed)
 2026-03-10 03:46:36,499 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Post-stop same-direction lockout for UP for the rest of this market after STOP_LOSS_CONFIRMED (-9.0c, 12/12, underlying confirmed)
+2026-03-10 03:47:42,640 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Post-stop same-direction lockout for UP for the rest of this market after STOP_LOSS_CONFIRMED (-9.0c, 12/12, underlying confirmed)
+2026-03-10 03:48:48,546 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Post-stop same-direction lockout for UP for the rest of this market after STOP_LOSS_CONFIRMED (-9.0c, 12/12, underlying confirmed)
+2026-03-10 03:49:54,403 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Post-stop same-direction lockout for UP for the rest of this market after STOP_LOSS_CONFIRMED (-9.0c, 12/12, underlying confirmed)
+2026-03-10 03:51:00,159 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Post-stop same-direction lockout for UP for the rest of this market after STOP_LOSS_CONFIRMED (-9.0c, 12/12, underlying confirmed)
+2026-03-10 03:52:05,949 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Post-stop same-direction lockout for UP for the rest of this market after STOP_LOSS_CONFIRMED (-9.0c, 12/12, underlying confirmed)
+2026-03-10 03:53:11,660 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Post-stop same-direction lockout for UP for the rest of this market after STOP_LOSS_CONFIRMED (-9.0c, 12/12, underlying confirmed)
+2026-03-10 03:54:17,448 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Post-stop same-direction lockout for UP for the rest of this market after STOP_LOSS_CONFIRMED (-9.0c, 12/12, underlying confirmed)
+2026-03-10 03:54:50,333 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.17, px 0.166, true 37.04%, spread 6.0% of price, depth 1.3% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:54:58,595 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.23, px 0.161, true 47.68%, spread 12.4% of price, depth 1.3% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:55:06,986 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.19, px 0.158, true 42.69%, spread 6.3% of price, depth 1.5% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:55:15,187 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.22, px 0.146, true 36.21%, spread 6.9% of price, depth 1.5% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:55:23,432 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.36, px 0.106, true 32.17%, spread 9.5% of price, depth 1.5% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:55:31,655 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.36, px 0.110, true 31.73%, spread 9.1% of price, depth 1.5% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:55:39,667 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.46, px 0.111, true 31.42%, spread 18.1% of price, depth 1.5% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:55:47,893 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.39, px 0.096, true 31.07%, spread 10.5% of price, depth 1.5% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:55:56,110 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.42, px 0.086, true 30.71%, spread 11.7% of price, depth 1.5% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:56:04,346 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.45, px 0.075, true 30.34%, spread 13.3% of price, depth 1.5% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:56:12,579 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Crowd skew too high
+2026-03-10 03:56:28,946 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.51, px 0.055, true 40.74%, spread 18.1% of price, depth 1.5% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:56:37,150 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.44, px 0.075, true 41.92%, spread 13.3% of price, depth 1.5% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:56:45,360 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.55, px 0.055, true 28.24%, spread 18.1% of price, depth 1.5% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:56:53,557 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Crowd skew too high
+2026-03-10 03:57:10,001 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.57, px 0.055, true 27.17%, spread 18.1% of price, depth 2.2% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:57:18,254 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.57, px 0.056, true 26.99%, spread 18.0% of price, depth 3.3% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:57:26,467 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.61, px 0.051, true 25.59%, spread 21.4% of price, depth 3.4% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:57:34,683 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.42, px 0.053, true 34.99%, spread 3.7% of price, depth 2.9% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:57:42,886 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.50, px 0.116, true 30.61%, spread 25.9% of price, depth 3.6% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:57:51,159 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.54, px 0.068, true 25.48%, spread 14.8% of price, depth 2.8% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:57:59,398 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.47, px 0.085, true 24.86%, spread 10.6% of price, depth 2.8% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:58:07,661 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.47, px 0.096, true 23.90%, spread 10.4% of price, depth 2.7% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:58:15,838 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.48, px 0.096, true 21.76%, spread 10.4% of price, depth 2.6% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:58:24,021 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.49, px 0.096, true 20.72%, spread 10.4% of price, depth 2.1% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:58:32,243 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.51, px 0.134, true 19.58%, spread 21.6% of price, depth 1.2% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:58:40,488 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Late lottery-profile blocked: risk 0.41, px 0.126, true 18.35%, spread 8.0% of price, depth 1.4% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 03:58:48,636 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Net EV -10.87% <= 0 after slippage
+2026-03-10 03:58:56,812 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Net EV -10.31% <= 0 after slippage
+2026-03-10 03:59:05,040 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Crowd skew too high
+2026-03-10 03:59:21,435 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Net EV -0.20% <= 0 after slippage
+2026-03-10 03:59:29,639 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Crowd skew too high
+2026-03-10 03:59:37,892 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Too close to expiry (23s < 30.0s)
+2026-03-10 03:59:46,440 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Too close to expiry (14s < 30.0s)
+2026-03-10 03:59:55,051 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Too close to expiry (5s < 30.0s)
+2026-03-10 03:59:59,349 [INFO] [SKIP] bitcoin-up-or-down-march-10-2am-et: Too close to expiry (1s < 30.0s)
+2026-03-10 04:00:04,318 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-10-3am-et | Prefix: bitcoin-up-or-down-march-10-3am
+2026-03-10 04:00:07,829 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-10-3am-et | matched_slug=bitcoin-up-or-down-march-10-3am-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=51925065750221205016026690890177779426812519630081603150983532238170590719631 | down_token=14796544175341549441084706061568992956313255950879874602273207269314462910532
+2026-03-10 04:00:07,829 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-10-3am-et
+2026-03-10 04:00:07,830 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Too early (3593s > 3540.0s)
+2026-03-10 04:00:07,830 [INFO] [CLOB WS] Reconnecting to apply subscription update.
+2026-03-10 04:00:08,372 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-10 04:00:15,664 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Too early (3585s > 3540.0s)
+2026-03-10 04:00:23,867 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Too early (3577s > 3540.0s)
+2026-03-10 04:00:32,096 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Too early (3568s > 3540.0s)
+2026-03-10 04:00:40,440 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Too early (3560s > 3540.0s)
+2026-03-10 04:00:48,684 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Too early (3552s > 3540.0s)
+2026-03-10 04:00:56,855 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Too early (3544s > 3540.0s)
+2026-03-10 04:01:05,033 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Net EV -0.52% <= 0 after slippage
+2026-03-10 04:01:52,389 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Entry premium 2.7c > 1.5c max
+2026-03-10 04:01:52,979 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Score 2 requires EV >= 6.00% (got 5.54%)
+2026-03-10 04:02:28,527 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Entry premium 4.2c > 1.5c max
+2026-03-10 04:02:29,090 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Net EV -4.43% <= 0 after slippage
+2026-03-10 04:02:37,292 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Net EV -3.86% <= 0 after slippage
+2026-03-10 04:02:45,516 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Net EV -3.20% <= 0 after slippage
+2026-03-10 04:02:53,816 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Net EV -1.08% <= 0 after slippage
+2026-03-10 04:03:02,073 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Net EV -1.45% <= 0 after slippage
+2026-03-10 04:03:10,335 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Net EV -0.72% <= 0 after slippage
+2026-03-10 04:03:41,978 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-10 04:03:52,925 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Entry premium 1.7c > 1.5c max
+2026-03-10 04:03:53,458 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Score 2 requires EV >= 6.00% (got 3.78%)
+2026-03-10 04:04:11,138 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-10 04:04:36,761 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Entry premium 1.8c > 1.5c max
+2026-03-10 04:04:37,278 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Score 2 requires EV >= 6.00% (got 0.13%)
+2026-03-10 04:04:45,540 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Score 2 requires EV >= 6.00% (got 2.11%)
+2026-03-10 04:04:53,742 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Score 2 requires EV >= 6.00% (got 0.59%)
+2026-03-10 04:05:06,202 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-10 04:05:37,000 [INFO] [ENTRY RISK] bitcoin-up-or-down-march-10-3am-et: SDK fee recheck resized bet $236.24 -> $236.21
+2026-03-10 04:05:37,001 [INFO] [ENTRY SMART] Spread 2.0c wide, time 3298s remaining — shading entry cap toward bid side @ 0.5800 (vs naive 0.5912, ask 0.5900)
+2026-03-10 04:05:37,002 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Entry premium 13.7c > 1.5c max
+2026-03-10 04:05:50,269 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-10 04:06:11,871 [INFO] [ENTRY LOCKUP] bitcoin-up-or-down-march-10-3am-et: capital locked for ~0.9h (threshold 0.8h)
+2026-03-10 04:06:11,873 [INFO] [BET] BET PLACED [PAPER] UP on bitcoin-up-or-down-march-10-3am-et | Filled: $221.75 | Avg Px: 0.5700 | Shares: 389.0351 | Liq: PAPER_CLOB_SHADOW | Expected: 0.6257
+2026-03-10 04:06:12,005 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Position already active
+2026-03-10 04:06:12,628 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.5530 | U-PnL: $-6.63 (-2.99%) | TP: +13.5c @ 0.7048 | SL: -12.5c @ 0.4446 | T-53:47 | TP Armed: N | SL Disabled: N
+2026-03-10 04:06:25,452 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.6000 | U-PnL: $+11.67 (+5.26%) | TP: +13.5c @ 0.7048 | SL: -12.5c @ 0.4446 | T-53:34 | TP Armed: N | SL Disabled: N
+2026-03-10 04:06:37,926 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-10 04:06:38,349 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.5907 | U-PnL: $+8.06 (+3.63%) | TP: +13.5c @ 0.7048 | SL: -12.5c @ 0.4446 | T-53:21 | TP Armed: N | SL Disabled: N
+2026-03-10 04:06:50,985 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.6217 | U-PnL: $+20.12 (+9.07%) | TP: +13.5c @ 0.7048 | SL: -12.5c @ 0.4446 | T-53:09 | TP Armed: N | SL Disabled: N
+2026-03-10 04:07:03,975 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.6045 | U-PnL: $+13.42 (+6.05%) | TP: +13.5c @ 0.7048 | SL: -12.5c @ 0.4446 | T-52:56 | TP Armed: N | SL Disabled: N
+2026-03-10 04:07:16,794 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.5878 | U-PnL: $+6.93 (+3.12%) | TP: +13.5c @ 0.7048 | SL: -12.5c @ 0.4446 | T-52:43 | TP Armed: N | SL Disabled: N
+2026-03-10 04:07:29,595 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.5754 | U-PnL: $+2.12 (+0.96%) | TP: +13.5c @ 0.7048 | SL: -12.5c @ 0.4446 | T-52:30 | TP Armed: N | SL Disabled: N
+2026-03-10 04:07:38,101 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-10 04:07:42,364 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7116 | U-PnL: $+55.10 (+24.85%) | TP: +13.5c @ 0.7048 | SL: -12.5c @ 0.4446 | T-52:17 | TP Armed: Y | SL Disabled: N
+2026-03-10 04:07:55,143 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7700 | U-PnL: $+77.81 (+35.09%) | TP: +13.5c @ 0.7048 | SL: -12.5c @ 0.4446 | T-52:04 | TP Armed: Y | SL Disabled: N
+2026-03-10 04:08:07,971 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7600 | U-PnL: $+73.92 (+33.33%) | TP: +13.5c @ 0.7048 | SL: -12.5c @ 0.4446 | T-51:52 | TP Armed: Y | SL Disabled: N
+2026-03-10 04:08:20,822 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7328 | U-PnL: $+63.34 (+28.56%) | TP: +13.5c @ 0.7048 | SL: -12.5c @ 0.4446 | T-51:39 | TP Armed: Y | SL Disabled: N
+2026-03-10 04:08:33,679 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7382 | U-PnL: $+65.44 (+29.51%) | TP: +13.5c @ 0.7048 | SL: -12.5c @ 0.4446 | T-51:26 | TP Armed: Y | SL Disabled: N
+2026-03-10 04:08:46,499 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7458 | U-PnL: $+68.40 (+30.84%) | TP: +13.5c @ 0.7048 | SL: -12.5c @ 0.4446 | T-51:13 | TP Armed: Y | SL Disabled: N
+2026-03-10 04:08:59,353 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7151 | U-PnL: $+56.45 (+25.45%) | TP: +13.5c @ 0.7048 | SL: -12.5c @ 0.4446 | T-51:00 | TP Armed: Y | SL Disabled: N
+2026-03-10 04:09:12,205 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.6931 | U-PnL: $+47.89 (+21.59%) | TP: +13.5c @ 0.7048 | SL: -12.0c @ 0.4500 | T-50:47 | TP Armed: Y | SL Disabled: N
+2026-03-10 04:09:25,121 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.6900 | U-PnL: $+46.68 (+21.05%) | TP: +13.5c @ 0.7048 | SL: -12.0c @ 0.4500 | T-50:34 | TP Armed: Y | SL Disabled: N
+2026-03-10 04:09:26,175 [INFO] [EXIT] EXIT FILLED [PAPER] UP on bitcoin-up-or-down-march-10-3am-et | Reason: TP_LOCK_RETRACE (peak +21.0c -> now +11.5c, floor +11.6c) | Exit Px: 0.6850 | Proceeds: $266.47 | PnL: $+44.72
+2026-03-10 04:09:26,178 [INFO] [TRADE CLOSED] bitcoin-up-or-down-march-10-3am-et | UP | PnL: $+44.72 | Exit: 0.6850 | Underlying: 70148.15 | Reason: TP_LOCK_RETRACE (peak +21.0c -> now +11.5c, floor +11.6c)
+2026-03-10 04:09:29,864 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Net EV -0.18% <= 0 after slippage
+2026-03-10 04:09:47,659 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-10 04:10:06,987 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Entry premium 3.4c > 1.5c max
+2026-03-10 04:10:07,596 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Net EV -1.49% <= 0 after slippage
+2026-03-10 04:10:15,833 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Net EV -1.55% <= 0 after slippage
+2026-03-10 04:10:24,064 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Score 2 requires EV >= 6.00% (got 5.54%)
+2026-03-10 04:10:32,261 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Net EV -1.72% <= 0 after slippage
+2026-03-10 04:10:40,772 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Entry premium 1.8c > 1.5c max
+2026-03-10 04:10:48,706 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Entry premium 1.7c > 1.5c max
+2026-03-10 04:10:50,630 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-10 04:11:05,123 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Entry premium 1.7c > 1.5c max
+2026-03-10 04:11:13,349 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Entry premium 1.6c > 1.5c max
+2026-03-10 04:11:21,679 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Entry premium 1.5c > 1.5c max
+2026-03-10 04:11:24,473 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-10 04:11:29,864 [INFO] [SKIP] bitcoin-up-or-down-march-10-3am-et: Entry premium 1.6c > 1.5c max
+2026-03-10 04:11:38,054 [INFO] [ENTRY SMART] Spread 2.0c wide, time 2902s remaining — shading entry cap toward bid side @ 0.7800 (vs naive 0.8095, ask 0.7900)
+2026-03-10 04:11:38,055 [INFO] [ENTRY LOCKUP] bitcoin-up-or-down-march-10-3am-et: capital locked for ~0.8h (threshold 0.8h)
+2026-03-10 04:11:38,055 [INFO] [BET] BET PLACED [PAPER] UP on bitcoin-up-or-down-march-10-3am-et | Filled: $225.80 | Avg Px: 0.7900 | Shares: 285.8228 | Liq: PAPER_CLOB_SHADOW | Expected: 0.8095
+2026-03-10 04:11:38,870 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7700 | U-PnL: $-5.72 (-2.53%) | TP: +13.5c @ 0.9248 | SL: -14.4c @ 0.6460 | T-48:21 | TP Armed: N | SL Disabled: N
+2026-03-10 04:11:48,633 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-10 04:11:51,480 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7786 | U-PnL: $-3.26 (-1.45%) | TP: +13.5c @ 0.9248 | SL: -14.4c @ 0.6460 | T-48:08 | TP Armed: N | SL Disabled: N
+2026-03-10 04:12:04,135 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7642 | U-PnL: $-7.38 (-3.27%) | TP: +13.5c @ 0.9248 | SL: -14.4c @ 0.6460 | T-47:55 | TP Armed: N | SL Disabled: N
+2026-03-10 04:12:13,969 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-10 04:12:16,892 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7610 | U-PnL: $-8.27 (-3.66%) | TP: +13.5c @ 0.9248 | SL: -14.4c @ 0.6460 | T-47:43 | TP Armed: N | SL Disabled: N
+2026-03-10 04:12:29,528 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7600 | U-PnL: $-8.57 (-3.80%) | TP: +13.5c @ 0.9248 | SL: -14.4c @ 0.6460 | T-47:30 | TP Armed: N | SL Disabled: N
+2026-03-10 04:12:42,503 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7732 | U-PnL: $-4.81 (-2.13%) | TP: +13.5c @ 0.9248 | SL: -14.4c @ 0.6460 | T-47:17 | TP Armed: N | SL Disabled: N
+2026-03-10 04:12:48,831 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-10 04:12:55,198 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7788 | U-PnL: $-3.19 (-1.41%) | TP: +13.5c @ 0.9248 | SL: -14.4c @ 0.6460 | T-47:04 | TP Armed: N | SL Disabled: N
+2026-03-10 04:13:08,145 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7834 | U-PnL: $-1.88 (-0.83%) | TP: +13.5c @ 0.9248 | SL: -14.4c @ 0.6460 | T-46:51 | TP Armed: N | SL Disabled: N
+2026-03-10 04:13:20,916 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7800 | U-PnL: $-2.86 (-1.27%) | TP: +13.5c @ 0.9248 | SL: -14.4c @ 0.6460 | T-46:39 | TP Armed: N | SL Disabled: N
+2026-03-10 04:13:33,803 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7900 | U-PnL: $+0.00 (+0.00%) | TP: +13.5c @ 0.9248 | SL: -14.4c @ 0.6460 | T-46:26 | TP Armed: N | SL Disabled: N
+2026-03-10 04:13:46,668 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7940 | U-PnL: $+1.13 (+0.50%) | TP: +13.5c @ 0.9248 | SL: -14.4c @ 0.6460 | T-46:13 | TP Armed: N | SL Disabled: N
+2026-03-10 04:13:59,508 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7865 | U-PnL: $-0.99 (-0.44%) | TP: +13.5c @ 0.9248 | SL: -14.4c @ 0.6460 | T-46:00 | TP Armed: N | SL Disabled: N
+2026-03-10 04:14:12,355 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7940 | U-PnL: $+1.14 (+0.51%) | TP: +13.5c @ 0.9248 | SL: -14.4c @ 0.6460 | T-45:47 | TP Armed: N | SL Disabled: N
+2026-03-10 04:14:24,611 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7900 | U-PnL: $+0.00 (+0.00%) | TP: +13.5c @ 0.9248 | SL: -14.4c @ 0.6460 | T-45:35 | TP Armed: N | SL Disabled: N
+2026-03-10 04:14:37,420 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7841 | U-PnL: $-1.69 (-0.75%) | TP: +13.5c @ 0.9248 | SL: -14.4c @ 0.6460 | T-45:22 | TP Armed: N | SL Disabled: N
+2026-03-10 04:14:50,366 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7887 | U-PnL: $-0.36 (-0.16%) | TP: +13.5c @ 0.9248 | SL: -12.0c @ 0.6700 | T-45:09 | TP Armed: N | SL Disabled: N
+2026-03-10 04:15:03,150 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7847 | U-PnL: $-1.53 (-0.68%) | TP: +13.5c @ 0.9248 | SL: -12.0c @ 0.6700 | T-44:56 | TP Armed: N | SL Disabled: N
+2026-03-10 04:15:16,036 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7862 | U-PnL: $-1.09 (-0.48%) | TP: +13.5c @ 0.9248 | SL: -12.0c @ 0.6700 | T-44:43 | TP Armed: N | SL Disabled: N
+2026-03-10 04:15:28,878 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.7914 | U-PnL: $+0.40 (+0.18%) | TP: +13.5c @ 0.9248 | SL: -12.0c @ 0.6700 | T-44:31 | TP Armed: N | SL Disabled: N
+2026-03-10 04:15:41,867 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.8000 | U-PnL: $+2.86 (+1.27%) | TP: +13.5c @ 0.9248 | SL: -12.0c @ 0.6700 | T-44:18 | TP Armed: N | SL Disabled: N
+2026-03-10 04:15:54,663 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.8000 | U-PnL: $+2.86 (+1.27%) | TP: +13.5c @ 0.9248 | SL: -12.0c @ 0.6700 | T-44:05 | TP Armed: N | SL Disabled: N
+2026-03-10 04:16:07,542 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-10-3am-et | Mark: 0.8114 | U-PnL: $+6.12 (+2.71%) | TP: +13.5c @ 0.9248 | SL: -12.0c @ 0.6700 | T-43:52 | TP Armed: N | SL Disabled: N
+2026-03-10 14:22:29,917 [INFO] Elite Quant Engine v2 Initialized. Monitoring 1h WebSocket...
+2026-03-10 14:22:29,939 [INFO] [INIT] Simulated balance initialized: $5000.00 (base: $5000.0 + historical: $0.00)
+2026-03-10 14:22:29,939 [INFO] [INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.
+2026-03-10 14:22:33,293 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-10-1pm-et | Prefix: bitcoin-up-or-down-march-10-1pm
+2026-03-10 14:22:33,491 [INFO] [SYSTEM] Loaded 120 candles. VWAP=70,419.43
+2026-03-10 14:22:33,789 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-10-1pm-et | matched_slug=bitcoin-up-or-down-march-10-1pm-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=12262487801408199826925365097268129030954888398184175579680606275682448865163 | down_token=29415641699097508128755397189622590044847044833690796065405442066575114467577
+2026-03-10 14:22:33,790 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-10-1pm-et
+2026-03-10 14:22:33,803 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-10 14:22:41,987 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-10 14:22:42,108 [INFO] [SYSTEM] CLOB WebSocket book manager started in paper shadow mode (heartbeat disabled).
+2026-03-10 14:22:43,715 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-10 14:22:51,563 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 14:23:08,485 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 14:23:17,414 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 29s
+2026-03-10 14:23:25,556 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 21s
+2026-03-10 14:23:33,696 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 13s
+2026-03-10 14:23:41,842 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 5s
+2026-03-10 14:23:58,037 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 14:23:58,490 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 59s
+2026-03-10 14:24:06,817 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Entry premium 1.3c > 1.0c max
+2026-03-10 14:24:14,959 [INFO] [ENTRY SMART] Spread 2.0c wide, time 2145s remaining — shading entry cap toward bid side @ 0.5500 (vs naive 0.5815, ask 0.5600)
+2026-03-10 14:24:14,965 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Paper shadow passive cap 0.5500 below ask 0.5600; immediate fill not simulated
+2026-03-10 14:24:23,105 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Entry premium 1.4c > 1.0c max
+2026-03-10 14:24:31,245 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Entry premium 1.3c > 1.0c max
+2026-03-10 14:24:47,533 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Entry premium 1.3c > 1.0c max
+2026-03-10 14:24:55,690 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Score 2 requires EV >= 6.00% (got 0.51%)
+2026-03-10 14:25:11,817 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 14:25:12,287 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 119s
+2026-03-10 14:25:20,410 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 111s
+2026-03-10 14:25:28,556 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 103s
+2026-03-10 14:25:36,765 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 95s
+2026-03-10 14:25:44,948 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 86s
+2026-03-10 14:25:53,122 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 78s
+2026-03-10 14:26:09,149 [INFO] Elite Quant Engine v2 Initialized. Monitoring 1h WebSocket...
+2026-03-10 14:26:09,151 [INFO] [INIT] Simulated balance initialized: $5000.00 (base: $5000.0 + historical: $0.00)
+2026-03-10 14:26:09,152 [INFO] [INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.
+2026-03-10 14:26:12,312 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-10-1pm-et | Prefix: bitcoin-up-or-down-march-10-1pm
+2026-03-10 14:26:12,507 [INFO] [SYSTEM] Loaded 120 candles. VWAP=70,423.91
+2026-03-10 14:26:12,798 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-10-1pm-et | matched_slug=bitcoin-up-or-down-march-10-1pm-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=12262487801408199826925365097268129030954888398184175579680606275682448865163 | down_token=29415641699097508128755397189622590044847044833690796065405442066575114467577
+2026-03-10 14:26:12,798 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-10-1pm-et
+2026-03-10 14:26:12,799 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-10 14:26:20,811 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-10 14:26:20,812 [INFO] [SYSTEM] CLOB WebSocket book manager started in paper shadow mode (heartbeat disabled).
+2026-03-10 14:26:21,218 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-10 14:26:29,278 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 14:26:46,199 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 14:26:55,110 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 29s
+2026-03-10 14:27:03,249 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 21s
+2026-03-10 14:27:11,433 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 13s
+2026-03-10 14:27:19,595 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 5s
+2026-03-10 14:27:35,821 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 14:27:36,276 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 59s
+2026-03-10 14:27:44,463 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 51s
+2026-03-10 14:27:52,683 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 43s
+2026-03-10 14:28:00,824 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 34s
+2026-03-10 14:28:08,996 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 26s
+2026-03-10 14:28:17,193 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 18s
+2026-03-10 14:28:25,344 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 10s
+2026-03-10 14:28:33,500 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Score 2 requires EV >= 6.00% (got 3.52%)
+2026-03-10 14:28:49,688 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 14:28:50,133 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 119s
+2026-03-10 14:28:58,300 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 111s
+2026-03-10 14:29:06,523 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 103s
+2026-03-10 14:29:14,645 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 95s
+2026-03-10 14:29:22,789 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 86s
+2026-03-10 14:29:30,972 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 78s
+2026-03-10 14:29:39,164 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 70s
+2026-03-10 14:29:47,335 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 62s
+2026-03-10 14:29:55,524 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 54s
+2026-03-10 14:30:03,672 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 46s
+2026-03-10 14:30:11,877 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 37s
+2026-03-10 14:30:20,094 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 29s
+2026-03-10 14:30:28,340 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 21s
+2026-03-10 14:30:36,518 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 13s
+2026-03-10 14:30:44,693 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 4s
+2026-03-10 14:31:00,933 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 14:31:01,402 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 239s
+2026-03-10 14:31:09,611 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 231s
+2026-03-10 14:31:17,807 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 223s
+2026-03-10 14:31:25,971 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 214s
+2026-03-10 14:31:34,193 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 206s
+2026-03-10 14:31:42,377 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 198s
+2026-03-10 14:31:50,542 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 190s
+2026-03-10 14:31:58,774 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 182s
+2026-03-10 14:32:06,938 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 173s
+2026-03-10 14:32:15,093 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 165s
+2026-03-10 14:32:23,237 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 157s
+2026-03-10 14:32:31,408 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 149s
+2026-03-10 14:32:39,609 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 141s
+2026-03-10 14:32:47,804 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 133s
+2026-03-10 14:32:55,968 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 124s
+2026-03-10 14:33:04,136 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Score 2 requires EV >= 6.00% (got 3.05%)
+2026-03-10 14:33:12,347 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 108s
+2026-03-10 14:33:20,575 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 100s
+2026-03-10 14:33:28,738 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 92s
+2026-03-10 14:33:36,938 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 83s
+2026-03-10 14:33:45,057 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 75s
+2026-03-10 14:33:53,227 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 67s
+2026-03-10 14:34:01,405 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 59s
+2026-03-10 14:34:09,545 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 51s
+2026-03-10 14:34:17,629 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 43s
+2026-03-10 14:34:25,606 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 35s
+2026-03-10 14:34:33,820 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 27s
+2026-03-10 14:34:42,011 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 18s
+2026-03-10 14:34:50,156 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 10s
+2026-03-10 14:34:58,274 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 2s
+2026-03-10 14:35:14,430 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 14:35:14,896 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 299s
+2026-03-10 14:35:23,022 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 291s
+2026-03-10 14:35:31,211 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 283s
+2026-03-10 14:35:39,398 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 275s
+2026-03-10 14:35:47,579 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 266s
+2026-03-10 14:35:55,778 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 258s
+2026-03-10 14:36:03,929 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 250s
+2026-03-10 14:36:12,126 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 242s
+2026-03-10 14:36:20,327 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 234s
+2026-03-10 14:36:28,559 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 225s
+2026-03-10 14:36:36,755 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 217s
+2026-03-10 14:36:44,961 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 209s
+2026-03-10 14:36:53,146 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 201s
+2026-03-10 14:37:01,351 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 193s
+2026-03-10 14:37:09,530 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late lottery-profile blocked: risk 0.16, px 0.100, true 13.02%, spread 19.9% of price, depth 0.1% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 14:37:17,743 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 176s
+2026-03-10 14:37:25,936 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 168s
+2026-03-10 14:37:34,085 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 160s
+2026-03-10 14:37:42,279 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 152s
+2026-03-10 14:37:50,453 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: AI circuit breaker open for 143s
+2026-03-10 14:37:58,658 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.19, px 0.090, true 13.74%, spread 22.2% of price
+2026-03-10 14:38:06,820 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.20, px 0.055, true 7.53%, spread 18.1% of price
+2026-03-10 14:38:14,971 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Net EV -4.46% <= 0 after slippage
+2026-03-10 14:38:23,162 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.20, px 0.055, true 10.91%, spread 18.1% of price
+2026-03-10 14:38:31,367 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:38:47,740 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.21, px 0.055, true 11.15%, spread 18.1% of price
+2026-03-10 14:38:55,890 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Net EV -5.39% <= 0 after slippage
+2026-03-10 14:39:04,061 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:39:12,270 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.22, px 0.055, true 10.70%, spread 18.1% of price
+2026-03-10 14:39:20,482 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Net EV -3.57% <= 0 after slippage
+2026-03-10 14:39:28,718 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.24, px 0.055, true 8.20%, spread 18.1% of price
+2026-03-10 14:39:36,942 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Net EV -4.21% <= 0 after slippage
+2026-03-10 14:39:45,173 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.24, px 0.070, true 9.93%, spread 28.5% of price
+2026-03-10 14:39:53,389 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Net EV -4.41% <= 0 after slippage
+2026-03-10 14:40:01,574 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Net EV -4.60% <= 0 after slippage
+2026-03-10 14:40:09,739 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.24, px 0.062, true 9.66%, spread 16.2% of price
+2026-03-10 14:40:17,912 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Net EV -4.38% <= 0 after slippage
+2026-03-10 14:40:26,109 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:41:15,213 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:41:23,386 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Net EV -6.37% <= 0 after slippage
+2026-03-10 14:41:31,566 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.24, px 0.051, true 6.51%, spread 3.9% of price
+2026-03-10 14:41:39,772 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.25, px 0.057, true 11.48%, spread 12.3% of price
+2026-03-10 14:41:47,998 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Net EV -4.01% <= 0 after slippage
+2026-03-10 14:41:56,314 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Net EV -5.36% <= 0 after slippage
+2026-03-10 14:42:04,502 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Net EV -4.29% <= 0 after slippage
+2026-03-10 14:42:12,789 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Net EV -2.09% <= 0 after slippage
+2026-03-10 14:42:20,962 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:42:45,544 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.31, px 0.054, true 10.35%, spread 16.8% of price
+2026-03-10 14:42:53,783 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.28, px 0.053, true 11.41%, spread 11.3% of price
+2026-03-10 14:43:02,022 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.33, px 0.062, true 9.49%, spread 22.5% of price
+2026-03-10 14:43:10,291 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Net EV -5.57% <= 0 after slippage
+2026-03-10 14:43:18,455 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Net EV -5.03% <= 0 after slippage
+2026-03-10 14:43:26,637 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.33, px 0.055, true 8.73%, spread 18.1% of price
+2026-03-10 14:43:34,833 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Net EV -5.83% <= 0 after slippage
+2026-03-10 14:43:43,075 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:44:32,325 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:45:21,592 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:46:10,678 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:46:59,966 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:47:49,125 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:48:38,396 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:48:46,606 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.37, px 0.042, true 15.71%, spread 2.4% of price
+2026-03-10 14:48:54,825 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.48, px 0.058, true 8.81%, spread 29.5% of price
+2026-03-10 14:49:03,011 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.44, px 0.060, true 15.90%, spread 18.2% of price
+2026-03-10 14:49:11,200 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Late high-risk lottery blocked: risk 0.47, px 0.055, true 9.67%, spread 18.1% of price
+2026-03-10 14:49:19,412 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:50:08,651 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:50:57,960 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:51:47,229 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:52:36,527 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:53:25,788 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:54:14,958 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:55:04,303 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:55:53,564 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:56:42,846 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:57:32,124 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:58:21,494 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:59:10,752 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Crowd skew too high
+2026-03-10 14:59:35,317 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Too close to expiry (25s < 30.0s)
+2026-03-10 14:59:44,397 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Too close to expiry (16s < 30.0s)
+2026-03-10 14:59:53,789 [INFO] [SKIP] bitcoin-up-or-down-march-10-1pm-et: Too close to expiry (7s < 30.0s)
+2026-03-10 15:00:04,035 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-10-2pm-et | Prefix: bitcoin-up-or-down-march-10-2pm
+2026-03-10 15:00:04,460 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-10-2pm-et | matched_slug=bitcoin-up-or-down-march-10-2pm-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=107620264106426587046829956442204796427510921601338539092225921995639658331526 | down_token=72508386945776873232371673388005034680779841357565582043486555051595868390473
+2026-03-10 15:00:04,463 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-10-2pm-et
+2026-03-10 15:00:04,463 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Too early (3596s > 3540.0s)
+2026-03-10 15:00:04,464 [INFO] [CLOB WS] Reconnecting to apply subscription update.
+2026-03-10 15:00:05,110 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-10 15:00:12,240 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Too early (3588s > 3540.0s)
+2026-03-10 15:00:20,437 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Too early (3580s > 3540.0s)
+2026-03-10 15:00:28,610 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Too early (3572s > 3540.0s)
+2026-03-10 15:00:36,789 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Too early (3564s > 3540.0s)
+2026-03-10 15:00:44,974 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Too early (3556s > 3540.0s)
+2026-03-10 15:00:53,198 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Too early (3547s > 3540.0s)
+2026-03-10 15:01:09,418 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 15:01:09,862 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 299s
+2026-03-10 15:01:18,049 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -9.66% <= 0 after slippage
+2026-03-10 15:01:26,211 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -6.41% <= 0 after slippage
+2026-03-10 15:01:34,429 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -6.92% <= 0 after slippage
+2026-03-10 15:01:42,567 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -10.02% <= 0 after slippage
+2026-03-10 15:01:50,723 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 258s
+2026-03-10 15:01:58,933 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 250s
+2026-03-10 15:02:07,131 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 242s
+2026-03-10 15:02:15,333 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 234s
+2026-03-10 15:02:23,544 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 225s
+2026-03-10 15:02:31,731 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -6.48% <= 0 after slippage
+2026-03-10 15:02:39,950 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 209s
+2026-03-10 15:02:48,160 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -9.40% <= 0 after slippage
+2026-03-10 15:02:56,368 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 0.93%)
+2026-03-10 15:03:04,569 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.71% <= 0 after slippage
+2026-03-10 15:03:12,752 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 176s
+2026-03-10 15:03:20,970 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.68% <= 0 after slippage
+2026-03-10 15:03:29,206 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 160s
+2026-03-10 15:03:37,396 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 2.88%)
+2026-03-10 15:03:45,557 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -5.16% <= 0 after slippage
+2026-03-10 15:03:53,714 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 135s
+2026-03-10 15:04:01,958 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.94% <= 0 after slippage
+2026-03-10 15:04:10,178 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.20% <= 0 after slippage
+2026-03-10 15:04:18,339 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.40% <= 0 after slippage
+2026-03-10 15:04:26,550 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -5.00% <= 0 after slippage
+2026-03-10 15:04:34,720 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 94s
+2026-03-10 15:04:42,927 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 3.44%)
+2026-03-10 15:04:51,118 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -6.87% <= 0 after slippage
+2026-03-10 15:04:59,320 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.61% <= 0 after slippage
+2026-03-10 15:05:07,484 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -7.01% <= 0 after slippage
+2026-03-10 15:05:15,697 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -6.47% <= 0 after slippage
+2026-03-10 15:05:23,889 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -5.78% <= 0 after slippage
+2026-03-10 15:05:32,105 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -5.22% <= 0 after slippage
+2026-03-10 15:05:40,262 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -5.17% <= 0 after slippage
+2026-03-10 15:05:48,426 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 20s
+2026-03-10 15:05:56,641 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 12s
+2026-03-10 15:06:04,860 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 4s
+2026-03-10 15:06:21,013 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 15:06:21,470 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 299s
+2026-03-10 15:06:29,703 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.28% <= 0 after slippage
+2026-03-10 15:06:37,896 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.80% <= 0 after slippage
+2026-03-10 15:06:46,101 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -8.77% <= 0 after slippage
+2026-03-10 15:06:54,307 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -5.57% <= 0 after slippage
+2026-03-10 15:07:02,483 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 258s
+2026-03-10 15:07:10,699 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 3.27%)
+2026-03-10 15:07:18,913 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 3.63%)
+2026-03-10 15:07:27,087 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 233s
+2026-03-10 15:07:35,273 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.60% <= 0 after slippage
+2026-03-10 15:07:43,479 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.00% <= 0 after slippage
+2026-03-10 15:07:51,651 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -6.72% <= 0 after slippage
+2026-03-10 15:07:59,834 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.12% <= 0 after slippage
+2026-03-10 15:08:08,056 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -10.20% <= 0 after slippage
+2026-03-10 15:08:16,275 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 184s
+2026-03-10 15:08:24,485 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 176s
+2026-03-10 15:08:32,702 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -10.85% <= 0 after slippage
+2026-03-10 15:08:40,915 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.05% <= 0 after slippage
+2026-03-10 15:08:49,103 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.94% <= 0 after slippage
+2026-03-10 15:08:57,316 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 4.52%)
+2026-03-10 15:09:05,537 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.08% <= 0 after slippage
+2026-03-10 15:09:13,754 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 3.61%)
+2026-03-10 15:09:21,961 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 119s
+2026-03-10 15:09:30,151 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 110s
+2026-03-10 15:09:38,324 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -5.51% <= 0 after slippage
+2026-03-10 15:09:46,504 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -5.41% <= 0 after slippage
+2026-03-10 15:09:54,707 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 4.79%)
+2026-03-10 15:10:02,877 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -9.34% <= 0 after slippage
+2026-03-10 15:10:11,087 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.06% <= 0 after slippage
+2026-03-10 15:10:19,417 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.21% <= 0 after slippage
+2026-03-10 15:10:27,631 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 53s
+2026-03-10 15:10:35,831 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 1.04%)
+2026-03-10 15:10:44,033 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 36s
+2026-03-10 15:10:52,251 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 28s
+2026-03-10 15:11:00,413 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 20s
+2026-03-10 15:11:08,586 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 12s
+2026-03-10 15:11:16,808 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 2.68%)
+2026-03-10 15:11:33,026 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 15:11:33,477 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 299s
+2026-03-10 15:11:41,646 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 291s
+2026-03-10 15:11:49,791 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.94% <= 0 after slippage
+2026-03-10 15:11:57,958 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 275s
+2026-03-10 15:12:06,142 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 0.79%)
+2026-03-10 15:12:14,291 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 258s
+2026-03-10 15:12:22,445 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 4.56%)
+2026-03-10 15:12:30,623 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.26% <= 0 after slippage
+2026-03-10 15:12:38,785 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -7.86% <= 0 after slippage
+2026-03-10 15:12:47,013 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.14% <= 0 after slippage
+2026-03-10 15:12:55,183 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 217s
+2026-03-10 15:13:03,351 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 209s
+2026-03-10 15:13:11,575 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.63% <= 0 after slippage
+2026-03-10 15:13:19,781 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 193s
+2026-03-10 15:13:28,008 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 185s
+2026-03-10 15:13:36,193 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 0.03%)
+2026-03-10 15:13:44,396 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 168s
+2026-03-10 15:13:52,600 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 160s
+2026-03-10 15:14:00,747 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 4.91%)
+2026-03-10 15:14:08,921 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 144s
+2026-03-10 15:14:17,070 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -8.46% <= 0 after slippage
+2026-03-10 15:14:25,208 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.26% <= 0 after slippage
+2026-03-10 15:14:33,405 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.49% <= 0 after slippage
+2026-03-10 15:14:41,585 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -0.39% <= 0 after slippage
+2026-03-10 15:14:49,738 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.38% <= 0 after slippage
+2026-03-10 15:14:57,965 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -0.73% <= 0 after slippage
+2026-03-10 15:15:06,130 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.03% <= 0 after slippage
+2026-03-10 15:15:14,272 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 0.57%)
+2026-03-10 15:15:22,430 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.84% <= 0 after slippage
+2026-03-10 15:15:30,636 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.21% <= 0 after slippage
+2026-03-10 15:15:38,789 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.34% <= 0 after slippage
+2026-03-10 15:15:46,945 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 0.53%)
+2026-03-10 15:15:55,143 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 0.12%)
+2026-03-10 15:16:03,333 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 2.69%)
+2026-03-10 15:16:11,509 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 21s
+2026-03-10 15:16:19,646 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -0.73% <= 0 after slippage
+2026-03-10 15:16:27,813 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.36% <= 0 after slippage
+2026-03-10 15:16:35,951 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.24% <= 0 after slippage
+2026-03-10 15:16:44,105 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.31% <= 0 after slippage
+2026-03-10 15:16:52,318 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 1.63%)
+2026-03-10 15:17:00,477 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -5.12% <= 0 after slippage
+2026-03-10 15:17:08,639 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 0.66%)
+2026-03-10 15:17:16,818 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 1.24%)
+2026-03-10 15:17:24,973 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 0.46%)
+2026-03-10 15:17:33,163 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.88% <= 0 after slippage
+2026-03-10 15:17:41,351 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.21% <= 0 after slippage
+2026-03-10 15:17:57,667 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 15:17:58,133 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.22% <= 0 after slippage
+2026-03-10 15:18:06,259 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.27% <= 0 after slippage
+2026-03-10 15:18:14,404 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.23% <= 0 after slippage
+2026-03-10 15:18:22,558 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -8.64% <= 0 after slippage
+2026-03-10 15:18:30,695 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.15% <= 0 after slippage
+2026-03-10 15:18:38,887 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -0.33% <= 0 after slippage
+2026-03-10 15:18:47,048 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.77% <= 0 after slippage
+2026-03-10 15:18:55,225 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 0.10%)
+2026-03-10 15:19:03,418 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -5.03% <= 0 after slippage
+2026-03-10 15:19:11,580 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -6.48% <= 0 after slippage
+2026-03-10 15:19:19,758 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.56% <= 0 after slippage
+2026-03-10 15:19:27,899 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.86% <= 0 after slippage
+2026-03-10 15:19:36,084 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.13% <= 0 after slippage
+2026-03-10 15:19:44,253 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.04% <= 0 after slippage
+2026-03-10 15:19:52,437 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -0.28% <= 0 after slippage
+2026-03-10 15:20:00,615 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 0.10%)
+2026-03-10 15:20:08,815 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.43% <= 0 after slippage
+2026-03-10 15:20:17,019 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -5.89% <= 0 after slippage
+2026-03-10 15:20:25,163 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.31% <= 0 after slippage
+2026-03-10 15:20:33,356 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.19% <= 0 after slippage
+2026-03-10 15:20:41,513 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -0.98% <= 0 after slippage
+2026-03-10 15:20:49,671 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.33% <= 0 after slippage
+2026-03-10 15:20:57,851 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.74% <= 0 after slippage
+2026-03-10 15:21:05,998 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.90% <= 0 after slippage
+2026-03-10 15:21:14,181 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 0.11%)
+2026-03-10 15:21:22,368 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.84% <= 0 after slippage
+2026-03-10 15:21:30,567 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.07% <= 0 after slippage
+2026-03-10 15:21:38,716 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 1.55%)
+2026-03-10 15:21:46,870 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.50% <= 0 after slippage
+2026-03-10 15:21:55,038 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.35% <= 0 after slippage
+2026-03-10 15:22:03,217 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 0.14%)
+2026-03-10 15:22:11,414 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 0.02%)
+2026-03-10 15:22:19,628 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.40% <= 0 after slippage
+2026-03-10 15:22:27,814 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.35% <= 0 after slippage
+2026-03-10 15:22:35,981 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 0.21%)
+2026-03-10 15:22:44,161 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -0.48% <= 0 after slippage
+2026-03-10 15:22:52,316 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.36% <= 0 after slippage
+2026-03-10 15:23:00,466 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.06% <= 0 after slippage
+2026-03-10 15:23:08,611 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -6.22% <= 0 after slippage
+2026-03-10 15:23:16,811 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -0.11% <= 0 after slippage
+2026-03-10 15:23:24,992 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.42% <= 0 after slippage
+2026-03-10 15:23:33,216 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -5.42% <= 0 after slippage
+2026-03-10 15:23:41,370 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -0.94% <= 0 after slippage
+2026-03-10 15:23:49,522 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.57% <= 0 after slippage
+2026-03-10 15:23:57,730 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.01% <= 0 after slippage
+2026-03-10 15:24:05,897 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 7.83%)
+2026-03-10 15:24:14,085 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.30% <= 0 after slippage
+2026-03-10 15:24:22,263 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.67% <= 0 after slippage
+2026-03-10 15:24:30,466 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 10.74%)
+2026-03-10 15:24:38,679 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 0.68%)
+2026-03-10 15:24:46,912 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -0.24% <= 0 after slippage
+2026-03-10 15:24:55,057 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -0.57% <= 0 after slippage
+2026-03-10 15:25:03,195 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.74% <= 0 after slippage
+2026-03-10 15:25:11,410 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.79% <= 0 after slippage
+2026-03-10 15:25:19,562 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.04% <= 0 after slippage
+2026-03-10 15:25:27,777 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.52% <= 0 after slippage
+2026-03-10 15:25:35,935 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -0.32% <= 0 after slippage
+2026-03-10 15:25:44,128 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 12.12%)
+2026-03-10 15:25:52,318 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.14% <= 0 after slippage
+2026-03-10 15:26:00,520 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.37% <= 0 after slippage
+2026-03-10 15:26:08,688 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.01% <= 0 after slippage
+2026-03-10 15:26:24,863 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 15:26:25,308 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -0.42% <= 0 after slippage
+2026-03-10 15:26:33,462 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 9.18%)
+2026-03-10 15:26:41,682 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 10.88%)
+2026-03-10 15:26:49,866 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 14.10%)
+2026-03-10 15:26:58,080 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 2 requires EV >= 6.00% (got 0.21%)
+2026-03-10 15:27:06,259 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 14.53%)
+2026-03-10 15:27:14,410 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 5.40%)
+2026-03-10 15:27:22,537 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.23% <= 0 after slippage
+2026-03-10 15:27:30,680 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.62% <= 0 after slippage
+2026-03-10 15:27:38,888 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.14% <= 0 after slippage
+2026-03-10 15:27:47,074 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.98% <= 0 after slippage
+2026-03-10 15:27:55,232 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.88% <= 0 after slippage
+2026-03-10 15:28:03,370 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 201s
+2026-03-10 15:28:11,566 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.37% <= 0 after slippage
+2026-03-10 15:28:19,777 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 185s
+2026-03-10 15:28:27,967 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.58% <= 0 after slippage
+2026-03-10 15:28:36,101 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 10.70%)
+2026-03-10 15:28:44,288 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 10.61%)
+2026-03-10 15:28:52,484 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.41% <= 0 after slippage
+2026-03-10 15:29:00,666 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -0.38% <= 0 after slippage
+2026-03-10 15:29:08,849 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 136s
+2026-03-10 15:29:17,012 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.77% <= 0 after slippage
+2026-03-10 15:29:25,155 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.73% <= 0 after slippage
+2026-03-10 15:29:33,366 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.41% <= 0 after slippage
+2026-03-10 15:29:41,544 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.04% <= 0 after slippage
+2026-03-10 15:29:49,788 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.92% <= 0 after slippage
+2026-03-10 15:29:58,027 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.51% <= 0 after slippage
+2026-03-10 15:30:06,189 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.26% <= 0 after slippage
+2026-03-10 15:30:14,369 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.58% <= 0 after slippage
+2026-03-10 15:30:22,572 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.79% <= 0 after slippage
+2026-03-10 15:30:30,744 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -0.69% <= 0 after slippage
+2026-03-10 15:30:38,930 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.44% <= 0 after slippage
+2026-03-10 15:30:47,128 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 37s
+2026-03-10 15:30:55,285 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 8.78%)
+2026-03-10 15:31:03,401 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 2.78%)
+2026-03-10 15:31:11,671 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 8.42%)
+2026-03-10 15:31:19,887 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.57% <= 0 after slippage
+2026-03-10 15:31:28,032 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.28% <= 0 after slippage
+2026-03-10 15:31:36,189 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.70% <= 0 after slippage
+2026-03-10 15:31:44,396 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 10.51%)
+2026-03-10 15:31:52,583 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.23% <= 0 after slippage
+2026-03-10 15:32:00,777 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.14% <= 0 after slippage
+2026-03-10 15:32:08,960 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.22% <= 0 after slippage
+2026-03-10 15:32:17,160 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.26% <= 0 after slippage
+2026-03-10 15:32:25,379 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 14.59%)
+2026-03-10 15:32:33,527 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 5.80%)
+2026-03-10 15:32:41,731 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.04% <= 0 after slippage
+2026-03-10 15:32:57,921 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 15:32:58,368 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.16% <= 0 after slippage
+2026-03-10 15:33:06,526 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.70% <= 0 after slippage
+2026-03-10 15:33:14,693 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.05% <= 0 after slippage
+2026-03-10 15:33:22,866 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.24% <= 0 after slippage
+2026-03-10 15:33:31,049 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.67% <= 0 after slippage
+2026-03-10 15:33:39,209 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.84% <= 0 after slippage
+2026-03-10 15:33:47,422 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.45% <= 0 after slippage
+2026-03-10 15:33:55,618 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.95% <= 0 after slippage
+2026-03-10 15:34:03,894 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.74% <= 0 after slippage
+2026-03-10 15:34:12,086 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.76% <= 0 after slippage
+2026-03-10 15:34:20,307 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.71% <= 0 after slippage
+2026-03-10 15:34:28,539 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.96% <= 0 after slippage
+2026-03-10 15:34:36,733 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.41% <= 0 after slippage
+2026-03-10 15:34:44,950 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 192s
+2026-03-10 15:34:53,166 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.03% <= 0 after slippage
+2026-03-10 15:35:01,298 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: AI circuit breaker open for 176s
+2026-03-10 15:35:09,482 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Score 1 requires EV >= 15.00% (got 9.90%)
+2026-03-10 15:35:17,691 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.29% <= 0 after slippage
+2026-03-10 15:35:25,915 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.87% <= 0 after slippage
+2026-03-10 15:35:34,102 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.23% <= 0 after slippage
+2026-03-10 15:35:42,316 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.95% <= 0 after slippage
+2026-03-10 15:35:50,497 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.70% <= 0 after slippage
+2026-03-10 15:35:58,702 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.27% <= 0 after slippage
+2026-03-10 15:36:06,860 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.88% <= 0 after slippage
+2026-03-10 15:36:15,044 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.05% <= 0 after slippage
+2026-03-10 15:36:23,205 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -6.92% <= 0 after slippage
+2026-03-10 15:36:31,379 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -6.04% <= 0 after slippage
+2026-03-10 15:36:39,554 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.28% <= 0 after slippage
+2026-03-10 15:36:47,732 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.08% <= 0 after slippage
+2026-03-10 15:36:55,932 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -0.52% <= 0 after slippage
+2026-03-10 15:37:04,171 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.17% <= 0 after slippage
+2026-03-10 15:37:12,352 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -1.47% <= 0 after slippage
+2026-03-10 15:37:20,535 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:37:45,095 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -4.18% <= 0 after slippage
+2026-03-10 15:37:53,317 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -3.55% <= 0 after slippage
+2026-03-10 15:38:01,497 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.58% <= 0 after slippage
+2026-03-10 15:38:09,695 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Net EV -2.52% <= 0 after slippage
+2026-03-10 15:38:17,866 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Late high-risk lottery blocked: risk 0.21, px 0.055, true 7.77%, spread 18.1% of price
+2026-03-10 15:38:26,051 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:39:15,202 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:40:04,502 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:40:53,808 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:41:43,084 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:42:32,423 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:43:21,779 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:44:11,105 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:45:00,479 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:45:49,765 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:46:39,101 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:47:28,406 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:48:17,612 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:49:06,789 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:49:56,059 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:50:45,326 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:51:34,562 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:52:23,903 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:53:13,106 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:54:02,297 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:54:51,501 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:55:40,771 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:56:30,055 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:57:19,264 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:58:08,457 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:58:57,602 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Crowd skew too high
+2026-03-10 15:59:30,453 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Too close to expiry (29.5s < 30.0s)
+2026-03-10 15:59:39,225 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Too close to expiry (21s < 30.0s)
+2026-03-10 15:59:48,193 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Too close to expiry (12s < 30.0s)
+2026-03-10 15:59:57,142 [INFO] [SKIP] bitcoin-up-or-down-march-10-2pm-et: Too close to expiry (3s < 30.0s)
+2026-03-10 16:00:04,131 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-10-3pm-et | Prefix: bitcoin-up-or-down-march-10-3pm
+2026-03-10 16:00:10,445 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-10-3pm-et | matched_slug=bitcoin-up-or-down-march-10-3pm-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=76009365676286639414232053850782415673763125917733526308976926462580939638002 | down_token=89688075700867051402657555397394976481797045051313382218544355540079436926340
+2026-03-10 16:00:10,446 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-10-3pm-et
+2026-03-10 16:00:10,446 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Too early (3590s > 3540.0s)
+2026-03-10 16:00:10,447 [INFO] [CLOB WS] Reconnecting to apply subscription update.
+2026-03-10 16:00:11,118 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-10 16:00:18,273 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Too early (3582s > 3540.0s)
+2026-03-10 16:00:26,433 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Too early (3574s > 3540.0s)
+2026-03-10 16:00:34,640 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Too early (3566s > 3540.0s)
+2026-03-10 16:00:42,833 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Too early (3558s > 3540.0s)
+2026-03-10 16:00:51,043 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Too early (3549s > 3540.0s)
+2026-03-10 16:00:59,219 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Too early (3540.8s > 3540.0s)
+2026-03-10 16:01:15,399 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 16:01:15,849 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 299s
+2026-03-10 16:01:23,997 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 291s
+2026-03-10 16:01:32,154 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 283s
+2026-03-10 16:01:40,372 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 275s
+2026-03-10 16:01:48,576 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 266s
+2026-03-10 16:01:56,775 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 258s
+2026-03-10 16:02:04,927 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 250s
+2026-03-10 16:02:13,146 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 242s
+2026-03-10 16:02:21,373 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 234s
+2026-03-10 16:02:29,550 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 225s
+2026-03-10 16:02:37,724 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 217s
+2026-03-10 16:02:45,886 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 209s
+2026-03-10 16:02:54,102 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 201s
+2026-03-10 16:03:02,304 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 193s
+2026-03-10 16:03:10,477 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 184s
+2026-03-10 16:03:18,662 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 176s
+2026-03-10 16:03:26,861 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 168s
+2026-03-10 16:03:35,049 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 160s
+2026-03-10 16:03:43,395 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 152s
+2026-03-10 16:03:51,605 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 143s
+2026-03-10 16:03:59,773 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 135s
+2026-03-10 16:04:07,941 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 127s
+2026-03-10 16:04:16,153 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 119s
+2026-03-10 16:04:24,398 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 111s
+2026-03-10 16:04:32,583 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 102s
+2026-03-10 16:04:40,786 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 94s
+2026-03-10 16:04:49,040 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 86s
+2026-03-10 16:04:57,250 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Score 1 requires EV >= 15.00% (got 0.71%)
+2026-03-10 16:05:05,415 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-10 16:05:14,002 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Entry premium 1.5c > 1.0c max
+2026-03-10 16:05:21,769 [INFO] [ENTRY RISK] bitcoin-up-or-down-march-10-3pm-et: SDK fee recheck resized bet $250.31 -> $244.47
+2026-03-10 16:05:21,770 [INFO] [ENTRY SMART] Spread 2.0c wide, time 3278s remaining — shading entry cap toward bid side @ 0.5200 (vs naive 0.5502, ask 0.5300)
+2026-03-10 16:05:21,782 [INFO] [ENTRY LOCKUP] bitcoin-up-or-down-march-10-3pm-et: capital locked for ~0.9h (threshold 0.8h)
+2026-03-10 16:05:21,782 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Paper shadow passive cap 0.5200 below ask 0.5300; immediate fill not simulated
+2026-03-10 16:05:29,922 [INFO] [ENTRY RISK] bitcoin-up-or-down-march-10-3pm-et: SDK fee recheck resized bet $224.26 -> $224.23
+2026-03-10 16:05:29,923 [INFO] [ENTRY SMART] Spread 2.0c wide, time 3270s remaining — shading entry cap toward bid side @ 0.5400 (vs naive 0.5703, ask 0.5500)
+2026-03-10 16:05:29,923 [INFO] [ENTRY LOCKUP] bitcoin-up-or-down-march-10-3pm-et: capital locked for ~0.9h (threshold 0.8h)
+2026-03-10 16:05:29,924 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Paper shadow passive cap 0.5400 below ask 0.5500; immediate fill not simulated
+2026-03-10 16:05:38,131 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Net EV -1.74% <= 0 after slippage
+2026-03-10 16:05:46,291 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Score 2 requires EV >= 6.00% (got 0.93%)
+2026-03-10 16:05:54,470 [INFO] [ENTRY RISK] bitcoin-up-or-down-march-10-3pm-et: SDK fee recheck resized bet $246.74 -> $243.73
+2026-03-10 16:05:54,470 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Entry premium 1.5c > 1.0c max
+2026-03-10 16:06:10,896 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Net EV -3.67% <= 0 after slippage
+2026-03-10 16:06:27,104 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 16:06:27,552 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Net EV -1.30% <= 0 after slippage
+2026-03-10 16:06:35,756 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Net EV -7.40% <= 0 after slippage
+2026-03-10 16:06:43,957 [INFO] [ENTRY RISK] bitcoin-up-or-down-march-10-3pm-et: SDK fee recheck resized bet $258.02 -> $252.95
+2026-03-10 16:06:43,958 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Entry premium 1.5c > 1.0c max
+2026-03-10 16:06:52,154 [INFO] [ENTRY RISK] bitcoin-up-or-down-march-10-3pm-et: SDK fee recheck resized bet $226.98 -> $225.92
+2026-03-10 16:06:52,154 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Entry premium 1.4c > 1.0c max
+2026-03-10 16:07:00,331 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Net EV -1.78% <= 0 after slippage
+2026-03-10 16:07:08,479 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Net EV -1.41% <= 0 after slippage
+2026-03-10 16:07:16,662 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Net EV -7.59% <= 0 after slippage
+2026-03-10 16:07:24,881 [INFO] [ENTRY RISK] bitcoin-up-or-down-march-10-3pm-et: SDK fee recheck resized bet $251.06 -> $248.36
+2026-03-10 16:07:24,881 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Entry premium 1.5c > 1.0c max
+2026-03-10 16:07:33,041 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Net EV -0.82% <= 0 after slippage
+2026-03-10 16:07:41,208 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 225s
+2026-03-10 16:07:49,384 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 217s
+2026-03-10 16:07:57,560 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 209s
+2026-03-10 16:08:05,743 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 201s
+2026-03-10 16:08:13,941 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 193s
+2026-03-10 16:08:22,114 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 184s
+2026-03-10 16:08:30,280 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 176s
+2026-03-10 16:08:38,461 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 168s
+2026-03-10 16:08:46,653 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 160s
+2026-03-10 16:08:54,881 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 152s
+2026-03-10 16:09:03,053 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 144s
+2026-03-10 16:09:11,288 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 135s
+2026-03-10 16:09:19,461 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 127s
+2026-03-10 16:09:27,658 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 119s
+2026-03-10 16:09:35,861 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 111s
+2026-03-10 16:09:44,071 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 103s
+2026-03-10 16:09:52,290 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 94s
+2026-03-10 16:10:00,489 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 86s
+2026-03-10 16:10:08,691 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 78s
+2026-03-10 16:10:16,872 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 70s
+2026-03-10 16:10:25,112 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 61s
+2026-03-10 16:10:33,306 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 53s
+2026-03-10 16:10:41,458 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 45s
+2026-03-10 16:10:49,682 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 37s
+2026-03-10 16:10:57,865 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 29s
+2026-03-10 16:11:06,055 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 21s
+2026-03-10 16:11:14,251 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 12s
+2026-03-10 16:11:22,428 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 4s
+2026-03-10 16:11:38,631 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 16:11:39,080 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 299s
+2026-03-10 16:11:47,267 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 291s
+2026-03-10 16:11:55,432 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 283s
+2026-03-10 16:12:03,599 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 275s
+2026-03-10 16:12:11,749 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 266s
+2026-03-10 16:12:19,965 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 258s
+2026-03-10 16:12:28,123 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 250s
+2026-03-10 16:12:36,309 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 242s
+2026-03-10 16:12:44,556 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 234s
+2026-03-10 16:12:52,768 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 225s
+2026-03-10 16:13:00,993 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 217s
+2026-03-10 16:13:09,209 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 209s
+2026-03-10 16:13:17,384 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 201s
+2026-03-10 16:13:25,547 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 193s
+2026-03-10 16:13:33,740 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 184s
+2026-03-10 16:13:41,938 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 176s
+2026-03-10 16:13:50,115 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 168s
+2026-03-10 16:13:58,313 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 160s
+2026-03-10 16:14:06,479 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 152s
+2026-03-10 16:14:14,650 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 143s
+2026-03-10 16:14:22,884 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 135s
+2026-03-10 16:14:31,092 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 127s
+2026-03-10 16:14:39,315 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 119s
+2026-03-10 16:14:47,496 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 111s
+2026-03-10 16:14:55,712 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 102s
+2026-03-10 16:15:03,921 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 94s
+2026-03-10 16:15:12,114 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 86s
+2026-03-10 16:15:20,332 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 78s
+2026-03-10 16:15:28,497 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 70s
+2026-03-10 16:15:36,690 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 61s
+2026-03-10 16:15:44,905 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 53s
+2026-03-10 16:15:53,149 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 45s
+2026-03-10 16:16:01,312 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 37s
+2026-03-10 16:16:09,503 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 29s
+2026-03-10 16:16:17,712 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 20s
+2026-03-10 16:16:25,875 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 12s
+2026-03-10 16:16:34,067 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 4s
+2026-03-10 16:16:50,266 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 16:16:50,724 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 299s
+2026-03-10 16:16:58,919 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 291s
+2026-03-10 16:17:07,049 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 283s
+2026-03-10 16:17:15,275 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 274s
+2026-03-10 16:17:23,433 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 266s
+2026-03-10 16:17:31,633 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 258s
+2026-03-10 16:17:39,815 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 250s
+2026-03-10 16:17:48,027 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 242s
+2026-03-10 16:17:56,212 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 234s
+2026-03-10 16:18:04,391 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 225s
+2026-03-10 16:18:12,564 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 217s
+2026-03-10 16:18:20,791 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 209s
+2026-03-10 16:18:29,001 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 201s
+2026-03-10 16:18:37,234 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 193s
+2026-03-10 16:18:45,444 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 184s
+2026-03-10 16:18:53,655 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 176s
+2026-03-10 16:19:01,848 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 168s
+2026-03-10 16:19:10,041 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 160s
+2026-03-10 16:19:18,261 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Score 2 requires EV >= 6.00% (got 5.56%)
+2026-03-10 16:19:26,469 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 143s
+2026-03-10 16:19:34,667 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 135s
+2026-03-10 16:19:42,816 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 127s
+2026-03-10 16:19:51,036 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 119s
+2026-03-10 16:19:59,232 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 111s
+2026-03-10 16:20:07,464 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 102s
+2026-03-10 16:20:15,688 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 94s
+2026-03-10 16:20:23,874 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 86s
+2026-03-10 16:20:32,070 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 78s
+2026-03-10 16:20:40,215 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 70s
+2026-03-10 16:20:48,401 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 61s
+2026-03-10 16:20:56,577 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 53s
+2026-03-10 16:21:04,766 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 45s
+2026-03-10 16:21:12,898 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 37s
+2026-03-10 16:21:21,046 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 29s
+2026-03-10 16:21:29,247 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 21s
+2026-03-10 16:21:37,385 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 12s
+2026-03-10 16:21:45,581 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 4s
+2026-03-10 16:22:01,798 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 16:22:02,267 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 299s
+2026-03-10 16:22:10,445 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 291s
+2026-03-10 16:22:18,611 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 283s
+2026-03-10 16:22:26,832 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 274s
+2026-03-10 16:22:35,017 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 266s
+2026-03-10 16:22:43,225 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 258s
+2026-03-10 16:22:51,403 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 250s
+2026-03-10 16:22:59,649 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 242s
+2026-03-10 16:23:07,812 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 233s
+2026-03-10 16:23:16,004 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 225s
+2026-03-10 16:23:24,169 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 217s
+2026-03-10 16:23:32,368 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 209s
+2026-03-10 16:23:40,568 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 201s
+2026-03-10 16:23:48,757 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 193s
+2026-03-10 16:23:56,949 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 184s
+2026-03-10 16:24:05,159 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 176s
+2026-03-10 16:24:13,310 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 168s
+2026-03-10 16:24:21,440 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 160s
+2026-03-10 16:24:29,642 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 152s
+2026-03-10 16:24:37,844 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 143s
+2026-03-10 16:24:46,059 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 135s
+2026-03-10 16:24:54,270 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 127s
+2026-03-10 16:25:02,420 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 119s
+2026-03-10 16:25:10,663 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 111s
+2026-03-10 16:25:18,862 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 102s
+2026-03-10 16:25:27,053 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 94s
+2026-03-10 16:25:35,231 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 86s
+2026-03-10 16:25:43,460 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 78s
+2026-03-10 16:25:51,674 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 70s
+2026-03-10 16:25:59,937 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 61s
+2026-03-10 16:26:08,139 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 53s
+2026-03-10 16:26:16,314 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 45s
+2026-03-10 16:26:24,466 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 37s
+2026-03-10 16:26:32,662 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 29s
+2026-03-10 16:26:40,832 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 20s
+2026-03-10 16:26:49,021 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 12s
+2026-03-10 16:26:57,179 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 4s
+2026-03-10 16:27:13,375 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 16:27:13,825 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 299s
+2026-03-10 16:27:21,987 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 291s
+2026-03-10 16:27:30,180 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 283s
+2026-03-10 16:27:38,412 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 274s
+2026-03-10 16:27:46,600 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 266s
+2026-03-10 16:27:54,770 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 258s
+2026-03-10 16:28:02,982 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 250s
+2026-03-10 16:28:11,184 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 242s
+2026-03-10 16:28:19,362 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 234s
+2026-03-10 16:28:27,502 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 225s
+2026-03-10 16:28:36,143 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 217s
+2026-03-10 16:28:43,893 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 209s
+2026-03-10 16:28:52,120 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 201s
+2026-03-10 16:29:00,329 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 193s
+2026-03-10 16:29:08,523 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 184s
+2026-03-10 16:29:16,730 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 176s
+2026-03-10 16:29:24,859 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 168s
+2026-03-10 16:29:32,997 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 160s
+2026-03-10 16:29:41,194 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 152s
+2026-03-10 16:29:49,359 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 144s
+2026-03-10 16:29:57,532 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 135s
+2026-03-10 16:30:05,716 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 127s
+2026-03-10 16:30:13,904 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 119s
+2026-03-10 16:30:22,090 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 111s
+2026-03-10 16:30:30,266 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 103s
+2026-03-10 16:30:38,454 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 94s
+2026-03-10 16:30:46,665 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 86s
+2026-03-10 16:30:54,867 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 78s
+2026-03-10 16:31:03,046 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 70s
+2026-03-10 16:31:11,230 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 62s
+2026-03-10 16:31:19,541 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 53s
+2026-03-10 16:31:27,757 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 45s
+2026-03-10 16:31:35,955 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 37s
+2026-03-10 16:31:44,097 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 29s
+2026-03-10 16:31:52,286 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 21s
+2026-03-10 16:32:00,495 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 12s
+2026-03-10 16:32:08,648 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 4s
+2026-03-10 16:32:24,861 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 16:32:25,312 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 299s
+2026-03-10 16:32:33,489 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 291s
+2026-03-10 16:32:41,652 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 283s
+2026-03-10 16:32:49,869 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 274s
+2026-03-10 16:32:58,086 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 266s
+2026-03-10 16:33:06,279 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 258s
+2026-03-10 16:33:14,473 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 250s
+2026-03-10 16:33:22,648 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 242s
+2026-03-10 16:33:30,838 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 234s
+2026-03-10 16:33:39,049 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 225s
+2026-03-10 16:33:47,264 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 217s
+2026-03-10 16:33:55,435 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 209s
+2026-03-10 16:34:03,599 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 201s
+2026-03-10 16:34:11,769 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 193s
+2026-03-10 16:34:19,940 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 184s
+2026-03-10 16:34:28,110 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 176s
+2026-03-10 16:34:36,328 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 168s
+2026-03-10 16:34:44,553 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 160s
+2026-03-10 16:34:52,758 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 152s
+2026-03-10 16:35:00,947 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 143s
+2026-03-10 16:35:09,113 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 135s
+2026-03-10 16:35:17,305 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 127s
+2026-03-10 16:35:25,520 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 119s
+2026-03-10 16:35:33,664 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 111s
+2026-03-10 16:35:41,868 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 102s
+2026-03-10 16:35:50,050 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 94s
+2026-03-10 16:35:58,258 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 86s
+2026-03-10 16:36:06,430 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 78s
+2026-03-10 16:36:14,622 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 70s
+2026-03-10 16:36:22,876 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 61s
+2026-03-10 16:36:31,072 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 53s
+2026-03-10 16:36:39,314 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 45s
+2026-03-10 16:36:47,458 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 37s
+2026-03-10 16:36:55,656 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 29s
+2026-03-10 16:37:03,850 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 21s
+2026-03-10 16:37:12,029 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 12s
+2026-03-10 16:37:20,213 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 4s
+2026-03-10 16:37:36,392 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 16:37:36,857 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 299s
+2026-03-10 16:37:45,043 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 291s
+2026-03-10 16:37:53,208 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 283s
+2026-03-10 16:38:01,390 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 275s
+2026-03-10 16:38:09,564 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 266s
+2026-03-10 16:38:17,751 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 258s
+2026-03-10 16:38:25,935 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 250s
+2026-03-10 16:38:34,099 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 242s
+2026-03-10 16:38:42,273 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 234s
+2026-03-10 16:38:50,402 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 225s
+2026-03-10 16:38:58,613 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 217s
+2026-03-10 16:39:06,803 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 209s
+2026-03-10 16:39:14,991 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 201s
+2026-03-10 16:39:23,187 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 193s
+2026-03-10 16:39:31,421 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 184s
+2026-03-10 16:39:39,605 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 176s
+2026-03-10 16:39:47,776 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 168s
+2026-03-10 16:39:55,979 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 160s
+2026-03-10 16:40:04,160 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 152s
+2026-03-10 16:40:12,340 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 144s
+2026-03-10 16:40:20,533 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 135s
+2026-03-10 16:40:28,731 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 127s
+2026-03-10 16:40:36,862 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 119s
+2026-03-10 16:40:45,002 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 111s
+2026-03-10 16:40:53,183 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 103s
+2026-03-10 16:41:01,333 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 95s
+2026-03-10 16:41:09,494 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 86s
+2026-03-10 16:41:17,673 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 78s
+2026-03-10 16:41:25,820 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 70s
+2026-03-10 16:41:34,015 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 62s
+2026-03-10 16:41:42,154 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 54s
+2026-03-10 16:41:50,289 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 46s
+2026-03-10 16:41:58,446 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 37s
+2026-03-10 16:42:06,643 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 29s
+2026-03-10 16:42:14,835 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 21s
+2026-03-10 16:42:23,032 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 13s
+2026-03-10 16:42:31,203 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 5s
+2026-03-10 16:42:47,391 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 16:42:47,848 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 299s
+2026-03-10 16:42:55,993 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 291s
+2026-03-10 16:43:04,155 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 283s
+2026-03-10 16:43:12,335 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 275s
+2026-03-10 16:43:20,561 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 266s
+2026-03-10 16:43:28,758 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 258s
+2026-03-10 16:43:36,908 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 250s
+2026-03-10 16:43:45,092 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 242s
+2026-03-10 16:43:53,292 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 234s
+2026-03-10 16:44:01,501 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 225s
+2026-03-10 16:44:09,728 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 217s
+2026-03-10 16:44:17,926 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 209s
+2026-03-10 16:44:26,091 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 201s
+2026-03-10 16:44:34,274 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 193s
+2026-03-10 16:44:42,410 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 184s
+2026-03-10 16:44:50,584 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 176s
+2026-03-10 16:44:58,789 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 168s
+2026-03-10 16:45:06,998 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 160s
+2026-03-10 16:45:15,164 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 152s
+2026-03-10 16:45:23,325 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 144s
+2026-03-10 16:45:31,504 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 135s
+2026-03-10 16:45:39,689 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 127s
+2026-03-10 16:45:47,958 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 119s
+2026-03-10 16:45:56,145 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 111s
+2026-03-10 16:46:04,335 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 103s
+2026-03-10 16:46:12,493 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 94s
+2026-03-10 16:46:20,692 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 86s
+2026-03-10 16:46:28,914 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 78s
+2026-03-10 16:46:37,103 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 70s
+2026-03-10 16:46:45,258 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 62s
+2026-03-10 16:46:53,412 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 53s
+2026-03-10 16:47:01,612 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 45s
+2026-03-10 16:47:09,794 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 37s
+2026-03-10 16:47:18,010 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 29s
+2026-03-10 16:47:26,202 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 21s
+2026-03-10 16:47:34,418 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 12s
+2026-03-10 16:47:42,597 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 4s
+2026-03-10 16:47:58,768 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 16:47:59,215 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 299s
+2026-03-10 16:48:07,412 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 291s
+2026-03-10 16:48:15,564 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 283s
+2026-03-10 16:48:23,752 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 275s
+2026-03-10 16:48:31,938 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 266s
+2026-03-10 16:48:40,123 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 258s
+2026-03-10 16:48:48,323 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 250s
+2026-03-10 16:48:56,478 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 242s
+2026-03-10 16:49:04,667 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 234s
+2026-03-10 16:49:12,891 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 225s
+2026-03-10 16:49:21,059 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 217s
+2026-03-10 16:49:29,276 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 209s
+2026-03-10 16:49:37,479 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 201s
+2026-03-10 16:49:45,699 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 193s
+2026-03-10 16:49:53,895 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 184s
+2026-03-10 16:50:02,080 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 176s
+2026-03-10 16:50:10,265 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 168s
+2026-03-10 16:50:18,464 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 160s
+2026-03-10 16:50:26,640 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 152s
+2026-03-10 16:50:34,821 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 143s
+2026-03-10 16:50:43,012 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 135s
+2026-03-10 16:50:51,166 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 127s
+2026-03-10 16:50:59,365 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 119s
+2026-03-10 16:51:07,561 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 111s
+2026-03-10 16:51:15,754 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 103s
+2026-03-10 16:51:23,977 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 94s
+2026-03-10 16:51:32,135 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 86s
+2026-03-10 16:51:40,342 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 78s
+2026-03-10 16:51:48,566 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 70s
+2026-03-10 16:51:56,783 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 61s
+2026-03-10 16:52:04,992 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 53s
+2026-03-10 16:52:13,169 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 45s
+2026-03-10 16:52:21,343 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 37s
+2026-03-10 16:52:29,532 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 29s
+2026-03-10 16:52:37,719 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 21s
+2026-03-10 16:52:45,879 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 12s
+2026-03-10 16:52:54,115 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 4s
+2026-03-10 16:53:10,291 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 16:53:10,754 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 299s
+2026-03-10 16:53:18,929 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 291s
+2026-03-10 16:53:27,131 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 283s
+2026-03-10 16:53:35,372 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 274s
+2026-03-10 16:53:43,560 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 266s
+2026-03-10 16:53:51,750 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 258s
+2026-03-10 16:53:59,943 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 250s
+2026-03-10 16:54:08,113 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 242s
+2026-03-10 16:54:16,301 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 233s
+2026-03-10 16:54:24,523 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 225s
+2026-03-10 16:54:32,712 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 217s
+2026-03-10 16:54:40,867 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 209s
+2026-03-10 16:54:49,069 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 201s
+2026-03-10 16:54:57,221 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Net EV -11.25% <= 0 after slippage
+2026-03-10 16:55:05,366 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 184s
+2026-03-10 16:55:13,517 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 176s
+2026-03-10 16:55:21,743 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 168s
+2026-03-10 16:55:30,013 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 160s
+2026-03-10 16:55:38,203 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 152s
+2026-03-10 16:55:46,373 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 143s
+2026-03-10 16:55:54,504 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 135s
+2026-03-10 16:56:02,678 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 127s
+2026-03-10 16:56:10,851 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 119s
+2026-03-10 16:56:19,038 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 111s
+2026-03-10 16:56:27,249 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 103s
+2026-03-10 16:56:35,421 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 94s
+2026-03-10 16:56:43,612 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 86s
+2026-03-10 16:56:51,811 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 78s
+2026-03-10 16:56:59,959 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 70s
+2026-03-10 16:57:08,144 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 62s
+2026-03-10 16:57:16,388 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 53s
+2026-03-10 16:57:24,572 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 45s
+2026-03-10 16:57:32,748 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 37s
+2026-03-10 16:57:40,955 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 29s
+2026-03-10 16:57:49,148 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 21s
+2026-03-10 16:57:57,343 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 12s
+2026-03-10 16:58:05,544 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 4s
+2026-03-10 16:58:21,720 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 16:58:22,177 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 299s
+2026-03-10 16:58:30,365 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 291s
+2026-03-10 16:58:38,516 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: AI circuit breaker open for 283s
+2026-03-10 16:58:46,676 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Net EV -3.71% <= 0 after slippage
+2026-03-10 16:58:54,864 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Net EV -1.12% <= 0 after slippage
+2026-03-10 16:59:03,031 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Net EV -5.20% <= 0 after slippage
+2026-03-10 16:59:11,207 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Net EV -4.53% <= 0 after slippage
+2026-03-10 16:59:19,382 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Net EV -9.39% <= 0 after slippage
+2026-03-10 16:59:27,511 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Net EV -2.81% <= 0 after slippage
+2026-03-10 16:59:35,676 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Too close to expiry (25s < 30.0s)
+2026-03-10 16:59:44,380 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Too close to expiry (16s < 30.0s)
+2026-03-10 16:59:53,371 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Too close to expiry (7s < 30.0s)
+2026-03-10 16:59:59,799 [INFO] [SKIP] bitcoin-up-or-down-march-10-3pm-et: Too close to expiry (1s < 30.0s)
+2026-03-10 17:00:03,753 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-10-4pm-et | Prefix: bitcoin-up-or-down-march-10-4pm
+2026-03-10 17:00:08,763 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-10-4pm-et | matched_slug=bitcoin-up-or-down-march-10-4pm-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=105192774302442639461172254196397701808959384050225956555927909190031289333662 | down_token=9989928335575942421901145490933674901431392225746788170642129260309039202237
+2026-03-10 17:00:08,764 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-10-4pm-et
+2026-03-10 17:00:08,764 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Too early (3592s > 3540.0s)
+2026-03-10 17:00:08,765 [INFO] [CLOB WS] Reconnecting to apply subscription update.
+2026-03-10 17:00:09,303 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-10 17:00:16,547 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Too early (3584s > 3540.0s)
+2026-03-10 17:00:24,758 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Too early (3576s > 3540.0s)
+2026-03-10 17:00:32,992 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Too early (3568s > 3540.0s)
+2026-03-10 17:00:41,207 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Too early (3559s > 3540.0s)
+2026-03-10 17:00:49,444 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Too early (3551s > 3540.0s)
+2026-03-10 17:00:57,615 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Too early (3543s > 3540.0s)
+2026-03-10 17:01:05,826 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Net EV -7.21% <= 0 after slippage
+2026-03-10 17:01:14,020 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Net EV -0.92% <= 0 after slippage
+2026-03-10 17:01:22,212 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Score 1 requires EV >= 15.00% (got 5.71%)
+2026-03-10 17:01:30,367 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Score 1 requires EV >= 15.00% (got 8.23%)
+2026-03-10 17:01:38,570 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Score 1 requires EV >= 15.00% (got 6.77%)
+2026-03-10 17:01:46,731 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 94s
+2026-03-10 17:01:54,907 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 86s
+2026-03-10 17:02:03,117 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Score 1 requires EV >= 15.00% (got 2.07%)
+2026-03-10 17:02:11,320 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 70s
+2026-03-10 17:02:19,572 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 62s
+2026-03-10 17:02:27,793 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 53s
+2026-03-10 17:02:36,009 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 45s
+2026-03-10 17:02:44,174 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 37s
+2026-03-10 17:02:52,353 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 29s
+2026-03-10 17:03:00,547 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 21s
+2026-03-10 17:03:08,742 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Score 2 requires EV >= 6.00% (got 0.24%)
+2026-03-10 17:03:16,953 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 4s
+2026-03-10 17:03:25,187 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Score 1 requires EV >= 15.00% (got 12.39%)
+2026-03-10 17:03:33,415 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Score 1 requires EV >= 15.00% (got 12.59%)
+2026-03-10 17:03:41,635 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Score 1 requires EV >= 15.00% (got 5.33%)
+2026-03-10 17:03:49,822 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Net EV -0.51% <= 0 after slippage
+2026-03-10 17:04:05,971 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 17:04:06,429 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Net EV -4.35% <= 0 after slippage
+2026-03-10 17:04:14,646 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 291s
+2026-03-10 17:04:22,860 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Score 2 requires EV >= 6.00% (got 2.37%)
+2026-03-10 17:04:31,031 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Net EV -7.27% <= 0 after slippage
+2026-03-10 17:04:39,204 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 266s
+2026-03-10 17:04:47,400 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Net EV -2.10% <= 0 after slippage
+2026-03-10 17:04:55,587 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Net EV -4.95% <= 0 after slippage
+2026-03-10 17:05:03,743 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Score 1 requires EV >= 15.00% (got 9.61%)
+2026-03-10 17:05:11,913 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 234s
+2026-03-10 17:05:20,064 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 225s
+2026-03-10 17:05:28,214 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 217s
+2026-03-10 17:05:36,390 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 209s
+2026-03-10 17:05:44,577 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 201s
+2026-03-10 17:05:52,834 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 193s
+2026-03-10 17:06:01,001 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 184s
+2026-03-10 17:06:09,223 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 176s
+2026-03-10 17:06:17,433 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 168s
+2026-03-10 17:06:25,777 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 160s
+2026-03-10 17:06:33,988 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 151s
+2026-03-10 17:06:42,219 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 143s
+2026-03-10 17:06:50,385 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 135s
+2026-03-10 17:06:58,603 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 127s
+2026-03-10 17:07:06,780 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 119s
+2026-03-10 17:07:14,981 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 110s
+2026-03-10 17:07:23,212 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 102s
+2026-03-10 17:07:31,428 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Score 2 requires EV >= 6.00% (got 3.18%)
+2026-03-10 17:07:39,656 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 86s
+2026-03-10 17:07:47,828 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 78s
+2026-03-10 17:07:56,031 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 69s
+2026-03-10 17:08:04,245 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 61s
+2026-03-10 17:08:12,475 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 53s
+2026-03-10 17:08:20,659 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 45s
+2026-03-10 17:08:28,814 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 37s
+2026-03-10 17:08:37,046 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 28s
+2026-03-10 17:08:45,262 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Net EV -6.20% <= 0 after slippage
+2026-03-10 17:08:53,454 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 12s
+2026-03-10 17:09:01,616 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 4s
+2026-03-10 17:09:17,830 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 17:09:18,296 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 299s
+2026-03-10 17:09:26,437 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 291s
+2026-03-10 17:09:34,587 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 283s
+2026-03-10 17:09:42,764 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Net EV -2.45% <= 0 after slippage
+2026-03-10 17:09:50,961 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Score 2 requires EV >= 6.00% (got 2.84%)
+2026-03-10 17:09:59,192 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Score 2 requires EV >= 6.00% (got 0.19%)
+2026-03-10 17:10:07,351 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 250s
+2026-03-10 17:10:15,594 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 242s
+2026-03-10 17:10:23,775 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Net EV -3.81% <= 0 after slippage
+2026-03-10 17:10:32,013 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Net EV -3.83% <= 0 after slippage
+2026-03-10 17:10:40,213 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 217s
+2026-03-10 17:10:48,390 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 209s
+2026-03-10 17:10:56,594 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 201s
+2026-03-10 17:11:04,804 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 193s
+2026-03-10 17:11:12,969 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 184s
+2026-03-10 17:11:21,205 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 176s
+2026-03-10 17:11:29,437 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 168s
+2026-03-10 17:11:37,648 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Net EV -8.67% <= 0 after slippage
+2026-03-10 17:11:45,850 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Net EV -8.58% <= 0 after slippage
+2026-03-10 17:11:54,097 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Net EV -4.75% <= 0 after slippage
+2026-03-10 17:12:02,318 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Net EV -5.15% <= 0 after slippage
+2026-03-10 17:12:10,516 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 127s
+2026-03-10 17:12:18,723 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 119s
+2026-03-10 17:12:26,958 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 110s
+2026-03-10 17:12:35,160 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 102s
+2026-03-10 17:12:43,332 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 94s
+2026-03-10 17:12:51,514 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: Score 2 requires EV >= 6.00% (got 5.64%)
+2026-03-10 17:12:59,765 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 78s
+2026-03-10 17:13:07,937 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 69s
+2026-03-10 17:13:16,086 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 61s
+2026-03-10 17:13:24,276 [INFO] [SKIP] bitcoin-up-or-down-march-10-4pm-et: AI circuit breaker open for 53s
+2026-03-10 18:33:02,237 [INFO] Elite Quant Engine v2 Initialized. Monitoring 1h WebSocket...
+2026-03-10 18:33:02,239 [INFO] [INIT] Simulated balance initialized: $5000.00 (base: $5000.0 + historical: $0.00)
+2026-03-10 18:33:02,239 [INFO] [INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.
+2026-03-10 18:33:06,417 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-10-5pm-et | Prefix: bitcoin-up-or-down-march-10-5pm
+2026-03-10 18:33:06,620 [INFO] [SYSTEM] Loaded 120 candles. VWAP=70,404.43
+2026-03-10 18:33:06,904 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-10-5pm-et | matched_slug=bitcoin-up-or-down-march-10-5pm-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=24574163885933424125827981244588431452366923741464658445089814555334809571468 | down_token=60704140324593904919127600755659130581880233599798105704806458294693748467348
+2026-03-10 18:33:06,904 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-10-5pm-et
+2026-03-10 18:33:06,908 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-10 18:33:14,915 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-10 18:33:14,916 [INFO] [SYSTEM] CLOB WebSocket book manager started in paper shadow mode (heartbeat disabled).
+2026-03-10 18:33:15,407 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-10 18:33:23,328 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 18:33:32,277 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-10 18:33:40,455 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Net EV -1.01% <= 0 after slippage
+2026-03-10 18:33:48,669 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-10 18:34:13,028 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 18:34:22,401 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI circuit breaker open for 29s
+2026-03-10 18:34:30,318 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI circuit breaker open for 21s
+2026-03-10 18:34:38,550 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI circuit breaker open for 12s
+2026-03-10 18:34:46,871 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI circuit breaker open for 4s
+2026-03-10 18:35:03,042 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 18:35:03,781 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI circuit breaker open for 59s
+2026-03-10 18:35:12,009 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI circuit breaker open for 51s
+2026-03-10 18:35:20,150 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI circuit breaker open for 42s
+2026-03-10 18:35:28,509 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI circuit breaker open for 34s
+2026-03-10 18:35:36,714 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI circuit breaker open for 26s
+2026-03-10 18:35:44,870 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI circuit breaker open for 18s
+2026-03-10 18:35:53,072 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI circuit breaker open for 9s
+2026-03-10 18:36:01,240 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Score 1 requires EV >= 15.00% (got 13.18%)
+2026-03-10 18:36:17,414 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI unavailable (timeout/network). Last error: TimeoutError: 
+2026-03-10 18:36:17,885 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI circuit breaker open for 119s
+2026-03-10 18:36:26,149 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI circuit breaker open for 111s
+2026-03-10 18:36:34,342 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Net EV -3.88% <= 0 after slippage
+2026-03-10 18:36:42,524 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI circuit breaker open for 94s
+2026-03-10 18:36:50,739 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: AI circuit breaker open for 86s
+2026-03-10 18:36:58,878 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-10 18:37:07,031 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Late lottery-profile blocked: risk 0.15, px 0.075, true 12.11%, spread 13.3% of price, depth 0.1% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 18:37:15,217 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Late lottery-profile blocked: risk 0.16, px 0.069, true 15.75%, spread 14.5% of price, depth 0.3% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 18:37:23,406 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Late lottery-profile blocked: risk 0.16, px 0.075, true 12.29%, spread 13.3% of price, depth 0.1% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 18:37:31,594 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-10 18:37:39,747 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Late lottery-profile blocked: risk 0.16, px 0.075, true 11.75%, spread 13.3% of price, depth 0.1% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 18:37:47,886 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Late lottery-profile blocked: risk 0.17, px 0.075, true 11.79%, spread 13.3% of price, depth 0.1% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-10 18:37:56,151 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Crowd skew too high
+2026-03-10 18:38:59,043 [INFO] Elite Quant Engine v2 Initialized. Monitoring 1h WebSocket...
+2026-03-10 18:38:59,045 [INFO] [INIT] Simulated balance initialized: $5000.00 (base: $5000.0 + historical: $0.00)
+2026-03-10 18:38:59,046 [INFO] [INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.
+2026-03-10 18:39:02,548 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-10-5pm-et | Prefix: bitcoin-up-or-down-march-10-5pm
+2026-03-10 18:39:02,751 [INFO] [SYSTEM] Loaded 120 candles. VWAP=70,401.55
+2026-03-10 18:39:03,031 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-10-5pm-et | matched_slug=bitcoin-up-or-down-march-10-5pm-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=24574163885933424125827981244588431452366923741464658445089814555334809571468 | down_token=60704140324593904919127600755659130581880233599798105704806458294693748467348
+2026-03-10 18:39:03,031 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-10-5pm-et
+2026-03-10 18:39:03,032 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-10 18:39:23,445 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-10 18:39:23,446 [INFO] [SYSTEM] CLOB WebSocket book manager started in paper shadow mode (heartbeat disabled).
+2026-03-10 18:39:24,148 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-10 18:39:24,267 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Crowd skew too high
+2026-03-10 18:40:12,640 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Crowd skew too high
+2026-03-10 18:41:01,781 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Crowd skew too high
+2026-03-10 18:41:50,896 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Crowd skew too high
+2026-03-10 18:42:40,056 [INFO] [SKIP] bitcoin-up-or-down-march-10-5pm-et: Crowd skew too high

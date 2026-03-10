@@ -305,6 +305,7 @@ class TradeSignal(SerializableModel):
     market_impact_pct: float = 0.0
     price_cap: float = 0.0
     reasons: tuple[str, ...] = field(default_factory=tuple)
+    model_context: TechnicalContext | None = None
     metadata: dict[str, float | str | bool] = field(default_factory=dict)
 
 

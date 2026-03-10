@@ -39,7 +39,7 @@ export default function WinHeatmap({ data }: { data: any[] }) {
           return (
             <motion.div
               key={item.hour}
-              className={`relative group flex h-14 flex-col items-center justify-center rounded-sm transition-all cursor-pointer ${style}`}
+              className={`relative group flex h-20 flex-col items-center justify-center rounded-md transition-all cursor-pointer ${style}`}
               whileHover={{ scale: 1.05, zIndex: 10 }}
               onHoverStart={() => setHoveredHour(item.hour)}
               onHoverEnd={() => setHoveredHour(null)}
@@ -47,17 +47,17 @@ export default function WinHeatmap({ data }: { data: any[] }) {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: item.hour * 0.01 }}
             >
-              <div className="absolute top-1 left-1">
-                <span className="text-[8px] font-mono tracking-tighter opacity-70">
+              <div className="absolute top-1.5 left-1.5">
+                <span className="text-[10px] font-mono tracking-tighter opacity-70">
                   {String(item.hour).padStart(2, '0')}h
                 </span>
               </div>
               
-              <div className="flex flex-col items-center justify-center mt-2">
-                <span className={`text-[11px] font-mono font-bold tracking-tight ${item.trades === 0 ? 'text-az-text-muted/50' : totalPnl >= 0 ? 'text-az-profit' : 'text-az-loss'}`}>
+              <div className="flex flex-col items-center justify-center mt-3">
+                <span className={`text-[13px] font-mono font-bold tracking-tight ${item.trades === 0 ? 'text-az-text-muted/50' : totalPnl >= 0 ? 'text-az-profit' : 'text-az-loss'}`}>
                   {item.trades > 0 ? `${totalPnl >= 0 ? '+' : '-'}$${Math.abs(totalPnl).toFixed(2)}` : "$0.00"}
                 </span>
-                <span className="text-[8px] font-mono opacity-60">
+                <span className="text-[10px] font-mono opacity-60">
                   {item.trades} trades
                 </span>
               </div>

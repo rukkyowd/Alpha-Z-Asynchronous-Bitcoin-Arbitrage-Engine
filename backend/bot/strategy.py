@@ -768,6 +768,7 @@ class StrategyEngine:
             market_impact_pct=target_ev.market_impact_pct,
             price_cap=target_ev.adjusted_token_price,
             reasons=tuple(reasons),
+            model_context=enriched_context,
             metadata={
                 "time_decay_multiplier": target_ev.time_decay_multiplier,
                 "adjusted_kelly_fraction": target_ev.adjusted_kelly_fraction,

@@ -194,6 +194,18 @@ def _infer_fill_stats(
     return 0.0, 0.0, fallback_price, "UNKNOWN"
 
 
+def _combine_fill_stats(*fills: tuple[float, float]) -> tuple[float, float, float]:
+    total_cost = 0.0
+    total_shares = 0.0
+    for fill_cost, fill_shares in fills:
+        if fill_cost <= 0 or fill_shares <= 0:
+            continue
+        total_cost += fill_cost
+        total_shares += fill_shares
+    average_price = (total_cost / total_shares) if total_shares > 0 else 0.0
+    return total_cost, total_shares, average_price
+
+
 @dataclass(slots=True, frozen=True)
 class ExecutionConfig:
     paper_trading: bool = True
@@ -961,10 +973,11 @@ class ClobExecutionEngine:
 
         tick_size, neg_risk, _fee_rate_bps = await self._resolve_market_params(token_id)
         authoritative_odds = replace(odds, sdk_fee_rate_bps=_fee_rate_bps) if _fee_rate_bps > 0 else odds
-        authoritative_market_prob_pct = authoritative_odds.entry_prob_pct(signal.direction)
+        authoritative_entry_price = liquidity.entry_price if liquidity.entry_price > 0 else (authoritative_odds.entry_prob_pct(signal.direction) / 100.0)
+        authoritative_market_prob_pct = authoritative_entry_price * 100.0
         authoritative_fee_rate = authoritative_odds.effective_taker_fee_rate(
             signal.direction,
-            entry_price=(authoritative_market_prob_pct / 100.0) if authoritative_market_prob_pct > 0 else None,
+            entry_price=authoritative_entry_price if authoritative_entry_price > 0 else None,
         )
         underlying_volatility = max(
             context.realized_volatility,
@@ -1143,6 +1156,38 @@ class ClobExecutionEngine:
 
         order_response: dict[str, Any] = {}
         order_type_used = "FOK"
+        taker_attempted = False
+        remaining_bet_usd = bet_size_usd
+        maker_fill_cost_usd = 0.0
+        maker_fill_shares = 0.0
+        maker_fill_average_price = 0.0
+        maker_fill_status = "UNKNOWN"
+        maker_status_text = ""
+
+        def _capture_maker_fill(candidate_response: dict[str, Any] | None, fallback_price: float) -> None:
+            nonlocal maker_fill_cost_usd, maker_fill_shares, maker_fill_average_price, maker_fill_status, maker_status_text
+            if not isinstance(candidate_response, dict):
+                return
+            fill_cost_usd, fill_shares, average_price, fill_status = _infer_fill_stats(
+                candidate_response,
+                bet_size_usd,
+                fallback_price,
+            )
+            status_text = str(candidate_response.get("status", "") or "")
+            if (
+                fill_shares > maker_fill_shares + EPSILON
+                or (
+                    abs(fill_shares - maker_fill_shares) <= EPSILON
+                    and fill_cost_usd > maker_fill_cost_usd + EPSILON
+                )
+            ):
+                maker_fill_cost_usd = fill_cost_usd
+                maker_fill_shares = fill_shares
+                maker_fill_average_price = average_price
+                maker_fill_status = fill_status
+                maker_status_text = status_text
+            elif status_text and not maker_status_text:
+                maker_status_text = status_text
 
         # ═══════════════════════════════════════════════════════════════════
         # PHASE 0: Maker-first GTC limit (zero/reduced fees)
@@ -1186,28 +1231,59 @@ class ClobExecutionEngine:
                         timeout=self.config.order_submit_timeout_secs,
                     )
                     maker_order_id = maker_resp.get("orderID") or maker_resp.get("id", "")
+                    _capture_maker_fill(maker_resp, maker_price)
 
                     if maker_order_id:
+                        latest_maker_status = maker_resp
                         # Poll for fill within the maker window
                         deadline = asyncio.get_event_loop().time() + effective_maker_window
                         while asyncio.get_event_loop().time() < deadline:
                             await asyncio.sleep(self.config.maker_poll_interval_secs)
                             maker_status = await self._get_order_status(maker_order_id)
+                            latest_maker_status = maker_status
+                            _capture_maker_fill(maker_status, maker_price)
                             status_text = str(maker_status.get("status", "")).lower()
-                            if status_text == "matched":
+                            if status_text == "matched" or maker_shares - maker_fill_shares <= self.config.min_live_fill_shares:
                                 order_response = maker_status
                                 order_type_used = "MAKER_GTC"
                                 maker_filled = True
+                                remaining_bet_usd = 0.0
                                 log.info(
-                                    "[ENTRY MAKER] GTC FILLED for %s (order %s)",
+                                    "[ENTRY MAKER] GTC filled for %s (order %s) | Filled: $%.2f | Shares: %.4f",
                                     signal.slug,
                                     maker_order_id,
+                                    maker_fill_cost_usd or bet_size_usd,
+                                    maker_fill_shares or maker_shares,
                                 )
                                 break
 
                         if not maker_filled:
-                            await self._cancel_order(maker_order_id)
-                            log.info(
+                            cancel_response = await self._cancel_order(maker_order_id)
+                            _capture_maker_fill(cancel_response, maker_price)
+                            final_maker_status = await self._get_order_status(maker_order_id)
+                            _capture_maker_fill(final_maker_status, maker_price)
+                            remaining_bet_usd = float(
+                                Decimal(str(max(0.0, bet_size_usd - maker_fill_cost_usd))).quantize(
+                                    Decimal("0.01"),
+                                    rounding=ROUND_DOWN,
+                                )
+                            )
+                            if maker_fill_cost_usd > 0 and maker_fill_shares >= self.config.min_live_fill_shares:
+                                if remaining_bet_usd <= 0:
+                                    order_response = final_maker_status or cancel_response or latest_maker_status
+                                    order_type_used = "MAKER_GTC"
+                                    maker_filled = True
+                                else:
+                                    log.info(
+                                        "[ENTRY MAKER] GTC partially filled for %s after %.1fs | Filled: $%.2f | Shares: %.4f | Routing $%.2f remainder to taker.",
+                                        signal.slug,
+                                        effective_maker_window,
+                                        maker_fill_cost_usd,
+                                        maker_fill_shares,
+                                        remaining_bet_usd,
+                                    )
+                            else:
+                                log.info(
                                 "[ENTRY MAKER] GTC unfilled for %s after %.1fs — cancelling, falling through to taker.",
                                 signal.slug,
                                 effective_maker_window,
@@ -1218,13 +1294,14 @@ class ClobExecutionEngine:
         # ═══════════════════════════════════════════════════════════════════
         # PHASE 1: Taker FOK → FAK (existing path, skipped if maker filled)
         # ═══════════════════════════════════════════════════════════════════
-        if not maker_filled:
+        if not maker_filled and remaining_bet_usd > 0:
             try:
+                taker_attempted = True
                 try:
                     order_response = await asyncio.wait_for(
                         self._submit_market_order(
                             token_id,
-                            amount=bet_size_usd,
+                            amount=remaining_bet_usd,
                             limit_price=limit_price,
                             order_type=OrderType.FOK,
                             tick_size=tick_size,
@@ -1241,7 +1318,7 @@ class ClobExecutionEngine:
                         order_response = await asyncio.wait_for(
                             self._submit_market_order(
                                 token_id,
-                                amount=bet_size_usd,
+                                amount=remaining_bet_usd,
                                 limit_price=limit_price,
                                 order_type=OrderType.FAK,
                                 tick_size=tick_size,
@@ -1252,12 +1329,12 @@ class ClobExecutionEngine:
                         order_type_used = "FAK"
                     except Exception as fak_exc:
                         if (
-                            bet_size_usd <= self.config.live_tiny_amm_fallback_max_bet_usd
+                            remaining_bet_usd <= self.config.live_tiny_amm_fallback_max_bet_usd
                             and "no orders found to match with fak order" in str(fak_exc).lower()
                         ):
                             recovered = await self.check_liquidity_and_spread(
                                 token_id,
-                                bet_size_usd=bet_size_usd,
+                                bet_size_usd=remaining_bet_usd,
                                 expected_price=expected_price,
                                 side="buy",
                                 odds=odds,
@@ -1279,7 +1356,7 @@ class ClobExecutionEngine:
                                     order_response = await asyncio.wait_for(
                                         self._submit_market_order(
                                             token_id,
-                                            amount=bet_size_usd,
+                                            amount=remaining_bet_usd,
                                             limit_price=limit_price,
                                             order_type=OrderType.FAK,
                                             tick_size=tick_size,
@@ -1295,15 +1372,52 @@ class ClobExecutionEngine:
                         else:
                             raise fak_exc
             except Exception as exc:
-                await state.record_execution_failure(signal.slug, reason=str(exc), ev_pct=signal.expected_value_pct)
-                return None
+                if maker_fill_cost_usd > 0 and maker_fill_shares >= self.config.min_live_fill_shares:
+                    log.warning(
+                        "[ENTRY ORDER] Taker remainder failed for %s after maker partial fill: %s | retaining filled maker exposure.",
+                        signal.slug,
+                        exc,
+                    )
+                    order_response = {}
+                else:
+                    await state.record_execution_failure(signal.slug, reason=str(exc), ev_pct=signal.expected_value_pct)
+                    return None
 
-        status = str(order_response.get("status", "") or "")
-        fill_cost_usd, fill_shares, average_price, fill_inference_status = _infer_fill_stats(
-            order_response,
-            bet_size_usd,
-            limit_price,
+        status = str(order_response.get("status", "") or maker_status_text or "")
+        taker_fill_cost_usd = 0.0
+        taker_fill_shares = 0.0
+        taker_average_price = 0.0
+        taker_fill_status = "UNKNOWN"
+        if taker_attempted:
+            taker_fill_cost_usd, taker_fill_shares, taker_average_price, taker_fill_status = _infer_fill_stats(
+                order_response,
+                remaining_bet_usd,
+                limit_price,
+            )
+        fill_cost_usd, fill_shares, average_price = _combine_fill_stats(
+            (maker_fill_cost_usd, maker_fill_shares),
+            (taker_fill_cost_usd, taker_fill_shares),
         )
+        fill_inference_status = taker_fill_status
+        if maker_fill_cost_usd > 0 and taker_fill_cost_usd > 0:
+            order_type_used = f"MAKER_GTC_PARTIAL+{order_type_used}"
+        elif maker_fill_cost_usd > 0 and taker_fill_cost_usd <= 0:
+            order_type_used = "MAKER_GTC_PARTIAL"
+            fill_inference_status = maker_fill_status
+        elif maker_fill_cost_usd > 0:
+            fill_inference_status = maker_fill_status
+
+        if maker_fill_cost_usd > 0 and taker_fill_cost_usd > 0:
+            if "UNCERTAIN" in (maker_fill_status, taker_fill_status):
+                fill_inference_status = "UNCERTAIN"
+            elif "INFERRED" in (maker_fill_status, taker_fill_status):
+                fill_inference_status = "INFERRED"
+            elif "FALLBACK" in (maker_fill_status, taker_fill_status):
+                fill_inference_status = "FALLBACK"
+
+        if fill_shares > 0 and average_price <= 0:
+            average_price = maker_fill_average_price or taker_average_price or limit_price
+
         if fill_inference_status == "UNCERTAIN":
             status = "UNCERTAIN"
         if fill_shares < self.config.min_live_fill_shares or fill_cost_usd <= 0:

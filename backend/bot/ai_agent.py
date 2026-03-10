@@ -5,6 +5,9 @@ import re
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from typing import Any
+
+import os
 
 import aiohttp
 
@@ -16,12 +19,15 @@ from .state import EngineState
 class AIConfig:
     url: str = "http://localhost:11434/v1/chat/completions"
     model: str = "llama3.2:3b-instruct-q4_K_M"
-    timeout_total_seconds: float = 30.0
-    max_retries: int = 2
-    retry_delay_seconds: float = 2.0
+    groq_api_key: str | None = None
+    groq_model: str = "qwen/qwen3-32b"
+    timeout_total_seconds: float = 2.0
+    decision_budget_seconds: float = 1.5
+    max_retries: int = 1
+    retry_delay_seconds: float = 0.5
     max_calls_per_slug: int = 6
     max_calls_per_slug_paper: int = 18
-    circuit_breaker_threshold: int = 5
+    circuit_breaker_threshold: int = 4
     circuit_breaker_base_cooldown_seconds: float = 30.0
     circuit_breaker_max_cooldown_seconds: float = 300.0
     temperature: float = 0.0
@@ -186,7 +192,8 @@ class LocalAIAgent:
 
         own_session = False
         if session is None:
-            session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.config.timeout_total_seconds))
+            initial_timeout = min(self.config.timeout_total_seconds, self.config.decision_budget_seconds)
+            session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=initial_timeout))
             own_session = True
 
         raw_response = ""
@@ -194,18 +201,70 @@ class LocalAIAgent:
         decision: Direction | None = None
         response_ms = 0.0
         transport_error = False
+        overall_started = time.perf_counter()
+
+        use_groq = bool(self.config.groq_api_key)
+        
+        async def _request_groq(timeout_seconds: float) -> dict[str, Any]:
+            headers = {
+                "Authorization": f"Bearer {self.config.groq_api_key}",
+                "Content-Type": "application/json"
+            }
+            groq_payload = payload.copy()
+            groq_payload["model"] = self.config.groq_model
+            # Qwen specific recommended groq configurations 
+            if "qwen" in self.config.groq_model.lower():
+                groq_payload["reasoning_effort"] = "default"
+                if "max_tokens" in groq_payload:
+                    groq_payload["max_completion_tokens"] = groq_payload.pop("max_tokens")
+                    
+            groq_payload.pop("keep_alive", None)
+            
+            async with session.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers=headers,
+                json=groq_payload,
+                timeout=aiohttp.ClientTimeout(total=timeout_seconds),
+            ) as response:
+                response.raise_for_status()
+                return await response.json()
+
+        async def _request_local(timeout_seconds: float) -> dict[str, Any]:
+            async with session.post(
+                self.config.url,
+                json=payload,
+                timeout=aiohttp.ClientTimeout(total=timeout_seconds),
+            ) as response:
+                response.raise_for_status()
+                return await response.json()
 
         try:
             for attempt in range(1, self.config.max_retries + 1):
+                remaining_budget = self.config.decision_budget_seconds - (time.perf_counter() - overall_started)
+                if remaining_budget <= 1e-6:
+                    transport_error = True
+                    last_error = (
+                        f"TimeoutError: AI decision budget exceeded "
+                        f"({self.config.decision_budget_seconds:.1f}s)"
+                    )
+                    break
+
+                attempt_timeout = min(self.config.timeout_total_seconds, remaining_budget)
                 try:
                     started = time.perf_counter()
-                    async with session.post(
-                        self.config.url,
-                        json=payload,
-                        timeout=aiohttp.ClientTimeout(total=self.config.timeout_total_seconds),
-                    ) as response:
-                        response.raise_for_status()
-                        body = await response.json()
+                    
+                    if use_groq:
+                        try:
+                            body = await asyncio.wait_for(_request_groq(attempt_timeout), timeout=attempt_timeout)
+                        except Exception as groq_exc:
+                            # Fallback to local
+                            transport_error = True
+                            last_error = f"Groq {type(groq_exc).__name__}: {groq_exc}"
+                            use_groq = False # Force local for retries
+                            raise groq_exc
+                    else:
+                        body = await asyncio.wait_for(_request_local(attempt_timeout), timeout=attempt_timeout)
+                        
                     raw_response = str(body["choices"][0]["message"]["content"]).strip()
                     response_ms = (time.perf_counter() - started) * 1000.0
                     decision = self.parse_decision(raw_response, signal.direction)
@@ -214,9 +273,13 @@ class LocalAIAgent:
                     break
                 except Exception as exc:
                     transport_error = True
-                    last_error = f"{type(exc).__name__}: {exc}"
+                    if not last_error.startswith("Groq"):
+                        last_error = f"{type(exc).__name__}: {exc}"
                     if attempt < self.config.max_retries:
-                        await asyncio.sleep(self.config.retry_delay_seconds)
+                        remaining_budget = self.config.decision_budget_seconds - (time.perf_counter() - overall_started)
+                        if remaining_budget <= 1e-6:
+                            break
+                        await asyncio.sleep(min(self.config.retry_delay_seconds, remaining_budget))
 
             if decision is not None:
                 updated_ema = await state.register_ai_success(response_ms=response_ms)
