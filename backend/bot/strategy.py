@@ -238,6 +238,13 @@ def _skip_signal(slug: str, reason: str, *, score: int = 0) -> TradeSignal:
     )
 
 
+def _format_gate_seconds(actual_seconds: float, threshold_seconds: float, *, clamp_min_zero: bool = False) -> str:
+    actual = max(0.0, actual_seconds) if clamp_min_zero else actual_seconds
+    if abs(actual - threshold_seconds) < 1.0:
+        return f"{actual:.1f}s"
+    return f"{int(math.ceil(actual))}s"
+
+
 def _post_stop_reentry_reason(
     reentry_state: ReentryState | None,
     direction: Direction,
@@ -358,12 +365,12 @@ class StrategyEngine:
         if odds.seconds_remaining < self.config.min_seconds_remaining:
             return _skip_signal(
                 slug,
-                f"Too close to expiry ({max(0, math.ceil(odds.seconds_remaining))}s < {int(self.config.min_seconds_remaining)}s)",
+                f"Too close to expiry ({_format_gate_seconds(odds.seconds_remaining, self.config.min_seconds_remaining, clamp_min_zero=True)} < {self.config.min_seconds_remaining:.1f}s)",
             )
         if odds.seconds_remaining > self.config.max_seconds_for_new_bet:
             return _skip_signal(
                 slug,
-                f"Too early ({math.ceil(odds.seconds_remaining)}s > {int(self.config.max_seconds_for_new_bet)}s)",
+                f"Too early ({_format_gate_seconds(odds.seconds_remaining, self.config.max_seconds_for_new_bet)} > {self.config.max_seconds_for_new_bet:.1f}s)",
             )
         reference_price = _reference_price(odds)
         if reference_price <= 0:

@@ -282,6 +282,13 @@ class ProbabilityCalibrator:
             )
             rows = cursor.fetchall()
             conn.close()
+        except sqlite3.OperationalError as exc:
+            message = str(exc).lower()
+            if "no such table: trades" in message:
+                log.info("[CALIBRATION] No trades table yet in %s; skipping fit.", path)
+            else:
+                log.warning("[CALIBRATION] Failed to read trades: %s", exc)
+            return False
         except Exception as exc:
             log.warning("[CALIBRATION] Failed to read trades: %s", exc)
             return False
