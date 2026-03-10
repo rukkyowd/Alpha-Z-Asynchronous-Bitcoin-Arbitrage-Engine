@@ -25,7 +25,8 @@ class DataStreamsConfig:
     symbol: str = "BTCUSDT"
     gamma_api: str = "https://gamma-api.polymarket.com"
     polymarket_crypto_price_api: str = "https://polymarket.com/api/crypto/crypto-price"
-    binance_rest_api: str = "https://api.binance.com"
+    # Official public market-data REST host. This engine only uses public endpoints.
+    binance_rest_api: str = "https://data-api.binance.vision"
     binance_ws_api: str = "wss://stream.binance.com:9443/ws"
     kline_interval: str = "1h"
     history_limit: int = 120
@@ -43,6 +44,7 @@ class DataStreamsConfig:
     websocket_ping_interval_seconds: float = 20.0
     websocket_ping_timeout_seconds: float = 20.0
     websocket_close_timeout_seconds: float = 5.0
+    rest_bootstrap_retry_attempts: int = 4
 
     @property
     def symbol_lower(self) -> str:
@@ -657,4 +659,3 @@ __all__ = [
 # and bot.connectors.gamma_connector respectively.
 from .connectors.binance_connector import BinanceStreamManager as BinanceStreamManager  # noqa: F811, E402
 from .connectors.gamma_connector import PolymarketFetcher as PolymarketFetcher  # noqa: F811, E402
-

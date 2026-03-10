@@ -21,6 +21,15 @@ def _safe_div(numerator: float, denominator: float, default: float = 0.0) -> flo
     return numerator / denominator
 
 
+def _scaled_score(value: float, soft: float, hard: float, *, invert: bool = False) -> float:
+    if invert:
+        value = -value
+        soft = -soft
+        hard = -hard
+    width = max(abs(hard - soft), EPSILON)
+    return _clamp((value - soft) / width, 0.0, 1.0)
+
+
 @dataclass(slots=True, frozen=True)
 class RiskConfig:
     max_daily_loss_pct: float = 0.15
@@ -39,7 +48,40 @@ class RiskConfig:
     min_token_price: float = 0.01
     max_token_price: float = 0.99
     expected_exit_fee_multiplier: float = 0.50
+    expected_exit_slippage_multiplier: float = 0.60
     latency_ev_haircut_pct: float = 0.25
+    capital_lockup_free_hours: float = 0.35
+    capital_lockup_penalty_max_pct: float = 6.0
+    late_lottery_window_secs: float = 1800.0
+    late_lottery_time_power: float = 1.0
+    late_lottery_price_anchor: float = 0.25
+    late_lottery_min_true_prob_pct: float = 35.0
+    late_lottery_spread_ratio_soft: float = 0.08
+    late_lottery_spread_ratio_hard: float = 0.20
+    late_lottery_depth_consumption_soft: float = 0.15
+    late_lottery_depth_consumption_hard: float = 0.45
+    late_lottery_payout_multiple_soft: float = 4.0
+    late_lottery_payout_multiple_hard: float = 8.0
+    late_lottery_volatility_soft: float = 0.004
+    late_lottery_volatility_hard: float = 0.008
+    late_lottery_ev_penalty_max_pct: float = 45.0
+    late_lottery_size_haircut_max: float = 0.75
+    late_lottery_elite_boost_cutoff_score: float = 0.12
+    late_lottery_size_cap_token_price: float = 0.20
+    late_lottery_size_cap_risk_score: float = 0.12
+    late_lottery_max_trade_pct_cap: float = 0.02
+    elite_ev_soft_pct: float = 12.0
+    elite_ev_hard_pct: float = 35.0
+    elite_edge_soft_pct: float = 6.0
+    elite_edge_hard_pct: float = 20.0
+    elite_true_prob_soft_pct: float = 58.0
+    elite_true_prob_hard_pct: float = 72.0
+    elite_friction_soft_pct: float = 4.0
+    elite_friction_hard_pct: float = 12.0
+    elite_depth_consumption_soft_pct: float = 8.0
+    elite_depth_consumption_hard_pct: float = 30.0
+    elite_size_boost_max: float = 0.75
+    elite_max_trade_pct: float = 0.06
 
 
 @dataclass(slots=True, frozen=True)
@@ -49,6 +91,27 @@ class LiquidityProfile:
     best_bid: float | None = None
     best_ask: float | None = None
     levels: int = 0
+
+
+@dataclass(slots=True, frozen=True)
+class LateLotteryProfile:
+    risk_score: float = 0.0
+    ev_penalty_pct: float = 0.0
+    size_multiplier: float = 1.0
+    spread_ratio_pct_of_price: float = 0.0
+    depth_consumption_pct: float = 0.0
+    payout_multiple: float = 0.0
+    time_weight: float = 0.0
+
+
+@dataclass(slots=True, frozen=True)
+class EliteSetupProfile:
+    quality_score: float = 0.0
+    size_multiplier: float = 1.0
+    effective_max_trade_pct: float = 0.0
+    capital_lockup_penalty_pct: float = 0.0
+    depth_consumption_pct: float = 0.0
+    total_friction_pct: float = 0.0
 
 
 @dataclass(slots=True, frozen=True)
@@ -70,7 +133,20 @@ class EVComputation:
     available_depth_usd: float
     fee_cost_pct: float = 0.0
     exit_fee_cost_pct: float = 0.0
+    expected_exit_slippage_pct: float = 0.0
     latency_haircut_pct: float = 0.0
+    capital_lockup_penalty_pct: float = 0.0
+    elite_quality_score: float = 0.0
+    elite_size_multiplier: float = 1.0
+    effective_max_trade_pct: float = 0.0
+    late_lottery_risk_score: float = 0.0
+    late_lottery_ev_penalty_pct: float = 0.0
+    late_lottery_size_multiplier: float = 1.0
+    late_lottery_spread_ratio_pct_of_price: float = 0.0
+    late_lottery_depth_consumption_pct: float = 0.0
+    late_lottery_payout_multiple: float = 0.0
+    late_lottery_time_weight: float = 0.0
+    late_lottery_trade_pct_cap: float = 0.0
 
 
 @dataclass(slots=True, frozen=True)
@@ -122,6 +198,11 @@ class PositionRiskConfig:
     tp_retrace_exit_frac: float = 0.45
     tp_retrace_exit_min_delta: float = 0.05
     tp_lock_min_profit_delta: float = 0.02
+    tp_stall_window_early_seconds: int = 480
+    tp_stall_window_mid_seconds: int = 300
+    tp_stall_window_late_seconds: int = 150
+    tp_stall_band_delta: float = 0.03
+    tp_stall_min_profit_delta: float = 0.06
     max_reachable_token_price: float = 0.99
 
 
@@ -228,13 +309,15 @@ class RiskManager:
         now: datetime | None = None,
         current_daily_pnl: float | None = None,
         trades_this_hour: int | None = None,
+        max_trade_pct_override: float | None = None,
     ) -> DrawdownStatus:
         current = now or datetime.now(timezone.utc)
         self._roll_session(current)
         day_pnl = self.current_daily_pnl if current_daily_pnl is None else current_daily_pnl
         hour_count = self.trades_this_hour if trades_this_hour is None else trades_this_hour
         daily_loss_limit = current_balance * self.config.max_daily_loss_pct
-        pct_cap = current_balance * self.config.max_trade_pct
+        effective_trade_pct = max_trade_pct_override if max_trade_pct_override is not None else self.config.max_trade_pct
+        pct_cap = current_balance * effective_trade_pct
         raw_trade_cap = pct_cap if self.config.max_absolute_bet_usd <= 0 else min(pct_cap, self.config.max_absolute_bet_usd)
         # Sizing rounds to cents before orders are staged, so the guardrail must compare against
         # the same cent-rounded cap or exact-cap trades will be falsely rejected.
@@ -253,7 +336,7 @@ class RiskManager:
         if trade_size > max_trade_size:
             return DrawdownStatus(
                 allowed=False,
-                reason=f"Trade size ${trade_size:.2f} exceeds max {self.config.max_trade_pct * 100:.1f}% risk.",
+                reason=f"Trade size ${trade_size:.2f} exceeds max {effective_trade_pct * 100:.1f}% risk.",
                 daily_pnl=day_pnl,
                 daily_loss_limit=daily_loss_limit,
                 trades_this_hour=hour_count,
@@ -301,6 +384,7 @@ class RiskManager:
         now: datetime | None = None,
         current_daily_pnl: float | None = None,
         trades_this_hour: int | None = None,
+        max_trade_pct_override: float | None = None,
     ) -> tuple[bool, str]:
         if trade_size <= 0:
             return False, "Bet size resolved to $0.00 after sizing"
@@ -312,6 +396,7 @@ class RiskManager:
             now=now,
             current_daily_pnl=current_daily_pnl,
             trades_this_hour=trades_this_hour,
+            max_trade_pct_override=max_trade_pct_override,
         )
         return status.allowed, status.reason
 
@@ -354,6 +439,143 @@ class RiskManager:
         slippage_pct = spread_pct + market_impact_pct + max(taker_fee_rate, 0.0)
         return slippage_pct, market_impact_pct
 
+    def _late_lottery_profile(
+        self,
+        *,
+        token_price: float,
+        true_prob_pct: float,
+        seconds_remaining: float,
+        bet_size_usd: float,
+        liquidity: LiquidityProfile | None,
+        underlying_volatility: float,
+    ) -> LateLotteryProfile:
+        cfg = self.config
+        if (
+            seconds_remaining > cfg.late_lottery_window_secs
+            or token_price <= 0.0
+            or token_price >= 1.0
+        ):
+            return LateLotteryProfile()
+
+        window = max(cfg.late_lottery_window_secs, 1.0)
+        time_progress = _clamp((window - max(seconds_remaining, 0.0)) / window, 0.0, 1.0)
+        time_weight = time_progress ** max(cfg.late_lottery_time_power, 0.1)
+
+        price_component = _clamp(
+            (cfg.late_lottery_price_anchor - token_price) / max(cfg.late_lottery_price_anchor, EPSILON),
+            0.0,
+            1.0,
+        )
+        true_prob_component = _clamp(
+            (cfg.late_lottery_min_true_prob_pct - true_prob_pct) / max(cfg.late_lottery_min_true_prob_pct, EPSILON),
+            0.0,
+            1.0,
+        )
+
+        payout_multiple = (1.0 - token_price) / max(token_price, EPSILON)
+        payout_component = _clamp(
+            (payout_multiple - cfg.late_lottery_payout_multiple_soft)
+            / max(cfg.late_lottery_payout_multiple_hard - cfg.late_lottery_payout_multiple_soft, EPSILON),
+            0.0,
+            1.0,
+        )
+
+        spread_abs = max(liquidity.estimated_spread_pct, 0.0) if liquidity is not None else 0.0
+        spread_ratio = spread_abs / max(token_price, cfg.min_token_price)
+        spread_component = _clamp(
+            (spread_ratio - cfg.late_lottery_spread_ratio_soft)
+            / max(cfg.late_lottery_spread_ratio_hard - cfg.late_lottery_spread_ratio_soft, EPSILON),
+            0.0,
+            1.0,
+        )
+
+        depth = max(liquidity.available_depth_usd, self.config.min_bet_usd) if liquidity is not None else self.config.default_depth_usd
+        depth_consumption = bet_size_usd / max(depth, EPSILON)
+        depth_component = _clamp(
+            (depth_consumption - cfg.late_lottery_depth_consumption_soft)
+            / max(cfg.late_lottery_depth_consumption_hard - cfg.late_lottery_depth_consumption_soft, EPSILON),
+            0.0,
+            1.0,
+        )
+
+        volatility_component = _clamp(
+            (underlying_volatility - cfg.late_lottery_volatility_soft)
+            / max(cfg.late_lottery_volatility_hard - cfg.late_lottery_volatility_soft, EPSILON),
+            0.0,
+            1.0,
+        )
+
+        weighted_risk = (
+            0.30 * price_component
+            + 0.20 * true_prob_component
+            + 0.15 * payout_component
+            + 0.15 * spread_component
+            + 0.10 * depth_component
+            + 0.10 * volatility_component
+        )
+        risk_score = _clamp(time_weight * weighted_risk, 0.0, 1.0)
+        ev_penalty_pct = risk_score * max(cfg.late_lottery_ev_penalty_max_pct, 0.0)
+        size_multiplier = _clamp(
+            1.0 - (risk_score * max(cfg.late_lottery_size_haircut_max, 0.0)),
+            max(0.0, 1.0 - max(cfg.late_lottery_size_haircut_max, 0.0)),
+            1.0,
+        )
+
+        return LateLotteryProfile(
+            risk_score=round(risk_score, 6),
+            ev_penalty_pct=round(ev_penalty_pct, 6),
+            size_multiplier=round(size_multiplier, 6),
+            spread_ratio_pct_of_price=round(spread_ratio * 100.0, 6),
+            depth_consumption_pct=round(depth_consumption * 100.0, 6),
+            payout_multiple=round(payout_multiple, 6),
+            time_weight=round(time_weight, 6),
+        )
+
+    def _elite_setup_profile(
+        self,
+        *,
+        ev_pct: float,
+        edge_pct: float,
+        true_prob_pct: float,
+        total_friction_pct: float,
+        depth_consumption_pct: float,
+        seconds_remaining: float,
+    ) -> EliteSetupProfile:
+        cfg = self.config
+        ev_component = _scaled_score(ev_pct, cfg.elite_ev_soft_pct, cfg.elite_ev_hard_pct)
+        edge_component = _scaled_score(edge_pct, cfg.elite_edge_soft_pct, cfg.elite_edge_hard_pct)
+        prob_component = _scaled_score(true_prob_pct, cfg.elite_true_prob_soft_pct, cfg.elite_true_prob_hard_pct)
+        friction_component = _scaled_score(total_friction_pct, cfg.elite_friction_soft_pct, cfg.elite_friction_hard_pct, invert=True)
+        depth_component = _scaled_score(depth_consumption_pct, cfg.elite_depth_consumption_soft_pct, cfg.elite_depth_consumption_hard_pct, invert=True)
+        urgency_component = _clamp(seconds_remaining / max(cfg.min_seconds_remaining * 12.0, 1.0), 0.0, 1.0)
+
+        quality_score = _clamp(
+            (0.35 * ev_component)
+            + (0.20 * edge_component)
+            + (0.20 * prob_component)
+            + (0.15 * friction_component)
+            + (0.05 * depth_component)
+            + (0.05 * urgency_component),
+            0.0,
+            1.0,
+        )
+        size_multiplier = 1.0 + (quality_score * max(cfg.elite_size_boost_max, 0.0))
+        effective_max_trade_pct = cfg.max_trade_pct + (
+            quality_score * max(cfg.elite_max_trade_pct - cfg.max_trade_pct, 0.0)
+        )
+        lockup_hours = max(seconds_remaining, 0.0) / 3600.0
+        excess_lockup = max(0.0, lockup_hours - max(cfg.capital_lockup_free_hours, 0.0))
+        capital_lockup_penalty_pct = excess_lockup * max(cfg.capital_lockup_penalty_max_pct, 0.0)
+
+        return EliteSetupProfile(
+            quality_score=round(quality_score, 6),
+            size_multiplier=round(size_multiplier, 6),
+            effective_max_trade_pct=round(effective_max_trade_pct, 6),
+            capital_lockup_penalty_pct=round(capital_lockup_penalty_pct, 6),
+            depth_consumption_pct=round(depth_consumption_pct, 6),
+            total_friction_pct=round(total_friction_pct, 6),
+        )
+
     @staticmethod
     def _kelly_fraction(true_probability: float, entry_price: float) -> float:
         if entry_price <= 0.0 or entry_price >= 1.0:
@@ -374,6 +596,7 @@ class RiskManager:
         seconds_remaining: float,
         liquidity: LiquidityProfile | None = None,
         taker_fee_rate: float = 0.0,
+        underlying_volatility: float = 0.0,
     ) -> EVComputation:
         token_price = market_prob_pct / 100.0
         true_probability = true_prob_pct / 100.0
@@ -396,39 +619,105 @@ class RiskManager:
                 available_depth_usd=0.0 if liquidity is None else liquidity.available_depth_usd,
                 fee_cost_pct=0.0,
                 exit_fee_cost_pct=0.0,
+                expected_exit_slippage_pct=0.0,
                 latency_haircut_pct=0.0,
+                capital_lockup_penalty_pct=0.0,
+                elite_quality_score=0.0,
+                elite_size_multiplier=1.0,
+                effective_max_trade_pct=self.config.max_trade_pct,
+                late_lottery_risk_score=0.0,
+                late_lottery_ev_penalty_pct=0.0,
+                late_lottery_size_multiplier=1.0,
+                late_lottery_spread_ratio_pct_of_price=0.0,
+                late_lottery_depth_consumption_pct=0.0,
+                late_lottery_payout_multiple=0.0,
+                late_lottery_time_weight=0.0,
             )
 
         gross_ev = true_probability * (1.0 - token_price) - ((1.0 - true_probability) * token_price)
         gross_ev_pct = _safe_div(gross_ev, token_price, default=0.0) * 100.0
         time_decay = self.continuous_time_decay(seconds_remaining)
         raw_kelly_fraction = self._kelly_fraction(true_probability, token_price)
-
-        pct_cap = current_balance * self.config.max_trade_pct
-        max_risk_cap = pct_cap if self.config.max_absolute_bet_usd <= 0 else min(
-            pct_cap,
-            self.config.max_absolute_bet_usd,
-        )
-        candidate_bet = raw_kelly_fraction * current_balance * self.config.fractional_kelly_dampener * time_decay
-        candidate_bet = min(candidate_bet, max_risk_cap)
-
+        effective_exit_fee_rate = max(taker_fee_rate, 0.0) * max(self.config.expected_exit_fee_multiplier, 0.0)
         adjusted_fraction = raw_kelly_fraction
         adjusted_token_price = token_price
         total_slippage_pct = 0.0
         market_impact_pct = 0.0
+        expected_exit_slippage_pct = 0.0
+        latency_haircut_pct = max(self.config.latency_ev_haircut_pct, 0.0)
+        late_lottery = LateLotteryProfile()
 
-        for _ in range(2):
+        base_pct_cap = self.config.max_trade_pct
+        base_max_risk_cap = current_balance * base_pct_cap
+        if self.config.max_absolute_bet_usd > 0:
+            base_max_risk_cap = min(base_max_risk_cap, self.config.max_absolute_bet_usd)
+        candidate_bet = raw_kelly_fraction * current_balance * self.config.fractional_kelly_dampener * time_decay
+        candidate_bet = min(candidate_bet, base_max_risk_cap)
+
+        elite_profile = EliteSetupProfile(
+            effective_max_trade_pct=base_pct_cap,
+        )
+        effective_max_risk_cap = base_max_risk_cap
+
+        for iteration in range(3):
             total_slippage_pct, market_impact_pct = self.estimate_total_slippage_pct(
                 candidate_bet,
                 liquidity,
                 token_price=token_price,
                 taker_fee_rate=taker_fee_rate,
             )
+            expected_exit_slippage_pct = max(0.0, total_slippage_pct * max(self.config.expected_exit_slippage_multiplier, 0.0))
             adjusted_token_price = _clamp(token_price * (1.0 + total_slippage_pct), 0.0001, 0.9999)
             adjusted_fraction = self._kelly_fraction(true_probability, adjusted_token_price)
-            recalculated = adjusted_fraction * current_balance * self.config.fractional_kelly_dampener * time_decay
-            recalculated = min(recalculated, max_risk_cap)
-            if abs(recalculated - candidate_bet) < 0.01:
+
+            late_lottery = self._late_lottery_profile(
+                token_price=adjusted_token_price,
+                true_prob_pct=true_prob_pct,
+                seconds_remaining=seconds_remaining,
+                bet_size_usd=max(candidate_bet, self.config.min_bet_usd),
+                liquidity=liquidity,
+                underlying_volatility=underlying_volatility,
+            )
+            total_friction_pct = (total_slippage_pct + expected_exit_slippage_pct + effective_exit_fee_rate) * 100.0
+            depth_reference = max(liquidity.available_depth_usd, self.config.min_bet_usd) if liquidity is not None else self.config.default_depth_usd
+            depth_consumption_pct = (candidate_bet / max(depth_reference, EPSILON)) * 100.0
+            elite_profile = self._elite_setup_profile(
+                ev_pct=gross_ev_pct,
+                edge_pct=true_prob_pct - market_prob_pct,
+                true_prob_pct=true_prob_pct,
+                total_friction_pct=total_friction_pct,
+                depth_consumption_pct=depth_consumption_pct,
+                seconds_remaining=seconds_remaining,
+            )
+            effective_trade_pct_cap = elite_profile.effective_max_trade_pct
+            if (
+                seconds_remaining <= self.config.late_lottery_window_secs
+                and adjusted_token_price <= self.config.late_lottery_size_cap_token_price
+                and late_lottery.risk_score >= self.config.late_lottery_size_cap_risk_score
+            ):
+                effective_trade_pct_cap = min(
+                    effective_trade_pct_cap,
+                    self.config.late_lottery_max_trade_pct_cap,
+                )
+
+            effective_max_risk_cap = current_balance * effective_trade_pct_cap
+            if self.config.max_absolute_bet_usd > 0:
+                effective_max_risk_cap = min(effective_max_risk_cap, self.config.max_absolute_bet_usd)
+
+            elite_boost_cutoff = max(self.config.late_lottery_elite_boost_cutoff_score, EPSILON)
+            elite_boost_weight = _clamp(1.0 - (late_lottery.risk_score / elite_boost_cutoff), 0.0, 1.0)
+            effective_elite_multiplier = 1.0 + ((elite_profile.size_multiplier - 1.0) * elite_boost_weight)
+
+            candidate_multiplier = effective_elite_multiplier * late_lottery.size_multiplier
+            recalculated = (
+                adjusted_fraction
+                * current_balance
+                * self.config.fractional_kelly_dampener
+                * time_decay
+                * candidate_multiplier
+            )
+            recalculated = min(recalculated, effective_max_risk_cap)
+            if abs(recalculated - candidate_bet) < 0.01 and iteration > 0:
                 candidate_bet = recalculated
                 break
             candidate_bet = recalculated
@@ -439,22 +728,38 @@ class RiskManager:
             token_price=token_price,
             taker_fee_rate=taker_fee_rate,
         )
+        expected_exit_slippage_pct = max(0.0, total_slippage_pct * max(self.config.expected_exit_slippage_multiplier, 0.0))
         adjusted_token_price = _clamp(token_price * (1.0 + total_slippage_pct), 0.0001, 0.9999)
         adjusted_fraction = self._kelly_fraction(true_probability, adjusted_token_price)
-        effective_exit_fee_rate = max(taker_fee_rate, 0.0) * max(self.config.expected_exit_fee_multiplier, 0.0)
-        expected_win_proceeds = max(0.0, 1.0 - effective_exit_fee_rate)
+        expected_win_proceeds = max(0.0, 1.0 - effective_exit_fee_rate - expected_exit_slippage_pct)
         net_ev = true_probability * (expected_win_proceeds - adjusted_token_price) - (
             (1.0 - true_probability) * adjusted_token_price
         )
         net_ev_pct = _safe_div(net_ev, adjusted_token_price, default=0.0) * 100.0
-        latency_haircut_pct = max(self.config.latency_ev_haircut_pct, 0.0)
-        net_ev_pct_after_haircut = net_ev_pct - latency_haircut_pct
+        net_ev_pct_after_haircut = (
+            net_ev_pct
+            - latency_haircut_pct
+            - late_lottery.ev_penalty_pct
+            - elite_profile.capital_lockup_penalty_pct
+        )
         fee_cost_pct = max(taker_fee_rate, 0.0) * 100.0
         exit_fee_cost_pct = effective_exit_fee_rate * 100.0
 
-        final_bet = round(min(candidate_bet, max_risk_cap), 2)
+        final_bet = round(min(candidate_bet, effective_max_risk_cap), 2)
         if final_bet < self.config.min_bet_usd:
             final_bet = 0.0
+
+        effective_trade_pct_cap = elite_profile.effective_max_trade_pct
+        if (
+            seconds_remaining <= self.config.late_lottery_window_secs
+            and adjusted_token_price <= self.config.late_lottery_size_cap_token_price
+            and late_lottery.risk_score >= self.config.late_lottery_size_cap_risk_score
+        ):
+            effective_trade_pct_cap = min(effective_trade_pct_cap, self.config.late_lottery_max_trade_pct_cap)
+
+        elite_boost_cutoff = max(self.config.late_lottery_elite_boost_cutoff_score, EPSILON)
+        elite_boost_weight = _clamp(1.0 - (late_lottery.risk_score / elite_boost_cutoff), 0.0, 1.0)
+        effective_elite_multiplier = 1.0 + ((elite_profile.size_multiplier - 1.0) * elite_boost_weight)
 
         return EVComputation(
             ev_pct=round(net_ev_pct_after_haircut, 2),
@@ -477,7 +782,20 @@ class RiskManager:
             ),
             fee_cost_pct=round(fee_cost_pct, 3),
             exit_fee_cost_pct=round(exit_fee_cost_pct, 3),
+            expected_exit_slippage_pct=round(expected_exit_slippage_pct * 100.0, 3),
             latency_haircut_pct=round(latency_haircut_pct, 3),
+            capital_lockup_penalty_pct=round(elite_profile.capital_lockup_penalty_pct, 3),
+            elite_quality_score=round(elite_profile.quality_score, 4),
+            elite_size_multiplier=round(effective_elite_multiplier, 4),
+            effective_max_trade_pct=round(effective_trade_pct_cap, 6),
+            late_lottery_risk_score=round(late_lottery.risk_score, 4),
+            late_lottery_ev_penalty_pct=round(late_lottery.ev_penalty_pct, 3),
+            late_lottery_size_multiplier=round(late_lottery.size_multiplier, 4),
+            late_lottery_spread_ratio_pct_of_price=round(late_lottery.spread_ratio_pct_of_price, 2),
+            late_lottery_depth_consumption_pct=round(late_lottery.depth_consumption_pct, 2),
+            late_lottery_payout_multiple=round(late_lottery.payout_multiple, 3),
+            late_lottery_time_weight=round(late_lottery.time_weight, 4),
+            late_lottery_trade_pct_cap=round(effective_trade_pct_cap, 6),
         )
 
     def _volatility_for_position(self, context: TechnicalContext) -> float:
@@ -528,6 +846,14 @@ class RiskManager:
             return confirmations >= cfg.underlying_soft_sl_min_confirms
 
         return True
+
+    def _tp_stall_window_seconds(self, seconds_remaining: float) -> int:
+        cfg = self.position_config
+        if seconds_remaining > cfg.early_phase_seconds:
+            return cfg.tp_stall_window_early_seconds
+        if seconds_remaining > cfg.mid_phase_seconds:
+            return cfg.tp_stall_window_mid_seconds
+        return cfg.tp_stall_window_late_seconds
 
     def position_risk_snapshot(
         self,
@@ -654,14 +980,24 @@ class RiskManager:
             tp_gate_hold = seconds_remaining > cfg.tp_early_exit_window_seconds
             roi_pct_now = _safe_div(current_token_price - position.bought_price, position.bought_price, default=0.0)
             force_tp = (roi_pct_now >= cfg.force_tp_roi_pct) or (price_delta >= cfg.force_tp_delta_abs)
-            peak_delta = max(float(updated.tp_peak_delta), price_delta)
+            previous_peak_delta = float(updated.tp_peak_delta)
+            peak_delta = max(previous_peak_delta, price_delta)
+            peak_refreshed = peak_delta > (previous_peak_delta + 1e-9)
             retrace_budget = max(cfg.tp_retrace_exit_min_delta, peak_delta * cfg.tp_retrace_exit_frac)
             lock_floor = max(cfg.tp_lock_min_profit_delta, peak_delta - retrace_budget)
+            tp_armed_at_ts = float(updated.tp_armed_at_ts) if updated.tp_armed else now_ts
+            tp_peak_at_ts = (
+                now_ts
+                if peak_refreshed or float(updated.tp_peak_at_ts) <= 0
+                else float(updated.tp_peak_at_ts)
+            )
             updated = replace(
                 updated,
                 sl_breach_count=0,
                 tp_armed=True,
+                tp_armed_at_ts=tp_armed_at_ts,
                 tp_peak_delta=peak_delta,
+                tp_peak_at_ts=tp_peak_at_ts,
                 tp_lock_floor_delta=max(float(updated.tp_lock_floor_delta), lock_floor),
                 tp_gate_logged=tp_gate_hold and not force_tp,
             )
@@ -691,6 +1027,27 @@ class RiskManager:
                         ),
                         exit_price=current_token_price,
                     )
+
+        if updated.tp_armed:
+            peak_delta = float(updated.tp_peak_delta)
+            peak_at_ts = float(updated.tp_peak_at_ts) if float(updated.tp_peak_at_ts) > 0 else now_ts
+            stall_window = self._tp_stall_window_seconds(seconds_remaining)
+            stall_age = max(0.0, now_ts - peak_at_ts)
+            stall_floor = max(cfg.tp_lock_min_profit_delta, peak_delta - cfg.tp_stall_band_delta)
+            if (
+                peak_delta >= cfg.tp_stall_min_profit_delta
+                and stall_age >= stall_window
+                and price_delta >= stall_floor
+            ):
+                return PositionMonitorDecision(
+                    position=replace(updated, status=PositionStatus.CLOSING),
+                    should_exit=True,
+                    exit_reason=(
+                        f"TP_STALL_EXIT (peak +{peak_delta * 100:.1f}c stalled for "
+                        f"{int(stall_age)}s; now +{price_delta * 100:.1f}c)"
+                    ),
+                    exit_price=current_token_price,
+                )
 
         if not snapshot.sl_disabled and price_delta <= snapshot.hard_sl_delta:
             return PositionMonitorDecision(

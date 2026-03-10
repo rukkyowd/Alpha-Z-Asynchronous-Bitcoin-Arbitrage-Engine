@@ -362,6 +362,10 @@ class ClobExecutionEngine:
 
         return naive_target
 
+    @staticmethod
+    def _is_passive_shadow_cap(target_price: float, naive_target: float) -> bool:
+        return target_price + 1e-9 < naive_target
+
     def _compute_twap_slices(self, total_usd: float) -> list[float]:
         """TWAP slice computation (Pillar 3B).
 
@@ -901,11 +905,20 @@ class ClobExecutionEngine:
             return None
 
         bankroll = state.simulated_balance
+        max_trade_pct_override: float | None = None
+        if signal.metadata:
+            try:
+                candidate_trade_pct = signal.metadata.get("effective_max_trade_pct")
+                if candidate_trade_pct is not None:
+                    max_trade_pct_override = float(candidate_trade_pct)
+            except (TypeError, ValueError):
+                max_trade_pct_override = None
         approved, reason = self.risk_manager.can_trade(
             bankroll,
             bet_size_usd,
             current_daily_pnl=state.current_daily_pnl,
             trades_this_hour=state.trades_this_hour,
+            max_trade_pct_override=max_trade_pct_override,
         )
         if not approved:
             await state.record_execution_failure(signal.slug, reason=reason, ev_pct=signal.expected_value_pct)
@@ -953,6 +966,11 @@ class ClobExecutionEngine:
             signal.direction,
             entry_price=(authoritative_market_prob_pct / 100.0) if authoritative_market_prob_pct > 0 else None,
         )
+        underlying_volatility = max(
+            context.realized_volatility,
+            context.parkinson_volatility,
+            context.garman_klass_volatility,
+        )
         authoritative_ev = self.risk_manager.evaluate_trade(
             true_prob_pct=signal.true_probability_pct,
             market_prob_pct=authoritative_market_prob_pct,
@@ -960,6 +978,7 @@ class ClobExecutionEngine:
             seconds_remaining=odds.seconds_remaining,
             liquidity=liquidity.as_profile(),
             taker_fee_rate=authoritative_fee_rate,
+            underlying_volatility=underlying_volatility,
         )
         if not authoritative_ev.approved:
             await state.record_execution_failure(
@@ -1019,6 +1038,7 @@ class ClobExecutionEngine:
         if self._is_ny_session():
             active_premium_cap = min(active_premium_cap, self.config.ny_session_max_entry_premium_cents)
 
+        smart_entry_is_passive = self._is_passive_shadow_cap(target_price, naive_target)
         limit_price = _quantize(_clamp(target_price + adjusted_slippage, 0.01, 0.99), tick_size, ROUND_UP)
         entry_premium = limit_price - expected_price
         if entry_premium > active_premium_cap:
@@ -1039,11 +1059,21 @@ class ClobExecutionEngine:
 
         if self.config.paper_trading or self.config.dry_run:
             synthetic_fill_cost = round(bet_size_usd, 2)
+            paper_shadow_limit_price = limit_price
             if liquidity.mode == "PAPER_CLOB_SHADOW":
+                if smart_entry_is_passive:
+                    # Keep the shaded cap intact in paper shadow mode so passive
+                    # smart-entry decisions do not get converted back into
+                    # taker-like immediate fills by the slippage cap.
+                    paper_shadow_limit_price = _quantize(
+                        _clamp(target_price, 0.01, 0.99),
+                        tick_size,
+                        ROUND_UP,
+                    )
                 current_ask = liquidity.best_ask if liquidity.best_ask is not None else liquidity.entry_price
-                if current_ask is None or limit_price + 1e-9 < current_ask:
+                if current_ask is None or paper_shadow_limit_price + 1e-9 < current_ask:
                     reason = (
-                        f"Paper shadow passive cap {limit_price:.4f} below ask "
+                        f"Paper shadow passive cap {paper_shadow_limit_price:.4f} below ask "
                         f"{(current_ask or 0.0):.4f}; immediate fill not simulated"
                     )
                     await state.record_execution_failure(
@@ -1052,7 +1082,7 @@ class ClobExecutionEngine:
                         ev_pct=signal.expected_value_pct,
                     )
                     return None
-            synthetic_fill_price = min(limit_price, max(liquidity.entry_price, 0.01))
+            synthetic_fill_price = min(paper_shadow_limit_price, max(liquidity.entry_price, 0.01))
             synthetic_shares = synthetic_fill_cost / max(synthetic_fill_price, 0.01)
             risk_snapshot = self.risk_manager.position_risk_snapshot(
                 ActivePosition(

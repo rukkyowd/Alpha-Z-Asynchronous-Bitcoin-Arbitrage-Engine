@@ -49,7 +49,7 @@ from bot.models import (
     TechnicalContext,
     TradeSignal,
 )
-from bot.risk import LiquidityProfile, RiskConfig, RiskManager
+from bot.risk import LiquidityProfile, PositionRiskConfig, RiskConfig, RiskManager
 from bot.state import EngineState
 from bot.strategy import StrategyConfig, StrategyEngine
 from bot.calibration import CalibrationConfig, ProbabilityCalibrator
@@ -1792,6 +1792,22 @@ async def evaluation_loop(runtime: EngineServices) -> None:
 
             last_soft_eval_ts = time.monotonic()
             cycle_started = time.perf_counter()
+
+            async with runtime.state.positions_lock:
+                already_open = slug in runtime.state.active_positions or slug in runtime.state.committed_slugs
+            if already_open:
+                runtime.latest_rejected_reason = "Position already active"
+                runtime.latest_locks = [runtime.latest_rejected_reason]
+                log_skip_reason(runtime, slug, runtime.latest_rejected_reason, min_repeat_secs=30.0)
+                await runtime.state.update_telemetry(
+                    execution_timing=ExecutionTimingSnapshot(
+                        total_ms=(time.perf_counter() - cycle_started) * 1000.0,
+                        updated_at=time.time(),
+                    )
+                )
+                await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
+                continue
+
             context = await build_context_from_state(runtime)
             if context is None:
                 await asyncio.sleep(EVALUATION_IDLE_SLEEP_SECS)
@@ -2588,12 +2604,69 @@ async def bootstrap_runtime() -> EngineServices:
         min_bet_usd=_env_float("MIN_BET_USD", 1.0),
         max_absolute_bet_usd=_env_float("MAX_BET_USD", 0.0),
         expected_exit_fee_multiplier=_env_float("EXPECTED_EXIT_FEE_MULTIPLIER", 0.50),
+        expected_exit_slippage_multiplier=_env_float("EXPECTED_EXIT_SLIPPAGE_MULTIPLIER", 0.60),
         latency_ev_haircut_pct=_env_float("LATENCY_EV_HAIRCUT_PCT", 0.25),
+        capital_lockup_free_hours=_env_float("CAPITAL_LOCKUP_FREE_HOURS", 0.35),
+        capital_lockup_penalty_max_pct=_env_float("CAPITAL_LOCKUP_PENALTY_MAX_PCT", 6.0),
+        late_lottery_window_secs=_env_float("LATE_LOTTERY_WINDOW_SECS", 1800.0),
+        late_lottery_time_power=_env_float("LATE_LOTTERY_TIME_POWER", 1.0),
+        late_lottery_price_anchor=_env_float("LATE_LOTTERY_PRICE_ANCHOR", 0.25),
+        late_lottery_min_true_prob_pct=_env_float("LATE_LOTTERY_MIN_TRUE_PROB_PCT", 35.0),
+        late_lottery_spread_ratio_soft=_env_float("LATE_LOTTERY_SPREAD_RATIO_SOFT", 0.08),
+        late_lottery_spread_ratio_hard=_env_float("LATE_LOTTERY_SPREAD_RATIO_HARD", 0.20),
+        late_lottery_depth_consumption_soft=_env_float("LATE_LOTTERY_DEPTH_CONSUMPTION_SOFT", 0.15),
+        late_lottery_depth_consumption_hard=_env_float("LATE_LOTTERY_DEPTH_CONSUMPTION_HARD", 0.45),
+        late_lottery_payout_multiple_soft=_env_float("LATE_LOTTERY_PAYOUT_MULTIPLE_SOFT", 4.0),
+        late_lottery_payout_multiple_hard=_env_float("LATE_LOTTERY_PAYOUT_MULTIPLE_HARD", 8.0),
+        late_lottery_volatility_soft=_env_float("LATE_LOTTERY_VOLATILITY_SOFT", 0.004),
+        late_lottery_volatility_hard=_env_float("LATE_LOTTERY_VOLATILITY_HARD", 0.008),
+        late_lottery_ev_penalty_max_pct=_env_float("LATE_LOTTERY_EV_PENALTY_MAX_PCT", 45.0),
+        late_lottery_size_haircut_max=_env_float("LATE_LOTTERY_SIZE_HAIRCUT_MAX", 0.75),
+        late_lottery_elite_boost_cutoff_score=_env_float("LATE_LOTTERY_ELITE_BOOST_CUTOFF_SCORE", 0.12),
+        late_lottery_size_cap_token_price=_env_float("LATE_LOTTERY_SIZE_CAP_TOKEN_PRICE", 0.20),
+        late_lottery_size_cap_risk_score=_env_float("LATE_LOTTERY_SIZE_CAP_RISK_SCORE", 0.12),
+        late_lottery_max_trade_pct_cap=_env_float("LATE_LOTTERY_MAX_TRADE_PCT_CAP", 0.02),
+        elite_ev_soft_pct=_env_float("ELITE_EV_SOFT_PCT", 12.0),
+        elite_ev_hard_pct=_env_float("ELITE_EV_HARD_PCT", 35.0),
+        elite_edge_soft_pct=_env_float("ELITE_EDGE_SOFT_PCT", 6.0),
+        elite_edge_hard_pct=_env_float("ELITE_EDGE_HARD_PCT", 20.0),
+        elite_true_prob_soft_pct=_env_float("ELITE_TRUE_PROB_SOFT_PCT", 58.0),
+        elite_true_prob_hard_pct=_env_float("ELITE_TRUE_PROB_HARD_PCT", 72.0),
+        elite_friction_soft_pct=_env_float("ELITE_FRICTION_SOFT_PCT", 4.0),
+        elite_friction_hard_pct=_env_float("ELITE_FRICTION_HARD_PCT", 12.0),
+        elite_depth_consumption_soft_pct=_env_float("ELITE_DEPTH_CONSUMPTION_SOFT_PCT", 8.0),
+        elite_depth_consumption_hard_pct=_env_float("ELITE_DEPTH_CONSUMPTION_HARD_PCT", 30.0),
+        elite_size_boost_max=_env_float("ELITE_SIZE_BOOST_MAX", 0.75),
+        elite_max_trade_pct=_env_float("ELITE_MAX_TRADE_PCT", 0.06),
     )
-    strategy_config = StrategyConfig(
-        risk=risk_config,
-        close_equals_open_up_bias_prob=_env_float("CLOSE_EQUALS_OPEN_UP_BIAS_PROB", 0.0005),
+    position_risk_config = PositionRiskConfig(
+        tp_stall_window_early_seconds=_env_int("TP_STALL_WINDOW_EARLY_SECONDS", 480),
+        tp_stall_window_mid_seconds=_env_int("TP_STALL_WINDOW_MID_SECONDS", 300),
+        tp_stall_window_late_seconds=_env_int("TP_STALL_WINDOW_LATE_SECONDS", 150),
+        tp_stall_band_delta=_env_float("TP_STALL_BAND_DELTA", 0.03),
+        tp_stall_min_profit_delta=_env_float("TP_STALL_MIN_PROFIT_DELTA", 0.06),
     )
+    strategy_config_path = os.path.join(os.path.dirname(__file__), "ai_strategy_config.json")
+    if os.path.exists(strategy_config_path):
+        strategy_config = StrategyConfig.load_managed(strategy_config_path)
+        risk_config = strategy_config.risk
+        logger.info("[INIT] Loaded AI StrategyConfig from dynamic JSON.")
+    else:
+        strategy_config = StrategyConfig(
+            risk=risk_config,
+            close_equals_open_up_bias_prob=_env_float("CLOSE_EQUALS_OPEN_UP_BIAS_PROB", 0.0005),
+            late_lottery_block_score=_env_float("LATE_LOTTERY_BLOCK_SCORE", 0.14),
+            late_lottery_min_ev_pct=_env_float("LATE_LOTTERY_MIN_EV_PCT", 20.0),
+            late_lottery_min_score=_env_int("LATE_LOTTERY_MIN_SCORE", 3),
+            late_lottery_min_true_prob_pct=_env_float("LATE_LOTTERY_MIN_TRUE_PROB_PCT", 35.0),
+            late_lottery_hard_block_score=_env_float("LATE_LOTTERY_HARD_BLOCK_SCORE", 0.18),
+            late_lottery_hard_block_max_token_price=_env_float("LATE_LOTTERY_HARD_BLOCK_MAX_TOKEN_PRICE", 0.18),
+            late_countertrend_window_secs=_env_float("LATE_COUNTERTREND_WINDOW_SECS", 1800.0),
+            late_countertrend_max_token_price=_env_float("LATE_COUNTERTREND_MAX_TOKEN_PRICE", 0.20),
+            late_countertrend_min_score=_env_int("LATE_COUNTERTREND_MIN_SCORE", 4),
+            late_countertrend_min_ev_pct=_env_float("LATE_COUNTERTREND_MIN_EV_PCT", 35.0),
+            late_countertrend_min_true_prob_pct=_env_float("LATE_COUNTERTREND_MIN_TRUE_PROB_PCT", 60.0),
+        )
     execution_config = ExecutionConfig(
         paper_trading=PAPER_TRADING,
         dry_run=DRY_RUN,
@@ -2602,155 +2675,165 @@ async def bootstrap_runtime() -> EngineServices:
     ai_config = AIConfig(model=os.getenv("LOCAL_AI_MODEL", AIConfig().model))
 
     http_session = create_http_session(data_config)
+    runtime: EngineServices | None = None
 
-    clob_client: ClobClient | None = None
-    live_enabled = not PAPER_TRADING and not DRY_RUN
-    should_initialize_clob = live_enabled or (PAPER_TRADING and PAPER_USE_LIVE_CLOB)
-    if should_initialize_clob:
-        try:
-            clob_client = await build_clob_client()
-        except Exception as exc:
-            if live_enabled:
-                live_enabled = False
-                logger.warning("[CLOB] Initialization failed. Falling back to paper mode: %s", exc)
-            else:
-                logger.warning("[CLOB] Paper shadow CLOB unavailable. Falling back to PAPER_SIM: %s", exc)
+    try:
+        clob_client: ClobClient | None = None
+        live_enabled = not PAPER_TRADING and not DRY_RUN
+        should_initialize_clob = live_enabled or (PAPER_TRADING and PAPER_USE_LIVE_CLOB)
+        if should_initialize_clob:
+            try:
+                clob_client = await build_clob_client()
+            except Exception as exc:
+                if live_enabled:
+                    live_enabled = False
+                    logger.warning("[CLOB] Initialization failed. Falling back to paper mode: %s", exc)
+                else:
+                    logger.warning("[CLOB] Paper shadow CLOB unavailable. Falling back to PAPER_SIM: %s", exc)
 
-    # Create CLOB WS manager (token IDs populated dynamically at runtime via sync_target_market)
-    clob_ws_mgr: ClobWebSocketManager | None = None
-    if clob_client is not None:
-        clob_ws_mgr = ClobWebSocketManager(token_ids=[])
+        # Create CLOB WS manager (token IDs populated dynamically at runtime via sync_target_market)
+        clob_ws_mgr: ClobWebSocketManager | None = None
+        if clob_client is not None:
+            clob_ws_mgr = ClobWebSocketManager(token_ids=[])
 
-    # --- Calibration layer ---
-    calibrator = ProbabilityCalibrator(
-        config=CalibrationConfig(
-            method="platt",
-            min_samples=30,
-            refit_interval=50,
-            db_path=str(DB_PATH),
+        # --- Calibration layer ---
+        calibrator = ProbabilityCalibrator(
+            config=CalibrationConfig(
+                method="platt",
+                min_samples=30,
+                refit_interval=50,
+                db_path=str(DB_PATH),
+            )
         )
-    )
-    calibrator.fit_from_history()
-    diag = calibrator.diagnostics()
-    logger.info(
-        "[CALIBRATION] Startup fit: method=%s fitted=%s n=%d A=%.4f B=%.4f",
-        diag["method"], diag["is_fitted"], diag["fitted_on_n"],
-        diag.get("platt_a") or 0.0, diag.get("platt_b") or 0.0,
-    )
-
-    risk_manager = RiskManager(risk_config)
-    runtime = EngineServices(
-        state=state,
-        http_session=http_session,
-        stream_manager=BinanceStreamManager(data_config),
-        polymarket_fetcher=PolymarketFetcher(data_config),
-        strategy_engine=StrategyEngine(strategy_config, calibrator=calibrator),
-        risk_manager=risk_manager,
-        execution_engine=ClobExecutionEngine(
-            clob_client,
-            config=replace(execution_config, paper_trading=not live_enabled, dry_run=DRY_RUN),
-            risk_manager=risk_manager,
-            clob_ws=clob_ws_mgr,
-        ),
-        ai_agent=LocalAIAgent(ai_config),
-        data_config=data_config,
-        strategy_config=strategy_config,
-        risk_config=risk_config,
-        execution_config=replace(execution_config, paper_trading=not live_enabled, dry_run=DRY_RUN),
-        ai_config=ai_config,
-        clob_client=clob_client,
-        bankroll=BASE_BANKROLL,
-        paper_trading=not live_enabled,
-        dry_run=DRY_RUN,
-        current_balance=BASE_BANKROLL,
-    )
-    runtime.clob_ws_manager = clob_ws_mgr
-    runtime.strategy_engine.risk_manager = runtime.risk_manager
-    _setup_logging(runtime)
-    _init_db()
-    logger.info("Elite Quant Engine v2 Initialized. Monitoring 1h WebSocket...")
-
-    await load_persisted_history(runtime)
-    if runtime.paper_trading:
+        calibrator.fit_from_history()
+        diag = calibrator.diagnostics()
         logger.info(
-            "[INIT] Simulated balance initialized: $%.2f (base: $%.1f + historical: $%.2f)",
-            runtime.current_balance,
-            runtime.bankroll,
-            runtime.current_balance - runtime.bankroll,
+            "[CALIBRATION] Startup fit: method=%s fitted=%s n=%d A=%.4f B=%.4f",
+            diag["method"], diag["is_fitted"], diag["fitted_on_n"],
+            diag.get("platt_a") or 0.0, diag.get("platt_b") or 0.0,
         )
-        if runtime.execution_config.paper_use_live_clob and runtime.clob_client is not None:
-            logger.info("[INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.")
-        elif runtime.execution_config.paper_use_live_clob:
-            logger.info("[INIT] Paper mode falling back to PAPER_SIM liquidity (no CLOB client).")
-    else:
-        runtime.current_balance = await fetch_live_balance(runtime, force=True)
-        logger.info("[INIT] Live balance initialized: $%.2f", runtime.current_balance)
 
-    await sync_target_market(runtime, force=True)
-    await runtime.stream_manager.load_initial_history(runtime.http_session, runtime.state)
-    initial_context = await build_context_from_state(runtime)
-    if initial_context is not None and runtime.state.target_slug:
-        with suppress(Exception):
-            seed_odds, _ = await fetch_market_odds(runtime, runtime.state.target_slug)
-            if seed_odds.market_found:
-                seeded_context = apply_probabilistic_model(
-                    initial_context,
-                    strike_price=seed_odds.reference_price or seed_odds.strike_price,
-                    seconds_remaining=seed_odds.seconds_remaining,
-                    degrees_of_freedom=runtime.strategy_config.degrees_of_freedom,
-                    probability_floor_pct=runtime.strategy_config.probability_floor_pct,
-                    probability_ceil_pct=runtime.strategy_config.probability_ceil_pct,
-                    close_equals_open_up_bias_prob=runtime.strategy_config.close_equals_open_up_bias_prob,
-                )
-                runtime.latest_context = seeded_context
-                await runtime.state.update_telemetry(context=seeded_context)
-    logger.info("[SYSTEM] Warming up local AI (%s) into RAM...", runtime.ai_config.model)
-    warm_signal = TradeSignal(
-        slug="warmup",
-        direction=Direction.UP,
-        confidence=ConfidenceLevel.LOW,
-    )
-    warm_context = TechnicalContext(timestamp=utc_now(), price=runtime.state.live_price or 0.0)
-    warm_odds = MarketOddsSnapshot(slug="warmup")
-    with suppress(Exception):
-        await call_local_ai(runtime.http_session, runtime.state, warm_signal, warm_context, warm_odds, agent=runtime.ai_agent)
-    logger.info("[SYSTEM] AI Warmup complete. Engine is hot and ready.")
+        risk_manager = RiskManager(risk_config, position_config=position_risk_config)
+        runtime = EngineServices(
+            state=state,
+            http_session=http_session,
+            stream_manager=BinanceStreamManager(data_config),
+            polymarket_fetcher=PolymarketFetcher(data_config),
+            strategy_engine=StrategyEngine(strategy_config, calibrator=calibrator),
+            risk_manager=risk_manager,
+            execution_engine=ClobExecutionEngine(
+                clob_client,
+                config=replace(execution_config, paper_trading=not live_enabled, dry_run=DRY_RUN),
+                risk_manager=risk_manager,
+                clob_ws=clob_ws_mgr,
+            ),
+            ai_agent=LocalAIAgent(ai_config),
+            data_config=data_config,
+            strategy_config=strategy_config,
+            risk_config=risk_config,
+            execution_config=replace(execution_config, paper_trading=not live_enabled, dry_run=DRY_RUN),
+            ai_config=ai_config,
+            clob_client=clob_client,
+            bankroll=BASE_BANKROLL,
+            paper_trading=not live_enabled,
+            dry_run=DRY_RUN,
+            current_balance=BASE_BANKROLL,
+        )
+        runtime.clob_ws_manager = clob_ws_mgr
+        runtime.strategy_engine.risk_manager = runtime.risk_manager
+        _setup_logging(runtime)
+        _init_db()
+        logger.info("Elite Quant Engine v2 Initialized. Monitoring 1h WebSocket...")
 
-    task_group = asyncio.TaskGroup()
-    await task_group.__aenter__()
-    runtime.task_group = task_group
-    runtime.tasks = [
-        task_group.create_task(runtime.stream_manager.run(runtime.http_session, runtime.state)),
-        task_group.create_task(evaluation_loop(runtime)),
-        task_group.create_task(position_monitor_loop(runtime)),
-        task_group.create_task(balance_refresh_loop(runtime)),
-        task_group.create_task(db_writer_worker(runtime)),
-        task_group.create_task(ml_writer_worker(runtime)),
-    ]
-    # --- Polymarket SDK heartbeat kill-switch + CLOB WS book ---
-    if live_enabled and clob_client is not None:
-        runtime.tasks.append(
-            task_group.create_task(
-                run_heartbeat_loop(
-                    clob_client,
-                    heartbeat_id="alpha_z_btc_hourly",
-                    interval_secs=8.0,
-                    stop_event=runtime.stop_event,
-                )
-            )
-        )
-        logger.info("[SYSTEM] CLOB heartbeat kill-switch ARMED (8s interval).")
-    if clob_ws_mgr is not None:
-        runtime.tasks.append(
-            task_group.create_task(
-                clob_ws_mgr.run(stop_event=runtime.stop_event)
-            )
-        )
+        await load_persisted_history(runtime)
         if runtime.paper_trading:
-            logger.info("[SYSTEM] CLOB WebSocket book manager started in paper shadow mode (heartbeat disabled).")
+            logger.info(
+                "[INIT] Simulated balance initialized: $%.2f (base: $%.1f + historical: $%.2f)",
+                runtime.current_balance,
+                runtime.bankroll,
+                runtime.current_balance - runtime.bankroll,
+            )
+            if runtime.execution_config.paper_use_live_clob and runtime.clob_client is not None:
+                logger.info("[INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.")
+            elif runtime.execution_config.paper_use_live_clob:
+                logger.info("[INIT] Paper mode falling back to PAPER_SIM liquidity (no CLOB client).")
         else:
-            logger.info("[SYSTEM] CLOB WebSocket book manager started.")
-    return runtime
+            runtime.current_balance = await fetch_live_balance(runtime, force=True)
+            logger.info("[INIT] Live balance initialized: $%.2f", runtime.current_balance)
+
+        await sync_target_market(runtime, force=True)
+        await runtime.stream_manager.load_initial_history(runtime.http_session, runtime.state)
+        initial_context = await build_context_from_state(runtime)
+        if initial_context is not None and runtime.state.target_slug:
+            with suppress(Exception):
+                seed_odds, _ = await fetch_market_odds(runtime, runtime.state.target_slug)
+                if seed_odds.market_found:
+                    seeded_context = apply_probabilistic_model(
+                        initial_context,
+                        strike_price=seed_odds.reference_price or seed_odds.strike_price,
+                        seconds_remaining=seed_odds.seconds_remaining,
+                        degrees_of_freedom=runtime.strategy_config.degrees_of_freedom,
+                        probability_floor_pct=runtime.strategy_config.probability_floor_pct,
+                        probability_ceil_pct=runtime.strategy_config.probability_ceil_pct,
+                        close_equals_open_up_bias_prob=runtime.strategy_config.close_equals_open_up_bias_prob,
+                    )
+                    runtime.latest_context = seeded_context
+                    await runtime.state.update_telemetry(context=seeded_context)
+        logger.info("[SYSTEM] Warming up local AI (%s) into RAM...", runtime.ai_config.model)
+        warm_signal = TradeSignal(
+            slug="warmup",
+            direction=Direction.UP,
+            confidence=ConfidenceLevel.LOW,
+        )
+        warm_context = TechnicalContext(timestamp=utc_now(), price=runtime.state.live_price or 0.0)
+        warm_odds = MarketOddsSnapshot(slug="warmup")
+        with suppress(Exception):
+            await call_local_ai(runtime.http_session, runtime.state, warm_signal, warm_context, warm_odds, agent=runtime.ai_agent)
+        logger.info("[SYSTEM] AI Warmup complete. Engine is hot and ready.")
+
+        task_group = asyncio.TaskGroup()
+        await task_group.__aenter__()
+        runtime.task_group = task_group
+        runtime.tasks = [
+            task_group.create_task(runtime.stream_manager.run(runtime.http_session, runtime.state)),
+            task_group.create_task(evaluation_loop(runtime)),
+            task_group.create_task(position_monitor_loop(runtime)),
+            task_group.create_task(balance_refresh_loop(runtime)),
+            task_group.create_task(db_writer_worker(runtime)),
+            task_group.create_task(ml_writer_worker(runtime)),
+        ]
+        # --- Polymarket SDK heartbeat kill-switch + CLOB WS book ---
+        if live_enabled and clob_client is not None:
+            runtime.tasks.append(
+                task_group.create_task(
+                    run_heartbeat_loop(
+                        clob_client,
+                        heartbeat_id="alpha_z_btc_hourly",
+                        interval_secs=8.0,
+                        stop_event=runtime.stop_event,
+                    )
+                )
+            )
+            logger.info("[SYSTEM] CLOB heartbeat kill-switch ARMED (8s interval).")
+        if clob_ws_mgr is not None:
+            runtime.tasks.append(
+                task_group.create_task(
+                    clob_ws_mgr.run(stop_event=runtime.stop_event)
+                )
+            )
+            if runtime.paper_trading:
+                logger.info("[SYSTEM] CLOB WebSocket book manager started in paper shadow mode (heartbeat disabled).")
+            else:
+                logger.info("[SYSTEM] CLOB WebSocket book manager started.")
+        return runtime
+    except Exception:
+        if runtime is not None:
+            with suppress(Exception):
+                await shutdown_runtime(runtime)
+        else:
+            with suppress(Exception):
+                await http_session.close()
+        raise
 
 
 async def shutdown_runtime(runtime: EngineServices | None) -> None:
@@ -2823,6 +2906,37 @@ async def get_engine_health() -> dict[str, Any]:
 async def get_engine_control() -> dict[str, Any]:
     runtime = get_runtime()
     return sanitize_data(await build_engine_control_snapshot(runtime))
+
+
+@app.post("/api/engine/reload_strategy")
+async def reload_strategy(request: Request) -> dict[str, Any]:
+    runtime = get_runtime()
+    _require_control_auth(request)
+    config_path = os.path.join(os.path.dirname(__file__), "ai_strategy_config.json")
+    if os.path.exists(config_path):
+        runtime.strategy_config = StrategyConfig.load_managed(config_path)
+        runtime.risk_config = runtime.strategy_config.risk
+        runtime.strategy_engine.config = runtime.strategy_config
+        runtime.strategy_engine.risk_manager.config = runtime.risk_config
+        runtime.risk_manager.config = runtime.risk_config
+        runtime.execution_engine.risk_manager.config = runtime.risk_config
+        logger.info("[RUNTIME] Strategy configuration dynamically reloaded from AI JSON.")
+        return sanitize_data({"ok": True, "status": "Reloaded configuration from ai_strategy_config.json"})
+    return sanitize_data({"ok": False, "status": "No AI configuration found"})
+
+
+@app.post("/api/engine/train")
+async def trigger_ai_analyst(request: Request, background_tasks: BackgroundTasks) -> dict[str, Any]:
+    _require_control_auth(request)
+    script_path = os.path.join(os.path.dirname(__file__), "bot", "ai_analyst.py")
+    
+    async def run_analyst():
+        proc = await asyncio.create_subprocess_exec(sys.executable, script_path)
+        await proc.wait()
+        
+    background_tasks.add_task(run_analyst)
+    return sanitize_data({"ok": True, "status": "AI Analyst training job dispatched"})
+
 
 
 @app.post("/api/engine/control")

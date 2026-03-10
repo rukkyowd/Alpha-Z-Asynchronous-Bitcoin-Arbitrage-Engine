@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import math
+import os
+import json
 import time
-from dataclasses import dataclass, field, replace as _dc_replace
+from dataclasses import dataclass, field, replace as _dc_replace, asdict, fields
 
 from .calibration import ProbabilityCalibrator
 from .indicators import REGIME_DF_MAP, apply_probabilistic_model, directional_probabilities
@@ -71,13 +73,45 @@ class StrategyConfig:
     post_stop_reentry_min_ev_improvement_pct: float = 5.0
     post_stop_reentry_min_score: int = 3
     post_win_opposite_direction_cooldown_secs: float = 900.0
-    late_cheap_token_threshold_price: float = 0.12
-    late_cheap_token_window_secs: float = 1800.0
-    late_cheap_token_min_ev_pct: float = 20.0
-    late_cheap_token_min_score: int = 3
+    late_lottery_block_score: float = 0.14
+    late_lottery_min_ev_pct: float = 20.0
+    late_lottery_min_score: int = 3
+    late_lottery_min_true_prob_pct: float = 35.0
+    late_lottery_hard_block_score: float = 0.18
+    late_lottery_hard_block_max_token_price: float = 0.18
+    late_countertrend_window_secs: float = 1800.0
+    late_countertrend_max_token_price: float = 0.20
+    late_countertrend_min_score: int = 4
+    late_countertrend_min_ev_pct: float = 35.0
+    late_countertrend_min_true_prob_pct: float = 60.0
     default_depth_usd: float = 40.0
     default_spread_pct: float = 0.01
     regime_df_map: dict[str, int] = field(default_factory=lambda: dict(REGIME_DF_MAP))
+
+    @classmethod
+    def load_managed(cls, path: str) -> StrategyConfig:
+        if not os.path.exists(path):
+            return cls()
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return cls.from_dict(data)
+        except Exception as e:
+            print(f"Error loading managed strategy config: {e}")
+            return cls()
+
+    @classmethod
+    def from_dict(cls, data: dict) -> StrategyConfig:
+        d = dict(data)
+        risk_data = d.pop("risk", {})
+        risk_config = RiskConfig(**risk_data) if risk_data else RiskConfig()
+        
+        valid_keys = {f.name for f in fields(cls) if f.name != "risk"}
+        filtered_d = {k: v for k, v in d.items() if k in valid_keys}
+        return cls(risk=risk_config, **filtered_d)
+
+    def to_dict(self) -> dict:
+        return asdict(self)
 
 def build_signal_alignment(context: TechnicalContext, direction: Direction, *, volume_ratio: float = 1.05) -> SignalAlignmentSnapshot:
     if direction not in (Direction.UP, Direction.DOWN):
@@ -228,6 +262,54 @@ def _countertrend_reason(
     return None
 
 
+def _late_countertrend_reason(
+    context: TechnicalContext,
+    odds: MarketOddsSnapshot,
+    direction: Direction,
+    *,
+    token_price: float,
+    score: int,
+    ev_pct: float,
+    true_prob_pct: float,
+    late_lottery_risk_score: float,
+    config: StrategyConfig,
+) -> str | None:
+    trend_direction = _infer_trend_direction(context)
+    if trend_direction not in (Direction.UP, Direction.DOWN) or direction == trend_direction:
+        return None
+
+    if odds.seconds_remaining > config.late_countertrend_window_secs:
+        return None
+    if token_price > config.late_countertrend_max_token_price:
+        return None
+
+    if (
+        late_lottery_risk_score >= config.late_lottery_hard_block_score
+        and token_price <= config.late_lottery_hard_block_max_token_price
+    ):
+        return (
+            f"Late countertrend lottery blocked: {direction.value} vs {trend_direction.value} trend "
+            f"(risk {late_lottery_risk_score:.2f}, px {token_price:.3f})"
+        )
+
+    if score < config.late_countertrend_min_score:
+        return (
+            f"Late countertrend blocked: score {score}/4 < {config.late_countertrend_min_score}/4 "
+            f"for {direction.value} against {trend_direction.value} trend"
+        )
+    if ev_pct < config.late_countertrend_min_ev_pct:
+        return (
+            f"Late countertrend blocked: EV {ev_pct:.2f}% < {config.late_countertrend_min_ev_pct:.2f}% "
+            f"for {direction.value} against {trend_direction.value} trend"
+        )
+    if true_prob_pct < config.late_countertrend_min_true_prob_pct:
+        return (
+            f"Late countertrend blocked: true {true_prob_pct:.2f}% < "
+            f"{config.late_countertrend_min_true_prob_pct:.2f}%"
+        )
+    return None
+
+
 def _skip_signal(slug: str, reason: str, *, score: int = 0) -> TradeSignal:
     return TradeSignal(
         slug=slug,
@@ -341,6 +423,11 @@ class StrategyEngine:
         market_prob_pct = odds.entry_prob_pct(direction)
         taker_fee_rate = odds.effective_taker_fee_rate(direction, market_prob_pct / 100.0)
         profile = _derive_liquidity_profile(odds, direction, config=self.config, explicit_liquidity=liquidity)
+        underlying_volatility = max(
+            context.realized_volatility,
+            context.parkinson_volatility,
+            context.garman_klass_volatility,
+        )
         return self.risk_manager.evaluate_trade(
             true_prob_pct=true_prob_pct,
             market_prob_pct=market_prob_pct,
@@ -348,6 +435,7 @@ class StrategyEngine:
             seconds_remaining=odds.seconds_remaining,
             liquidity=profile,
             taker_fee_rate=taker_fee_rate,
+            underlying_volatility=underlying_volatility,
         )
 
     async def evaluate_trade_signal(
@@ -503,24 +591,55 @@ class StrategyEngine:
             )
 
         if (
-            odds.seconds_remaining <= self.config.late_cheap_token_window_secs
-            and token_price <= self.config.late_cheap_token_threshold_price
+            odds.seconds_remaining <= self.config.late_countertrend_window_secs
+            and token_price <= self.config.late_lottery_hard_block_max_token_price
+            and target_ev.late_lottery_risk_score >= self.config.late_lottery_hard_block_score
+        ):
+            return _skip_signal(
+                slug,
+                (
+                    f"Late high-risk lottery blocked: risk {target_ev.late_lottery_risk_score:.2f}, "
+                    f"px {token_price:.3f}, true {target_ev.true_prob_pct:.2f}%, "
+                    f"spread {target_ev.late_lottery_spread_ratio_pct_of_price:.1f}% of price"
+                ),
+                score=score,
+            )
+
+        if (
+            target_ev.late_lottery_risk_score >= self.config.late_lottery_block_score
             and (
-                score < self.config.late_cheap_token_min_score
-                or target_ev.ev_pct < self.config.late_cheap_token_min_ev_pct
+                score < self.config.late_lottery_min_score
+                or target_ev.ev_pct < self.config.late_lottery_min_ev_pct
+                or target_ev.true_prob_pct < self.config.late_lottery_min_true_prob_pct
             )
         ):
             return _skip_signal(
                 slug,
                 (
-                    f"Late cheap-token blocked: px {token_price:.3f} <= {self.config.late_cheap_token_threshold_price:.2f} "
-                    f"with score {score}/4 and EV {target_ev.ev_pct:.2f}% "
-                    f"(needs score>={self.config.late_cheap_token_min_score}/4, "
-                    f"EV>={self.config.late_cheap_token_min_ev_pct:.2f}% inside "
-                    f"{int(self.config.late_cheap_token_window_secs)}s)"
+                    f"Late lottery-profile blocked: risk {target_ev.late_lottery_risk_score:.2f}, "
+                    f"px {token_price:.3f}, true {target_ev.true_prob_pct:.2f}%, "
+                    f"spread {target_ev.late_lottery_spread_ratio_pct_of_price:.1f}% of price, "
+                    f"depth {target_ev.late_lottery_depth_consumption_pct:.1f}% of book "
+                    f"(needs score>={self.config.late_lottery_min_score}/4, "
+                    f"EV>={self.config.late_lottery_min_ev_pct:.2f}%, "
+                    f"true>={self.config.late_lottery_min_true_prob_pct:.2f}%)"
                 ),
                 score=score,
             )
+
+        late_countertrend_reason = _late_countertrend_reason(
+            enriched_context,
+            odds,
+            target_direction,
+            token_price=token_price,
+            score=score,
+            ev_pct=target_ev.ev_pct,
+            true_prob_pct=target_ev.true_prob_pct,
+            late_lottery_risk_score=target_ev.late_lottery_risk_score,
+            config=self.config,
+        )
+        if late_countertrend_reason:
+            return _skip_signal(slug, late_countertrend_reason, score=score)
 
         countertrend_reason = _countertrend_reason(
             enriched_context,
@@ -617,7 +736,11 @@ class StrategyEngine:
                 if confidence == ConfidenceLevel.HIGH:
                     confidence = ConfidenceLevel.SCOUT
 
-        approved, approval_reason = self.risk_manager.can_trade(bankroll, target_ev.kelly_bet_usd)
+        approved, approval_reason = self.risk_manager.can_trade(
+            bankroll,
+            target_ev.kelly_bet_usd,
+            max_trade_pct_override=target_ev.effective_max_trade_pct,
+        )
         if not approved:
             return _skip_signal(slug, approval_reason, score=score)
 
@@ -670,7 +793,19 @@ class StrategyEngine:
                 "public_vig_pct": round(odds.public_vig_pct(), 2),
                 "reference_price": round(reference_price, 6),
                 "expected_exit_fee_cost_pct": target_ev.exit_fee_cost_pct,
+                "expected_exit_slippage_pct": target_ev.expected_exit_slippage_pct,
                 "latency_haircut_pct": target_ev.latency_haircut_pct,
+                "capital_lockup_penalty_pct": target_ev.capital_lockup_penalty_pct,
+                "elite_quality_score": target_ev.elite_quality_score,
+                "elite_size_multiplier": target_ev.elite_size_multiplier,
+                "effective_max_trade_pct": target_ev.effective_max_trade_pct,
+                "late_lottery_risk_score": target_ev.late_lottery_risk_score,
+                "late_lottery_ev_penalty_pct": target_ev.late_lottery_ev_penalty_pct,
+                "late_lottery_size_multiplier": target_ev.late_lottery_size_multiplier,
+                "late_lottery_spread_ratio_pct_of_price": target_ev.late_lottery_spread_ratio_pct_of_price,
+                "late_lottery_depth_consumption_pct": target_ev.late_lottery_depth_consumption_pct,
+                "late_lottery_payout_multiple": target_ev.late_lottery_payout_multiple,
+                "late_lottery_time_weight": target_ev.late_lottery_time_weight,
             },
         )
 

@@ -408,11 +408,17 @@ def apply_probabilistic_model(
     sigma_bar = max(context.realized_volatility, context.garman_klass_volatility, context.parkinson_volatility, 1e-5)
     expected_move_sigma = max(context.price * sigma_bar * math.sqrt(horizon_bars), context.price * 1e-4)
     t_score = (context.price - strike_price) / expected_move_sigma
-    # Resolve regime-adaptive degrees of freedom
-    effective_df = degrees_of_freedom
+    # Resolve regime-adaptive degrees of freedom and then perturb it with
+    # observed shock intensity so stressed conditions retain fatter tails.
+    effective_df = float(degrees_of_freedom)
     if regime_df_map is not None:
         regime_key = context.market_regime.value if hasattr(context.market_regime, 'value') else str(context.market_regime)
-        effective_df = regime_df_map.get(regime_key, degrees_of_freedom)
+        effective_df = float(regime_df_map.get(regime_key, degrees_of_freedom))
+    vol_ratio = sigma_bar / max(0.004, EPSILON)
+    shock_penalty = 2.0 * _clamp((abs(t_score) - 0.8) / 2.2, 0.0, 1.0)
+    vol_penalty = 2.0 * _clamp((vol_ratio - 1.0) / 1.5, 0.0, 1.0)
+    calm_bonus = 2.0 * _clamp((1.0 - vol_ratio) / 0.6, 0.0, 1.0) * _clamp((1.2 - abs(t_score)) / 1.2, 0.0, 1.0)
+    effective_df = int(round(_clamp(effective_df + calm_bonus - shock_penalty - vol_penalty, 3.0, 10.0)))
     base_probability = float(stdtr(max(3, effective_df), t_score))
     if close_equals_open_up_bias_prob > 0:
         base_probability = _clamp(

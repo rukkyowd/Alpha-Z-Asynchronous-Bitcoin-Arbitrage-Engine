@@ -333,7 +333,9 @@ class ActivePosition(SerializableModel):
     sl_breach_count: int = 0
     tp_gate_logged: bool = False
     tp_armed: bool = False
+    tp_armed_at_ts: float = 0.0
     tp_peak_delta: float = 0.0
+    tp_peak_at_ts: float = 0.0
     tp_lock_floor_delta: float = 0.0
     signals: tuple[str, ...] = field(default_factory=tuple)
     notes: tuple[str, ...] = field(default_factory=tuple)

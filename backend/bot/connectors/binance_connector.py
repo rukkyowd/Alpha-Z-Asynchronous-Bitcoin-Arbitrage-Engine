@@ -156,9 +156,30 @@ class BinanceStreamManager:
             "interval": self.config.kline_interval,
             "limit": self.config.history_limit,
         }
-        async with session.get(f"{self.config.binance_rest_api}/api/v3/klines", params=params) as response:
-            response.raise_for_status()
-            rows = await response.json()
+        rows: list[list[Any]] | None = None
+        last_error: Exception | None = None
+        for attempt in range(max(1, self.config.rest_bootstrap_retry_attempts)):
+            try:
+                async with session.get(f"{self.config.binance_rest_api}/api/v3/klines", params=params) as response:
+                    response.raise_for_status()
+                    rows = await response.json()
+                break
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:
+                last_error = exc
+                if attempt >= max(1, self.config.rest_bootstrap_retry_attempts) - 1:
+                    break
+                delay = _backoff_delay(self.config, attempt)
+                log.warning(
+                    "[SYSTEM] Initial Binance history fetch failed (%s). Retrying in %.2fs...",
+                    exc,
+                    delay,
+                )
+                await asyncio.sleep(delay)
+
+        if rows is None:
+            raise RuntimeError("Unable to load initial Binance candle history after retrying.") from last_error
 
         async with state.market_lock:
             state.candle_history.clear()
