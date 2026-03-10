@@ -50,6 +50,18 @@ class IndicatorWeights:
 
 DEFAULT_INDICATOR_WEIGHTS = IndicatorWeights()
 
+# Regime-adaptive degrees of freedom for the Student-t CDF.
+# Fatter tails (lower df) for volatile/breakout regimes, thinner tails
+# (higher df) for calm trending or ranging markets.
+REGIME_DF_MAP: dict[str, int] = {
+    "BULL_TREND": 6,
+    "BEAR_TREND": 6,
+    "RANGE": 8,
+    "VOLATILE_RANGE": 4,
+    "BREAKOUT": 3,
+    "UNKNOWN": 4,
+}
+
 
 class StreamingEMA:
     __slots__ = ("period", "k", "ema", "history")
@@ -377,6 +389,7 @@ def apply_probabilistic_model(
     max_indicator_logit_shift: float = 2.0,
     close_equals_open_up_bias_prob: float = 0.0005,
     bar_seconds: float | None = None,
+    regime_df_map: dict[str, int] | None = None,
 ) -> TechnicalContext:
     if context.price <= 0 or strike_price <= 0:
         return replace(
@@ -395,7 +408,12 @@ def apply_probabilistic_model(
     sigma_bar = max(context.realized_volatility, context.garman_klass_volatility, context.parkinson_volatility, 1e-5)
     expected_move_sigma = max(context.price * sigma_bar * math.sqrt(horizon_bars), context.price * 1e-4)
     t_score = (context.price - strike_price) / expected_move_sigma
-    base_probability = float(stdtr(max(3, degrees_of_freedom), t_score))
+    # Resolve regime-adaptive degrees of freedom
+    effective_df = degrees_of_freedom
+    if regime_df_map is not None:
+        regime_key = context.market_regime.value if hasattr(context.market_regime, 'value') else str(context.market_regime)
+        effective_df = regime_df_map.get(regime_key, degrees_of_freedom)
+    base_probability = float(stdtr(max(3, effective_df), t_score))
     if close_equals_open_up_bias_prob > 0:
         base_probability = _clamp(
             base_probability + (close_equals_open_up_bias_prob * (1.0 - base_probability)),
@@ -448,6 +466,7 @@ __all__ = [
     "DEFAULT_BAR_SECONDS",
     "DEFAULT_INDICATOR_WEIGHTS",
     "IndicatorWeights",
+    "REGIME_DF_MAP",
     "StreamingEMA",
     "StreamingRSI",
     "apply_probabilistic_model",

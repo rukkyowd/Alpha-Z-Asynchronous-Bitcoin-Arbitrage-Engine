@@ -5,7 +5,7 @@ import time
 from dataclasses import dataclass, field, replace as _dc_replace
 
 from .calibration import ProbabilityCalibrator
-from .indicators import apply_probabilistic_model, directional_probabilities
+from .indicators import REGIME_DF_MAP, apply_probabilistic_model, directional_probabilities
 from .models import (
     ConfidenceLevel,
     Direction,
@@ -71,12 +71,13 @@ class StrategyConfig:
     post_stop_reentry_min_ev_improvement_pct: float = 5.0
     post_stop_reentry_min_score: int = 3
     post_win_opposite_direction_cooldown_secs: float = 900.0
-    late_cheap_token_threshold_price: float = 0.10
+    late_cheap_token_threshold_price: float = 0.12
     late_cheap_token_window_secs: float = 1800.0
     late_cheap_token_min_ev_pct: float = 20.0
     late_cheap_token_min_score: int = 3
     default_depth_usd: float = 40.0
     default_spread_pct: float = 0.01
+    regime_df_map: dict[str, int] = field(default_factory=lambda: dict(REGIME_DF_MAP))
 
 def build_signal_alignment(context: TechnicalContext, direction: Direction, *, volume_ratio: float = 1.05) -> SignalAlignmentSnapshot:
     if direction not in (Direction.UP, Direction.DOWN):
@@ -385,6 +386,7 @@ class StrategyEngine:
             probability_ceil_pct=self.config.probability_ceil_pct,
             max_indicator_logit_shift=self.config.max_indicator_logit_shift,
             close_equals_open_up_bias_prob=self.config.close_equals_open_up_bias_prob,
+            regime_df_map=self.config.regime_df_map,
         )
 
         # --- Calibration layer: map raw Bayesian probability to calibrated ---
