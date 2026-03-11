@@ -12,12 +12,14 @@ from .models import (
     ConfidenceLevel,
     Direction,
     EdgeSnapshot,
+    ExitReasonKind,
     MarketOddsSnapshot,
     MarketRegime,
     ReentryState,
     SignalAlignmentSnapshot,
     TechnicalContext,
     TradeSignal,
+    classify_exit_reason,
 )
 from .risk import EVComputation, LiquidityProfile, RiskConfig, RiskManager
 from .state import EngineState
@@ -61,6 +63,10 @@ class StrategyConfig:
     trend_lock_min_ema_spread_pct: float = 0.0012
     trend_lock_min_vwap_dist_pct: float = 0.0010
     trend_lock_cvd_confirm_threshold: float = 15000.0
+    momentum_fallback_min_vwap_dist_pct: float = 0.0006
+    momentum_fallback_cvd_confirm_threshold: float = 0.0
+    momentum_fallback_volatility_floor: float = 0.0010
+    momentum_fallback_max_shock_ratio: float = 4.0
     countertrend_min_score: int = 3
     countertrend_min_ev_pct: float = 20.0
     countertrend_min_ev_lead_pct: float = 5.0
@@ -73,6 +79,7 @@ class StrategyConfig:
     post_stop_reentry_min_ev_improvement_pct: float = 5.0
     post_stop_reentry_min_score: int = 3
     post_win_opposite_direction_cooldown_secs: float = 900.0
+    post_win_same_direction_lockout_for_slug: bool = True
     late_lottery_block_score: float = 0.14
     late_lottery_min_ev_pct: float = 20.0
     late_lottery_min_score: int = 3
@@ -173,15 +180,42 @@ def _derive_liquidity_profile(
         best_bid=best_bid,
         best_ask=best_ask,
         levels=1 if (best_bid is not None or best_ask is not None) else 0,
+        depth_confidence=config.risk.estimated_liquidity_depth_confidence,
     )
 
 
-def _infer_trend_direction(context: TechnicalContext) -> Direction:
+def _infer_trend_direction(context: TechnicalContext, config: StrategyConfig) -> Direction:
     trend_direction = Direction.UNKNOWN
+
+    # Core alignment
     if context.ema_9 > context.ema_21 and context.vwap_distance > 0:
         trend_direction = Direction.UP
     elif context.ema_9 < context.ema_21 and context.vwap_distance < 0:
         trend_direction = Direction.DOWN
+
+    # Immediate momentum, but reject shock moves that look more like a flash crash/spike.
+    if trend_direction == Direction.UNKNOWN:
+        price = max(context.price, EPSILON)
+        vwap_dist_pct = abs(_safe_div(context.vwap_distance, price, default=0.0))
+        shock_reference = max(
+            context.realized_volatility,
+            context.parkinson_volatility,
+            context.garman_klass_volatility,
+            config.momentum_fallback_volatility_floor,
+        )
+        shock_distance = max(abs(context.price_vs_vwap_pct), vwap_dist_pct)
+        shock_ratio = shock_distance / max(shock_reference, EPSILON)
+        orderly_move = (
+            vwap_dist_pct >= config.momentum_fallback_min_vwap_dist_pct
+            and shock_ratio <= config.momentum_fallback_max_shock_ratio
+        )
+        cvd_down_confirms = context.cvd_1min_delta <= -config.momentum_fallback_cvd_confirm_threshold
+        cvd_up_confirms = context.cvd_1min_delta >= config.momentum_fallback_cvd_confirm_threshold
+        if orderly_move and context.vwap_distance < 0 and context.price < context.ema_9 and cvd_down_confirms:
+            trend_direction = Direction.DOWN
+        elif orderly_move and context.vwap_distance > 0 and context.price > context.ema_9 and cvd_up_confirms:
+            trend_direction = Direction.UP
+
     return trend_direction
 
 
@@ -193,7 +227,7 @@ def _trend_lock_veto(context: TechnicalContext, direction: Direction, config: St
     ema_spread_pct = abs(context.ema_spread_pct)
     vwap_dist_pct = abs(_safe_div(context.vwap_distance, price, default=0.0))
     cvd_delta = context.cvd_candle_delta
-    trend_direction = _infer_trend_direction(context)
+    trend_direction = _infer_trend_direction(context, config)
 
     strong_trend = (
         context.market_regime in (MarketRegime.BULL_TREND, MarketRegime.BEAR_TREND, MarketRegime.BREAKOUT)
@@ -226,7 +260,7 @@ def _countertrend_reason(
     ev_lead_pct: float,
     config: StrategyConfig,
 ) -> str | None:
-    trend_direction = _infer_trend_direction(context)
+    trend_direction = _infer_trend_direction(context, config)
     if trend_direction not in (Direction.UP, Direction.DOWN) or direction == trend_direction:
         return None
 
@@ -274,7 +308,7 @@ def _late_countertrend_reason(
     late_lottery_risk_score: float,
     config: StrategyConfig,
 ) -> str | None:
-    trend_direction = _infer_trend_direction(context)
+    trend_direction = _infer_trend_direction(context, config)
     if trend_direction not in (Direction.UP, Direction.DOWN) or direction == trend_direction:
         return None
 
@@ -341,7 +375,10 @@ def _post_stop_reentry_reason(
     if reentry_state.last_exit_direction != direction:
         return None
 
-    if "STOP_LOSS" not in reentry_state.last_exit_reason.upper():
+    exit_kind = reentry_state.last_exit_kind
+    if exit_kind == ExitReasonKind.UNKNOWN:
+        exit_kind = classify_exit_reason(reentry_state.last_exit_reason)
+    if exit_kind != ExitReasonKind.STOP_LOSS:
         return None
 
     if config.post_stop_same_direction_lockout_for_slug:
@@ -382,13 +419,24 @@ def _post_profit_reentry_reason(
     if reentry_state is None:
         return None
 
-    if reentry_state.last_exit_direction in (Direction.UNKNOWN, direction):
+    if reentry_state.last_exit_direction == Direction.UNKNOWN:
         return None
 
-    last_reason = reentry_state.last_exit_reason.upper()
-    if "STOP_LOSS" in last_reason:
+    exit_kind = reentry_state.last_exit_kind
+    if exit_kind == ExitReasonKind.UNKNOWN:
+        exit_kind = classify_exit_reason(reentry_state.last_exit_reason)
+    if exit_kind == ExitReasonKind.STOP_LOSS:
         return None
 
+    if reentry_state.last_exit_direction == direction:
+        if config.post_win_same_direction_lockout_for_slug:
+            return (
+                f"Post-win same-direction lockout for {direction.value}: "
+                f"no immediate re-entry after profitable {reentry_state.last_exit_direction.value} exit"
+            )
+        return None
+
+    # Opposite direction cooldown
     elapsed = time.time() - reentry_state.last_exit_ts
     if elapsed >= config.post_win_opposite_direction_cooldown_secs:
         return None
@@ -687,7 +735,7 @@ class StrategyEngine:
 
         confidence = ConfidenceLevel.SCOUT
         needs_ai = True
-        trend_direction = _infer_trend_direction(enriched_context)
+        trend_direction = _infer_trend_direction(enriched_context, self.config)
         is_countertrend = trend_direction in (Direction.UP, Direction.DOWN) and trend_direction != target_direction
 
         if allow_score0_extreme_ev:

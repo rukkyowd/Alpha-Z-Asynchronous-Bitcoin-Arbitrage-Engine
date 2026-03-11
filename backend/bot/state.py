@@ -24,6 +24,7 @@ from .models import (
     RuntimeCounters,
     SignalAlignmentSnapshot,
     TechnicalContext,
+    classify_exit_reason,
 )
 
 
@@ -288,6 +289,7 @@ class EngineState:
                 closed_trades=current.closed_trades + 1,
                 last_exit_ts=time.time(),
                 last_exit_reason=exit_reason,
+                last_exit_kind=classify_exit_reason(exit_reason),
                 last_exit_direction=direction,
                 last_entry_ev_pct=entry_ev_pct,
             )

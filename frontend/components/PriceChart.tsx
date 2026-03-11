@@ -1,6 +1,5 @@
-"use client";
-import { useEffect, useRef } from "react";
-import { createChart, CandlestickSeries, LineSeries, ColorType } from "lightweight-charts";
+import { useEffect, useRef, useState } from "react";
+import { createChart, CandlestickSeries, AreaSeries, LineSeries, ColorType } from "lightweight-charts";
 import type { PriceBar } from "./engine-types";
 
 function getChartHeight(): number {
@@ -44,21 +43,25 @@ function sanitizeHistoryBars(history: Array<Partial<PriceBar>>): PriceBar[] {
 type PriceChartProps = {
   candle: Partial<PriceBar> | null;
   history?: Array<Partial<PriceBar>>;
-  vwap: number;
+  vwap?: number;
+  type?: "candle" | "snake";
 };
 
 export default function PriceChart({
   candle,
   history,
   vwap,
+  type = "candle",
 }: PriceChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<any>(null);
   const candlestickSeriesRef = useRef<any>(null);
+  const areaSeriesRef = useRef<any>(null);
   const vwapSeriesRef = useRef<any>(null);
   
   // LOCK: Prevents live ticks from breaking the chart before history loads
   const isHistoryLoaded = useRef(false);
+  const lastAreaTimeRef = useRef<number>(0);
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
@@ -70,12 +73,27 @@ export default function PriceChart({
       timeScale: { timeVisible: true, secondsVisible: false, borderColor: "rgba(255,255,255,0.06)" },
       rightPriceScale: { borderColor: "rgba(255,255,255,0.06)" },
       height: getChartHeight(),
+      crosshair: {
+        mode: 1, // Magnet crosshair
+      },
     });
 
     // 2. Add Series
     const candleSeries = chart.addSeries(CandlestickSeries, {
       upColor: "#34d399", downColor: "#f87171", 
-      borderVisible: false, wickUpColor: "#34d399", wickDownColor: "#f87171" 
+      borderVisible: false, wickUpColor: "#34d399", wickDownColor: "#f87171",
+      visible: type === "candle", // Toggle visibility
+    });
+
+    const areaSeries = chart.addSeries(AreaSeries, {
+      lineColor: '#f59e0b', // Amber-500
+      topColor: 'rgba(245, 158, 11, 0.4)',
+      bottomColor: 'rgba(245, 158, 11, 0.0)',
+      lineWidth: 2,
+      priceLineVisible: true,
+      lastValueVisible: true,
+      crosshairMarkerVisible: true,
+      visible: type === "snake", // Toggle visibility
     });
     
     const vwapSeries = chart.addSeries(LineSeries, {
@@ -88,6 +106,7 @@ export default function PriceChart({
 
     chartRef.current = chart;
     candlestickSeriesRef.current = candleSeries;
+    areaSeriesRef.current = areaSeries;
     vwapSeriesRef.current = vwapSeries;
 
     const handleResize = () =>
@@ -102,10 +121,19 @@ export default function PriceChart({
       window.removeEventListener("resize", handleResize);
       chart.remove();
     };
-  }, []);
+  }, []); // Note: re-init only on mount. We toggle visibility via props in another effect.
 
+  // 3. Toggle visibility when `type` prop changes
   useEffect(() => {
-    if (!candlestickSeriesRef.current || !Array.isArray(history) || history.length === 0) {
+    if (candlestickSeriesRef.current && areaSeriesRef.current) {
+        candlestickSeriesRef.current.applyOptions({ visible: type === "candle" });
+        areaSeriesRef.current.applyOptions({ visible: type === "snake" });
+    }
+  }, [type]);
+
+  // 4. Load history
+  useEffect(() => {
+    if (!candlestickSeriesRef.current || !areaSeriesRef.current || !Array.isArray(history) || history.length === 0) {
       return;
     }
     const sanitizedHistory = sanitizeHistoryBars(history);
@@ -113,21 +141,45 @@ export default function PriceChart({
       return;
     }
     candlestickSeriesRef.current.setData(sanitizedHistory);
+    // Area series only takes {time, value} where value is close price
+    areaSeriesRef.current.setData(sanitizedHistory.map(b => ({ time: b.time, value: b.close })));
+    if (sanitizedHistory.length > 0) {
+      lastAreaTimeRef.current = sanitizedHistory[sanitizedHistory.length - 1].time;
+    }
     isHistoryLoaded.current = true;
   }, [history]);
 
-  // 4. Handle Live Updates safely
+  // 5. Handle Live Updates safely
   useEffect(() => {
-    if (!candlestickSeriesRef.current) return;
+    if (!candlestickSeriesRef.current || !areaSeriesRef.current) return;
     const nextCandle = normalizeBar(candle);
     if (!nextCandle) return;
+
+    // Use current timestamp for ticking the snake graph so it moves in real time (up to second precision).
+    const nowSecs = Math.floor(Date.now() / 1000);
+    
+    let areaTime = type === "snake" ? nowSecs : nextCandle.time;
+    if (type === "snake" && areaTime <= lastAreaTimeRef.current) {
+      areaTime = lastAreaTimeRef.current + 1;
+    }
+    const areaPoint = { time: areaTime as any, value: nextCandle.close };
 
     // Bootstrap with current candle if history has not arrived yet.
     if (!isHistoryLoaded.current) {
       candlestickSeriesRef.current.setData([nextCandle]);
+      areaSeriesRef.current.setData([areaPoint]);
+      lastAreaTimeRef.current = areaTime;
       isHistoryLoaded.current = true;
     } else {
       candlestickSeriesRef.current.update(nextCandle);
+      if (areaTime >= lastAreaTimeRef.current) {
+        try {
+          areaSeriesRef.current.update(areaPoint);
+          lastAreaTimeRef.current = areaTime;
+        } catch (e) {
+          console.warn("Snake tick overlap, skipped", e);
+        }
+      }
     }
 
     if (vwap && vwapSeriesRef.current) {
@@ -136,7 +188,7 @@ export default function PriceChart({
         value: vwap,
       });
     }
-  }, [candle, vwap]);
+  }, [candle, vwap, type]);
 
   return (
     <div className="relative h-full w-full min-h-[260px] sm:min-h-[350px]">

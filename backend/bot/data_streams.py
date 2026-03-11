@@ -26,7 +26,7 @@ class DataStreamsConfig:
     gamma_api: str = "https://gamma-api.polymarket.com"
     polymarket_crypto_price_api: str = "https://polymarket.com/api/crypto/crypto-price"
     # Official public market-data REST host. This engine only uses public endpoints.
-    binance_rest_api: str = "https://data-api.binance.vision"
+    binance_rest_api: str = "https://api.binance.com"
     binance_ws_api: str = "wss://stream.binance.com:9443/ws"
     kline_interval: str = "1h"
     history_limit: int = 120

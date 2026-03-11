@@ -49,6 +49,29 @@ class SerializableModel:
         return replace(self)
 
 
+def classify_exit_reason(reason: str) -> "ExitReasonKind":
+    raw_reason = str(reason or "").strip()
+    if not raw_reason:
+        return ExitReasonKind.UNKNOWN
+
+    upper_reason = raw_reason.upper()
+    normalized = upper_reason.replace("-", "_").replace(" ", "_")
+    stop_tokens = (
+        "STOP_LOSS",
+        "HARD_STOP",
+        "STOP_OUT",
+        "SL_HIT",
+        "LIQUIDATION",
+    )
+    if any(token in upper_reason or token in normalized for token in stop_tokens):
+        return ExitReasonKind.STOP_LOSS
+    if normalized.startswith("SL_") or "_SL_" in normalized or normalized.endswith("_SL"):
+        return ExitReasonKind.STOP_LOSS
+    if "TAKE_PROFIT" in upper_reason or normalized.startswith("TP_") or "_TP_" in normalized:
+        return ExitReasonKind.TAKE_PROFIT
+    return ExitReasonKind.OTHER
+
+
 class Direction(StrEnum):
     UP = "UP"
     DOWN = "DOWN"
@@ -71,6 +94,21 @@ class PositionStatus(StrEnum):
     RESOLVING = "RESOLVING"
     UNCERTAIN = "UNCERTAIN"
     CLOSED = "CLOSED"
+
+
+class ExitReasonKind(StrEnum):
+    STOP_LOSS = "STOP_LOSS"
+    TAKE_PROFIT = "TAKE_PROFIT"
+    OTHER = "OTHER"
+    UNKNOWN = "UNKNOWN"
+
+
+class FillInferenceStatus(StrEnum):
+    PAPER = "PAPER"
+    INFERRED = "INFERRED"
+    UNCERTAIN = "UNCERTAIN"
+    FALLBACK = "FALLBACK"
+    UNKNOWN = "UNKNOWN"
 
 
 class MarketRegime(StrEnum):
@@ -360,6 +398,7 @@ class ReentryState(SerializableModel):
     closed_trades: int = 0
     last_exit_ts: float = 0.0
     last_exit_reason: str = ""
+    last_exit_kind: ExitReasonKind = ExitReasonKind.UNKNOWN
     last_exit_direction: Direction = Direction.UNKNOWN
     last_entry_ev_pct: float = 0.0
 

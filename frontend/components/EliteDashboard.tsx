@@ -96,6 +96,21 @@ type AlertSettings = {
   sound_circuit_breaker: boolean;
 };
 
+function safeString(val: any, fallback = ""): string {
+  if (val === null || val === undefined || Number.isNaN(val)) return fallback;
+  return String(val);
+}
+
+function formatSeconds(secs: number): string {
+  if (!secs || secs <= 0) return "";
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  const s = Math.floor(secs % 60);
+  if (h > 0) return `${h}h ${m}m ${s}s`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
 const PAGE_SIZE = 20;
 const WS_RECONNECT_SECONDS = 3;
 const TOAST_DURATION_MS = 4200;
@@ -463,7 +478,9 @@ function normalizeWsPayload(raw: unknown, previous: DashboardLiveData): Dashboar
   const regime = String((context as Partial<TechnicalContextSnapshot>).market_regime || previous.regime || "UNKNOWN");
   const atr = safeNumber((context as Partial<TechnicalContextSnapshot>).adaptive_atr_floor, previous.atr);
   const positionSecondsRemaining = Object.values(positions)[0]?.seconds_remaining;
-  const seconds_remaining = safeNumber(positionSecondsRemaining, previous.seconds_remaining);
+  const seconds_remaining = safeNumber(payload.meta?.seconds_remaining, positionSecondsRemaining ?? previous.seconds_remaining);
+  const strike_price = safeNumber(payload.meta?.strike_price, previous.meta?.strike_price as number | undefined);
+  const market_end_iso = typeof payload.meta?.market_end_iso === "string" ? payload.meta.market_end_iso : (previous.meta?.market_end_iso as string | undefined);
   const logs = Array.isArray(runtime.logs)
     ? runtime.logs.map((item) => String(item))
     : previous.logs;
@@ -542,6 +559,13 @@ function normalizeWsPayload(raw: unknown, previous: DashboardLiveData): Dashboar
       garman_klass_volatility: safeNumber((context as Partial<TechnicalContextSnapshot>).garman_klass_volatility, previous.quant.garman_klass_volatility),
       cvd_candle_delta: safeNumber((context as Partial<TechnicalContextSnapshot>).cvd_candle_delta, previous.quant.cvd_candle_delta),
       expected_move_sigma: safeNumber((context as Partial<TechnicalContextSnapshot>).expected_move_sigma, previous.quant.expected_move_sigma),
+    },
+    meta: {
+      ...payload.meta,
+      ...previous.meta,
+      strike_price,
+      market_end_iso,
+      seconds_remaining,
     },
   };
 }
@@ -1002,7 +1026,8 @@ export default function EliteDashboard() {
 
   const metrics = portfolio?.metrics;
   const portfolioValue = safeNumber(metrics?.current_balance, safeNumber(metrics?.current_pnl));
-  const isPnlPositive = portfolioValue >= 0;
+  const currentPnl = safeNumber(metrics?.current_pnl);
+  const isPnlPositive = currentPnl >= 0;
   const isPriceUp = priceChange > 0;
   const activePositions = Object.keys(liveData.active_trades || {}).length;
   const bayesianWinProbPct = clamp(safeNumber(liveData.quant.bayesian_probability) * 100, 0, 100);
@@ -1040,36 +1065,27 @@ export default function EliteDashboard() {
               {metricsLoading ? (
                 <SkeletonBox className="h-14 w-80" />
               ) : (
-                <motion.div
-                  className={`text-4xl font-black tabular-nums tracking-tight sm:text-5xl ${isPnlPositive ? "text-[var(--az-text-primary)]" : "text-[var(--az-loss)]"}`}
-                  key={portfolioValue}
-                  initial={{ scale: 1.03, opacity: 0.85 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: "spring", stiffness: 280, damping: 22 }}
-                >
-                  ${portfolioValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </motion.div>
+                <div className="flex flex-col">
+                  <motion.div
+                    className={`text-4xl font-black tabular-nums tracking-tight sm:text-5xl ${isPnlPositive ? "text-[var(--az-text-primary)]" : "text-[var(--az-loss)]"}`}
+                    key={portfolioValue}
+                    initial={{ scale: 1.03, opacity: 0.85 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 280, damping: 22 }}
+                  >
+                    ${portfolioValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </motion.div>
+                  <div className="mt-2 flex items-center gap-2 text-sm">
+                    <span className="font-medium tracking-wide text-zinc-500">Total PnL</span>
+                    <span className={`font-mono font-bold ${isPnlPositive ? "text-az-profit" : "text-az-loss"}`}>
+                      {isPnlPositive ? "+" : "-"}${Math.abs(currentPnl).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                </div>
               )}
             </div>
 
-            <div className="flex items-center gap-4 text-sm">
-              <span className="font-medium text-zinc-500">BTC/USD</span>
-              {liveLoading ? (
-                <SkeletonBox className="h-6 w-28" />
-              ) : (
-                <>
-                  <motion.span className={`font-bold tabular-nums ${isPriceUp ? "text-green-400" : "text-red-400"}`} key={liveData.price} initial={{ scale: 1.04 }} animate={{ scale: 1 }}>
-                    ${safeNumber(liveData.price).toLocaleString()}
-                  </motion.span>
-                  {Math.abs(priceChange) > 0 && (
-                    <span className={`text-xs font-mono ${isPriceUp ? "text-green-400" : "text-red-400"}`}>
-                      {isPriceUp ? "+" : ""}
-                      {priceChange.toFixed(3)}%
-                    </span>
-                  )}
-                </>
-              )}
-            </div>
+
           </motion.div>
 
           <div className="relative flex w-full flex-col items-start gap-3 sm:items-end lg:w-auto">
@@ -1620,19 +1636,66 @@ function AdaptiveThresholdPanel({ atr, cvd, thresholds }: { atr: number; cvd: an
 }
 
 function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMode }: any) {
+  const [chartType, setChartType] = useState<"candle" | "snake">("snake");
   const strategy = liveData?.strategy || DEFAULT_DASHBOARD_LIVE_DATA.strategy;
   const chartCandle = liveData?.candle || (Array.isArray(liveData?.history) && liveData.history.length > 0 ? liveData.history[liveData.history.length - 1] : null);
   const flowEvents = useMemo(() => logsToFlowEvents(liveData?.logs || []), [liveData?.logs]);
   const brierSummary = portfolio?.brier_summary;
+  const strikePrice = safeNumber(liveData?.meta?.strike_price, liveData?.market?.latest_context?.strike_price || strategy.edge_tracker?.strike_price || 0);
+  const currentPrice = safeNumber(liveData?.price);
+  const diffToBeat = currentPrice - strikePrice;
+  const timeToExpiry = formatSeconds(safeNumber(liveData?.meta?.seconds_remaining, liveData?.seconds_remaining));
+
   return (
     <motion.div key="terminal" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="grid grid-cols-1 gap-2 md:grid-cols-4 md:gap-3 lg:grid-cols-6">
-      <Panel title="Live Price Action • 1H Candles" className="md:col-span-4 lg:col-span-4">
+      <Panel title="Live Price Action • 1H Candles" className="md:col-span-4 lg:col-span-4" contentClassName="flex flex-col p-4">
+        <div className="mb-4 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="flex items-center gap-6">
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-az-text-muted mb-1 flex items-center gap-2">
+                Price to beat
+                {(timeToExpiry !== "00:00:00" && timeToExpiry !== "") && <span className="px-1.5 py-0.5 rounded-sm bg-zinc-800 text-zinc-300 text-[10px] border border-zinc-700 font-mono font-medium tracking-wide">Exp: {timeToExpiry}</span>}
+              </div>
+              <div className="font-mono text-2xl font-bold tabular-nums text-zinc-300">
+                ${strikePrice > 0 ? strikePrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "---"}
+              </div>
+            </div>
+            {strikePrice > 0 && (
+              <div className="h-10 w-px bg-zinc-800" />
+            )}
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-az-accent">Current price</div>
+                <div className={`text-[10px] font-bold ${diffToBeat >= 0 ? "text-az-profit" : "text-az-loss"}`}>
+                  {diffToBeat >= 0 ? "▲" : "▼"} ${Math.abs(diffToBeat).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
+              </div>
+              <div className="font-mono text-2xl font-bold tabular-nums text-az-accent">
+                ${currentPrice > 0 ? currentPrice.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "---"}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 rounded-md border border-az-border bg-az-surface-2 p-1">
+             <button
+                onClick={() => setChartType("candle")}
+                className={`rounded px-3 py-1 text-xs font-semibold transition-colors ${chartType === "candle" ? "bg-zinc-700 text-white shadow-sm" : "text-az-text-muted hover:text-white"}`}
+             >
+               Candles
+             </button>
+             <button
+                onClick={() => setChartType("snake")}
+                className={`rounded px-3 py-1 text-xs font-semibold transition-colors ${chartType === "snake" ? "bg-amber-500/20 text-amber-500 shadow-sm border border-amber-500/30" : "text-az-text-muted hover:text-white"}`}
+             >
+               Snake Graph
+             </button>
+          </div>
+        </div>
         {liveLoading ? (
           <div className="grid grid-cols-1 gap-3">
             <SkeletonBox className="h-[350px] w-full" />
           </div>
         ) : chartCandle || (Array.isArray(liveData?.history) && liveData.history.length > 0) ? (
-          <PriceChart candle={chartCandle} history={liveData.history} vwap={liveData.vwap} />
+          <PriceChart candle={chartCandle} history={liveData.history} vwap={liveData.vwap} type={chartType} />
         ) : (
           <div className="flex h-[350px] items-center justify-center rounded-xl border border-dashed border-white/10">
             <div className="section-label">Awaiting stream...</div>

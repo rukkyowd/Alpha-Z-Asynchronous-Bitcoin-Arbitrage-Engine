@@ -42,11 +42,18 @@ class RiskConfig:
     min_bet_usd: float = 1.00
     max_absolute_bet_usd: float = 0.00
     default_depth_usd: float = 25.0
+    estimated_liquidity_depth_confidence: float = 0.15
+    unknown_liquidity_depth_usd: float = 1.0
     market_impact_constant: float = 0.05
     time_decay_tau_seconds: float = 420.0
     time_decay_floor: float = 0.30
     min_token_price: float = 0.01
     max_token_price: float = 0.99
+    kelly_volatility_soft: float = 0.004
+    kelly_volatility_hard: float = 0.012
+    kelly_volatility_min_multiplier: float = 0.25
+    size_solver_max_iterations: int = 12
+    size_solver_tolerance_usd: float = 0.01
     expected_exit_fee_multiplier: float = 0.50
     expected_exit_slippage_multiplier: float = 0.60
     latency_ev_haircut_pct: float = 0.25
@@ -64,6 +71,12 @@ class RiskConfig:
     late_lottery_payout_multiple_hard: float = 8.0
     late_lottery_volatility_soft: float = 0.004
     late_lottery_volatility_hard: float = 0.008
+    late_lottery_price_weight: float = 0.30
+    late_lottery_true_prob_weight: float = 0.20
+    late_lottery_payout_weight: float = 0.15
+    late_lottery_spread_weight: float = 0.15
+    late_lottery_depth_weight: float = 0.10
+    late_lottery_volatility_weight: float = 0.10
     late_lottery_ev_penalty_max_pct: float = 45.0
     late_lottery_size_haircut_max: float = 0.75
     late_lottery_elite_boost_cutoff_score: float = 0.12
@@ -91,6 +104,7 @@ class LiquidityProfile:
     best_bid: float | None = None
     best_ask: float | None = None
     levels: int = 0
+    depth_confidence: float = 1.0
 
 
 @dataclass(slots=True, frozen=True)
@@ -121,6 +135,7 @@ class EVComputation:
     kelly_bet_usd: float
     raw_kelly_fraction: float
     adjusted_kelly_fraction: float
+    kelly_confidence_multiplier: float
     token_price: float
     adjusted_token_price: float
     slippage_cost_pct: float
@@ -408,10 +423,37 @@ class RiskManager:
         decay = floor + ((1.0 - floor) * math.exp(-effective_seconds / self.config.time_decay_tau_seconds))
         return _clamp(decay, floor, 1.0)
 
+    def _effective_depth_usd(self, liquidity: LiquidityProfile | None) -> float:
+        if liquidity is None:
+            return max(self.config.unknown_liquidity_depth_usd, self.config.min_bet_usd)
+
+        raw_depth = max(liquidity.available_depth_usd, 0.0)
+        if raw_depth <= 0:
+            return max(self.config.unknown_liquidity_depth_usd, self.config.min_bet_usd)
+
+        confidence = _clamp(liquidity.depth_confidence, 0.0, 1.0)
+        conservative_depth = raw_depth * confidence
+        return max(conservative_depth, self.config.min_bet_usd)
+
+    def _kelly_confidence_multiplier(self, underlying_volatility: float) -> float:
+        cfg = self.config
+        if underlying_volatility <= 0:
+            return 1.0
+        risk_score = _scaled_score(
+            underlying_volatility,
+            cfg.kelly_volatility_soft,
+            cfg.kelly_volatility_hard,
+        )
+        return _clamp(
+            1.0 - (risk_score * (1.0 - cfg.kelly_volatility_min_multiplier)),
+            cfg.kelly_volatility_min_multiplier,
+            1.0,
+        )
+
     def square_root_market_impact_pct(self, bet_size_usd: float, available_depth_usd: float) -> float:
         if bet_size_usd <= 0:
             return 0.0
-        depth = max(available_depth_usd, self.config.default_depth_usd, self.config.min_bet_usd)
+        depth = max(available_depth_usd, self.config.min_bet_usd)
         return _clamp(
             self.config.market_impact_constant * math.sqrt(max(bet_size_usd, 0.0) / depth),
             0.0,
@@ -426,12 +468,8 @@ class RiskManager:
         token_price: float | None = None,
         taker_fee_rate: float = 0.0,
     ) -> tuple[float, float]:
-        if liquidity is None:
-            depth = self.config.default_depth_usd
-            spread_abs = 0.0
-        else:
-            depth = max(liquidity.available_depth_usd, self.config.min_bet_usd)
-            spread_abs = max(liquidity.estimated_spread_pct, 0.0)
+        depth = self._effective_depth_usd(liquidity)
+        spread_abs = max(liquidity.estimated_spread_pct, 0.0) if liquidity is not None else 0.0
 
         reference_price = max(token_price or 0.5, self.config.min_token_price)
         spread_pct = (spread_abs * 0.5) / reference_price
@@ -489,7 +527,7 @@ class RiskManager:
             1.0,
         )
 
-        depth = max(liquidity.available_depth_usd, self.config.min_bet_usd) if liquidity is not None else self.config.default_depth_usd
+        depth = self._effective_depth_usd(liquidity)
         depth_consumption = bet_size_usd / max(depth, EPSILON)
         depth_component = _clamp(
             (depth_consumption - cfg.late_lottery_depth_consumption_soft)
@@ -505,14 +543,23 @@ class RiskManager:
             1.0,
         )
 
-        weighted_risk = (
-            0.30 * price_component
-            + 0.20 * true_prob_component
-            + 0.15 * payout_component
-            + 0.15 * spread_component
-            + 0.10 * depth_component
-            + 0.10 * volatility_component
+        total_weight = max(
+            cfg.late_lottery_price_weight
+            + cfg.late_lottery_true_prob_weight
+            + cfg.late_lottery_payout_weight
+            + cfg.late_lottery_spread_weight
+            + cfg.late_lottery_depth_weight
+            + cfg.late_lottery_volatility_weight,
+            EPSILON,
         )
+        weighted_risk = (
+            (cfg.late_lottery_price_weight * price_component)
+            + (cfg.late_lottery_true_prob_weight * true_prob_component)
+            + (cfg.late_lottery_payout_weight * payout_component)
+            + (cfg.late_lottery_spread_weight * spread_component)
+            + (cfg.late_lottery_depth_weight * depth_component)
+            + (cfg.late_lottery_volatility_weight * volatility_component)
+        ) / total_weight
         risk_score = _clamp(time_weight * weighted_risk, 0.0, 1.0)
         ev_penalty_pct = risk_score * max(cfg.late_lottery_ev_penalty_max_pct, 0.0)
         size_multiplier = _clamp(
@@ -607,6 +654,7 @@ class RiskManager:
                 kelly_bet_usd=0.0,
                 raw_kelly_fraction=0.0,
                 adjusted_kelly_fraction=0.0,
+                kelly_confidence_multiplier=round(self._kelly_confidence_multiplier(underlying_volatility), 6),
                 token_price=round(token_price, 4),
                 adjusted_token_price=round(token_price, 4),
                 slippage_cost_pct=0.0,
@@ -616,7 +664,7 @@ class RiskManager:
                 true_prob_pct=round(true_prob_pct, 2),
                 market_prob_pct=round(market_prob_pct, 2),
                 approved=False,
-                available_depth_usd=0.0 if liquidity is None else liquidity.available_depth_usd,
+                available_depth_usd=0.0 if liquidity is None else self._effective_depth_usd(liquidity),
                 fee_cost_pct=0.0,
                 exit_fee_cost_pct=0.0,
                 expected_exit_slippage_pct=0.0,
@@ -638,49 +686,68 @@ class RiskManager:
         gross_ev_pct = _safe_div(gross_ev, token_price, default=0.0) * 100.0
         time_decay = self.continuous_time_decay(seconds_remaining)
         raw_kelly_fraction = self._kelly_fraction(true_probability, token_price)
+        kelly_confidence_multiplier = self._kelly_confidence_multiplier(underlying_volatility)
         effective_exit_fee_rate = max(taker_fee_rate, 0.0) * max(self.config.expected_exit_fee_multiplier, 0.0)
-        adjusted_fraction = raw_kelly_fraction
+        adjusted_fraction = raw_kelly_fraction * kelly_confidence_multiplier
         adjusted_token_price = token_price
         total_slippage_pct = 0.0
         market_impact_pct = 0.0
         expected_exit_slippage_pct = 0.0
         latency_haircut_pct = max(self.config.latency_ev_haircut_pct, 0.0)
         late_lottery = LateLotteryProfile()
+        effective_depth_usd = self._effective_depth_usd(liquidity)
 
         base_pct_cap = self.config.max_trade_pct
         base_max_risk_cap = current_balance * base_pct_cap
         if self.config.max_absolute_bet_usd > 0:
             base_max_risk_cap = min(base_max_risk_cap, self.config.max_absolute_bet_usd)
-        candidate_bet = raw_kelly_fraction * current_balance * self.config.fractional_kelly_dampener * time_decay
+        candidate_bet = (
+            raw_kelly_fraction
+            * kelly_confidence_multiplier
+            * current_balance
+            * self.config.fractional_kelly_dampener
+            * time_decay
+        )
         candidate_bet = min(candidate_bet, base_max_risk_cap)
 
         elite_profile = EliteSetupProfile(
             effective_max_trade_pct=base_pct_cap,
         )
         effective_max_risk_cap = base_max_risk_cap
+        effective_trade_pct_cap = base_pct_cap
+        effective_elite_multiplier = 1.0
 
-        for iteration in range(3):
+        def _size_snapshot(
+            bet_size_usd: float,
+        ) -> tuple[float, float, float, float, float, LateLotteryProfile, EliteSetupProfile, float, float, float, float]:
+            size = max(bet_size_usd, 0.0)
             total_slippage_pct, market_impact_pct = self.estimate_total_slippage_pct(
-                candidate_bet,
+                size,
                 liquidity,
                 token_price=token_price,
                 taker_fee_rate=taker_fee_rate,
             )
-            expected_exit_slippage_pct = max(0.0, total_slippage_pct * max(self.config.expected_exit_slippage_multiplier, 0.0))
+            expected_exit_slippage_pct = max(
+                0.0,
+                total_slippage_pct * max(self.config.expected_exit_slippage_multiplier, 0.0),
+            )
             adjusted_token_price = _clamp(token_price * (1.0 + total_slippage_pct), 0.0001, 0.9999)
-            adjusted_fraction = self._kelly_fraction(true_probability, adjusted_token_price)
-
+            adjusted_fraction = (
+                self._kelly_fraction(true_probability, adjusted_token_price)
+                * kelly_confidence_multiplier
+            )
             late_lottery = self._late_lottery_profile(
                 token_price=adjusted_token_price,
                 true_prob_pct=true_prob_pct,
                 seconds_remaining=seconds_remaining,
-                bet_size_usd=max(candidate_bet, self.config.min_bet_usd),
+                bet_size_usd=max(size, self.config.min_bet_usd),
                 liquidity=liquidity,
                 underlying_volatility=underlying_volatility,
             )
-            total_friction_pct = (total_slippage_pct + expected_exit_slippage_pct + effective_exit_fee_rate) * 100.0
-            depth_reference = max(liquidity.available_depth_usd, self.config.min_bet_usd) if liquidity is not None else self.config.default_depth_usd
-            depth_consumption_pct = (candidate_bet / max(depth_reference, EPSILON)) * 100.0
+            total_friction_pct = (
+                total_slippage_pct + expected_exit_slippage_pct + effective_exit_fee_rate
+            ) * 100.0
+            depth_consumption_pct = (size / max(effective_depth_usd, EPSILON)) * 100.0
             elite_profile = self._elite_setup_profile(
                 ev_pct=gross_ev_pct,
                 edge_pct=true_prob_pct - market_prob_pct,
@@ -707,7 +774,6 @@ class RiskManager:
             elite_boost_cutoff = max(self.config.late_lottery_elite_boost_cutoff_score, EPSILON)
             elite_boost_weight = _clamp(1.0 - (late_lottery.risk_score / elite_boost_cutoff), 0.0, 1.0)
             effective_elite_multiplier = 1.0 + ((elite_profile.size_multiplier - 1.0) * elite_boost_weight)
-
             candidate_multiplier = effective_elite_multiplier * late_lottery.size_multiplier
             recalculated = (
                 adjusted_fraction
@@ -717,20 +783,65 @@ class RiskManager:
                 * candidate_multiplier
             )
             recalculated = min(recalculated, effective_max_risk_cap)
-            if abs(recalculated - candidate_bet) < 0.01 and iteration > 0:
-                candidate_bet = recalculated
-                break
-            candidate_bet = recalculated
+            return (
+                total_slippage_pct,
+                market_impact_pct,
+                expected_exit_slippage_pct,
+                adjusted_token_price,
+                adjusted_fraction,
+                late_lottery,
+                elite_profile,
+                effective_max_risk_cap,
+                effective_trade_pct_cap,
+                effective_elite_multiplier,
+                recalculated,
+            )
 
-        total_slippage_pct, market_impact_pct = self.estimate_total_slippage_pct(
-            candidate_bet,
-            liquidity,
-            token_price=token_price,
-            taker_fee_rate=taker_fee_rate,
-        )
-        expected_exit_slippage_pct = max(0.0, total_slippage_pct * max(self.config.expected_exit_slippage_multiplier, 0.0))
-        adjusted_token_price = _clamp(token_price * (1.0 + total_slippage_pct), 0.0001, 0.9999)
-        adjusted_fraction = self._kelly_fraction(true_probability, adjusted_token_price)
+        if candidate_bet > 0 and base_max_risk_cap > 0:
+            lower = 0.0
+            upper = base_max_risk_cap
+            tolerance = max(self.config.size_solver_tolerance_usd, 0.001)
+            iterations = max(int(self.config.size_solver_max_iterations), 1)
+            for _ in range(iterations):
+                (
+                    total_slippage_pct,
+                    market_impact_pct,
+                    expected_exit_slippage_pct,
+                    adjusted_token_price,
+                    adjusted_fraction,
+                    late_lottery,
+                    elite_profile,
+                    effective_max_risk_cap,
+                    effective_trade_pct_cap,
+                    effective_elite_multiplier,
+                    recalculated,
+                ) = _size_snapshot(candidate_bet)
+                if abs(recalculated - candidate_bet) <= tolerance:
+                    candidate_bet = recalculated
+                    break
+                if recalculated > candidate_bet:
+                    lower = candidate_bet
+                else:
+                    upper = candidate_bet
+                next_candidate = (lower + upper) * 0.5
+                if abs(next_candidate - candidate_bet) <= tolerance:
+                    candidate_bet = next_candidate
+                    break
+                candidate_bet = next_candidate
+
+        (
+            total_slippage_pct,
+            market_impact_pct,
+            expected_exit_slippage_pct,
+            adjusted_token_price,
+            adjusted_fraction,
+            late_lottery,
+            elite_profile,
+            effective_max_risk_cap,
+            effective_trade_pct_cap,
+            effective_elite_multiplier,
+            _recalculated,
+        ) = _size_snapshot(candidate_bet)
         expected_win_proceeds = max(0.0, 1.0 - effective_exit_fee_rate - expected_exit_slippage_pct)
         net_ev = true_probability * (expected_win_proceeds - adjusted_token_price) - (
             (1.0 - true_probability) * adjusted_token_price
@@ -749,24 +860,13 @@ class RiskManager:
         if final_bet < self.config.min_bet_usd:
             final_bet = 0.0
 
-        effective_trade_pct_cap = elite_profile.effective_max_trade_pct
-        if (
-            seconds_remaining <= self.config.late_lottery_window_secs
-            and adjusted_token_price <= self.config.late_lottery_size_cap_token_price
-            and late_lottery.risk_score >= self.config.late_lottery_size_cap_risk_score
-        ):
-            effective_trade_pct_cap = min(effective_trade_pct_cap, self.config.late_lottery_max_trade_pct_cap)
-
-        elite_boost_cutoff = max(self.config.late_lottery_elite_boost_cutoff_score, EPSILON)
-        elite_boost_weight = _clamp(1.0 - (late_lottery.risk_score / elite_boost_cutoff), 0.0, 1.0)
-        effective_elite_multiplier = 1.0 + ((elite_profile.size_multiplier - 1.0) * elite_boost_weight)
-
         return EVComputation(
             ev_pct=round(net_ev_pct_after_haircut, 2),
             ev_pct_gross=round(gross_ev_pct, 2),
             kelly_bet_usd=final_bet,
             raw_kelly_fraction=round(raw_kelly_fraction, 6),
             adjusted_kelly_fraction=round(adjusted_fraction, 6),
+            kelly_confidence_multiplier=round(kelly_confidence_multiplier, 6),
             token_price=round(token_price, 4),
             adjusted_token_price=round(adjusted_token_price, 4),
             slippage_cost_pct=round(total_slippage_pct * 100.0, 2),
@@ -776,10 +876,7 @@ class RiskManager:
             true_prob_pct=round(true_prob_pct, 2),
             market_prob_pct=round(market_prob_pct, 2),
             approved=net_ev_pct_after_haircut > 0.0 and time_decay > 0.0,
-            available_depth_usd=round(
-                self.config.default_depth_usd if liquidity is None else liquidity.available_depth_usd,
-                2,
-            ),
+            available_depth_usd=round(effective_depth_usd, 2),
             fee_cost_pct=round(fee_cost_pct, 3),
             exit_fee_cost_pct=round(exit_fee_cost_pct, 3),
             expected_exit_slippage_pct=round(expected_exit_slippage_pct * 100.0, 3),

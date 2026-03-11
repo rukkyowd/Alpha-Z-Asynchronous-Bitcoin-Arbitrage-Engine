@@ -206,6 +206,7 @@ export interface EngineWsPayload {
   engine_health?: Record<string, unknown>;
   engine_control?: Record<string, unknown>;
   portfolio?: Record<string, unknown>;
+  meta?: Record<string, unknown>;
 }
 
 export interface DashboardQuantSnapshot {
@@ -248,6 +249,7 @@ export interface DashboardLiveData {
     drawdown_guard: DrawdownGuardSnapshot;
   };
   quant: DashboardQuantSnapshot;
+  meta?: Record<string, unknown>;
 }
 
 export const DEFAULT_DASHBOARD_LIVE_DATA: DashboardLiveData = {

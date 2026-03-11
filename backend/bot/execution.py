@@ -16,6 +16,7 @@ from .clob_ws import ClobWebSocketManager, LiveOrderBook
 from .models import (
     ActivePosition,
     Direction,
+    FillInferenceStatus,
     MarketOddsSnapshot,
     PositionStatus,
     TechnicalContext,
@@ -112,18 +113,18 @@ def _finalize_inferred_fill(
     average_price: float,
     *,
     fallback_price: float,
-) -> tuple[float, float, float, str]:
+) -> tuple[float, float, float, FillInferenceStatus]:
     if total_cost <= 0 or total_shares <= 0:
-        return 0.0, 0.0, fallback_price, "UNKNOWN"
+        return 0.0, 0.0, fallback_price, FillInferenceStatus.UNKNOWN
 
     avg_price = average_price
-    status = "INFERRED"
+    status = FillInferenceStatus.INFERRED
     if fallback_price > 0:
         deviation = abs(avg_price - fallback_price) / fallback_price
         if deviation > 0.05:
             avg_price = fallback_price
             total_cost = total_shares * fallback_price
-            status = "UNCERTAIN"
+            status = FillInferenceStatus.UNCERTAIN
     return total_cost, total_shares, avg_price, status
 
 
@@ -131,7 +132,7 @@ def _infer_fill_stats(
     response: dict[str, Any],
     intended_cost_usd: float,
     fallback_price: float,
-) -> tuple[float, float, float, str]:
+) -> tuple[float, float, float, FillInferenceStatus]:
     transactions = response.get("transactions") or []
     if transactions:
         total_cost = 0.0
@@ -181,17 +182,30 @@ def _infer_fill_stats(
         if matched_amount <= (intended_cost_usd / max(fallback_price, 0.01)) * 2.0:
             total_shares = matched_amount
             total_cost = total_shares * fallback_price
-            return total_cost, total_shares, fallback_price, "FALLBACK"
+            return total_cost, total_shares, fallback_price, FillInferenceStatus.FALLBACK
         total_cost = matched_amount
         total_shares = total_cost / fallback_price
-        return total_cost, total_shares, fallback_price, "FALLBACK"
+        return total_cost, total_shares, fallback_price, FillInferenceStatus.FALLBACK
 
     status = str(response.get("status", "")).lower()
     if status == "matched" and fallback_price > 0 and intended_cost_usd > 0:
         total_shares = intended_cost_usd / fallback_price
-        return intended_cost_usd, total_shares, fallback_price, "FALLBACK"
+        return intended_cost_usd, total_shares, fallback_price, FillInferenceStatus.FALLBACK
 
-    return 0.0, 0.0, fallback_price, "UNKNOWN"
+    return 0.0, 0.0, fallback_price, FillInferenceStatus.UNKNOWN
+
+
+def _merge_fill_statuses(*statuses: FillInferenceStatus) -> FillInferenceStatus:
+    status_set = {status for status in statuses}
+    if FillInferenceStatus.UNCERTAIN in status_set:
+        return FillInferenceStatus.UNCERTAIN
+    if FillInferenceStatus.INFERRED in status_set:
+        return FillInferenceStatus.INFERRED
+    if FillInferenceStatus.FALLBACK in status_set:
+        return FillInferenceStatus.FALLBACK
+    if FillInferenceStatus.PAPER in status_set:
+        return FillInferenceStatus.PAPER
+    return FillInferenceStatus.UNKNOWN
 
 
 def _combine_fill_stats(*fills: tuple[float, float]) -> tuple[float, float, float]:
@@ -214,6 +228,11 @@ class ExecutionConfig:
     live_require_clob_liquidity: bool = True
     live_tiny_amm_fallback_max_bet_usd: float = 2.0
     live_tiny_amm_fallback_max_spread_pct: float = 0.015
+    live_tiny_amm_fallback_depth_usd: float = 0.0
+    live_tiny_amm_fallback_min_depth_fraction: float = 0.10
+    live_tiny_amm_fallback_max_market_impact_pct: float = 0.02
+    live_tiny_amm_fallback_max_total_slippage_pct: float = 0.03
+    live_tiny_amm_fallback_depth_confidence: float = 0.25
     live_clob_recovery_wait_secs: float = 12.0
     live_clob_recovery_poll_secs: float = 1.0
     live_entry_slippage_cents: float = 0.01
@@ -226,6 +245,8 @@ class ExecutionConfig:
     paper_sim_estimated_depth_usd: float = 1000.0
     paper_sim_fallback_spread_pct: float = 0.01
     paper_sim_scale_haircut: float = 0.95
+    paper_sim_depth_confidence: float = 0.75
+    market_params_cache_ttl_secs: float = 300.0
     order_submit_timeout_secs: float = 4.0
     min_live_fill_shares: float = 0.01
     exit_floor_first: float = 0.98
@@ -257,6 +278,7 @@ class LiquidityCheckResult:
     expected_slippage_pct: float
     market_impact_pct: float
     levels: int
+    depth_confidence: float = 1.0
     allow_tiny_amm_fallback: bool = False
 
     def as_profile(self) -> LiquidityProfile:
@@ -266,6 +288,7 @@ class LiquidityCheckResult:
             best_bid=self.best_bid,
             best_ask=self.best_ask,
             levels=self.levels,
+            depth_confidence=self.depth_confidence,
         )
 
 
@@ -284,7 +307,7 @@ class FillResult:
 
 
 class ClobExecutionEngine:
-    __slots__ = ("client", "config", "risk_manager", "clob_ws")
+    __slots__ = ("client", "config", "risk_manager", "clob_ws", "_market_params_cache")
 
     def __init__(
         self,
@@ -298,6 +321,7 @@ class ClobExecutionEngine:
         self.config = config or ExecutionConfig()
         self.risk_manager = risk_manager or RiskManager()
         self.clob_ws = clob_ws
+        self._market_params_cache: dict[str, tuple[float, tuple[str, bool, int]]] = {}
 
     def _paper_sim_liquidity(
         self,
@@ -310,7 +334,11 @@ class ClobExecutionEngine:
         depth = max(bet_size_usd * self.config.paper_sim_scale_haircut, self.config.paper_sim_estimated_depth_usd)
         slippage, impact = self.risk_manager.estimate_total_slippage_pct(
             bet_size_usd,
-            LiquidityProfile(available_depth_usd=depth, estimated_spread_pct=spread),
+            LiquidityProfile(
+                available_depth_usd=depth,
+                estimated_spread_pct=spread,
+                depth_confidence=self.config.paper_sim_depth_confidence,
+            ),
             token_price=expected_price,
         )
         return LiquidityCheckResult(
@@ -325,6 +353,121 @@ class ClobExecutionEngine:
             expected_slippage_pct=slippage,
             market_impact_pct=impact,
             levels=1,
+            depth_confidence=self.config.paper_sim_depth_confidence,
+        )
+
+    def _build_tiny_amm_fallback_result(
+        self,
+        *,
+        token_id: str,
+        bet_size_usd: float,
+        expected_price: float,
+        odds: MarketOddsSnapshot | None,
+        reason: str,
+        best_bid: float | None = None,
+        best_ask: float | None = None,
+    ) -> LiquidityCheckResult:
+        if odds is None:
+            return LiquidityCheckResult(
+                ok=False,
+                mode="AMM_TINY_LIVE_FALLBACK",
+                reason=f"{reason}; odds context unavailable",
+                entry_price=expected_price,
+                best_bid=best_bid,
+                best_ask=best_ask,
+                spread_pct=1.0,
+                available_depth_usd=0.0,
+                expected_slippage_pct=1.0,
+                market_impact_pct=1.0,
+                levels=0,
+                depth_confidence=0.0,
+            )
+
+        if token_id == odds.up_token_id:
+            direction = Direction.UP
+        elif token_id == odds.down_token_id:
+            direction = Direction.DOWN
+        else:
+            return LiquidityCheckResult(
+                ok=False,
+                mode="AMM_TINY_LIVE_FALLBACK",
+                reason=f"{reason}; token direction could not be resolved",
+                entry_price=expected_price,
+                best_bid=best_bid,
+                best_ask=best_ask,
+                spread_pct=1.0,
+                available_depth_usd=0.0,
+                expected_slippage_pct=1.0,
+                market_impact_pct=1.0,
+                levels=0,
+                depth_confidence=0.0,
+            )
+
+        if self.config.live_tiny_amm_fallback_depth_usd <= 0:
+            return LiquidityCheckResult(
+                ok=False,
+                mode="AMM_TINY_LIVE_FALLBACK",
+                reason=f"{reason}; fallback depth budget is disabled",
+                entry_price=expected_price,
+                best_bid=best_bid,
+                best_ask=best_ask,
+                spread_pct=1.0,
+                available_depth_usd=0.0,
+                expected_slippage_pct=1.0,
+                market_impact_pct=1.0,
+                levels=0,
+                depth_confidence=0.0,
+            )
+
+        public_prob = odds.public_prob_pct(direction) / 100.0
+        if public_prob <= 0.0 or public_prob >= 1.0:
+            public_prob = odds.entry_prob_pct(direction) / 100.0
+        public_prob = _clamp(public_prob, 0.01, 0.99)
+        fallback_entry_price = max(expected_price, public_prob)
+        fallback_spread = abs(public_prob - expected_price)
+        depth_fraction = max(
+            public_prob * (1.0 - public_prob),
+            self.config.live_tiny_amm_fallback_min_depth_fraction,
+        )
+        synthetic_depth = self.config.live_tiny_amm_fallback_depth_usd * depth_fraction
+        profile = LiquidityProfile(
+            available_depth_usd=synthetic_depth,
+            estimated_spread_pct=fallback_spread,
+            best_bid=best_bid,
+            best_ask=best_ask,
+            levels=0,
+            depth_confidence=self.config.live_tiny_amm_fallback_depth_confidence,
+        )
+        expected_slippage_pct, market_impact_pct = self.risk_manager.estimate_total_slippage_pct(
+            bet_size_usd,
+            profile,
+            token_price=fallback_entry_price,
+        )
+        allow = (
+            synthetic_depth > 0
+            and fallback_spread <= self.config.live_tiny_amm_fallback_max_spread_pct
+            and market_impact_pct <= self.config.live_tiny_amm_fallback_max_market_impact_pct
+            and expected_slippage_pct <= self.config.live_tiny_amm_fallback_max_total_slippage_pct
+        )
+        detail = (
+            f"{reason}; synthetic depth ${synthetic_depth:.2f}, "
+            f"spread {fallback_spread * 100.0:.2f}c, "
+            f"impact {market_impact_pct * 100.0:.2f}%"
+        )
+        return LiquidityCheckResult(
+            ok=allow,
+            mode="AMM_TINY_LIVE_FALLBACK",
+            reason=detail,
+            entry_price=fallback_entry_price,
+            best_bid=best_bid,
+            best_ask=best_ask,
+            spread_pct=fallback_spread,
+            available_depth_usd=synthetic_depth,
+            expected_slippage_pct=expected_slippage_pct,
+            market_impact_pct=market_impact_pct,
+            levels=0,
+            depth_confidence=self.config.live_tiny_amm_fallback_depth_confidence,
+            allow_tiny_amm_fallback=allow,
         )
 
     # ───────────────────────────────────────────────────────────────────────
@@ -428,19 +571,36 @@ class ClobExecutionEngine:
         if self.client is None:
             return tick_size, neg_risk, fee_rate_bps
 
-        try:
-            tick_size = str(await asyncio.to_thread(self.client.get_tick_size, token_id))
-        except Exception as exc:
-            log.debug("[MARKET PARAMS] Tick size fetch failed for %s: %s", token_id, exc)
-        try:
-            neg_risk = bool(await asyncio.to_thread(self.client.get_neg_risk, token_id))
-        except Exception as exc:
-            log.debug("[MARKET PARAMS] Neg-risk fetch failed for %s: %s", token_id, exc)
-        try:
-            fee_rate_bps = int(await asyncio.to_thread(self.client.get_fee_rate_bps, token_id))
-        except Exception as exc:
-            log.debug("[MARKET PARAMS] Fee rate fetch failed for %s: %s", token_id, exc)
-        return tick_size, neg_risk, fee_rate_bps
+        now = time.monotonic()
+        cached = self._market_params_cache.get(token_id)
+        if cached is not None and cached[0] > now:
+            return cached[1]
+
+        tick_result, neg_result, fee_result = await asyncio.gather(
+            asyncio.to_thread(self.client.get_tick_size, token_id),
+            asyncio.to_thread(self.client.get_neg_risk, token_id),
+            asyncio.to_thread(self.client.get_fee_rate_bps, token_id),
+            return_exceptions=True,
+        )
+        if isinstance(tick_result, Exception):
+            log.debug("[MARKET PARAMS] Tick size fetch failed for %s: %s", token_id, tick_result)
+        else:
+            tick_size = str(tick_result)
+        if isinstance(neg_result, Exception):
+            log.debug("[MARKET PARAMS] Neg-risk fetch failed for %s: %s", token_id, neg_result)
+        else:
+            neg_risk = bool(neg_result)
+        if isinstance(fee_result, Exception):
+            log.debug("[MARKET PARAMS] Fee rate fetch failed for %s: %s", token_id, fee_result)
+        else:
+            fee_rate_bps = int(fee_result)
+
+        resolved = (tick_size, neg_risk, fee_rate_bps)
+        ttl = max(self.config.market_params_cache_ttl_secs, 0.0)
+        if ttl > 0:
+            self._market_params_cache[token_id] = (now + ttl, resolved)
+        return resolved
+
     async def check_liquidity_and_spread(
         self,
         token_id: str,
@@ -478,6 +638,7 @@ class ClobExecutionEngine:
                 expected_slippage_pct=1.0,
                 market_impact_pct=1.0,
                 levels=0,
+                depth_confidence=0.0,
             )
 
         # --- WS-first book fetch: zero-latency if available, REST fallback ---
@@ -512,25 +673,12 @@ class ClobExecutionEngine:
                         reason=f"Paper simulation liquidity (CLOB unavailable: {exc})",
                     )
                 if allow_tiny_amm_fallback and bet_size_usd <= self.config.live_tiny_amm_fallback_max_bet_usd:
-                    fallback_spread = 0.0
-                    if odds is not None:
-                        direction = Direction.UP if token_id == odds.up_token_id else Direction.DOWN
-                        public_prob = odds.entry_prob_pct(direction) / 100.0
-                        fallback_spread = abs(public_prob - expected_price)
-                    allow = fallback_spread <= self.config.live_tiny_amm_fallback_max_spread_pct
-                    return LiquidityCheckResult(
-                        ok=allow,
-                        mode="AMM_TINY_LIVE_FALLBACK",
+                    return self._build_tiny_amm_fallback_result(
+                        token_id=token_id,
+                        bet_size_usd=bet_size_usd,
+                        expected_price=expected_price,
+                        odds=odds,
                         reason=f"CLOB unavailable: {exc}",
-                        entry_price=expected_price,
-                        best_bid=None,
-                        best_ask=None,
-                        spread_pct=fallback_spread,
-                        available_depth_usd=0.0,
-                        expected_slippage_pct=fallback_spread,
-                        market_impact_pct=0.0,
-                        levels=0,
-                        allow_tiny_amm_fallback=allow,
                     )
                 return LiquidityCheckResult(
                     ok=False,
@@ -544,6 +692,7 @@ class ClobExecutionEngine:
                     expected_slippage_pct=1.0,
                     market_impact_pct=1.0,
                     levels=0,
+                    depth_confidence=0.0,
                 )
 
             bid_levels = _extract_levels(getattr(book, "bids", None), reverse=True)
@@ -559,19 +708,14 @@ class ClobExecutionEngine:
                     reason="Paper simulation liquidity (CLOB stub quotes)",
                 )
             if allow_tiny_amm_fallback and bet_size_usd <= self.config.live_tiny_amm_fallback_max_bet_usd:
-                return LiquidityCheckResult(
-                    ok=True,
-                    mode="AMM_TINY_LIVE_FALLBACK",
+                return self._build_tiny_amm_fallback_result(
+                    token_id=token_id,
+                    bet_size_usd=bet_size_usd,
+                    expected_price=expected_price,
+                    odds=odds,
                     reason="CLOB shows stub quotes",
-                    entry_price=expected_price,
                     best_bid=best_bid,
                     best_ask=best_ask,
-                    spread_pct=0.0,
-                    available_depth_usd=0.0,
-                    expected_slippage_pct=0.0,
-                    market_impact_pct=0.0,
-                    levels=0,
-                    allow_tiny_amm_fallback=True,
                 )
             return LiquidityCheckResult(
                 ok=False,
@@ -585,6 +729,7 @@ class ClobExecutionEngine:
                 expected_slippage_pct=1.0,
                 market_impact_pct=1.0,
                 levels=0,
+                depth_confidence=1.0,
             )
 
         requested_notional_usd = max(bet_size_usd, 0.0)
@@ -602,6 +747,7 @@ class ClobExecutionEngine:
                     expected_slippage_pct=1.0,
                     market_impact_pct=1.0,
                     levels=0,
+                    depth_confidence=1.0,
                 )
             depth_usd = sum(price * size for price, size in ask_levels)
             _, filled_shares, avg_price = _simulate_buy_fill(ask_levels, bet_size_usd)
@@ -621,6 +767,7 @@ class ClobExecutionEngine:
                     expected_slippage_pct=1.0,
                     market_impact_pct=1.0,
                     levels=0,
+                    depth_confidence=1.0,
                 )
             effective_shares_to_sell = max(
                 shares_to_sell if shares_to_sell is not None else (bet_size_usd / max(expected_price, 0.01)),
@@ -638,6 +785,7 @@ class ClobExecutionEngine:
             best_bid=best_bid,
             best_ask=best_ask,
             levels=max(len(bid_levels), len(ask_levels)),
+            depth_confidence=1.0,
         )
         expected_slippage_pct, market_impact_pct = self.risk_manager.estimate_total_slippage_pct(
             requested_notional_usd,
@@ -658,6 +806,7 @@ class ClobExecutionEngine:
                 expected_slippage_pct=expected_slippage_pct,
                 market_impact_pct=market_impact_pct,
                 levels=profile.levels,
+                depth_confidence=1.0,
             )
         if spread_pct > self.config.max_spread_pct:
             return LiquidityCheckResult(
@@ -672,6 +821,7 @@ class ClobExecutionEngine:
                 expected_slippage_pct=expected_slippage_pct,
                 market_impact_pct=market_impact_pct,
                 levels=profile.levels,
+                depth_confidence=1.0,
             )
 
         return LiquidityCheckResult(
@@ -686,6 +836,7 @@ class ClobExecutionEngine:
             expected_slippage_pct=expected_slippage_pct,
             market_impact_pct=market_impact_pct,
             levels=profile.levels,
+            depth_confidence=1.0,
         )
 
     async def wait_for_live_clob_recovery(
@@ -709,6 +860,7 @@ class ClobExecutionEngine:
             expected_slippage_pct=1.0,
             market_impact_pct=1.0,
             levels=0,
+            depth_confidence=0.0,
         )
 
         while time.monotonic() < deadline:
@@ -836,7 +988,7 @@ class ClobExecutionEngine:
         risk_snapshot: PositionRiskSnapshot,
         liquidity: LiquidityCheckResult,
         order_type: str,
-        fill_status: str,
+        fill_status: FillInferenceStatus,
     ) -> ActivePosition:
         return ActivePosition(
             slug=signal.slug,
@@ -864,7 +1016,12 @@ class ClobExecutionEngine:
             tp_peak_delta=0.0,
             tp_lock_floor_delta=0.0,
             signals=signal.reasons,
-            notes=(f"liq_mode={liquidity.mode}", f"entry_order_type={order_type}", f"fill_status={fill_status}", liquidity.reason),
+            notes=(
+                f"liq_mode={liquidity.mode}",
+                f"entry_order_type={order_type}",
+                f"fill_status={fill_status.value}",
+                liquidity.reason,
+            ),
             ml_features={
                 "filled_cost_usd": round(fill_cost_usd, 6),
                 "filled_shares": round(fill_shares, 6),
@@ -1120,7 +1277,7 @@ class ClobExecutionEngine:
                 risk_snapshot=risk_snapshot,
                 liquidity=liquidity,
                 order_type="PAPER",
-                fill_status="PAPER",
+                fill_status=FillInferenceStatus.PAPER,
             )
             await state.upsert_position(position)
             await state.update_runtime_counters(trades_this_hour=state.trades_this_hour + 1)
@@ -1161,7 +1318,7 @@ class ClobExecutionEngine:
         maker_fill_cost_usd = 0.0
         maker_fill_shares = 0.0
         maker_fill_average_price = 0.0
-        maker_fill_status = "UNKNOWN"
+        maker_fill_status = FillInferenceStatus.UNKNOWN
         maker_status_text = ""
 
         def _capture_maker_fill(candidate_response: dict[str, Any] | None, fallback_price: float) -> None:
@@ -1387,7 +1544,7 @@ class ClobExecutionEngine:
         taker_fill_cost_usd = 0.0
         taker_fill_shares = 0.0
         taker_average_price = 0.0
-        taker_fill_status = "UNKNOWN"
+        taker_fill_status = FillInferenceStatus.UNKNOWN
         if taker_attempted:
             taker_fill_cost_usd, taker_fill_shares, taker_average_price, taker_fill_status = _infer_fill_stats(
                 order_response,
@@ -1408,18 +1565,13 @@ class ClobExecutionEngine:
             fill_inference_status = maker_fill_status
 
         if maker_fill_cost_usd > 0 and taker_fill_cost_usd > 0:
-            if "UNCERTAIN" in (maker_fill_status, taker_fill_status):
-                fill_inference_status = "UNCERTAIN"
-            elif "INFERRED" in (maker_fill_status, taker_fill_status):
-                fill_inference_status = "INFERRED"
-            elif "FALLBACK" in (maker_fill_status, taker_fill_status):
-                fill_inference_status = "FALLBACK"
+            fill_inference_status = _merge_fill_statuses(maker_fill_status, taker_fill_status)
 
         if fill_shares > 0 and average_price <= 0:
             average_price = maker_fill_average_price or taker_average_price or limit_price
 
-        if fill_inference_status == "UNCERTAIN":
-            status = "UNCERTAIN"
+        if fill_inference_status == FillInferenceStatus.UNCERTAIN:
+            status = FillInferenceStatus.UNCERTAIN.value
         if fill_shares < self.config.min_live_fill_shares or fill_cost_usd <= 0:
             await state.record_execution_failure(
                 signal.slug,
@@ -1544,8 +1696,8 @@ class ClobExecutionEngine:
                     floor_price,
                 )
                 exit_status = str((response or {}).get("status", "matched"))
-                if fill_inference_status == "UNCERTAIN":
-                    exit_status = "UNCERTAIN"
+                if fill_inference_status == FillInferenceStatus.UNCERTAIN:
+                    exit_status = FillInferenceStatus.UNCERTAIN.value
                 if sold_shares > 0:
                     fraction = min(sold_shares / shares_owned, 1.0)
                     realized_cost = position.bet_size_usd * fraction

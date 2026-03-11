@@ -61,7 +61,7 @@ ML_CSV_PATH = BASE_DIR / "ai_training_data.csv"
 TRADING_LOG_PATH = BASE_DIR / "trading_log.txt"
 ET_TZ = ZoneInfo("America/New_York")
 
-WS_PUSH_INTERVAL_SECS = 0.35
+WS_PUSH_INTERVAL_SECS = 0.05
 WS_PORTFOLIO_PUSH_INTERVAL_SECS = 2.0
 METRICS_CACHE_TTL_SECS = 2.0
 BALANCE_REFRESH_SECS = 15.0
@@ -2562,6 +2562,8 @@ async def build_live_payload(runtime: EngineServices) -> dict[str, Any]:
             "seconds_remaining": round(latest_odds.seconds_remaining, 2) if latest_odds is not None else 0.0,
             "balance": round(current_balance, 2),
             "regime": latest_context.market_regime.value if latest_context is not None else MarketRegime.UNKNOWN.value,
+            "strike_price": latest_odds.strike_price if latest_odds is not None else (latest_context.strike_price if latest_context is not None else 0.0),
+            "market_end_iso": latest_odds.market_end_time.isoformat() if latest_odds is not None and latest_odds.market_end_time is not None else None,
         },
     }
     return sanitize_data(payload)
