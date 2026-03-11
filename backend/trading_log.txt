@@ -673,3 +673,774 @@
 2026-03-11 02:11:13,236 [WARNING] [WS] /ws/live send timed out; closing slow client.
 2026-03-11 02:11:17,820 [INFO] [SKIP] bitcoin-up-or-down-march-11-1am-et: Score 1 requires EV >= 15.00% (got 2.35%)
 2026-03-11 02:11:19,332 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 11:35:57,619 [INFO] Elite Quant Engine v2 Initialized. Monitoring 1h WebSocket...
+2026-03-11 11:35:57,626 [INFO] [INIT] Simulated balance initialized: $4973.84 (base: $5000.0 + historical: $-26.16)
+2026-03-11 11:35:57,626 [INFO] [INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.
+2026-03-11 11:36:00,374 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-11-10am-et | Prefix: bitcoin-up-or-down-march-11-10am
+2026-03-11 11:36:00,559 [INFO] [SYSTEM] Loaded 120 candles. VWAP=69,852.16
+2026-03-11 11:36:00,875 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-11-10am-et | matched_slug=bitcoin-up-or-down-march-11-10am-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=46068022887404427160418735952669615990074881942011860833081496193735601903559 | down_token=88159133815077594100616414829974600522263240443051724001878879071919918124640
+2026-03-11 11:36:00,875 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-11-10am-et
+2026-03-11 11:36:00,876 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-11 11:36:01,456 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-11 11:36:01,457 [INFO] [SYSTEM] CLOB WebSocket book manager started in paper shadow mode (heartbeat disabled).
+2026-03-11 11:36:01,783 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: EMA Squeeze (spread 0.000%)
+2026-03-11 11:36:01,912 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-11 11:36:09,672 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Entry premium 1.8c > 1.0c max
+2026-03-11 11:36:17,839 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Entry premium 1.9c > 1.0c max
+2026-03-11 11:36:34,172 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Entry premium 1.9c > 1.0c max
+2026-03-11 11:36:42,589 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Entry premium 1.8c > 1.0c max
+2026-03-11 11:36:58,790 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Entry premium 1.9c > 1.0c max
+2026-03-11 11:37:20,017 [INFO] Elite Quant Engine v2 Initialized. Monitoring 1h WebSocket...
+2026-03-11 11:37:20,031 [INFO] [INIT] Simulated balance initialized: $5000.00 (base: $5000.0 + historical: $0.00)
+2026-03-11 11:37:20,031 [INFO] [INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.
+2026-03-11 11:37:22,118 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-11-10am-et | Prefix: bitcoin-up-or-down-march-11-10am
+2026-03-11 11:37:22,302 [INFO] [SYSTEM] Loaded 120 candles. VWAP=69,857.80
+2026-03-11 11:37:22,603 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-11-10am-et | matched_slug=bitcoin-up-or-down-march-11-10am-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=46068022887404427160418735952669615990074881942011860833081496193735601903559 | down_token=88159133815077594100616414829974600522263240443051724001878879071919918124640
+2026-03-11 11:37:22,603 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-11-10am-et
+2026-03-11 11:37:22,603 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-11 11:37:22,867 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-11 11:37:22,867 [INFO] [SYSTEM] CLOB WebSocket book manager started in paper shadow mode (heartbeat disabled).
+2026-03-11 11:37:23,251 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV 0.16% below AI trigger (1.00%)
+2026-03-11 11:37:23,252 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-11 11:37:31,549 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: AI vetoed borderline signal
+2026-03-11 11:37:39,511 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -0.03% <= 0 after slippage
+2026-03-11 11:37:47,970 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Entry premium 1.9c > 1.0c max
+2026-03-11 11:37:55,970 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -0.98% <= 0 after slippage
+2026-03-11 11:38:04,321 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -1.03% <= 0 after slippage
+2026-03-11 11:38:20,924 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:39:10,970 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:39:19,317 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -1.05% <= 0 after slippage
+2026-03-11 11:39:27,618 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -1.07% <= 0 after slippage
+2026-03-11 11:39:35,892 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -0.04% <= 0 after slippage
+2026-03-11 11:39:44,192 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -0.08% <= 0 after slippage
+2026-03-11 11:40:00,657 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -0.12% <= 0 after slippage
+2026-03-11 11:40:08,971 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -0.16% <= 0 after slippage
+2026-03-11 11:40:17,324 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -1.03% <= 0 after slippage
+2026-03-11 11:40:25,631 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Entry premium 1.2c > 1.0c max
+2026-03-11 11:40:34,039 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Entry premium 1.3c > 1.0c max
+2026-03-11 11:40:42,325 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -0.05% <= 0 after slippage
+2026-03-11 11:40:50,660 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -1.02% <= 0 after slippage
+2026-03-11 11:40:59,023 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -0.59% <= 0 after slippage
+2026-03-11 11:41:07,369 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Authoritative EV -0.36% <= 0 after SDK fee recheck
+2026-03-11 11:41:15,674 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -0.15% <= 0 after slippage
+2026-03-11 11:41:23,810 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -0.64% <= 0 after slippage
+2026-03-11 11:41:32,204 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -3.59% <= 0 after slippage
+2026-03-11 11:41:40,491 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -4.21% <= 0 after slippage
+2026-03-11 11:41:48,831 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -4.11% <= 0 after slippage
+2026-03-11 11:41:57,072 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -3.19% <= 0 after slippage
+2026-03-11 11:42:05,421 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -1.48% <= 0 after slippage
+2026-03-11 11:42:13,440 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -1.99% <= 0 after slippage
+2026-03-11 11:42:21,498 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -1.55% <= 0 after slippage
+2026-03-11 11:42:29,792 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -1.27% <= 0 after slippage
+2026-03-11 11:42:37,905 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Score 2 requires EV >= 6.00% (got 2.95%)
+2026-03-11 11:42:46,216 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -1.47% <= 0 after slippage
+2026-03-11 11:42:54,578 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -1.67% <= 0 after slippage
+2026-03-11 11:43:02,967 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:43:11,239 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -1.95% <= 0 after slippage
+2026-03-11 11:43:19,690 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -3.80% <= 0 after slippage
+2026-03-11 11:43:27,605 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:44:16,982 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:45:06,594 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:45:56,308 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:46:46,372 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:47:19,486 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -1.10% <= 0 after slippage
+2026-03-11 11:47:27,781 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:47:36,327 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -0.87% <= 0 after slippage
+2026-03-11 11:47:44,976 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:48:18,080 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -1.37% <= 0 after slippage
+2026-03-11 11:48:26,419 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -2.43% <= 0 after slippage
+2026-03-11 11:48:34,804 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -2.28% <= 0 after slippage
+2026-03-11 11:48:43,211 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Net EV -2.92% <= 0 after slippage
+2026-03-11 11:48:51,479 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:49:40,547 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:50:30,240 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:51:19,606 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:52:08,978 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:52:58,216 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:53:47,063 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:54:35,863 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:55:25,212 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:56:15,140 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:57:05,280 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:57:54,888 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:58:44,590 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Crowd skew too high
+2026-03-11 11:59:33,400 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Too close to expiry (27s < 30.0s)
+2026-03-11 11:59:43,201 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Too close to expiry (17s < 30.0s)
+2026-03-11 11:59:52,598 [INFO] [SKIP] bitcoin-up-or-down-march-11-10am-et: Too close to expiry (8s < 30.0s)
+2026-03-11 12:00:04,842 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-11-11am-et | Prefix: bitcoin-up-or-down-march-11-11am
+2026-03-11 12:00:10,246 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-11-11am-et | matched_slug=bitcoin-up-or-down-march-11-11am-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=105039365949420256766328563213545594477027765117367784796070914223624162557647 | down_token=1221713115391907844867135788457332312131592666770685723917385889721864949742
+2026-03-11 12:00:10,246 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-11-11am-et
+2026-03-11 12:00:10,247 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Too early (3591s > 3540.0s)
+2026-03-11 12:00:10,247 [INFO] [CLOB WS] Reconnecting to apply subscription update.
+2026-03-11 12:00:10,832 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-11 12:00:18,233 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Too early (3582s > 3540.0s)
+2026-03-11 12:00:26,185 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Too early (3574s > 3540.0s)
+2026-03-11 12:00:34,282 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Too early (3566s > 3540.0s)
+2026-03-11 12:00:42,550 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Too early (3558s > 3540.0s)
+2026-03-11 12:00:50,888 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Too early (3550s > 3540.0s)
+2026-03-11 12:00:59,257 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Too early (3540.7s > 3540.0s)
+2026-03-11 12:01:07,723 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Entry premium 1.5c > 1.0c max
+2026-03-11 12:01:23,975 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Entry premium 1.6c > 1.0c max
+2026-03-11 12:01:40,562 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Entry premium 1.6c > 1.0c max
+2026-03-11 12:01:57,242 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Entry premium 1.6c > 1.0c max
+2026-03-11 12:02:14,057 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: AI vetoed borderline signal
+2026-03-11 12:02:21,585 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -5.73% <= 0 after slippage
+2026-03-11 12:02:29,692 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.93% <= 0 after slippage
+2026-03-11 12:02:38,481 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: AI vetoed borderline signal
+2026-03-11 12:02:46,475 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.71%)
+2026-03-11 12:02:54,833 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.78%)
+2026-03-11 12:03:03,177 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.86%)
+2026-03-11 12:03:11,195 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -8.80% <= 0 after slippage
+2026-03-11 12:03:19,596 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -8.81% <= 0 after slippage
+2026-03-11 12:03:27,928 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.10% <= 0 after slippage
+2026-03-11 12:03:36,305 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.93% <= 0 after slippage
+2026-03-11 12:03:44,598 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 7.39%)
+2026-03-11 12:03:52,733 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.59%)
+2026-03-11 12:04:00,996 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.27% <= 0 after slippage
+2026-03-11 12:04:09,106 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -5.98% <= 0 after slippage
+2026-03-11 12:04:17,435 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 4.58%)
+2026-03-11 12:04:25,730 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.78% <= 0 after slippage
+2026-03-11 12:04:34,032 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 4.01%)
+2026-03-11 12:04:42,339 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.89%)
+2026-03-11 12:04:50,624 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.88% <= 0 after slippage
+2026-03-11 12:04:58,913 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.48% <= 0 after slippage
+2026-03-11 12:05:07,544 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: AI vetoed borderline signal
+2026-03-11 12:05:15,095 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.47% <= 0 after slippage
+2026-03-11 12:05:23,323 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 4.71%)
+2026-03-11 12:05:31,587 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.63%)
+2026-03-11 12:05:39,884 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.41%)
+2026-03-11 12:05:48,114 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -8.71% <= 0 after slippage
+2026-03-11 12:05:56,423 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.80% <= 0 after slippage
+2026-03-11 12:06:04,770 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.75%)
+2026-03-11 12:06:13,068 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.47%)
+2026-03-11 12:06:21,369 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.31%)
+2026-03-11 12:06:29,748 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.54% <= 0 after slippage
+2026-03-11 12:06:38,147 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -6.13% <= 0 after slippage
+2026-03-11 12:06:46,228 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 7.30%)
+2026-03-11 12:06:54,588 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 0.43%)
+2026-03-11 12:07:02,633 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 7.61%)
+2026-03-11 12:07:10,706 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.03%)
+2026-03-11 12:07:18,980 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.80% <= 0 after slippage
+2026-03-11 12:07:27,283 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 6.29%)
+2026-03-11 12:07:35,614 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.40% <= 0 after slippage
+2026-03-11 12:07:43,970 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -7.72% <= 0 after slippage
+2026-03-11 12:07:52,229 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -9.74% <= 0 after slippage
+2026-03-11 12:08:00,410 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 6.76%)
+2026-03-11 12:08:08,558 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -9.74% <= 0 after slippage
+2026-03-11 12:08:16,844 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 5.21%)
+2026-03-11 12:08:23,747 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 12:08:24,957 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.82% <= 0 after slippage
+2026-03-11 12:08:33,162 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.21% <= 0 after slippage
+2026-03-11 12:08:41,529 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 4.66%)
+2026-03-11 12:08:49,874 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.70%)
+2026-03-11 12:08:58,113 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -5.94% <= 0 after slippage
+2026-03-11 12:09:06,423 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.94%)
+2026-03-11 12:09:14,737 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 4.46%)
+2026-03-11 12:09:23,022 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.50%)
+2026-03-11 12:09:31,109 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -5.80% <= 0 after slippage
+2026-03-11 12:09:39,496 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 4.63%)
+2026-03-11 12:09:47,396 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 5.06%)
+2026-03-11 12:09:55,700 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 2.35%)
+2026-03-11 12:10:04,078 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: AI vetoed borderline signal
+2026-03-11 12:10:20,066 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 3.05%)
+2026-03-11 12:10:28,335 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 0.84%)
+2026-03-11 12:10:36,723 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 4.44%)
+2026-03-11 12:10:45,012 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 1.34%)
+2026-03-11 12:10:53,256 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.41% <= 0 after slippage
+2026-03-11 12:11:01,573 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.62%)
+2026-03-11 12:11:09,641 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 4.40%)
+2026-03-11 12:11:17,906 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.07%)
+2026-03-11 12:11:26,142 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 1.02%)
+2026-03-11 12:11:34,475 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.03%)
+2026-03-11 12:11:42,694 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.22% <= 0 after slippage
+2026-03-11 12:11:51,023 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.06%)
+2026-03-11 12:11:59,387 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.50% <= 0 after slippage
+2026-03-11 12:12:07,619 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 4.79%)
+2026-03-11 12:12:15,962 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -5.62% <= 0 after slippage
+2026-03-11 12:12:24,337 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -6.47% <= 0 after slippage
+2026-03-11 12:12:32,694 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.56% <= 0 after slippage
+2026-03-11 12:12:41,042 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -6.05% <= 0 after slippage
+2026-03-11 12:12:49,345 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.70%)
+2026-03-11 12:12:57,588 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 2.72%)
+2026-03-11 12:13:05,765 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 4.62%)
+2026-03-11 12:13:14,046 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.45% <= 0 after slippage
+2026-03-11 12:13:22,336 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.06%)
+2026-03-11 12:13:30,635 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 4.16%)
+2026-03-11 12:13:38,879 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.09% <= 0 after slippage
+2026-03-11 12:13:47,135 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.85% <= 0 after slippage
+2026-03-11 12:13:55,538 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.06% <= 0 after slippage
+2026-03-11 12:14:03,776 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.93% <= 0 after slippage
+2026-03-11 12:14:11,881 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.98% <= 0 after slippage
+2026-03-11 12:14:20,112 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.63%)
+2026-03-11 12:14:28,426 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.99% <= 0 after slippage
+2026-03-11 12:14:36,628 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.41% <= 0 after slippage
+2026-03-11 12:14:44,994 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 0.62%)
+2026-03-11 12:14:53,360 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -5.79% <= 0 after slippage
+2026-03-11 12:15:01,678 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -6.54% <= 0 after slippage
+2026-03-11 12:15:09,941 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 4.91%)
+2026-03-11 12:15:18,479 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 4.51%)
+2026-03-11 12:15:26,505 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 5.54%)
+2026-03-11 12:15:34,761 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.34% <= 0 after slippage
+2026-03-11 12:15:43,293 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.30% <= 0 after slippage
+2026-03-11 12:15:51,209 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.39% <= 0 after slippage
+2026-03-11 12:15:59,585 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.71% <= 0 after slippage
+2026-03-11 12:16:07,823 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.11% <= 0 after slippage
+2026-03-11 12:16:15,955 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.69% <= 0 after slippage
+2026-03-11 12:16:24,217 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -4.23% <= 0 after slippage
+2026-03-11 12:16:32,499 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.61% <= 0 after slippage
+2026-03-11 12:16:40,822 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 4.05%)
+2026-03-11 12:16:49,147 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.09% <= 0 after slippage
+2026-03-11 12:16:57,536 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 6.17%)
+2026-03-11 12:17:05,755 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 5.54%)
+2026-03-11 12:17:13,870 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 4.29%)
+2026-03-11 12:17:22,240 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.69%)
+2026-03-11 12:17:30,519 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 2.06%)
+2026-03-11 12:17:38,843 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.92% <= 0 after slippage
+2026-03-11 12:17:47,179 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.93%)
+2026-03-11 12:17:55,222 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.38% <= 0 after slippage
+2026-03-11 12:18:03,610 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 4.39%)
+2026-03-11 12:18:11,946 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.18% <= 0 after slippage
+2026-03-11 12:18:20,283 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.24%)
+2026-03-11 12:18:28,595 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 4.05%)
+2026-03-11 12:18:36,970 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.44% <= 0 after slippage
+2026-03-11 12:18:45,503 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.52%)
+2026-03-11 12:18:53,379 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -5.36% <= 0 after slippage
+2026-03-11 12:19:01,482 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -4.92% <= 0 after slippage
+2026-03-11 12:19:09,700 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -4.77% <= 0 after slippage
+2026-03-11 12:19:18,028 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -4.86% <= 0 after slippage
+2026-03-11 12:19:26,332 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -4.94% <= 0 after slippage
+2026-03-11 12:19:34,352 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.73% <= 0 after slippage
+2026-03-11 12:19:42,451 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.10% <= 0 after slippage
+2026-03-11 12:19:50,469 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -6.11% <= 0 after slippage
+2026-03-11 12:19:58,854 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.99% <= 0 after slippage
+2026-03-11 12:20:07,199 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.12% <= 0 after slippage
+2026-03-11 12:20:15,621 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.25%)
+2026-03-11 12:20:23,922 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 5.65%)
+2026-03-11 12:20:32,171 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 6.37%)
+2026-03-11 12:20:40,409 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 5.02%)
+2026-03-11 12:20:48,716 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.83% <= 0 after slippage
+2026-03-11 12:20:57,032 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 0.30%)
+2026-03-11 12:21:05,291 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 0.17%)
+2026-03-11 12:21:13,625 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 5.30%)
+2026-03-11 12:21:21,966 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 3.08%)
+2026-03-11 12:21:30,327 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.20%)
+2026-03-11 12:21:38,338 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -6.72% <= 0 after slippage
+2026-03-11 12:21:46,875 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -4.13% <= 0 after slippage
+2026-03-11 12:21:55,637 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: AI vetoed borderline signal
+2026-03-11 12:22:03,142 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.64%)
+2026-03-11 12:22:11,559 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 3.86%)
+2026-03-11 12:22:19,565 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.84% <= 0 after slippage
+2026-03-11 12:22:27,703 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.12% <= 0 after slippage
+2026-03-11 12:22:36,211 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 6.03%)
+2026-03-11 12:22:44,105 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.13%)
+2026-03-11 12:22:52,394 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 0.95%)
+2026-03-11 12:23:00,750 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 0.02%)
+2026-03-11 12:23:08,755 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 0.93%)
+2026-03-11 12:23:17,108 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -4.65% <= 0 after slippage
+2026-03-11 12:23:25,115 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 1.22%)
+2026-03-11 12:23:33,508 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.08%)
+2026-03-11 12:23:41,844 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.27%)
+2026-03-11 12:23:50,396 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.31%)
+2026-03-11 12:23:58,758 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: AI vetoed borderline signal
+2026-03-11 12:24:06,698 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.38% <= 0 after slippage
+2026-03-11 12:24:14,943 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.10% <= 0 after slippage
+2026-03-11 12:24:23,250 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -4.33% <= 0 after slippage
+2026-03-11 12:24:31,295 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.17%)
+2026-03-11 12:24:39,616 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.27%)
+2026-03-11 12:24:48,186 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 0.53%)
+2026-03-11 12:24:56,477 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: AI vetoed borderline signal
+2026-03-11 12:25:04,388 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -5.60% <= 0 after slippage
+2026-03-11 12:25:12,728 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.23%)
+2026-03-11 12:25:21,061 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.97%)
+2026-03-11 12:25:29,580 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: AI vetoed borderline signal
+2026-03-11 12:25:37,244 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 1.88%)
+2026-03-11 12:25:45,285 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 2.10%)
+2026-03-11 12:25:53,644 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 2.24%)
+2026-03-11 12:26:02,011 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.38% <= 0 after slippage
+2026-03-11 12:26:10,346 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 2.88%)
+2026-03-11 12:26:18,573 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 0.26%)
+2026-03-11 12:26:26,872 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.25%)
+2026-03-11 12:26:35,197 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 0.42%)
+2026-03-11 12:26:43,570 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.04%)
+2026-03-11 12:26:51,981 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 4.51%)
+2026-03-11 12:27:00,355 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.66%)
+2026-03-11 12:27:08,371 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.85%)
+2026-03-11 12:27:16,709 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 3.97%)
+2026-03-11 12:27:25,030 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 0.91%)
+2026-03-11 12:27:33,364 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 4.40%)
+2026-03-11 12:27:41,740 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 2.42%)
+2026-03-11 12:27:49,969 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.69% <= 0 after slippage
+2026-03-11 12:27:58,401 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: AI vetoed borderline signal
+2026-03-11 12:28:14,565 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: AI vetoed borderline signal
+2026-03-11 12:28:30,815 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 2.26%)
+2026-03-11 12:28:39,227 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.69% <= 0 after slippage
+2026-03-11 12:28:47,625 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.82%)
+2026-03-11 12:28:56,047 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.35% <= 0 after slippage
+2026-03-11 12:29:04,843 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: AI vetoed borderline signal
+2026-03-11 12:29:12,589 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 3.81%)
+2026-03-11 12:29:20,891 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 5.20%)
+2026-03-11 12:29:29,208 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 1.32%)
+2026-03-11 12:29:37,293 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 0.83%)
+2026-03-11 12:29:45,671 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.13%)
+2026-03-11 12:29:54,027 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.47% <= 0 after slippage
+2026-03-11 12:30:02,332 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 0.49%)
+2026-03-11 12:30:10,704 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 2.65%)
+2026-03-11 12:30:18,921 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 0.16%)
+2026-03-11 12:30:27,241 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -4.66% <= 0 after slippage
+2026-03-11 12:30:35,503 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 0.43%)
+2026-03-11 12:30:43,747 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.17%)
+2026-03-11 12:30:52,029 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 1 requires EV >= 15.00% (got 1.50%)
+2026-03-11 12:30:59,902 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.25% <= 0 after slippage
+2026-03-11 12:31:08,248 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 1.31%)
+2026-03-11 12:31:16,513 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.10% <= 0 after slippage
+2026-03-11 12:31:24,766 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.40% <= 0 after slippage
+2026-03-11 12:31:33,004 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 2.37%)
+2026-03-11 12:31:41,343 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.84% <= 0 after slippage
+2026-03-11 12:31:49,684 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 0.19%)
+2026-03-11 12:31:57,677 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.32% <= 0 after slippage
+2026-03-11 12:32:05,934 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.37% <= 0 after slippage
+2026-03-11 12:32:14,304 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: EMA Squeeze (spread 0.005%)
+2026-03-11 12:32:22,549 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.46% <= 0 after slippage
+2026-03-11 12:32:30,901 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.81% <= 0 after slippage
+2026-03-11 12:32:39,297 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV 0.40% below AI trigger (1.00%)
+2026-03-11 12:32:47,661 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.20% <= 0 after slippage
+2026-03-11 12:32:56,104 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.53% <= 0 after slippage
+2026-03-11 12:33:04,064 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: EMA Squeeze (spread 0.005%)
+2026-03-11 12:33:12,407 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.70% <= 0 after slippage
+2026-03-11 12:33:20,693 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.03% <= 0 after slippage
+2026-03-11 12:33:29,067 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.46% <= 0 after slippage
+2026-03-11 12:33:37,483 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.15% <= 0 after slippage
+2026-03-11 12:33:45,531 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.76% <= 0 after slippage
+2026-03-11 12:33:54,138 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.79% <= 0 after slippage
+2026-03-11 12:34:02,231 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.62% <= 0 after slippage
+2026-03-11 12:34:10,572 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.16% <= 0 after slippage
+2026-03-11 12:34:18,928 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.78% <= 0 after slippage
+2026-03-11 12:34:26,943 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.36% <= 0 after slippage
+2026-03-11 12:34:35,047 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 2.28%)
+2026-03-11 12:34:43,356 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.89% <= 0 after slippage
+2026-03-11 12:34:51,644 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.72% <= 0 after slippage
+2026-03-11 12:34:59,670 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 0.92%)
+2026-03-11 12:35:08,032 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.25% <= 0 after slippage
+2026-03-11 12:35:16,264 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.27% <= 0 after slippage
+2026-03-11 12:35:24,599 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.03% <= 0 after slippage
+2026-03-11 12:35:32,985 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.31% <= 0 after slippage
+2026-03-11 12:35:41,325 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 1.42%)
+2026-03-11 12:35:49,328 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Score 2 requires EV >= 6.00% (got 0.05%)
+2026-03-11 12:35:57,685 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.48% <= 0 after slippage
+2026-03-11 12:36:05,876 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.57% <= 0 after slippage
+2026-03-11 12:36:14,115 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.46% <= 0 after slippage
+2026-03-11 12:36:22,462 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.12% <= 0 after slippage
+2026-03-11 12:36:30,841 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.12% <= 0 after slippage
+2026-03-11 12:36:39,144 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.35% <= 0 after slippage
+2026-03-11 12:36:47,418 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.10% <= 0 after slippage
+2026-03-11 12:36:55,934 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.96% <= 0 after slippage
+2026-03-11 12:37:04,043 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -6.61% <= 0 after slippage
+2026-03-11 12:37:12,511 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.70% <= 0 after slippage
+2026-03-11 12:37:20,756 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.59% <= 0 after slippage
+2026-03-11 12:37:29,594 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: AI vetoed borderline signal
+2026-03-11 12:37:37,103 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.60% <= 0 after slippage
+2026-03-11 12:37:45,511 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -6.45% <= 0 after slippage
+2026-03-11 12:37:53,965 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: AI vetoed borderline signal
+2026-03-11 12:38:01,911 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.73% <= 0 after slippage
+2026-03-11 12:38:10,359 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.47% <= 0 after slippage
+2026-03-11 12:38:18,740 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.40% <= 0 after slippage
+2026-03-11 12:38:27,029 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.43% <= 0 after slippage
+2026-03-11 12:38:35,376 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.89% <= 0 after slippage
+2026-03-11 12:38:43,735 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.86% <= 0 after slippage
+2026-03-11 12:38:52,147 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -0.72% <= 0 after slippage
+2026-03-11 12:39:08,651 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.74% <= 0 after slippage
+2026-03-11 12:39:16,779 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.38% <= 0 after slippage
+2026-03-11 12:39:24,801 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late lottery-profile blocked: risk 0.16, px 0.115, true 13.69%, spread 8.7% of price, depth 0.1% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-11 12:39:32,912 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -1.65% <= 0 after slippage
+2026-03-11 12:39:40,934 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late lottery-profile blocked: risk 0.18, px 0.105, true 13.50%, spread 9.5% of price, depth 0.1% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-11 12:39:49,258 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late high-risk lottery blocked: risk 0.21, px 0.110, true 13.84%, spread 18.1% of price
+2026-03-11 12:39:57,699 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late lottery-profile blocked: risk 0.18, px 0.105, true 14.28%, spread 9.5% of price, depth 0.1% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-11 12:40:05,660 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.45% <= 0 after slippage
+2026-03-11 12:40:13,669 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late lottery-profile blocked: risk 0.15, px 0.126, true 16.43%, spread 8.0% of price, depth 0.1% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-11 12:40:21,878 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.25% <= 0 after slippage
+2026-03-11 12:40:30,158 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late lottery-profile blocked: risk 0.16, px 0.126, true 15.02%, spread 8.0% of price, depth 0.1% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-11 12:40:38,535 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late high-risk lottery blocked: risk 0.19, px 0.105, true 14.93%, spread 9.5% of price
+2026-03-11 12:40:46,829 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late high-risk lottery blocked: risk 0.23, px 0.110, true 14.64%, spread 18.1% of price
+2026-03-11 12:40:55,212 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late high-risk lottery blocked: risk 0.20, px 0.105, true 13.73%, spread 9.5% of price
+2026-03-11 12:41:03,271 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late lottery-profile blocked: risk 0.15, px 0.151, true 18.68%, spread 13.3% of price, depth 0.1% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-11 12:41:11,778 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.73% <= 0 after slippage
+2026-03-11 12:41:20,035 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -4.06% <= 0 after slippage
+2026-03-11 12:41:28,154 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.81% <= 0 after slippage
+2026-03-11 12:41:36,413 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: AI vetoed borderline signal
+2026-03-11 12:41:52,448 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late lottery-profile blocked: risk 0.16, px 0.136, true 18.20%, spread 7.4% of price, depth 0.1% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-11 12:42:00,848 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -5.55% <= 0 after slippage
+2026-03-11 12:42:09,152 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -5.64% <= 0 after slippage
+2026-03-11 12:42:17,526 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.68% <= 0 after slippage
+2026-03-11 12:42:25,896 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -2.73% <= 0 after slippage
+2026-03-11 12:42:34,228 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -5.10% <= 0 after slippage
+2026-03-11 12:42:42,612 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.95% <= 0 after slippage
+2026-03-11 12:42:50,776 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -5.80% <= 0 after slippage
+2026-03-11 12:42:59,316 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late high-risk lottery blocked: risk 0.27, px 0.110, true 16.39%, spread 18.1% of price
+2026-03-11 12:43:07,354 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late high-risk lottery blocked: risk 0.21, px 0.116, true 17.75%, spread 8.7% of price
+2026-03-11 12:43:15,718 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late high-risk lottery blocked: risk 0.24, px 0.105, true 15.69%, spread 9.5% of price
+2026-03-11 12:43:24,045 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -5.04% <= 0 after slippage
+2026-03-11 12:43:32,120 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late high-risk lottery blocked: risk 0.23, px 0.131, true 17.90%, spread 15.3% of price
+2026-03-11 12:43:40,493 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late high-risk lottery blocked: risk 0.23, px 0.131, true 17.43%, spread 15.3% of price
+2026-03-11 12:43:48,785 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -4.29% <= 0 after slippage
+2026-03-11 12:43:57,101 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -4.49% <= 0 after slippage
+2026-03-11 12:44:05,485 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -4.72% <= 0 after slippage
+2026-03-11 12:44:13,845 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -5.69% <= 0 after slippage
+2026-03-11 12:44:22,166 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late high-risk lottery blocked: risk 0.33, px 0.065, true 10.38%, spread 15.3% of price
+2026-03-11 12:44:30,568 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -4.37% <= 0 after slippage
+2026-03-11 12:44:38,895 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late high-risk lottery blocked: risk 0.34, px 0.065, true 8.84%, spread 15.4% of price
+2026-03-11 12:44:47,115 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -4.02% <= 0 after slippage
+2026-03-11 12:44:55,187 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Net EV -3.43% <= 0 after slippage
+2026-03-11 12:45:03,231 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:45:52,569 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:46:01,140 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late high-risk lottery blocked: risk 0.40, px 0.055, true 7.58%, spread 18.1% of price
+2026-03-11 12:46:09,157 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Late high-risk lottery blocked: risk 0.41, px 0.053, true 8.38%, spread 18.8% of price
+2026-03-11 12:46:17,522 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:47:07,493 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:47:55,640 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:48:44,973 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:49:34,111 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:50:23,138 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:51:12,337 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:52:01,722 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:52:51,266 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:53:40,557 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:54:29,558 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:55:18,181 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:56:07,772 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:56:57,090 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:57:46,457 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:58:30,954 [INFO] Elite Quant Engine v2 Initialized. Monitoring 1h WebSocket...
+2026-03-11 12:58:30,956 [INFO] [INIT] Simulated balance initialized: $5000.00 (base: $5000.0 + historical: $0.00)
+2026-03-11 12:58:30,957 [INFO] [INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.
+2026-03-11 12:58:33,573 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-11-11am-et | Prefix: bitcoin-up-or-down-march-11-11am
+2026-03-11 12:58:33,763 [INFO] [SYSTEM] Loaded 120 candles. VWAP=69,914.77
+2026-03-11 12:58:34,082 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-11-11am-et | matched_slug=bitcoin-up-or-down-march-11-11am-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=105039365949420256766328563213545594477027765117367784796070914223624162557647 | down_token=1221713115391907844867135788457332312131592666770685723917385889721864949742
+2026-03-11 12:58:34,082 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-11-11am-et
+2026-03-11 12:58:34,083 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-11 12:58:34,346 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-11 12:58:34,348 [INFO] [SYSTEM] CLOB WebSocket book manager started in paper shadow mode (heartbeat disabled).
+2026-03-11 12:58:34,738 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:58:34,805 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-11 12:59:23,933 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Crowd skew too high
+2026-03-11 12:59:32,006 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Too close to expiry (29s < 30.0s)
+2026-03-11 12:59:40,398 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Too close to expiry (20s < 30.0s)
+2026-03-11 12:59:48,605 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Too close to expiry (12s < 30.0s)
+2026-03-11 12:59:57,024 [INFO] [SKIP] bitcoin-up-or-down-march-11-11am-et: Too close to expiry (3s < 30.0s)
+2026-03-11 13:00:05,020 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-11-12pm-et | Prefix: bitcoin-up-or-down-march-11-12pm
+2026-03-11 13:00:05,540 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-11-12pm-et | matched_slug=bitcoin-up-or-down-march-11-12pm-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=46664492463300959505073111343974970155058243405294174116713283459228535644473 | down_token=86007010233957313036176457534338312645623404990541625216883034711167753173680
+2026-03-11 13:00:05,540 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-11-12pm-et
+2026-03-11 13:00:05,540 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Too early (3595s > 3540.0s)
+2026-03-11 13:00:05,541 [INFO] [CLOB WS] Reconnecting to apply subscription update.
+2026-03-11 13:00:06,090 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-11 13:00:13,334 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Too early (3587s > 3540.0s)
+2026-03-11 13:00:21,277 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Too early (3579s > 3540.0s)
+2026-03-11 13:00:29,687 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Too early (3571s > 3540.0s)
+2026-03-11 13:00:38,041 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Too early (3562s > 3540.0s)
+2026-03-11 13:00:46,462 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Too early (3554s > 3540.0s)
+2026-03-11 13:00:54,725 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Too early (3546s > 3540.0s)
+2026-03-11 13:01:03,021 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -2.21% <= 0 after slippage
+2026-03-11 13:01:11,257 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 9.61%)
+2026-03-11 13:01:19,333 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 10.80%)
+2026-03-11 13:01:27,521 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 1.85%)
+2026-03-11 13:01:35,516 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -3.26% <= 0 after slippage
+2026-03-11 13:01:43,845 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -0.19% <= 0 after slippage
+2026-03-11 13:01:52,478 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 10.17%)
+2026-03-11 13:02:00,506 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -3.03% <= 0 after slippage
+2026-03-11 13:02:08,570 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 9.68%)
+2026-03-11 13:02:16,961 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -0.31% <= 0 after slippage
+2026-03-11 13:02:25,136 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -3.70% <= 0 after slippage
+2026-03-11 13:02:33,159 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -2.85% <= 0 after slippage
+2026-03-11 13:02:41,239 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 6.28%)
+2026-03-11 13:02:49,556 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -5.41% <= 0 after slippage
+2026-03-11 13:02:57,969 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -7.39% <= 0 after slippage
+2026-03-11 13:03:05,989 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -2.95% <= 0 after slippage
+2026-03-11 13:03:14,855 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -7.95% <= 0 after slippage
+2026-03-11 13:03:22,426 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -3.39% <= 0 after slippage
+2026-03-11 13:03:30,460 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 10.60%)
+2026-03-11 13:03:38,864 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 2 requires EV >= 6.00% (got 1.80%)
+2026-03-11 13:03:46,871 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 11.65%)
+2026-03-11 13:03:54,949 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 2.10%)
+2026-03-11 13:04:03,021 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 9.94%)
+2026-03-11 13:04:11,145 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -6.73% <= 0 after slippage
+2026-03-11 13:04:19,500 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 11.94%)
+2026-03-11 13:04:27,886 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 11.64%)
+2026-03-11 13:04:36,255 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 5.44%)
+2026-03-11 13:04:44,600 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 12.28%)
+2026-03-11 13:05:02,240 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: No active market found
+2026-03-11 13:05:04,246 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -1.96% <= 0 after slippage
+2026-03-11 13:05:12,543 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -0.70% <= 0 after slippage
+2026-03-11 13:05:15,451 [WARNING] [KLINE WS] Disconnected: no close frame received or sent. Reconnecting in 1.04s...
+2026-03-11 13:05:20,945 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -2.05% <= 0 after slippage
+2026-03-11 13:05:29,007 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 11.12%)
+2026-03-11 13:05:37,027 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 3.76%)
+2026-03-11 13:05:45,056 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 11.34%)
+2026-03-11 13:05:53,039 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 10.29%)
+2026-03-11 13:06:01,087 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 2 requires EV >= 6.00% (got 0.58%)
+2026-03-11 13:06:09,437 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 2 requires EV >= 6.00% (got 0.81%)
+2026-03-11 13:06:17,754 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -1.14% <= 0 after slippage
+2026-03-11 13:06:25,818 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 10.31%)
+2026-03-11 13:06:33,859 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 9.64%)
+2026-03-11 13:06:41,866 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 5.80%)
+2026-03-11 13:06:50,276 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 1.93%)
+2026-03-11 13:06:57,942 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:06:58,378 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -1.06% <= 0 after slippage
+2026-03-11 13:07:06,626 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -6.01% <= 0 after slippage
+2026-03-11 13:07:14,672 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 11.92%)
+2026-03-11 13:07:23,048 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 9.63%)
+2026-03-11 13:07:31,090 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 10.76%)
+2026-03-11 13:07:39,289 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 2.19%)
+2026-03-11 13:07:47,362 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 4.52%)
+2026-03-11 13:07:55,413 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 3.34%)
+2026-03-11 13:08:03,775 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 2 requires EV >= 6.00% (got 5.56%)
+2026-03-11 13:08:12,202 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 2 requires EV >= 6.00% (got 1.14%)
+2026-03-11 13:08:20,439 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -4.96% <= 0 after slippage
+2026-03-11 13:08:28,720 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 9.78%)
+2026-03-11 13:08:36,909 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 8.99%)
+2026-03-11 13:08:45,215 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 4.87%)
+2026-03-11 13:08:53,612 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 10.10%)
+2026-03-11 13:09:01,911 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 2.26%)
+2026-03-11 13:09:10,286 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 2 requires EV >= 6.00% (got 0.85%)
+2026-03-11 13:09:18,657 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 4.92%)
+2026-03-11 13:09:26,729 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 6.63%)
+2026-03-11 13:09:35,106 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 10.52%)
+2026-03-11 13:09:43,511 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 7.17%)
+2026-03-11 13:09:51,640 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 10.70%)
+2026-03-11 13:09:59,915 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 10.65%)
+2026-03-11 13:10:08,148 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-11 13:10:16,462 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -6.20% <= 0 after slippage
+2026-03-11 13:10:24,865 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 2 requires EV >= 6.00% (got 0.03%)
+2026-03-11 13:10:32,994 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 12.59%)
+2026-03-11 13:10:41,108 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -6.47% <= 0 after slippage
+2026-03-11 13:10:49,272 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 2 requires EV >= 6.00% (got 3.29%)
+2026-03-11 13:10:57,644 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -5.61% <= 0 after slippage
+2026-03-11 13:11:06,039 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -4.35% <= 0 after slippage
+2026-03-11 13:11:14,429 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 5.60%)
+2026-03-11 13:11:22,704 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 4.28%)
+2026-03-11 13:11:30,710 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 9.88%)
+2026-03-11 13:11:38,780 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 10.84%)
+2026-03-11 13:11:47,142 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 10.73%)
+2026-03-11 13:11:55,434 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -2.60% <= 0 after slippage
+2026-03-11 13:12:03,740 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 14.08%)
+2026-03-11 13:12:12,125 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 10.00%)
+2026-03-11 13:12:20,239 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 11.90%)
+2026-03-11 13:12:28,245 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 10.17%)
+2026-03-11 13:12:36,352 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-11 13:12:44,406 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 9.32%)
+2026-03-11 13:12:52,978 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 9.84%)
+2026-03-11 13:13:00,988 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 10.78%)
+2026-03-11 13:13:09,509 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 2 requires EV >= 6.00% (got 2.58%)
+2026-03-11 13:13:17,953 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 6.04%)
+2026-03-11 13:13:26,085 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 13.47%)
+2026-03-11 13:13:34,287 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 2 requires EV >= 6.00% (got 2.51%)
+2026-03-11 13:13:42,786 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 2 requires EV >= 6.00% (got 1.94%)
+2026-03-11 13:13:51,326 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:14:07,839 [INFO] [ENTRY SMART] Spread 3.0c wide, time 2752s remaining — shading entry cap toward bid side @ 0.6400 (vs naive 0.6858, ask 0.6600)
+2026-03-11 13:14:07,840 [INFO] [ENTRY LOCKUP] bitcoin-up-or-down-march-11-12pm-et: capital locked for ~0.8h (threshold 0.8h)
+2026-03-11 13:14:07,840 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.6400 below ask 0.6600; immediate fill not simulated
+2026-03-11 13:14:15,853 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:14:22,457 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:14:31,955 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:14:48,252 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:15:04,263 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:15:12,591 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.9c > 1.0c max
+2026-03-11 13:15:20,962 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:15:37,444 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:15:44,172 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:15:53,727 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:16:06,812 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:16:10,078 [INFO] [ENTRY SMART] Spread 2.0c wide, time 2630s remaining — shading entry cap toward bid side @ 0.6100 (vs naive 0.6409, ask 0.6200)
+2026-03-11 13:16:10,078 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.6100 below ask 0.6200; immediate fill not simulated
+2026-03-11 13:16:18,401 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:16:24,054 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:16:34,825 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:16:35,270 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:16:51,394 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:17:07,551 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:17:13,355 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:17:24,105 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:17:40,488 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:17:56,634 [INFO] [ENTRY SMART] Spread 2.0c wide, time 2523s remaining — shading entry cap toward bid side @ 0.6100 (vs naive 0.6409, ask 0.6200)
+2026-03-11 13:17:56,635 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.6100 below ask 0.6200; immediate fill not simulated
+2026-03-11 13:18:04,680 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:18:20,713 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:18:37,339 [INFO] [ENTRY SMART] Spread 2.0c wide, time 2483s remaining — shading entry cap toward bid side @ 0.6700 (vs naive 0.7007, ask 0.6800)
+2026-03-11 13:18:37,346 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.6700 below ask 0.6800; immediate fill not simulated
+2026-03-11 13:18:37,738 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:18:45,325 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:18:53,655 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.5c > 1.0c max
+2026-03-11 13:19:01,596 [INFO] [ENTRY SMART] Spread 2.0c wide, time 2458s remaining — shading entry cap toward bid side @ 0.7000 (vs naive 0.7303, ask 0.7100)
+2026-03-11 13:19:01,597 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.7000 below ask 0.7100; immediate fill not simulated
+2026-03-11 13:19:09,992 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:19:26,539 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:19:42,653 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:19:59,233 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:20:15,831 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:20:32,268 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:20:40,002 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:20:48,828 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:21:05,237 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:21:08,588 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:21:19,085 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:21:21,344 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.9c > 1.0c max
+2026-03-11 13:21:28,710 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:21:29,401 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:21:36,471 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:21:45,978 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:22:02,389 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:22:18,681 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:22:35,028 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:22:51,301 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:22:59,453 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.5c > 1.0c max
+2026-03-11 13:23:07,594 [INFO] [ENTRY SMART] Spread 2.0c wide, time 2212s remaining — shading entry cap toward bid side @ 0.7900 (vs naive 0.8188, ask 0.8000)
+2026-03-11 13:23:07,595 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.7900 below ask 0.8000; immediate fill not simulated
+2026-03-11 13:23:15,716 [INFO] [ENTRY SMART] Spread 2.0c wide, time 2204s remaining — shading entry cap toward bid side @ 0.7200 (vs naive 0.7505, ask 0.7300)
+2026-03-11 13:23:15,717 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.7200 below ask 0.7300; immediate fill not simulated
+2026-03-11 13:23:23,875 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.5c > 1.0c max
+2026-03-11 13:23:32,028 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.9c > 1.0c max
+2026-03-11 13:23:40,182 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:23:56,739 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:24:13,046 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:24:29,357 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:24:45,708 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:25:02,046 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:25:18,376 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.9c > 1.0c max
+2026-03-11 13:25:26,566 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:25:42,909 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:25:59,380 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:26:15,757 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:26:32,074 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:26:48,399 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.4c > 1.0c max
+2026-03-11 13:27:04,789 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.5c > 1.0c max
+2026-03-11 13:27:21,152 [INFO] [ENTRY SMART] Spread 2.0c wide, time 1959s remaining — shading entry cap toward bid side @ 0.7300 (vs naive 0.7599, ask 0.7400)
+2026-03-11 13:27:21,152 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.7300 below ask 0.7400; immediate fill not simulated
+2026-03-11 13:27:29,315 [INFO] [ENTRY SMART] Spread 4.0c wide, time 1951s remaining — shading entry cap toward bid side @ 0.7300 (vs naive 0.7895, ask 0.7600)
+2026-03-11 13:27:29,315 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.7300 below ask 0.7600; immediate fill not simulated
+2026-03-11 13:27:37,507 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.5c > 1.0c max
+2026-03-11 13:27:53,821 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.5c > 1.0c max
+2026-03-11 13:28:10,168 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.5c > 1.0c max
+2026-03-11 13:28:26,511 [INFO] [ENTRY SMART] Spread 2.0c wide, time 1893s remaining — shading entry cap toward bid side @ 0.7300 (vs naive 0.7598, ask 0.7400)
+2026-03-11 13:28:26,512 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.7300 below ask 0.7400; immediate fill not simulated
+2026-03-11 13:28:34,678 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.5c > 1.0c max
+2026-03-11 13:28:42,838 [INFO] [ENTRY SMART] Spread 2.0c wide, time 1877s remaining — shading entry cap toward bid side @ 0.7200 (vs naive 0.7500, ask 0.7300)
+2026-03-11 13:28:42,839 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.7200 below ask 0.7300; immediate fill not simulated
+2026-03-11 13:28:51,029 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.5c > 1.0c max
+2026-03-11 13:29:07,561 [INFO] [ENTRY SMART] Spread 3.0c wide, time 1852s remaining — shading entry cap toward bid side @ 0.7200 (vs naive 0.7649, ask 0.7400)
+2026-03-11 13:29:07,561 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.7200 below ask 0.7400; immediate fill not simulated
+2026-03-11 13:29:15,747 [INFO] [ENTRY SMART] Spread 2.0c wide, time 1844s remaining — shading entry cap toward bid side @ 0.7200 (vs naive 0.7500, ask 0.7300)
+2026-03-11 13:29:15,748 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.7200 below ask 0.7300; immediate fill not simulated
+2026-03-11 13:29:23,918 [INFO] [ENTRY SMART] Spread 2.0c wide, time 1836s remaining — shading entry cap toward bid side @ 0.7200 (vs naive 0.7501, ask 0.7300)
+2026-03-11 13:29:32,118 [INFO] [ENTRY SMART] Spread 2.0c wide, time 1828s remaining — shading entry cap toward bid side @ 0.7200 (vs naive 0.7501, ask 0.7300)
+2026-03-11 13:29:32,119 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.7200 below ask 0.7300; immediate fill not simulated
+2026-03-11 13:29:40,290 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.5c > 1.0c max
+2026-03-11 13:29:56,680 [INFO] [ENTRY SMART] Spread 2.0c wide, time 1803s remaining — shading entry cap toward bid side @ 0.7400 (vs naive 0.7697, ask 0.7500)
+2026-03-11 13:29:56,682 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.7400 below ask 0.7500; immediate fill not simulated
+2026-03-11 13:30:05,138 [INFO] [ENTRY SMART] Spread 2.0c wide, time 1795s remaining — shading entry cap toward bid side @ 0.7500 (vs naive 0.7798, ask 0.7600)
+2026-03-11 13:30:05,139 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.7500 below ask 0.7600; immediate fill not simulated
+2026-03-11 13:30:13,509 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.5c > 1.0c max
+2026-03-11 13:30:23,690 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:30:29,826 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.5c > 1.0c max
+2026-03-11 13:30:37,265 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:30:45,090 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:30:46,337 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.5c > 1.0c max
+2026-03-11 13:30:54,560 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.6c > 1.0c max
+2026-03-11 13:31:02,885 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.5c > 1.0c max
+2026-03-11 13:31:10,907 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.6c > 1.0c max
+2026-03-11 13:31:27,287 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.6c > 1.0c max
+2026-03-11 13:31:43,407 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.6c > 1.0c max
+2026-03-11 13:31:51,688 [INFO] [ENTRY SMART] Spread 2.0c wide, time 1688s remaining — shading entry cap toward bid side @ 0.8300 (vs naive 0.8597, ask 0.8400)
+2026-03-11 13:31:51,689 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.8300 below ask 0.8400; immediate fill not simulated
+2026-03-11 13:31:59,909 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.7c > 1.0c max
+2026-03-11 13:32:08,914 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.8c > 1.0c max
+2026-03-11 13:32:16,772 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.7c > 1.0c max
+2026-03-11 13:32:24,486 [INFO] [ENTRY SMART] Spread 2.0c wide, time 1656s remaining — shading entry cap toward bid side @ 0.8600 (vs naive 0.8874, ask 0.8700)
+2026-03-11 13:32:24,487 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Paper shadow passive cap 0.8600 below ask 0.8700; immediate fill not simulated
+2026-03-11 13:32:32,512 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.7c > 1.0c max
+2026-03-11 13:32:48,705 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Entry premium 1.7c > 1.0c max
+2026-03-11 13:32:56,777 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -1.18% <= 0 after slippage
+2026-03-11 13:33:05,106 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -0.80% <= 0 after slippage
+2026-03-11 13:33:13,290 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 11.07%)
+2026-03-11 13:33:21,683 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 1.09%)
+2026-03-11 13:33:29,695 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -0.68% <= 0 after slippage
+2026-03-11 13:33:37,730 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 2 requires EV >= 6.00% (got 1.13%)
+2026-03-11 13:33:45,762 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -0.07% <= 0 after slippage
+2026-03-11 13:33:46,679 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:33:54,084 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -2.26% <= 0 after slippage
+2026-03-11 13:34:02,148 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -0.08% <= 0 after slippage
+2026-03-11 13:34:10,284 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -1.22% <= 0 after slippage
+2026-03-11 13:34:18,274 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -2.51% <= 0 after slippage
+2026-03-11 13:34:26,323 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late countertrend blocked: score 1/4 < 4/4 for DOWN against UP trend
+2026-03-11 13:34:42,954 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -1.80% <= 0 after slippage
+2026-03-11 13:34:51,192 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -1.98% <= 0 after slippage
+2026-03-11 13:34:59,560 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -1.43% <= 0 after slippage
+2026-03-11 13:35:07,923 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -2.57% <= 0 after slippage
+2026-03-11 13:35:16,540 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -1.54% <= 0 after slippage
+2026-03-11 13:35:24,419 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 4.59%)
+2026-03-11 13:35:32,783 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 6.69%)
+2026-03-11 13:35:40,810 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late countertrend blocked: score 1/4 < 4/4 for DOWN against UP trend
+2026-03-11 13:35:57,190 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -2.59% <= 0 after slippage
+2026-03-11 13:36:05,518 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -1.67% <= 0 after slippage
+2026-03-11 13:36:13,862 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 9.75%)
+2026-03-11 13:36:22,235 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -1.44% <= 0 after slippage
+2026-03-11 13:36:30,393 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late countertrend blocked: score 1/4 < 4/4 for DOWN against UP trend
+2026-03-11 13:36:44,912 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:36:46,974 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -2.09% <= 0 after slippage
+2026-03-11 13:36:55,286 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late countertrend blocked: score 1/4 < 4/4 for DOWN against UP trend
+2026-03-11 13:37:11,915 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late lottery-profile blocked: risk 0.15, px 0.085, true 12.54%, spread 11.7% of price, depth 0.1% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-11 13:37:20,227 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late countertrend blocked: score 1/4 < 4/4 for DOWN against UP trend
+2026-03-11 13:37:22,095 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:37:28,203 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -2.48% <= 0 after slippage
+2026-03-11 13:37:36,573 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -2.73% <= 0 after slippage
+2026-03-11 13:37:44,832 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -4.26% <= 0 after slippage
+2026-03-11 13:37:52,858 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.18, px 0.065, true 10.36%, spread 15.3% of price
+2026-03-11 13:38:00,877 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -3.06% <= 0 after slippage
+2026-03-11 13:38:08,890 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -4.04% <= 0 after slippage
+2026-03-11 13:38:17,315 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late lottery-profile blocked: risk 0.18, px 0.075, true 10.96%, spread 13.3% of price, depth 0.1% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-11 13:38:25,251 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 11.28%)
+2026-03-11 13:38:33,260 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.18, px 0.075, true 11.94%, spread 13.3% of price
+2026-03-11 13:38:41,490 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.19, px 0.075, true 10.63%, spread 13.3% of price
+2026-03-11 13:38:49,587 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 9.56%)
+2026-03-11 13:38:57,882 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -4.96% <= 0 after slippage
+2026-03-11 13:39:06,067 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.20, px 0.075, true 11.95%, spread 13.3% of price
+2026-03-11 13:39:14,442 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 1 requires EV >= 15.00% (got 10.22%)
+2026-03-11 13:39:22,499 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -4.59% <= 0 after slippage
+2026-03-11 13:39:30,555 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.22, px 0.065, true 10.85%, spread 15.3% of price
+2026-03-11 13:39:38,909 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.21, px 0.075, true 11.70%, spread 13.3% of price
+2026-03-11 13:39:47,001 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.21, px 0.075, true 12.22%, spread 13.3% of price
+2026-03-11 13:39:49,460 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:39:55,183 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.21, px 0.075, true 12.24%, spread 13.3% of price
+2026-03-11 13:40:03,217 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.23, px 0.065, true 11.98%, spread 15.3% of price
+2026-03-11 13:40:11,574 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.20, px 0.085, true 14.18%, spread 11.7% of price
+2026-03-11 13:40:19,578 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.21, px 0.085, true 13.94%, spread 11.7% of price
+2026-03-11 13:40:27,772 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.21, px 0.085, true 14.45%, spread 11.7% of price
+2026-03-11 13:40:36,054 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.21, px 0.085, true 15.23%, spread 11.7% of price
+2026-03-11 13:40:44,181 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.23, px 0.075, true 10.58%, spread 13.3% of price
+2026-03-11 13:40:52,494 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.25, px 0.065, true 9.73%, spread 15.3% of price
+2026-03-11 13:41:00,527 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -4.04% <= 0 after slippage
+2026-03-11 13:41:08,717 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.27, px 0.080, true 12.03%, spread 24.9% of price
+2026-03-11 13:41:16,806 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.24, px 0.075, true 13.19%, spread 13.3% of price
+2026-03-11 13:41:25,273 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -4.15% <= 0 after slippage
+2026-03-11 13:41:33,016 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -7.09% <= 0 after slippage
+2026-03-11 13:41:41,349 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.29, px 0.070, true 12.04%, spread 28.5% of price
+2026-03-11 13:41:49,485 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.29, px 0.070, true 10.11%, spread 28.5% of price
+2026-03-11 13:41:52,205 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:41:57,503 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.29, px 0.070, true 11.20%, spread 28.5% of price
+2026-03-11 13:42:05,578 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.30, px 0.055, true 10.97%, spread 18.1% of price
+2026-03-11 13:42:13,639 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.30, px 0.055, true 12.23%, spread 18.1% of price
+2026-03-11 13:42:21,733 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.28, px 0.065, true 11.13%, spread 15.3% of price
+2026-03-11 13:42:30,322 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.30, px 0.080, true 14.07%, spread 24.9% of price
+2026-03-11 13:42:38,416 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -5.14% <= 0 after slippage
+2026-03-11 13:42:46,431 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.29, px 0.065, true 10.83%, spread 15.3% of price
+2026-03-11 13:42:54,453 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.29, px 0.065, true 11.72%, spread 15.3% of price
+2026-03-11 13:43:02,460 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -4.33% <= 0 after slippage
+2026-03-11 13:43:10,514 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.31, px 0.060, true 11.78%, spread 16.8% of price
+2026-03-11 13:43:18,605 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -5.60% <= 0 after slippage
+2026-03-11 13:43:26,753 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Score 2 requires EV >= 6.00% (got 5.72%)
+2026-03-11 13:43:34,898 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -0.91% <= 0 after slippage
+2026-03-11 13:43:42,926 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.33, px 0.055, true 12.53%, spread 18.0% of price
+2026-03-11 13:43:51,260 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.32, px 0.065, true 10.22%, spread 15.3% of price
+2026-03-11 13:43:59,536 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.35, px 0.055, true 7.62%, spread 18.1% of price
+2026-03-11 13:44:07,898 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Net EV -5.32% <= 0 after slippage
+2026-03-11 13:44:16,315 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Late high-risk lottery blocked: risk 0.35, px 0.055, true 8.82%, spread 18.1% of price
+2026-03-11 13:44:24,748 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Crowd skew too high
+2026-03-11 13:44:31,098 [WARNING] [WS] /ws/live send timed out; closing slow client.
+2026-03-11 13:45:13,575 [INFO] [SKIP] bitcoin-up-or-down-march-11-12pm-et: Crowd skew too high

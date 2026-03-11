@@ -21,8 +21,8 @@ class AIConfig:
     model: str = "llama3.2:3b-instruct-q4_K_M"
     groq_api_key: str | None = None
     groq_model: str = "qwen/qwen3-32b"
-    timeout_total_seconds: float = 2.0
-    decision_budget_seconds: float = 1.5
+    timeout_total_seconds: float = 4.0
+    decision_budget_seconds: float = 3.5
     max_retries: int = 1
     retry_delay_seconds: float = 0.5
     max_calls_per_slug: int = 6
@@ -31,7 +31,7 @@ class AIConfig:
     circuit_breaker_base_cooldown_seconds: float = 30.0
     circuit_breaker_max_cooldown_seconds: float = 300.0
     temperature: float = 0.0
-    max_tokens: int = 12
+    max_tokens: int = 128
 
 
 @dataclass(slots=True, frozen=True)
@@ -112,7 +112,8 @@ class LocalAIAgent:
             "1. Approve only the favored direction or SKIP.\n"
             "2. If evidence is contradictory, output SKIP.\n"
             "3. If volatility or regime implies unstable directionality, prefer SKIP.\n"
-            "4. Do not output explanations.\n\n"
+            "4. Do not output explanations.\n"
+            "5. NO REASONING OR CHAIN OF THOUGHT. DO NOT output <think> tags.\n\n"
             f"OUTPUT FORMAT: FINAL:{favored} or FINAL:SKIP\n"
             "Return exactly one line."
         )
@@ -266,8 +267,9 @@ class LocalAIAgent:
                         body = await asyncio.wait_for(_request_local(attempt_timeout), timeout=attempt_timeout)
                         
                     raw_response = str(body["choices"][0]["message"]["content"]).strip()
+                    clean_response = re.sub(r'<think>.*?(?:</think>|$)', '', raw_response, flags=re.DOTALL).strip()
                     response_ms = (time.perf_counter() - started) * 1000.0
-                    decision = self.parse_decision(raw_response, signal.direction)
+                    decision = self.parse_decision(clean_response or raw_response, signal.direction)
                     transport_error = False
                     last_error = ""
                     break

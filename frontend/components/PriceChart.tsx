@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import { createChart, CandlestickSeries, AreaSeries, LineSeries, ColorType } from "lightweight-charts";
+import { useEffect, useRef } from "react";
+import { createChart, CandlestickSeries, AreaSeries, LineSeries, ColorType, LineType } from "lightweight-charts";
 import type { PriceBar } from "./engine-types";
+import SnakePriceChart from "./SnakePriceChart";
 
 function getChartHeight(): number {
   if (typeof window !== "undefined" && window.innerWidth < 768) {
@@ -44,6 +45,7 @@ type PriceChartProps = {
   candle: Partial<PriceBar> | null;
   history?: Array<Partial<PriceBar>>;
   vwap?: number;
+  targetPrice?: number;
   type?: "candle" | "snake";
 };
 
@@ -51,6 +53,7 @@ export default function PriceChart({
   candle,
   history,
   vwap,
+  targetPrice,
   type = "candle",
 }: PriceChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -90,6 +93,7 @@ export default function PriceChart({
       topColor: 'rgba(245, 158, 11, 0.4)',
       bottomColor: 'rgba(245, 158, 11, 0.0)',
       lineWidth: 2,
+      lineType: LineType.WithSteps,
       priceLineVisible: true,
       lastValueVisible: true,
       crosshairMarkerVisible: true,
@@ -155,13 +159,7 @@ export default function PriceChart({
     const nextCandle = normalizeBar(candle);
     if (!nextCandle) return;
 
-    // Use current timestamp for ticking the snake graph so it moves in real time (up to second precision).
-    const nowSecs = Math.floor(Date.now() / 1000);
-    
-    let areaTime = type === "snake" ? nowSecs : nextCandle.time;
-    if (type === "snake" && areaTime <= lastAreaTimeRef.current) {
-      areaTime = lastAreaTimeRef.current + 1;
-    }
+    const areaTime = nextCandle.time;
     const areaPoint = { time: areaTime as any, value: nextCandle.close };
 
     // Bootstrap with current candle if history has not arrived yet.
@@ -172,13 +170,11 @@ export default function PriceChart({
       isHistoryLoaded.current = true;
     } else {
       candlestickSeriesRef.current.update(nextCandle);
-      if (areaTime >= lastAreaTimeRef.current) {
-        try {
-          areaSeriesRef.current.update(areaPoint);
-          lastAreaTimeRef.current = areaTime;
-        } catch (e) {
-          console.warn("Snake tick overlap, skipped", e);
-        }
+      try {
+        areaSeriesRef.current.update(areaPoint);
+        lastAreaTimeRef.current = areaTime;
+      } catch (e) {
+        console.warn("Snake tick overlap, skipped", e);
       }
     }
 
@@ -192,7 +188,13 @@ export default function PriceChart({
 
   return (
     <div className="relative h-full w-full min-h-[260px] sm:min-h-[350px]">
-      <div ref={chartContainerRef} className="h-full w-full min-h-[260px] sm:min-h-[350px]" />
+      <div
+        ref={chartContainerRef}
+        className={`h-full w-full min-h-[260px] sm:min-h-[350px] transition-opacity duration-300 ${
+          type === "snake" ? "pointer-events-none opacity-0" : "opacity-100"
+        }`}
+      />
+      {type === "snake" ? <SnakePriceChart candle={candle} history={history} vwap={vwap} targetPrice={targetPrice} /> : null}
     </div>
   );
 }

@@ -1695,7 +1695,7 @@ function TerminalView({ liveData, portfolio, setReplayTrade, liveLoading, timeMo
             <SkeletonBox className="h-[350px] w-full" />
           </div>
         ) : chartCandle || (Array.isArray(liveData?.history) && liveData.history.length > 0) ? (
-          <PriceChart candle={chartCandle} history={liveData.history} vwap={liveData.vwap} type={chartType} />
+          <PriceChart candle={chartCandle} history={liveData.history} vwap={liveData.vwap} targetPrice={strikePrice} type={chartType} />
         ) : (
           <div className="flex h-[350px] items-center justify-center rounded-xl border border-dashed border-white/10">
             <div className="section-label">Awaiting stream...</div>

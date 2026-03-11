@@ -47,8 +47,8 @@ class StrategyConfig:
     close_equals_open_up_bias_prob: float = 0.0005
     ema_squeeze_pct: float = 0.00005
     min_score_to_trade: int = 1
-    min_seconds_remaining: float = 30.0
-    max_seconds_for_new_bet: float = 3540.0
+    min_seconds_remaining: float = 15.0
+    max_seconds_for_new_bet: float = 3585.0
     max_crowd_prob_to_call: float = 96.0
     min_ev_pct_to_call_ai: float = 1.0
     ev_ai_bypass_threshold: float = 3.0
