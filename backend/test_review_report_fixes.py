@@ -238,9 +238,32 @@ def test_hard_stop_floor_has_more_breathing_room() -> None:
         now_ts=position.entry_time.timestamp() + 60.0,
     )
     _assert(
-        math.isclose(snapshot.hard_sl_delta, -0.20, abs_tol=1e-9),
-        "Hard stop floor widens to -20.0c for early-hour chop",
+        math.isclose(snapshot.hard_sl_delta, -0.18, abs_tol=1e-9),
+        "Hard stop floor now tightens back to -18.0c for early-hour chop",
         detail=f"hard_sl_delta={snapshot.hard_sl_delta:.4f}",
+    )
+
+
+def test_position_risk_defaults_cut_losers_faster() -> None:
+    config = PositionRiskConfig()
+    _assert(
+        config.underlying_soft_sl_min_confirms == 1,
+        "Soft stop now needs only one underlying confirmation",
+        detail=f"confirms={config.underlying_soft_sl_min_confirms}",
+    )
+    _assert(
+        (config.sl_confirm_breach_early, config.sl_confirm_breach_mid, config.sl_confirm_breach_late) == (4, 3, 2),
+        "Soft stop breach counts are reduced across phases",
+        detail=(
+            f"early={config.sl_confirm_breach_early}, "
+            f"mid={config.sl_confirm_breach_mid}, "
+            f"late={config.sl_confirm_breach_late}"
+        ),
+    )
+    _assert(
+        math.isclose(config.tp_retrace_exit_frac, 0.30, abs_tol=1e-9),
+        "TP retrace giveback is tightened to 30%",
+        detail=f"retrace={config.tp_retrace_exit_frac:.2f}",
     )
 
 
@@ -250,6 +273,15 @@ def test_crowd_skew_default_is_relaxed() -> None:
         math.isclose(config.max_crowd_prob_to_call, 98.0, abs_tol=1e-9),
         "Crowd skew cap now defaults to 98% instead of overblocking momentum",
         detail=f"cap={config.max_crowd_prob_to_call:.1f}",
+    )
+
+
+def test_max_trade_pct_default_is_trimmed() -> None:
+    config = RiskConfig()
+    _assert(
+        math.isclose(config.max_trade_pct, 0.02, abs_tol=1e-9),
+        "Base max trade size is reduced to 2% while expectancy is repaired",
+        detail=f"max_trade_pct={config.max_trade_pct:.2f}",
     )
 
 
@@ -357,7 +389,9 @@ async def run() -> None:
     print("\n--- Execution Guardrails ---")
     test_fill_inference_uses_enum_status()
     test_hard_stop_floor_has_more_breathing_room()
+    test_position_risk_defaults_cut_losers_faster()
     test_crowd_skew_default_is_relaxed()
+    test_max_trade_pct_default_is_trimmed()
     test_tiny_amm_fallback_needs_depth_budget()
     await test_market_params_cache()
 

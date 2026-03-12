@@ -259,7 +259,7 @@ DEFAULT_MARKET_DATA = {
             "max_bet_cap": 0.0,
             "drawdown_used": 0.0,
             "drawdown_room_left": 0.0,
-            "max_trade_pct": 0.03,
+            "max_trade_pct": 0.02,
             "max_daily_loss_pct": 0.15,
         },
     },
@@ -2590,7 +2590,7 @@ async def bootstrap_runtime() -> EngineServices:
     data_config = DataStreamsConfig()
     risk_config = RiskConfig(
         max_daily_loss_pct=_env_float("MAX_DAILY_LOSS_PCT", 0.15),
-        max_trade_pct=_env_float("MAX_TRADE_PCT", 0.03),
+        max_trade_pct=_env_float("MAX_TRADE_PCT", 0.02),
         max_trades_per_hour=_env_int("MAX_TRADES_PER_HOUR", 2),
         hourly_trade_limit_drawdown_step1=_env_float("HOURLY_TRADE_LIMIT_DRAWDOWN_STEP1", 0.25),
         hourly_trade_limit_drawdown_step2=_env_float("HOURLY_TRADE_LIMIT_DRAWDOWN_STEP2", 0.50),
@@ -2633,7 +2633,7 @@ async def bootstrap_runtime() -> EngineServices:
         elite_max_trade_pct=_env_float("ELITE_MAX_TRADE_PCT", 0.06),
     )
     position_risk_config = PositionRiskConfig(
-        hard_sl_min_token_delta=_env_float("HARD_SL_MIN_TOKEN_DELTA", -0.20),
+        hard_sl_min_token_delta=_env_float("HARD_SL_MIN_TOKEN_DELTA", -0.18),
         tp_stall_window_early_seconds=_env_int("TP_STALL_WINDOW_EARLY_SECONDS", 480),
         tp_stall_window_mid_seconds=_env_int("TP_STALL_WINDOW_MID_SECONDS", 300),
         tp_stall_window_late_seconds=_env_int("TP_STALL_WINDOW_LATE_SECONDS", 150),

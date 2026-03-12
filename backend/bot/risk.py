@@ -33,7 +33,7 @@ def _scaled_score(value: float, soft: float, hard: float, *, invert: bool = Fals
 @dataclass(slots=True, frozen=True)
 class RiskConfig:
     max_daily_loss_pct: float = 0.15
-    max_trade_pct: float = 0.03
+    max_trade_pct: float = 0.02
     max_trades_per_hour: int = 2
     hourly_trade_limit_drawdown_step1: float = 0.25
     hourly_trade_limit_drawdown_step2: float = 0.50
@@ -198,20 +198,20 @@ class PositionRiskConfig:
     tp_late_compress_multiplier: float = 0.85
     settling_window_seconds: int = 180
     settling_sl_breath_multiplier: float = 1.20
-    sl_confirm_breach_early: int = 12
-    sl_confirm_breach_mid: int = 8
-    sl_confirm_breach_late: int = 6
+    sl_confirm_breach_early: int = 4
+    sl_confirm_breach_mid: int = 3
+    sl_confirm_breach_late: int = 2
     sl_recovery_reset_buffer: float = 0.01
     hard_sl_extra_cents: float = 0.03
     hard_sl_extra_frac: float = 0.35
-    hard_sl_min_token_delta: float = -0.20
-    underlying_soft_sl_min_confirms: int = 2
+    hard_sl_min_token_delta: float = -0.18
+    underlying_soft_sl_min_confirms: int = 1
     underlying_vwap_buffer_frac: float = 0.0005
     sl_entry_rel_max_loss_pct: float = 0.55
     sl_entry_rel_min_cents: float = 0.03
     force_tp_roi_pct: float = 0.70
     force_tp_delta_abs: float = 0.35
-    tp_retrace_exit_frac: float = 0.45
+    tp_retrace_exit_frac: float = 0.30
     tp_retrace_exit_min_delta: float = 0.05
     tp_lock_min_profit_delta: float = 0.02
     tp_stall_window_early_seconds: int = 480

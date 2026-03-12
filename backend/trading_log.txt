@@ -6877,3 +6877,523 @@
 2026-03-12 14:22:50,080 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 1.27%)
 2026-03-12 14:22:58,465 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
 2026-03-12 14:23:06,688 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 5.51%)
+2026-03-12 14:23:15,016 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -4.48% <= 0 after slippage
+2026-03-12 14:23:23,248 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:23:31,507 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 5.48%)
+2026-03-12 14:23:39,795 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -2.49% <= 0 after slippage
+2026-03-12 14:23:48,097 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 7.24%)
+2026-03-12 14:23:56,333 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 2.47%)
+2026-03-12 14:24:04,674 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 5.72%)
+2026-03-12 14:24:12,964 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 0.15%)
+2026-03-12 14:24:21,172 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 3.92%)
+2026-03-12 14:24:29,367 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 1.01%)
+2026-03-12 14:24:37,623 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:24:45,844 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 2.34%)
+2026-03-12 14:24:54,165 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -2.96% <= 0 after slippage
+2026-03-12 14:25:02,516 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:25:19,077 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -6.21% <= 0 after slippage
+2026-03-12 14:25:27,307 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 5.31%)
+2026-03-12 14:25:35,582 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -5.92% <= 0 after slippage
+2026-03-12 14:25:43,979 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:25:52,150 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 0.77%)
+2026-03-12 14:26:00,407 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:26:08,617 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 3.24%)
+2026-03-12 14:26:16,912 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 1.52%)
+2026-03-12 14:26:25,209 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 1.94%)
+2026-03-12 14:26:33,506 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:27:14,643 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 4.10%)
+2026-03-12 14:27:22,962 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 1.42%)
+2026-03-12 14:27:31,305 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 5.64%)
+2026-03-12 14:27:39,602 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 3.09%)
+2026-03-12 14:27:47,842 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 5.82%)
+2026-03-12 14:27:56,089 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 4.76%)
+2026-03-12 14:28:04,337 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 5.62%)
+2026-03-12 14:28:12,621 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:28:20,971 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 4.60%)
+2026-03-12 14:28:29,368 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 3.28%)
+2026-03-12 14:28:37,730 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 4.92%)
+2026-03-12 14:28:46,065 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:29:02,626 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -3.57% <= 0 after slippage
+2026-03-12 14:29:10,860 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 0.40%)
+2026-03-12 14:29:19,159 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 0.63%)
+2026-03-12 14:29:27,410 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:29:35,667 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 0.85%)
+2026-03-12 14:29:43,949 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 0.60%)
+2026-03-12 14:29:52,268 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:30:08,946 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 3.53%)
+2026-03-12 14:30:17,214 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 4.77%)
+2026-03-12 14:30:25,448 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:30:33,737 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 0.89%)
+2026-03-12 14:30:42,130 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -6.68% <= 0 after slippage
+2026-03-12 14:30:50,344 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:31:56,580 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:33:02,934 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:34:09,186 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:34:34,129 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 1.92%)
+2026-03-12 14:34:42,400 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 0.44%)
+2026-03-12 14:34:50,620 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:34:58,840 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -6.10% <= 0 after slippage
+2026-03-12 14:35:07,166 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 1.93%)
+2026-03-12 14:35:15,416 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -5.01% <= 0 after slippage
+2026-03-12 14:35:23,647 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:35:40,144 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -4.96% <= 0 after slippage
+2026-03-12 14:35:48,370 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:35:56,625 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 4.15%)
+2026-03-12 14:36:04,908 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 1.25%)
+2026-03-12 14:36:13,124 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:36:29,638 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 0.40%)
+2026-03-12 14:36:37,865 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -2.26% <= 0 after slippage
+2026-03-12 14:36:46,136 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -0.05% <= 0 after slippage
+2026-03-12 14:36:54,439 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -0.85% <= 0 after slippage
+2026-03-12 14:37:02,679 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -3.43% <= 0 after slippage
+2026-03-12 14:37:10,969 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -0.97% <= 0 after slippage
+2026-03-12 14:37:19,219 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 0.77%)
+2026-03-12 14:37:27,532 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:37:35,768 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 2.19%)
+2026-03-12 14:37:44,057 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 1.89%)
+2026-03-12 14:37:52,347 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 4.09%)
+2026-03-12 14:38:00,649 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 1.95%)
+2026-03-12 14:38:08,989 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 4.07%)
+2026-03-12 14:38:17,193 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:38:25,461 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 2.06%)
+2026-03-12 14:38:33,752 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -1.72% <= 0 after slippage
+2026-03-12 14:38:42,088 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 3.37%)
+2026-03-12 14:38:50,373 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 2.94%)
+2026-03-12 14:38:58,640 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 3.56%)
+2026-03-12 14:39:06,960 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -1.46% <= 0 after slippage
+2026-03-12 14:39:15,235 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:39:23,526 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 4.02%)
+2026-03-12 14:39:31,762 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 1.82%)
+2026-03-12 14:39:40,075 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:39:48,322 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 0.62%)
+2026-03-12 14:39:56,604 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:40:04,885 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -6.41% <= 0 after slippage
+2026-03-12 14:40:13,134 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:40:29,652 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 5.08%)
+2026-03-12 14:40:37,898 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:40:46,190 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 2.50%)
+2026-03-12 14:41:02,716 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 2.90%)
+2026-03-12 14:41:10,946 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 2.70%)
+2026-03-12 14:41:19,243 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 2.40%)
+2026-03-12 14:41:27,547 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 4.45%)
+2026-03-12 14:41:35,826 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 2.98%)
+2026-03-12 14:41:44,100 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:41:52,308 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 1.84%)
+2026-03-12 14:42:00,596 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 0.37%)
+2026-03-12 14:42:08,965 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:42:17,207 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -1.00% <= 0 after slippage
+2026-03-12 14:42:25,462 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:42:42,014 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -9.29% <= 0 after slippage
+2026-03-12 14:42:50,219 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 0.79%)
+2026-03-12 14:42:58,503 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 2.82%)
+2026-03-12 14:43:06,758 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -2.22% <= 0 after slippage
+2026-03-12 14:43:14,984 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -2.90% <= 0 after slippage
+2026-03-12 14:43:23,158 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -2.16% <= 0 after slippage
+2026-03-12 14:43:31,422 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -4.17% <= 0 after slippage
+2026-03-12 14:43:39,676 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:43:47,954 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -4.74% <= 0 after slippage
+2026-03-12 14:43:56,188 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -3.19% <= 0 after slippage
+2026-03-12 14:44:04,418 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -3.16% <= 0 after slippage
+2026-03-12 14:44:12,758 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -4.48% <= 0 after slippage
+2026-03-12 14:44:20,952 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -1.98% <= 0 after slippage
+2026-03-12 14:44:29,254 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 0.33%)
+2026-03-12 14:44:37,532 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -2.97% <= 0 after slippage
+2026-03-12 14:44:45,791 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -3.79% <= 0 after slippage
+2026-03-12 14:44:54,059 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -0.48% <= 0 after slippage
+2026-03-12 14:45:02,352 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 0.81%)
+2026-03-12 14:45:10,572 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -3.09% <= 0 after slippage
+2026-03-12 14:45:18,874 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -0.26% <= 0 after slippage
+2026-03-12 14:45:27,101 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -6.88% <= 0 after slippage
+2026-03-12 14:45:35,419 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -9.39% <= 0 after slippage
+2026-03-12 14:45:43,664 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:45:51,962 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -5.57% <= 0 after slippage
+2026-03-12 14:46:00,254 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -6.33% <= 0 after slippage
+2026-03-12 14:46:08,567 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -0.37% <= 0 after slippage
+2026-03-12 14:46:16,964 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late lottery-profile blocked: risk 0.17, px 0.146, true 26.64%, spread 6.8% of price, depth 0.3% of book (needs score>=3/4, EV>=20.00%, true>=35.00%)
+2026-03-12 14:46:25,181 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -5.59% <= 0 after slippage
+2026-03-12 14:46:33,473 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:46:58,085 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -2.38% <= 0 after slippage
+2026-03-12 14:47:06,374 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:48:04,357 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -1.98% <= 0 after slippage
+2026-03-12 14:48:12,633 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 3.95%)
+2026-03-12 14:48:20,939 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:48:29,241 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 2.10%)
+2026-03-12 14:48:37,483 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:48:54,076 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -4.48% <= 0 after slippage
+2026-03-12 14:49:02,435 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -3.98% <= 0 after slippage
+2026-03-12 14:49:10,668 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -5.14% <= 0 after slippage
+2026-03-12 14:49:18,959 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -6.62% <= 0 after slippage
+2026-03-12 14:49:27,338 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:49:43,838 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -6.07% <= 0 after slippage
+2026-03-12 14:49:52,227 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -4.51% <= 0 after slippage
+2026-03-12 14:50:00,463 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:50:08,737 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -9.87% <= 0 after slippage
+2026-03-12 14:50:17,071 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:50:25,404 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 1.54%)
+2026-03-12 14:50:33,639 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:50:58,484 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -1.51% <= 0 after slippage
+2026-03-12 14:51:06,764 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 4.27%)
+2026-03-12 14:51:15,065 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 1 requires EV >= 15.00% (got 3.80%)
+2026-03-12 14:51:23,322 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:51:40,028 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -1.61% <= 0 after slippage
+2026-03-12 14:51:48,353 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -3.99% <= 0 after slippage
+2026-03-12 14:51:56,637 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:52:04,844 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -1.61% <= 0 after slippage
+2026-03-12 14:52:13,217 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -3.15% <= 0 after slippage
+2026-03-12 14:52:21,430 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -5.53% <= 0 after slippage
+2026-03-12 14:52:29,704 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:52:46,284 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -3.58% <= 0 after slippage
+2026-03-12 14:52:54,583 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:53:11,206 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -6.92% <= 0 after slippage
+2026-03-12 14:53:19,489 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 1.96%)
+2026-03-12 14:53:27,735 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:54:00,817 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -4.91% <= 0 after slippage
+2026-03-12 14:54:09,133 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -7.85% <= 0 after slippage
+2026-03-12 14:54:17,391 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Post-stop same-direction lockout for UP for the rest of this market after HARD_STOP_LOSS (-20.5c <= -20.0c hard floor)
+2026-03-12 14:54:25,686 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.23, px 0.166, true 21.64%, spread 6.0% of price
+2026-03-12 14:54:33,956 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 4.05%)
+2026-03-12 14:54:42,242 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.39, px 0.116, true 17.23%, spread 8.7% of price
+2026-03-12 14:54:50,527 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.35, px 0.126, true 18.19%, spread 8.0% of price
+2026-03-12 14:54:58,771 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.39, px 0.116, true 17.97%, spread 8.7% of price
+2026-03-12 14:55:06,986 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.59, px 0.070, true 12.80%, spread 28.5% of price
+2026-03-12 14:55:15,293 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.64, px 0.045, true 9.23%, spread 22.2% of price
+2026-03-12 14:55:23,588 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Crowd skew too high
+2026-03-12 14:55:31,936 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.56, px 0.020, true 4.75%, spread 0.0% of price
+2026-03-12 14:55:40,313 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Crowd skew too high
+2026-03-12 14:55:48,594 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.56, px 0.021, true 7.39%, spread 0.0% of price
+2026-03-12 14:55:56,886 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.56, px 0.020, true 7.30%, spread 0.0% of price
+2026-03-12 14:56:05,191 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.57, px 0.020, true 7.10%, spread 0.0% of price
+2026-03-12 14:56:13,515 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.67, px 0.035, true 9.41%, spread 28.5% of price
+2026-03-12 14:56:21,815 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Crowd skew too high
+2026-03-12 14:56:30,152 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV 0.00% <= 0 after slippage
+2026-03-12 14:56:46,814 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Crowd skew too high
+2026-03-12 14:57:36,705 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.71, px 0.034, true 9.01%, spread 26.6% of price
+2026-03-12 14:57:44,992 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.69, px 0.050, true 9.63%, spread 39.9% of price
+2026-03-12 14:57:53,261 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.70, px 0.050, true 8.77%, spread 38.3% of price
+2026-03-12 14:58:01,549 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 5.14%)
+2026-03-12 14:58:09,908 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.60, px 0.043, true 12.50%, spread 11.7% of price
+2026-03-12 14:58:18,192 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.73, px 0.040, true 8.12%, spread 32.9% of price
+2026-03-12 14:58:26,505 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.75, px 0.032, true 6.21%, spread 25.0% of price
+2026-03-12 14:58:34,781 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.73, px 0.046, true 8.09%, spread 37.3% of price
+2026-03-12 14:58:43,115 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 5.67%)
+2026-03-12 14:58:51,453 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Late high-risk lottery blocked: risk 0.76, px 0.034, true 6.39%, spread 26.8% of price
+2026-03-12 14:58:59,717 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Score 2 requires EV >= 6.00% (got 5.65%)
+2026-03-12 14:59:08,036 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Net EV -6.18% <= 0 after slippage
+2026-03-12 14:59:16,295 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Crowd skew too high
+2026-03-12 14:59:50,919 [INFO] [SKIP] bitcoin-up-or-down-march-12-1pm-et: Too close to expiry (10s < 15.0s)
+2026-03-12 15:00:04,061 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-12-2pm-et | Prefix: bitcoin-up-or-down-march-12-2pm
+2026-03-12 15:00:09,108 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-12-2pm-et | matched_slug=bitcoin-up-or-down-march-12-2pm-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=112940510105850000612844551781786716879716047059254699976055394378257100219282 | down_token=72529101738454500233967269910923425397368574140736763378411849155793727252466
+2026-03-12 15:00:09,109 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-12-2pm-et
+2026-03-12 15:00:09,110 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Too early (3592s > 3585.0s)
+2026-03-12 15:00:09,110 [INFO] [CLOB WS] Reconnecting to apply subscription update.
+2026-03-12 15:00:09,600 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-12 15:00:16,965 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.34%)
+2026-03-12 15:00:25,138 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 2 requires EV >= 6.00% (got 0.76%)
+2026-03-12 15:00:33,401 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -0.20% <= 0 after slippage
+2026-03-12 15:00:41,687 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 2 requires EV >= 6.00% (got 0.04%)
+2026-03-12 15:00:49,637 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 9.28%)
+2026-03-12 15:00:57,914 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 11.92%)
+2026-03-12 15:01:06,221 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 2.72%)
+2026-03-12 15:01:14,591 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 9.02%)
+2026-03-12 15:01:22,876 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 13.78%)
+2026-03-12 15:01:31,185 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 8.49%)
+2026-03-12 15:01:39,493 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -7.48% <= 0 after slippage
+2026-03-12 15:01:47,749 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -4.10% <= 0 after slippage
+2026-03-12 15:01:56,058 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.53%)
+2026-03-12 15:02:04,308 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -4.25% <= 0 after slippage
+2026-03-12 15:02:12,563 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 9.30%)
+2026-03-12 15:02:20,842 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 14.31%)
+2026-03-12 15:02:29,195 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 5.71%)
+2026-03-12 15:02:37,485 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 13.28%)
+2026-03-12 15:02:45,742 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 13.76%)
+2026-03-12 15:02:54,009 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:03:02,289 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -3.08% <= 0 after slippage
+2026-03-12 15:03:10,565 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 12.20%)
+2026-03-12 15:03:18,772 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -3.69% <= 0 after slippage
+2026-03-12 15:03:26,944 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 13.80%)
+2026-03-12 15:03:35,085 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 12.09%)
+2026-03-12 15:03:43,232 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -7.77% <= 0 after slippage
+2026-03-12 15:03:51,484 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -4.32% <= 0 after slippage
+2026-03-12 15:03:59,651 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 8.03%)
+2026-03-12 15:04:07,844 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 8.21%)
+2026-03-12 15:04:16,012 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.21%)
+2026-03-12 15:04:24,180 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 8.87%)
+2026-03-12 15:04:32,330 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 11.21%)
+2026-03-12 15:04:40,503 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 9.72%)
+2026-03-12 15:04:48,630 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.98%)
+2026-03-12 15:04:56,803 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 12.78%)
+2026-03-12 15:05:04,966 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 11.76%)
+2026-03-12 15:05:13,130 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.40%)
+2026-03-12 15:05:21,269 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -8.44% <= 0 after slippage
+2026-03-12 15:05:29,456 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 11.62%)
+2026-03-12 15:05:37,617 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 9.38%)
+2026-03-12 15:05:45,764 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -8.57% <= 0 after slippage
+2026-03-12 15:05:53,903 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -2.71% <= 0 after slippage
+2026-03-12 15:06:02,041 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 9.90%)
+2026-03-12 15:06:10,223 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 11.22%)
+2026-03-12 15:06:18,411 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 12.94%)
+2026-03-12 15:06:26,585 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 9.61%)
+2026-03-12 15:06:34,742 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 12.25%)
+2026-03-12 15:06:42,896 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 11.37%)
+2026-03-12 15:06:51,134 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -8.53% <= 0 after slippage
+2026-03-12 15:06:59,294 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 4.33%)
+2026-03-12 15:07:07,486 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 7.74%)
+2026-03-12 15:07:15,635 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 8.17%)
+2026-03-12 15:07:23,780 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.83%)
+2026-03-12 15:07:31,972 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -9.13% <= 0 after slippage
+2026-03-12 15:07:40,118 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 9.64%)
+2026-03-12 15:07:48,350 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 13.69%)
+2026-03-12 15:07:56,523 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 13.41%)
+2026-03-12 15:08:04,657 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -5.46% <= 0 after slippage
+2026-03-12 15:08:12,824 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -6.04% <= 0 after slippage
+2026-03-12 15:08:20,964 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:08:29,139 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 4.32%)
+2026-03-12 15:08:37,290 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 13.36%)
+2026-03-12 15:08:45,444 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 14.32%)
+2026-03-12 15:08:53,575 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 4.16%)
+2026-03-12 15:09:01,717 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 7.49%)
+2026-03-12 15:09:09,854 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:09:26,134 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 13.49%)
+2026-03-12 15:09:34,276 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -5.09% <= 0 after slippage
+2026-03-12 15:09:42,461 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 9.08%)
+2026-03-12 15:09:50,619 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:09:58,784 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 14.57%)
+2026-03-12 15:10:06,989 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:10:15,156 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -7.59% <= 0 after slippage
+2026-03-12 15:10:23,320 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -2.93% <= 0 after slippage
+2026-03-12 15:10:31,492 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 12.50%)
+2026-03-12 15:10:39,648 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -6.35% <= 0 after slippage
+2026-03-12 15:10:47,782 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:10:55,947 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 14.67%)
+2026-03-12 15:11:04,107 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:11:12,262 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 12.45%)
+2026-03-12 15:11:20,431 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -1.24% <= 0 after slippage
+2026-03-12 15:11:28,614 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.73%)
+2026-03-12 15:11:36,760 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 13.65%)
+2026-03-12 15:11:44,907 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 6.72%)
+2026-03-12 15:11:53,102 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 13.52%)
+2026-03-12 15:12:01,278 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 12.10%)
+2026-03-12 15:12:09,444 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.83%)
+2026-03-12 15:12:17,604 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 12.40%)
+2026-03-12 15:12:25,741 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:12:33,949 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 2.18%)
+2026-03-12 15:12:42,162 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:12:50,327 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 12.56%)
+2026-03-12 15:12:58,486 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 4.99%)
+2026-03-12 15:13:06,629 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.74%)
+2026-03-12 15:13:14,807 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.58%)
+2026-03-12 15:13:22,994 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 14.52%)
+2026-03-12 15:13:31,130 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -0.67% <= 0 after slippage
+2026-03-12 15:13:39,290 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 13.16%)
+2026-03-12 15:13:47,493 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 11.02%)
+2026-03-12 15:13:55,635 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 5.20%)
+2026-03-12 15:14:03,771 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 14.74%)
+2026-03-12 15:14:11,948 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:14:28,304 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 13.63%)
+2026-03-12 15:14:36,474 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:14:44,645 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 8.22%)
+2026-03-12 15:14:52,812 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -4.71% <= 0 after slippage
+2026-03-12 15:15:00,994 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 2 requires EV >= 6.00% (got 0.57%)
+2026-03-12 15:15:09,169 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -5.20% <= 0 after slippage
+2026-03-12 15:15:17,357 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:15:25,531 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 14.40%)
+2026-03-12 15:15:33,674 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 13.67%)
+2026-03-12 15:15:41,806 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 7.81%)
+2026-03-12 15:15:50,000 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:15:58,185 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 14.33%)
+2026-03-12 15:16:06,334 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -3.94% <= 0 after slippage
+2026-03-12 15:16:14,497 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:16:30,846 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:16:47,152 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 14.32%)
+2026-03-12 15:16:55,290 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:17:11,620 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 13.23%)
+2026-03-12 15:17:19,790 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 12.43%)
+2026-03-12 15:17:27,951 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.92%)
+2026-03-12 15:17:36,119 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 11.10%)
+2026-03-12 15:17:44,266 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 9.44%)
+2026-03-12 15:17:52,391 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -4.17% <= 0 after slippage
+2026-03-12 15:18:00,544 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.59%)
+2026-03-12 15:18:08,712 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 11.18%)
+2026-03-12 15:18:16,893 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.09%)
+2026-03-12 15:18:25,048 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.88%)
+2026-03-12 15:18:33,196 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 1/4 < 3/4 against UP trend
+2026-03-12 15:18:41,355 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -2.59% <= 0 after slippage
+2026-03-12 15:18:49,533 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -3.95% <= 0 after slippage
+2026-03-12 15:18:57,696 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -1.73% <= 0 after slippage
+2026-03-12 15:19:05,887 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.71%)
+2026-03-12 15:19:14,045 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.62%)
+2026-03-12 15:19:22,207 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 1.21%)
+2026-03-12 15:19:30,379 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.30%)
+2026-03-12 15:19:38,524 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 8.69%)
+2026-03-12 15:19:46,684 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 10.63%)
+2026-03-12 15:19:54,845 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 8.70%)
+2026-03-12 15:20:03,016 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 9.56%)
+2026-03-12 15:20:11,164 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 1 requires EV >= 15.00% (got 8.13%)
+2026-03-12 15:20:19,300 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Countertrend blocked: score 2/4 < 3/4 against UP trend
+2026-03-12 15:20:36,205 [INFO] [ENTRY SMART] Spread 2.0c wide, time 2364s remaining — shading entry cap toward bid side @ 0.7700 (vs naive 0.7989, ask 0.7800)
+2026-03-12 15:20:36,205 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Paper shadow passive cap 0.7700 below ask 0.7800; immediate fill not simulated
+2026-03-12 15:20:43,976 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Score 2 requires EV >= 6.00% (got 0.50%)
+2026-03-12 15:20:52,109 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -3.56% <= 0 after slippage
+2026-03-12 15:21:00,239 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -4.76% <= 0 after slippage
+2026-03-12 15:21:08,457 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Entry premium 1.6c > 1.5c max
+2026-03-12 15:21:16,620 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -1.43% <= 0 after slippage
+2026-03-12 15:21:24,771 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Entry premium 1.6c > 1.5c max
+2026-03-12 15:21:32,930 [INFO] [ENTRY SMART] Spread 2.0c wide, time 2307s remaining — shading entry cap toward bid side @ 0.8000 (vs naive 0.8287, ask 0.8100)
+2026-03-12 15:21:32,930 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Paper shadow passive cap 0.8000 below ask 0.8100; immediate fill not simulated
+2026-03-12 15:21:41,078 [INFO] [BET] BET PLACED [PAPER] DOWN on bitcoin-up-or-down-march-12-2pm-et | Filled: $135.76 | Avg Px: 0.8267 | Shares: 164.2289 | Liq: PAPER_CLOB_SHADOW | Expected: 0.8385
+2026-03-12 15:21:42,088 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8006 | U-PnL: $-4.28 (-3.15%) | TP: +13.0c @ 0.9565 | SL: -14.4c @ 0.6827 | T-38:17 | TP Armed: N | SL Disabled: N
+2026-03-12 15:21:54,852 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7970 | U-PnL: $-4.88 (-3.59%) | TP: +13.0c @ 0.9565 | SL: -14.4c @ 0.6827 | T-38:05 | TP Armed: N | SL Disabled: N
+2026-03-12 15:22:07,564 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8096 | U-PnL: $-2.81 (-2.07%) | TP: +13.0c @ 0.9565 | SL: -14.4c @ 0.6827 | T-37:52 | TP Armed: N | SL Disabled: N
+2026-03-12 15:22:20,286 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7600 | U-PnL: $-10.95 (-8.06%) | TP: +13.0c @ 0.9565 | SL: -14.4c @ 0.6827 | T-37:39 | TP Armed: N | SL Disabled: N
+2026-03-12 15:22:33,067 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7500 | U-PnL: $-12.59 (-9.27%) | TP: +13.0c @ 0.9565 | SL: -14.4c @ 0.6827 | T-37:26 | TP Armed: N | SL Disabled: N
+2026-03-12 15:22:45,903 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7185 | U-PnL: $-17.76 (-13.08%) | TP: +13.0c @ 0.9565 | SL: -14.4c @ 0.6827 | T-37:14 | TP Armed: N | SL Disabled: N
+2026-03-12 15:22:58,661 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7300 | U-PnL: $-15.87 (-11.69%) | TP: +13.0c @ 0.9565 | SL: -14.4c @ 0.6827 | T-37:01 | TP Armed: N | SL Disabled: N
+2026-03-12 15:23:11,398 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7122 | U-PnL: $-18.80 (-13.85%) | TP: +13.0c @ 0.9565 | SL: -14.4c @ 0.6827 | T-36:48 | TP Armed: N | SL Disabled: N
+2026-03-12 15:23:24,082 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7300 | U-PnL: $-15.87 (-11.69%) | TP: +13.0c @ 0.9565 | SL: -14.4c @ 0.6827 | T-36:35 | TP Armed: N | SL Disabled: N
+2026-03-12 15:23:36,757 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7293 | U-PnL: $-15.98 (-11.77%) | TP: +13.0c @ 0.9565 | SL: -14.4c @ 0.6827 | T-36:23 | TP Armed: N | SL Disabled: N
+2026-03-12 15:23:49,370 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7700 | U-PnL: $-9.30 (-6.85%) | TP: +13.0c @ 0.9565 | SL: -14.4c @ 0.6827 | T-36:10 | TP Armed: N | SL Disabled: N
+2026-03-12 15:24:02,116 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7400 | U-PnL: $-14.23 (-10.48%) | TP: +13.0c @ 0.9565 | SL: -14.4c @ 0.6827 | T-35:57 | TP Armed: N | SL Disabled: N
+2026-03-12 15:24:14,725 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7149 | U-PnL: $-18.36 (-13.52%) | TP: +13.0c @ 0.9565 | SL: -14.4c @ 0.6827 | T-35:45 | TP Armed: N | SL Disabled: N
+2026-03-12 15:24:27,436 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7000 | U-PnL: $-20.80 (-15.32%) | TP: +13.0c @ 0.9565 | SL: -14.4c @ 0.6827 | T-35:32 | TP Armed: N | SL Disabled: N
+2026-03-12 15:24:40,104 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.6790 | U-PnL: $-24.25 (-17.86%) | TP: +13.0c @ 0.9565 | SL: -14.4c @ 0.6827 | T-35:19 | TP Armed: N | SL Disabled: N
+2026-03-12 15:24:52,892 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7100 | U-PnL: $-19.16 (-14.11%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-35:07 | TP Armed: N | SL Disabled: N
+2026-03-12 15:25:05,625 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7200 | U-PnL: $-17.52 (-12.90%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-34:54 | TP Armed: N | SL Disabled: N
+2026-03-12 15:25:18,463 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.6993 | U-PnL: $-20.92 (-15.41%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-34:41 | TP Armed: N | SL Disabled: N
+2026-03-12 15:25:31,215 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7050 | U-PnL: $-19.97 (-14.71%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-34:28 | TP Armed: N | SL Disabled: N
+2026-03-12 15:25:43,888 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.6800 | U-PnL: $-24.08 (-17.74%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-34:16 | TP Armed: N | SL Disabled: N
+2026-03-12 15:25:56,588 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.6800 | U-PnL: $-24.08 (-17.74%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-34:03 | TP Armed: N | SL Disabled: N
+2026-03-12 15:26:09,236 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.6965 | U-PnL: $-21.38 (-15.75%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-33:50 | TP Armed: N | SL Disabled: N
+2026-03-12 15:26:21,434 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.6849 | U-PnL: $-23.28 (-17.15%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-33:38 | TP Armed: N | SL Disabled: N
+2026-03-12 15:26:34,204 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.6800 | U-PnL: $-24.08 (-17.74%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-33:25 | TP Armed: N | SL Disabled: N
+2026-03-12 15:26:46,879 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.6927 | U-PnL: $-22.00 (-16.21%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-33:13 | TP Armed: N | SL Disabled: N
+2026-03-12 15:26:59,601 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.6865 | U-PnL: $-23.01 (-16.95%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-33:00 | TP Armed: N | SL Disabled: N
+2026-03-12 15:27:12,284 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.6776 | U-PnL: $-24.49 (-18.04%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-32:47 | TP Armed: N | SL Disabled: N
+2026-03-12 15:27:24,994 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.6982 | U-PnL: $-21.10 (-15.54%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-32:35 | TP Armed: N | SL Disabled: N
+2026-03-12 15:27:37,719 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.6788 | U-PnL: $-24.29 (-17.89%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-32:22 | TP Armed: N | SL Disabled: N
+2026-03-12 15:27:50,396 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7056 | U-PnL: $-19.88 (-14.65%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-32:09 | TP Armed: N | SL Disabled: N
+2026-03-12 15:28:03,134 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7000 | U-PnL: $-20.80 (-15.32%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-31:56 | TP Armed: N | SL Disabled: N
+2026-03-12 15:28:15,817 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7043 | U-PnL: $-20.10 (-14.80%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-31:44 | TP Armed: N | SL Disabled: N
+2026-03-12 15:28:28,519 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7118 | U-PnL: $-18.86 (-13.89%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-31:31 | TP Armed: N | SL Disabled: N
+2026-03-12 15:28:41,263 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7343 | U-PnL: $-15.17 (-11.18%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-31:18 | TP Armed: N | SL Disabled: N
+2026-03-12 15:28:53,978 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7053 | U-PnL: $-19.93 (-14.68%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-31:06 | TP Armed: N | SL Disabled: N
+2026-03-12 15:29:06,981 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7053 | U-PnL: $-19.92 (-14.67%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-30:53 | TP Armed: N | SL Disabled: N
+2026-03-12 15:29:19,683 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7300 | U-PnL: $-15.87 (-11.69%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-30:40 | TP Armed: N | SL Disabled: N
+2026-03-12 15:29:32,428 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7429 | U-PnL: $-13.75 (-10.13%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-30:27 | TP Armed: N | SL Disabled: N
+2026-03-12 15:29:45,091 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7700 | U-PnL: $-9.30 (-6.85%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-30:14 | TP Armed: N | SL Disabled: N
+2026-03-12 15:29:57,776 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7549 | U-PnL: $-11.79 (-8.68%) | TP: +13.0c @ 0.9565 | SL: -12.0c @ 0.7067 | T-30:02 | TP Armed: N | SL Disabled: N
+2026-03-12 15:30:10,490 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7700 | U-PnL: $-9.31 (-6.85%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-29:49 | TP Armed: N | SL Disabled: N
+2026-03-12 15:30:23,215 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7630 | U-PnL: $-10.46 (-7.70%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-29:36 | TP Armed: N | SL Disabled: N
+2026-03-12 15:30:35,876 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7600 | U-PnL: $-10.95 (-8.06%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-29:24 | TP Armed: N | SL Disabled: N
+2026-03-12 15:30:48,594 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7600 | U-PnL: $-10.95 (-8.06%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-29:11 | TP Armed: N | SL Disabled: N
+2026-03-12 15:31:01,270 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7284 | U-PnL: $-16.13 (-11.88%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-28:58 | TP Armed: N | SL Disabled: N
+2026-03-12 15:31:14,008 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7400 | U-PnL: $-14.23 (-10.48%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-28:45 | TP Armed: N | SL Disabled: N
+2026-03-12 15:31:26,823 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7206 | U-PnL: $-17.42 (-12.83%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-28:33 | TP Armed: N | SL Disabled: N
+2026-03-12 15:31:39,558 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7206 | U-PnL: $-17.42 (-12.83%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-28:20 | TP Armed: N | SL Disabled: N
+2026-03-12 15:31:52,240 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7574 | U-PnL: $-11.38 (-8.38%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-28:07 | TP Armed: N | SL Disabled: N
+2026-03-12 15:32:05,034 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7300 | U-PnL: $-15.87 (-11.69%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-27:54 | TP Armed: N | SL Disabled: N
+2026-03-12 15:32:17,758 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7311 | U-PnL: $-15.69 (-11.56%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-27:42 | TP Armed: N | SL Disabled: N
+2026-03-12 15:32:30,432 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7300 | U-PnL: $-15.87 (-11.69%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-27:29 | TP Armed: N | SL Disabled: N
+2026-03-12 15:32:43,085 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7524 | U-PnL: $-12.19 (-8.98%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-27:16 | TP Armed: N | SL Disabled: N
+2026-03-12 15:32:55,747 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7522 | U-PnL: $-12.24 (-9.01%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-27:04 | TP Armed: N | SL Disabled: N
+2026-03-12 15:33:08,437 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7400 | U-PnL: $-14.23 (-10.48%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-26:51 | TP Armed: N | SL Disabled: N
+2026-03-12 15:33:21,083 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7200 | U-PnL: $-17.52 (-12.90%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-26:38 | TP Armed: N | SL Disabled: N
+2026-03-12 15:33:33,736 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7246 | U-PnL: $-16.75 (-12.34%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-26:26 | TP Armed: N | SL Disabled: N
+2026-03-12 15:33:46,462 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7500 | U-PnL: $-12.59 (-9.27%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-26:13 | TP Armed: N | SL Disabled: N
+2026-03-12 15:33:59,199 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7697 | U-PnL: $-9.36 (-6.89%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-26:00 | TP Armed: N | SL Disabled: N
+2026-03-12 15:34:12,000 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8000 | U-PnL: $-4.38 (-3.22%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-25:48 | TP Armed: N | SL Disabled: N
+2026-03-12 15:34:24,733 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8500 | U-PnL: $+3.83 (+2.82%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-25:35 | TP Armed: N | SL Disabled: N
+2026-03-12 15:34:37,402 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8600 | U-PnL: $+5.48 (+4.03%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-25:22 | TP Armed: N | SL Disabled: N
+2026-03-12 15:34:50,078 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8659 | U-PnL: $+6.45 (+4.75%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-25:09 | TP Armed: N | SL Disabled: N
+2026-03-12 15:35:02,742 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8325 | U-PnL: $+0.97 (+0.71%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-24:57 | TP Armed: N | SL Disabled: N
+2026-03-12 15:35:15,476 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8894 | U-PnL: $+10.31 (+7.60%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-24:44 | TP Armed: N | SL Disabled: N
+2026-03-12 15:35:28,083 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8500 | U-PnL: $+3.83 (+2.82%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-24:31 | TP Armed: N | SL Disabled: N
+2026-03-12 15:35:40,795 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8400 | U-PnL: $+2.19 (+1.61%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-24:19 | TP Armed: N | SL Disabled: N
+2026-03-12 15:35:53,491 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8251 | U-PnL: $-0.25 (-0.18%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-24:06 | TP Armed: N | SL Disabled: N
+2026-03-12 15:36:06,176 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7963 | U-PnL: $-4.98 (-3.67%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-23:53 | TP Armed: N | SL Disabled: N
+2026-03-12 15:36:18,915 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8000 | U-PnL: $-4.38 (-3.22%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-23:41 | TP Armed: N | SL Disabled: N
+2026-03-12 15:36:31,648 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7800 | U-PnL: $-7.66 (-5.64%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-23:28 | TP Armed: N | SL Disabled: N
+2026-03-12 15:36:44,319 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7800 | U-PnL: $-7.66 (-5.64%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-23:15 | TP Armed: N | SL Disabled: N
+2026-03-12 15:36:56,995 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7600 | U-PnL: $-10.95 (-8.06%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-23:03 | TP Armed: N | SL Disabled: N
+2026-03-12 15:37:09,724 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7100 | U-PnL: $-19.16 (-14.11%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-22:50 | TP Armed: N | SL Disabled: N
+2026-03-12 15:37:22,592 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7400 | U-PnL: $-14.23 (-10.48%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-22:37 | TP Armed: N | SL Disabled: N
+2026-03-12 15:37:35,326 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7300 | U-PnL: $-15.87 (-11.69%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-22:24 | TP Armed: N | SL Disabled: N
+2026-03-12 15:37:47,978 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7530 | U-PnL: $-12.09 (-8.90%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-22:12 | TP Armed: N | SL Disabled: N
+2026-03-12 15:38:00,937 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7292 | U-PnL: $-16.01 (-11.79%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-21:59 | TP Armed: N | SL Disabled: N
+2026-03-12 15:38:13,662 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.6900 | U-PnL: $-22.44 (-16.53%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-21:46 | TP Armed: N | SL Disabled: N
+2026-03-12 15:38:26,358 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7368 | U-PnL: $-14.76 (-10.87%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-21:33 | TP Armed: N | SL Disabled: N
+2026-03-12 15:38:39,080 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7400 | U-PnL: $-14.23 (-10.48%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-21:20 | TP Armed: N | SL Disabled: N
+2026-03-12 15:38:51,738 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7661 | U-PnL: $-9.94 (-7.32%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-21:08 | TP Armed: N | SL Disabled: N
+2026-03-12 15:39:04,435 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7600 | U-PnL: $-10.95 (-8.06%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-20:55 | TP Armed: N | SL Disabled: N
+2026-03-12 15:39:17,136 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.7527 | U-PnL: $-12.14 (-8.94%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-20:42 | TP Armed: N | SL Disabled: N
+2026-03-12 15:39:29,827 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8100 | U-PnL: $-2.73 (-2.01%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-20:30 | TP Armed: N | SL Disabled: N
+2026-03-12 15:39:42,562 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8200 | U-PnL: $-1.09 (-0.80%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-20:17 | TP Armed: N | SL Disabled: N
+2026-03-12 15:39:55,250 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8200 | U-PnL: $-1.09 (-0.80%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-20:04 | TP Armed: N | SL Disabled: N
+2026-03-12 15:40:07,924 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8600 | U-PnL: $+5.48 (+4.03%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-19:52 | TP Armed: N | SL Disabled: N
+2026-03-12 15:40:20,670 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8600 | U-PnL: $+5.48 (+4.03%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-19:39 | TP Armed: N | SL Disabled: N
+2026-03-12 15:40:33,367 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8637 | U-PnL: $+6.09 (+4.49%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-19:26 | TP Armed: N | SL Disabled: N
+2026-03-12 15:40:46,049 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8706 | U-PnL: $+7.22 (+5.32%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-19:13 | TP Armed: N | SL Disabled: N
+2026-03-12 15:40:58,729 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8625 | U-PnL: $+5.89 (+4.34%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-19:01 | TP Armed: N | SL Disabled: N
+2026-03-12 15:41:11,497 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9100 | U-PnL: $+13.69 (+10.08%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-18:48 | TP Armed: N | SL Disabled: N
+2026-03-12 15:41:24,337 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9100 | U-PnL: $+13.69 (+10.08%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-18:35 | TP Armed: N | SL Disabled: N
+2026-03-12 15:41:37,147 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8900 | U-PnL: $+10.40 (+7.66%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-18:22 | TP Armed: N | SL Disabled: N
+2026-03-12 15:41:49,835 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9100 | U-PnL: $+13.69 (+10.08%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-18:10 | TP Armed: N | SL Disabled: N
+2026-03-12 15:42:02,541 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9200 | U-PnL: $+15.33 (+11.29%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-17:57 | TP Armed: N | SL Disabled: N
+2026-03-12 15:42:15,232 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.8926 | U-PnL: $+10.83 (+7.98%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-17:44 | TP Armed: N | SL Disabled: N
+2026-03-12 15:42:27,950 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9100 | U-PnL: $+13.69 (+10.08%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-17:32 | TP Armed: N | SL Disabled: N
+2026-03-12 15:42:40,680 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9200 | U-PnL: $+15.33 (+11.29%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-17:19 | TP Armed: N | SL Disabled: N
+2026-03-12 15:42:53,380 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9100 | U-PnL: $+13.69 (+10.08%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-17:06 | TP Armed: N | SL Disabled: N
+2026-03-12 15:43:06,066 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9400 | U-PnL: $+18.62 (+13.71%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-16:53 | TP Armed: N | SL Disabled: N
+2026-03-12 15:43:18,768 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9500 | U-PnL: $+20.26 (+14.92%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-16:41 | TP Armed: N | SL Disabled: N
+2026-03-12 15:43:31,445 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9400 | U-PnL: $+18.62 (+13.71%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-16:28 | TP Armed: N | SL Disabled: N
+2026-03-12 15:43:44,128 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9400 | U-PnL: $+18.62 (+13.71%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-16:15 | TP Armed: N | SL Disabled: N
+2026-03-12 15:43:56,832 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9300 | U-PnL: $+16.97 (+12.50%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-16:03 | TP Armed: N | SL Disabled: N
+2026-03-12 15:44:09,528 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9265 | U-PnL: $+16.40 (+12.08%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-15:50 | TP Armed: N | SL Disabled: N
+2026-03-12 15:44:22,230 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9200 | U-PnL: $+15.33 (+11.29%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-15:37 | TP Armed: N | SL Disabled: N
+2026-03-12 15:44:34,908 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9200 | U-PnL: $+15.33 (+11.29%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-15:25 | TP Armed: N | SL Disabled: N
+2026-03-12 15:44:47,586 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9300 | U-PnL: $+16.97 (+12.50%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-15:12 | TP Armed: N | SL Disabled: N
+2026-03-12 15:45:00,344 [INFO] [POSITION] OPEN bitcoin-up-or-down-march-12-2pm-et | Mark: 0.9500 | U-PnL: $+20.26 (+14.92%) | TP: +13.0c @ 0.9565 | SL: -9.6c @ 0.7307 | T-14:59 | TP Armed: N | SL Disabled: N
+2026-03-12 15:45:08,862 [INFO] [EXIT] EXIT FILLED [PAPER] DOWN on bitcoin-up-or-down-march-12-2pm-et | Reason: TAKE_PROFIT (vol-adjusted: +13.3c) | Exit Px: 0.9600 | Proceeds: $157.66 | PnL: $+21.90
+2026-03-12 15:45:08,865 [INFO] [TRADE CLOSED] bitcoin-up-or-down-march-12-2pm-et | DOWN | PnL: $+21.90 | Exit: 0.9600 | Underlying: 69902.01 | Reason: TAKE_PROFIT (vol-adjusted: +13.3c)
+2026-03-12 15:45:11,109 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -4.28% <= 0 after slippage
+2026-03-12 15:45:18,962 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Late high-risk lottery blocked: risk 0.39, px 0.045, true 9.00%, spread 22.2% of price
+2026-03-12 15:45:27,167 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Late high-risk lottery blocked: risk 0.37, px 0.055, true 10.54%, spread 18.1% of price
+2026-03-12 15:45:35,419 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -4.70% <= 0 after slippage
+2026-03-12 15:45:43,669 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -4.19% <= 0 after slippage
+2026-03-12 15:45:51,889 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Late high-risk lottery blocked: risk 0.38, px 0.055, true 10.13%, spread 18.1% of price
+2026-03-12 15:46:00,112 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -5.20% <= 0 after slippage
+2026-03-12 15:46:08,340 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -4.48% <= 0 after slippage
+2026-03-12 15:46:16,607 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -6.06% <= 0 after slippage
+2026-03-12 15:46:24,822 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -5.54% <= 0 after slippage
+2026-03-12 15:46:33,018 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -4.57% <= 0 after slippage
+2026-03-12 15:46:41,203 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Late high-risk lottery blocked: risk 0.42, px 0.045, true 9.31%, spread 22.2% of price
+2026-03-12 15:46:49,397 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Late high-risk lottery blocked: risk 0.42, px 0.045, true 9.63%, spread 22.2% of price
+2026-03-12 15:46:57,596 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -5.93% <= 0 after slippage
+2026-03-12 15:47:05,862 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -0.77% <= 0 after slippage
+2026-03-12 15:47:14,093 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Late high-risk lottery blocked: risk 0.45, px 0.035, true 7.71%, spread 28.5% of price
+2026-03-12 15:47:22,323 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Insufficient technical confirmation (0/4 < 1/4)
+2026-03-12 15:47:30,572 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Net EV -5.23% <= 0 after slippage
+2026-03-12 15:47:38,785 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Crowd skew too high
+2026-03-12 15:48:19,730 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Late high-risk lottery blocked: risk 0.43, px 0.030, true 5.78%, spread 13.4% of price
+2026-03-12 15:48:27,932 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Late high-risk lottery blocked: risk 0.45, px 0.027, true 4.47%, spread 14.7% of price
+2026-03-12 15:48:36,201 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Crowd skew too high
+2026-03-12 15:49:25,594 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Crowd skew too high
+2026-03-12 15:50:14,946 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Crowd skew too high
+2026-03-12 15:51:04,342 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Crowd skew too high
+2026-03-12 15:51:53,654 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Crowd skew too high
+2026-03-12 15:52:43,213 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Crowd skew too high
+2026-03-12 15:53:32,633 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Crowd skew too high
+2026-03-12 15:54:22,177 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Crowd skew too high
+2026-03-12 15:55:06,066 [INFO] Elite Quant Engine v2 Initialized. Monitoring 1h WebSocket...
+2026-03-12 15:55:06,081 [INFO] [INIT] Simulated balance initialized: $5000.00 (base: $5000.0 + historical: $0.00)
+2026-03-12 15:55:06,081 [INFO] [INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.
+2026-03-12 15:55:09,283 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-12-2pm-et | Prefix: bitcoin-up-or-down-march-12-2pm
+2026-03-12 15:55:09,470 [INFO] [SYSTEM] Loaded 120 candles. VWAP=69,993.79
+2026-03-12 15:55:09,807 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-12-2pm-et | matched_slug=bitcoin-up-or-down-march-12-2pm-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=112940510105850000612844551781786716879716047059254699976055394378257100219282 | down_token=72529101738454500233967269910923425397368574140736763378411849155793727252466
+2026-03-12 15:55:09,807 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-12-2pm-et
+2026-03-12 15:55:09,808 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-12 15:55:10,222 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-12 15:55:10,223 [INFO] [SYSTEM] CLOB WebSocket book manager started in paper shadow mode (heartbeat disabled).
+2026-03-12 15:55:10,549 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Crowd skew too high
+2026-03-12 15:55:10,609 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)
+2026-03-12 15:55:59,650 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Crowd skew too high
+2026-03-12 15:56:48,973 [INFO] [SKIP] bitcoin-up-or-down-march-12-2pm-et: Crowd skew too high
