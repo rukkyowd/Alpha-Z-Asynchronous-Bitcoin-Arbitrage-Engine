@@ -14,7 +14,10 @@ function normalizeBar(bar: Partial<PriceBar> | null | undefined): PriceBar | nul
   if (!bar) {
     return null;
   }
-  const time = Number(bar.time);
+  let time = Number(bar.time);
+  if (time > 10000000000) {
+    time = Math.floor(time / 1000);
+  }
   const open = Number(bar.open);
   const high = Number(bar.high);
   const low = Number(bar.low);
