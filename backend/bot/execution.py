@@ -239,7 +239,7 @@ class ExecutionConfig:
     live_tiny_entry_slippage_cents: float = 0.01
     live_tiny_reprice_buffer_cents: float = 0.005
     live_tiny_reprice_max_extra_cents: float = 0.01
-    max_entry_premium_cents: float = 0.015
+    max_entry_premium_cents: float = 0.018
     max_spread_pct: float = 0.05
     min_liquidity_multiplier: float = 1.15
     paper_sim_estimated_depth_usd: float = 1000.0
@@ -259,7 +259,9 @@ class ExecutionConfig:
     twap_max_slices: int = 4
     twap_slice_interval_secs: float = 2.0
     ny_session_maker_window_multiplier: float = 1.5
-    ny_session_max_entry_premium_cents: float = 0.01
+    ny_session_max_entry_premium_cents: float = 0.015
+    high_ev_entry_premium_cents: float = 0.02
+    high_ev_entry_premium_min_ev_pct: float = 15.0
     smart_entry_min_spread_cents: float = 0.02
     smart_entry_min_time_remaining_secs: float = 300.0
     capital_lockup_warning_hours: float = 0.75
@@ -1207,6 +1209,8 @@ class ClobExecutionEngine:
         active_premium_cap = self.config.max_entry_premium_cents
         if self._is_ny_session():
             active_premium_cap = min(active_premium_cap, self.config.ny_session_max_entry_premium_cents)
+        if signal.expected_value_pct >= self.config.high_ev_entry_premium_min_ev_pct:
+            active_premium_cap = max(active_premium_cap, self.config.high_ev_entry_premium_cents)
 
         smart_entry_is_passive = self._is_passive_shadow_cap(target_price, naive_target)
         limit_price = _quantize(_clamp(target_price + adjusted_slippage, 0.01, 0.99), tick_size, ROUND_UP)

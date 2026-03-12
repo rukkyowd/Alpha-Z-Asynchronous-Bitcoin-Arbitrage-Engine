@@ -19,6 +19,7 @@ if str(_BACKEND_DIR) not in sys.path:
 
 from bot.execution import ClobExecutionEngine, ExecutionConfig, _infer_fill_stats
 from bot.models import (
+    ActivePosition,
     Direction,
     ExitReasonKind,
     FillInferenceStatus,
@@ -27,7 +28,7 @@ from bot.models import (
     TechnicalContext,
     classify_exit_reason,
 )
-from bot.risk import LiquidityProfile, RiskConfig, RiskManager
+from bot.risk import LiquidityProfile, PositionRiskConfig, RiskConfig, RiskManager
 from bot.strategy import StrategyConfig, _infer_trend_direction, _post_stop_reentry_reason
 
 PASSED = 0
@@ -219,6 +220,39 @@ def test_fill_inference_uses_enum_status() -> None:
     )
 
 
+def test_hard_stop_floor_has_more_breathing_room() -> None:
+    manager = RiskManager(position_config=PositionRiskConfig())
+    position = ActivePosition(
+        slug="btc-hourly-test",
+        decision=Direction.DOWN,
+        token_id="token-down",
+        strike=69950.0,
+        bet_size_usd=150.0,
+        bought_price=0.48,
+        entry_time=datetime.now(timezone.utc),
+    )
+    snapshot = manager.position_risk_snapshot(
+        position,
+        _make_context(),
+        seconds_remaining=3300.0,
+        now_ts=position.entry_time.timestamp() + 60.0,
+    )
+    _assert(
+        math.isclose(snapshot.hard_sl_delta, -0.20, abs_tol=1e-9),
+        "Hard stop floor widens to -20.0c for early-hour chop",
+        detail=f"hard_sl_delta={snapshot.hard_sl_delta:.4f}",
+    )
+
+
+def test_crowd_skew_default_is_relaxed() -> None:
+    config = StrategyConfig.from_dict({})
+    _assert(
+        math.isclose(config.max_crowd_prob_to_call, 98.0, abs_tol=1e-9),
+        "Crowd skew cap now defaults to 98% instead of overblocking momentum",
+        detail=f"cap={config.max_crowd_prob_to_call:.1f}",
+    )
+
+
 def test_tiny_amm_fallback_needs_depth_budget() -> None:
     odds = _make_odds(public_prob_pct=55.0)
     disabled = ClobExecutionEngine(
@@ -322,6 +356,8 @@ async def run() -> None:
 
     print("\n--- Execution Guardrails ---")
     test_fill_inference_uses_enum_status()
+    test_hard_stop_floor_has_more_breathing_room()
+    test_crowd_skew_default_is_relaxed()
     test_tiny_amm_fallback_needs_depth_budget()
     await test_market_params_cache()
 

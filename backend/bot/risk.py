@@ -204,6 +204,7 @@ class PositionRiskConfig:
     sl_recovery_reset_buffer: float = 0.01
     hard_sl_extra_cents: float = 0.03
     hard_sl_extra_frac: float = 0.35
+    hard_sl_min_token_delta: float = -0.20
     underlying_soft_sl_min_confirms: int = 2
     underlying_vwap_buffer_frac: float = 0.0005
     sl_entry_rel_max_loss_pct: float = 0.55
@@ -1019,6 +1020,7 @@ class RiskManager:
         sl_delta = max(sl_delta, entry_based_sl)
         hard_sl_extra = max(cfg.hard_sl_extra_cents, abs(sl_delta) * cfg.hard_sl_extra_frac)
         hard_sl_delta = max(sl_delta - hard_sl_extra, reachable_floor)
+        hard_sl_delta = max(min(hard_sl_delta, cfg.hard_sl_min_token_delta), reachable_floor)
 
         return PositionRiskSnapshot(
             tp_delta=tp_delta,

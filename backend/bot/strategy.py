@@ -49,7 +49,7 @@ class StrategyConfig:
     min_score_to_trade: int = 1
     min_seconds_remaining: float = 15.0
     max_seconds_for_new_bet: float = 3585.0
-    max_crowd_prob_to_call: float = 96.0
+    max_crowd_prob_to_call: float = 98.0
     min_ev_pct_to_call_ai: float = 1.0
     ev_ai_bypass_threshold: float = 3.0
     score1_min_ev_pct: float = 15.0

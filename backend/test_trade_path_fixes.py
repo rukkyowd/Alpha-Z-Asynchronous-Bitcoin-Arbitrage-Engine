@@ -73,6 +73,7 @@ def _make_signal(
     *,
     bet_size_usd: float = 100.0,
     token_price: float = 0.42,
+    expected_value_pct: float = 12.0,
     model_context: TechnicalContext | None = None,
 ) -> TradeSignal:
     return TradeSignal(
@@ -80,7 +81,7 @@ def _make_signal(
         direction=Direction.UP,
         confidence=ConfidenceLevel.SCOUT,
         score=2,
-        expected_value_pct=12.0,
+        expected_value_pct=expected_value_pct,
         expected_value_gross_pct=15.0,
         true_probability_pct=68.0,
         market_probability_pct=40.0,
@@ -277,6 +278,42 @@ async def test_authoritative_ev_uses_executable_price() -> None:
     )
 
 
+async def test_high_ev_entry_premium_override_keeps_tradeable_edges() -> None:
+    low_ev_state = await _build_state()
+    high_ev_state = await _build_state()
+    engine = TestExecutionEngine(
+        None,
+        config=ExecutionConfig(
+            paper_trading=True,
+            dry_run=False,
+            maker_enabled=False,
+            live_entry_slippage_cents=0.0,
+            max_entry_premium_cents=0.018,
+            high_ev_entry_premium_cents=0.02,
+            high_ev_entry_premium_min_ev_pct=15.0,
+        ),
+        risk_manager=RiskManager(),
+    )
+    engine.check_liquidity_hook = lambda *args, **kwargs: asyncio.sleep(0, result=_make_liquidity(entry_price=0.421))
+    engine.resolve_market_params_hook = lambda token_id: asyncio.sleep(0, result=("0.01", False, 0))
+
+    low_ev_position = await engine.submit_entry_order(
+        low_ev_state,
+        _make_signal(token_price=0.411, expected_value_pct=12.0),
+        _make_odds(entry_prob_pct=40.0),
+        _make_context(),
+    )
+    high_ev_position = await engine.submit_entry_order(
+        high_ev_state,
+        _make_signal(token_price=0.411, expected_value_pct=18.0),
+        _make_odds(entry_prob_pct=40.0),
+        _make_context(),
+    )
+
+    _assert(low_ev_position is None, "Base entry premium cap still blocks low-EV overpays")
+    _assert(high_ev_position is not None, "High-EV setups can use the widened ~2.0c premium cap")
+
+
 async def test_ai_validation_uses_strategy_context() -> None:
     state = await _build_state()
     raw_context = _make_context(bayesian_probability=0.41)
@@ -361,6 +398,19 @@ async def test_ai_budget_limits_inline_latency() -> None:
     _assert(elapsed < 0.20, "AI decision budget caps wall-clock latency", f"elapsed={elapsed:.3f}s")
 
 
+def test_live_ws_sender_is_throttled() -> None:
+    _assert(
+        main_module.WS_PUSH_INTERVAL_SECS >= 0.25,
+        "Live websocket cadence is throttled away from micro-tick pushes",
+        f"interval={main_module.WS_PUSH_INTERVAL_SECS:.3f}s",
+    )
+    _assert(
+        main_module.WS_SEND_TIMEOUT_SECS >= 1.0,
+        "Live websocket sender has a longer timeout than the push interval",
+        f"timeout={main_module.WS_SEND_TIMEOUT_SECS:.3f}s",
+    )
+
+
 async def run() -> None:
     print("\n" + "=" * 52)
     print("  Alpha-Z Trading Path Fixes - Regression Suite")
@@ -371,12 +421,16 @@ async def run() -> None:
 
     print("\n--- Executable EV Recheck ---")
     await test_authoritative_ev_uses_executable_price()
+    await test_high_ev_entry_premium_override_keeps_tradeable_edges()
 
     print("\n--- AI Context Wiring ---")
     await test_ai_validation_uses_strategy_context()
 
     print("\n--- AI Latency Budget ---")
     await test_ai_budget_limits_inline_latency()
+
+    print("\n--- Live Runtime Pacing ---")
+    test_live_ws_sender_is_throttled()
 
     print("\n" + "=" * 52)
     print(f"PASSED: {PASSED}")

@@ -1,180 +1,109 @@
-"use client";
+'use client';
 
-import React, { useMemo } from 'react';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceLine,
-  CartesianGrid
-} from 'recharts';
-import { type PriceBar } from "./engine-types";
+import React, { useEffect, useState } from 'react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-type SnakePriceChartProps = {
-  candle: Partial<PriceBar> | null;
-  history?: Array<Partial<PriceBar>>;
-  vwap?: number;
-  targetPrice?: number;
-};
+interface PricePoint {
+  time: string;
+  price: number;
+}
 
-export default function SnakePriceChart({
-  candle,
-  history,
-  vwap,
-  targetPrice,
-}: SnakePriceChartProps) {
-  
-  // 1. Map API Data structure: Merge history and live candle, deduplicate, and format for Recharts
-  const chartData = useMemo(() => {
-    const combined = [...(history || [])];
-    if (candle) combined.push(candle);
+export default function SnakePriceChart() {
+  const [data, setData] = useState<PricePoint[]>([]);
 
-    const deduped = new Map();
-    combined.forEach(bar => {
-      if (bar.time && bar.close) {
-        // Handle varying epoch timestamp formats (seconds vs milliseconds)
-        const timeMs = bar.time > 10000000000 ? bar.time : bar.time * 1000;
-        const normalizedTime = Math.floor(timeMs / 1000);
-        
-        deduped.set(normalizedTime, {
-          time: normalizedTime,
-          price: Number(bar.close),
-          formattedTime: new Date(timeMs).toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit"
-          })
-        });
-      }
-    });
-    
-    const sorted = Array.from(deduped.values()).sort((a, b) => a.time - b.time);
-    return sorted.slice(-64); // Keep MAX_VISIBLE_POINTS to match your original SVG look
-  }, [history, candle]);
+  useEffect(() => {
+    // Connect directly to the live Binance WebSocket for BTC/USDT trades
+    const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
 
-  // 2. Calculate dynamic bounds for the Y-Axis to give the BTC prices some breathing room
-  const { minBound, maxBound } = useMemo(() => {
-    if (!chartData.length) return { minBound: 0, maxBound: 0 };
-    const prices = chartData.map(d => d.price);
-    if (targetPrice) prices.push(targetPrice);
-    if (vwap && !targetPrice) prices.push(vwap);
-    
-    const minP = Math.min(...prices);
-    const maxP = Math.max(...prices);
-    const span = maxP - minP || 1; 
-    
-    return {
-      minBound: minP - (span * 0.1),
-      maxBound: maxP + (span * 0.1)
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      const currentPrice = parseFloat(message.p);
+      
+      // Format time for the X-axis
+      const timeString = new Date(message.T).toLocaleTimeString([], { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      });
+
+      setData((prevData) => {
+        const newDataPoint = { time: timeString, price: currentPrice };
+        const updatedData = [...prevData, newDataPoint];
+        // Keep only the last 60 ticks to create the moving "snake" effect
+        return updatedData.slice(-60);
+      });
     };
-  }, [chartData, targetPrice, vwap]);
 
-  if (chartData.length === 0) {
-    return (
-      <div className="flex h-full min-h-[300px] items-center justify-center text-zinc-500 font-mono text-xs uppercase tracking-widest">
-        Awaiting Market Data
-      </div>
-    );
-  }
+    return () => {
+      ws.close();
+    };
+  }, []);
+
+  // Dynamically calculate the Y-axis bounds so the snake fills the container
+  const prices = data.map(d => d.price);
+  const minPrice = prices.length ? Math.min(...prices) : 0;
+  const maxPrice = prices.length ? Math.max(...prices) : 0;
+  const padding = (maxPrice - minPrice) * 0.2 || 10; 
 
   return (
-    <div className="w-full h-full min-h-[300px] font-sans relative group">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartData} margin={{ top: 10, right: 48, left: 0, bottom: 0 }}>
-          <defs>
-            {/* Matching your original UI orange theme */}
-            <linearGradient id="polymarketOrange" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#fb923c" stopOpacity={0.25} />
-              <stop offset="95%" stopColor="#fb923c" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-
-          {/* Faint horizontal lines only - exactly like Poly */}
-          <CartesianGrid 
-            vertical={false} 
-            strokeDasharray="3 3" 
-            stroke="#27272a" 
-            opacity={0.6}
-          />
-
-          <XAxis 
-            dataKey="formattedTime" 
-            hide // Hide X-Axis in main view 
-          />
-
-          {/* Right-aligned Y-axis formatted for BTC Prices */}
-          <YAxis 
-            orientation="right" 
-            domain={[minBound, maxBound]} 
-            tickFormatter={(val) => `$${val.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
-            axisLine={false}
-            tickLine={false}
-            tick={{ fill: '#71717a', fontSize: 11, fontWeight: 500 }}
-            dx={10}
-          />
-
-          {/* Target / Strike Price reference line */}
-          {targetPrice && (
-            <ReferenceLine 
-              y={targetPrice} 
-              stroke="#a855f7" 
-              strokeDasharray="4 4" 
-              opacity={0.8}
-              label={{ position: 'insideTopLeft', value: 'TARGET', fill: '#a855f7', fontSize: 10, offset: 5, fontWeight: 700 }}
+    <div className="w-full h-64 bg-slate-900 rounded-xl p-4 border border-slate-800 shadow-lg">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-slate-300 text-sm font-bold tracking-wider uppercase">Live BTC/USDT</h3>
+        <span className="relative flex h-3 w-3">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+        </span>
+      </div>
+      
+      <div className="w-full h-48">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+            <XAxis 
+              dataKey="time" 
+              stroke="#64748b" 
+              fontSize={10} 
+              tick={{ fill: '#64748b' }}
+              tickLine={false}
+              axisLine={false}
+              minTickGap={20}
             />
-          )}
-          
-          {/* Fallback to VWAP if Target isn't available */}
-          {vwap && !targetPrice && (
-            <ReferenceLine 
-              y={vwap} 
+            <YAxis 
+              domain={[minPrice - padding, maxPrice + padding]} 
+              stroke="#64748b" 
+              fontSize={10}
+              tickFormatter={(tick) => `$${tick.toLocaleString()}`}
+              orientation="right"
+              tickLine={false}
+              axisLine={false}
+              width={80}
+            />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: '#0f172a', 
+                border: '1px solid #1e293b', 
+                borderRadius: '8px', 
+                color: '#f8fafc' 
+              }}
+              itemStyle={{ color: '#38bdf8', fontWeight: 'bold' }}
+              labelStyle={{ color: '#94a3b8', marginBottom: '4px' }}
+              formatter={(value: number) => [`$${value.toFixed(2)}`, 'Price']}
+              isAnimationActive={false}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="price" 
               stroke="#38bdf8" 
-              strokeDasharray="4 4" 
-              opacity={0.6}
-              label={{ position: 'insideTopLeft', value: 'VWAP', fill: '#38bdf8', fontSize: 10, offset: 5, fontWeight: 700 }}
+              strokeWidth={3} 
+              dot={false} 
+              // Turning off the Recharts animation here is crucial! 
+              // It lets the array slicing handle the movement smoothly.
+              isAnimationActive={false} 
             />
-          )}
-
-          {/* Polymarket Tooltip and Crosshair */}
-          <Tooltip 
-            content={<PolymarketTooltip />} 
-            cursor={{ stroke: '#a1a1aa', strokeWidth: 1, strokeDasharray: '4 4' }} 
-            isAnimationActive={false}
-          />
-
-          {/* Type="stepAfter" provides the rigid snake line you had in your original SVG */}
-          <Area 
-            type="stepAfter" 
-            dataKey="price" 
-            stroke="#fb923c" 
-            strokeWidth={2}
-            fillOpacity={1} 
-            fill="url(#polymarketOrange)" 
-            activeDot={{ r: 5, strokeWidth: 2, fill: '#fb923c', stroke: '#18181b' }}
-            isAnimationActive={false} 
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }
 
-// Minimalist, high-contrast dark mode tooltip
-const PolymarketTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    const price = payload[0].value;
-    return (
-      <div className="bg-zinc-900 border border-zinc-700/50 rounded-lg p-3 shadow-xl flex flex-col items-start min-w-[120px]">
-        <span className="text-xs text-zinc-400 font-medium mb-1 tracking-wide">
-          {label}
-        </span>
-        <span className="text-xl font-bold text-zinc-100 tabular-nums">
-          ${price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-        </span>
-      </div>
-    );
-  }
-  return null;
-};

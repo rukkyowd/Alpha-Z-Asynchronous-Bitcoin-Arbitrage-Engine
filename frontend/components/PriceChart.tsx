@@ -197,7 +197,7 @@ export default function PriceChart({
           type === "snake" ? "pointer-events-none opacity-0" : "opacity-100"
         }`}
       />
-      {type === "snake" ? <SnakePriceChart candle={candle} history={history} vwap={vwap} targetPrice={targetPrice} /> : null}
+      {type === "snake" ? <SnakePriceChart /> : null}
     </div>
   );
 }
