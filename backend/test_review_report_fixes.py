@@ -30,7 +30,7 @@ from bot.models import (
     classify_exit_reason,
 )
 from bot.risk import LiquidityProfile, PositionRiskConfig, RiskConfig, RiskManager
-from bot.strategy import StrategyConfig, _infer_trend_direction, _post_stop_reentry_reason
+from bot.strategy import StrategyConfig, _infer_trend_direction, _post_profit_reentry_reason, _post_stop_reentry_reason
 
 PASSED = 0
 FAILED = 0
@@ -109,6 +109,55 @@ def test_stop_loss_reentry_is_kind_backed() -> None:
     _assert(
         classify_exit_reason("LIQUIDATION") == ExitReasonKind.STOP_LOSS,
         "Liquidation-style exits classify as stop losses",
+    )
+
+
+def test_post_win_same_direction_reentry_uses_cooldown_then_quality_gate() -> None:
+    config = StrategyConfig(
+        post_win_same_direction_lockout_for_slug=True,
+        post_win_same_direction_cooldown_secs=120.0,
+        post_win_same_direction_min_ev_pct=12.0,
+        post_win_same_direction_min_score=3,
+    )
+    active_cooldown = ReentryState(
+        last_exit_ts=time.time(),
+        last_exit_reason="TP_LOCK_RETRACE (peak +17.1c -> now +8.4c, floor +12.0c)",
+        last_exit_direction=Direction.DOWN,
+        last_exit_kind=ExitReasonKind.TAKE_PROFIT,
+        last_entry_ev_pct=18.0,
+    )
+    cooled = ReentryState(
+        last_exit_ts=time.time() - 180.0,
+        last_exit_reason=active_cooldown.last_exit_reason,
+        last_exit_direction=Direction.DOWN,
+        last_exit_kind=ExitReasonKind.TAKE_PROFIT,
+        last_entry_ev_pct=18.0,
+    )
+
+    cooldown_reason = _post_profit_reentry_reason(active_cooldown, Direction.DOWN, score=4, ev_pct=20.0, config=config)
+    weak_score_reason = _post_profit_reentry_reason(cooled, Direction.DOWN, score=2, ev_pct=20.0, config=config)
+    weak_ev_reason = _post_profit_reentry_reason(cooled, Direction.DOWN, score=4, ev_pct=8.0, config=config)
+    allowed_reason = _post_profit_reentry_reason(cooled, Direction.DOWN, score=4, ev_pct=20.0, config=config)
+
+    _assert(
+        cooldown_reason is not None and "same-direction cooldown active" in cooldown_reason,
+        "Profitable same-direction re-entries now use a cooldown instead of a full-market ban",
+        detail=cooldown_reason or "",
+    )
+    _assert(
+        weak_score_reason is not None and "score 2/4 < 3/4" in weak_score_reason,
+        "Same-direction re-entry still needs a strong score after the cooldown",
+        detail=weak_score_reason or "",
+    )
+    _assert(
+        weak_ev_reason is not None and "EV 8.00% < 12.00%" in weak_ev_reason,
+        "Same-direction re-entry still needs enough EV after the cooldown",
+        detail=weak_ev_reason or "",
+    )
+    _assert(
+        allowed_reason is None,
+        "Strong same-direction setups are allowed again once the post-win cooldown expires",
+        detail=allowed_reason or "",
     )
 
 
@@ -474,6 +523,7 @@ async def run() -> None:
 
     print("\n--- Exit Classification ---")
     test_stop_loss_reentry_is_kind_backed()
+    test_post_win_same_direction_reentry_uses_cooldown_then_quality_gate()
 
     print("\n--- Liquidity & Kelly Sizing ---")
     test_estimated_liquidity_gets_haircut()

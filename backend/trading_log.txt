@@ -14220,3 +14220,32 @@
 2026-03-13 19:01:27,928 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Expensive entry blocked: px 0.724 needs EV >= 12.00% (got 5.04%)
 2026-03-13 19:01:36,118 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
 2026-03-13 19:01:52,585 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:02:09,143 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:02:25,750 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:02:42,316 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:02:58,765 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:03:15,041 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:03:31,603 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Expensive entry blocked: px 0.802 needs EV >= 12.00% (got 11.47%)
+2026-03-13 19:03:39,950 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:03:56,514 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:04:13,188 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:04:29,757 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:04:46,311 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:05:02,746 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:05:19,368 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:05:35,977 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:05:52,552 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:06:09,087 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:06:25,704 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Post-win same-direction lockout for DOWN: no immediate re-entry after profitable DOWN exit
+2026-03-13 19:08:13,039 [INFO] Elite Quant Engine v2 Initialized. Monitoring 1h WebSocket...
+2026-03-13 19:08:13,051 [INFO] [INIT] Simulated balance initialized: $4865.75 (base: $5000.0 + historical: $-134.25)
+2026-03-13 19:08:13,051 [INFO] [INIT] Paper mode using live Polymarket CLOB for shadow pricing/liquidity.
+2026-03-13 19:08:15,565 [INFO] Starting Quant Engine: bitcoin-up-or-down-march-13-6pm-et | Prefix: bitcoin-up-or-down-march-13-6pm
+2026-03-13 19:08:15,750 [INFO] [SYSTEM] Loaded 120 candles. VWAP=71,976.24
+2026-03-13 19:08:16,028 [INFO] [MARKET AUDIT] requested_slug=bitcoin-up-or-down-march-13-6pm-et | matched_slug=bitcoin-up-or-down-march-13-6pm-et | outcomes=Up, Down | resolution=CANDLE_OPEN | up_token=104824150250443236882086360420633373059806736464838284014530826008940737241139 | down_token=102575201462241448916483597156504313194933673106877598138691137935520511223651
+2026-03-13 19:08:16,030 [INFO] [CLOB WS] Updated subscriptions: 2 token(s) for bitcoin-up-or-down-march-13-6pm-et
+2026-03-13 19:08:16,030 [INFO] [SYSTEM] Warming up local AI (llama3.2:3b-instruct-q4_K_M) into RAM...
+2026-03-13 19:08:16,465 [INFO] [SYSTEM] AI Warmup complete. Engine is hot and ready.
+2026-03-13 19:08:16,466 [INFO] [SYSTEM] CLOB WebSocket book manager started in paper shadow mode (heartbeat disabled).
+2026-03-13 19:08:16,832 [INFO] [SKIP] bitcoin-up-or-down-march-13-6pm-et: Expensive entry blocked: px 0.724 needs score >= 3/4 (got 2/4)
+2026-03-13 19:08:16,896 [INFO] [CLOB WS] Connected - subscribed to 2 token(s)

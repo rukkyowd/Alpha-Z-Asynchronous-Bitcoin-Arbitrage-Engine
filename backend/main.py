@@ -270,6 +270,8 @@ def _skip_log_repeat_secs(reason: str, default_secs: float = 15.0) -> float:
     normalized = (reason or "").lower()
     if "post-stop same-direction lockout" in normalized:
         return 60.0
+    if "post-win same-direction cooldown" in normalized:
+        return 60.0
     if "post-win opposite-direction cooldown" in normalized:
         return 60.0
     if "ai veto cooldown active" in normalized:
@@ -2813,6 +2815,9 @@ async def bootstrap_runtime() -> EngineServices:
             late_countertrend_min_score=_env_int("LATE_COUNTERTREND_MIN_SCORE", 4),
             late_countertrend_min_ev_pct=_env_float("LATE_COUNTERTREND_MIN_EV_PCT", 35.0),
             late_countertrend_min_true_prob_pct=_env_float("LATE_COUNTERTREND_MIN_TRUE_PROB_PCT", 60.0),
+            post_win_same_direction_cooldown_secs=_env_float("POST_WIN_SAME_DIRECTION_COOLDOWN_SECS", 180.0),
+            post_win_same_direction_min_ev_pct=_env_float("POST_WIN_SAME_DIRECTION_MIN_EV_PCT", 12.0),
+            post_win_same_direction_min_score=_env_int("POST_WIN_SAME_DIRECTION_MIN_SCORE", 3),
         )
     execution_config = ExecutionConfig(
         paper_trading=PAPER_TRADING,

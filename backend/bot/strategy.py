@@ -90,6 +90,9 @@ class StrategyConfig:
     post_stop_reentry_min_score: int = 3
     post_win_opposite_direction_cooldown_secs: float = 900.0
     post_win_same_direction_lockout_for_slug: bool = True
+    post_win_same_direction_cooldown_secs: float = 180.0
+    post_win_same_direction_min_ev_pct: float = 12.0
+    post_win_same_direction_min_score: int = 3
     late_lottery_block_score: float = 0.14
     late_lottery_min_ev_pct: float = 20.0
     late_lottery_min_score: int = 3
@@ -469,6 +472,8 @@ def _post_stop_reentry_reason(
 def _post_profit_reentry_reason(
     reentry_state: ReentryState | None,
     direction: Direction,
+    score: int,
+    ev_pct: float,
     config: StrategyConfig,
 ) -> str | None:
     if reentry_state is None:
@@ -484,10 +489,24 @@ def _post_profit_reentry_reason(
         return None
 
     if reentry_state.last_exit_direction == direction:
-        if config.post_win_same_direction_lockout_for_slug:
+        if not config.post_win_same_direction_lockout_for_slug:
+            return None
+        elapsed = time.time() - reentry_state.last_exit_ts
+        if elapsed < config.post_win_same_direction_cooldown_secs:
+            remaining = max(0, int(config.post_win_same_direction_cooldown_secs - elapsed))
             return (
-                f"Post-win same-direction lockout for {direction.value}: "
+                f"Post-win same-direction cooldown active ({remaining}s left): "
                 f"no immediate re-entry after profitable {reentry_state.last_exit_direction.value} exit"
+            )
+        if ev_pct < config.post_win_same_direction_min_ev_pct:
+            return (
+                f"Post-win same-direction re-entry blocked: EV {ev_pct:.2f}% < "
+                f"{config.post_win_same_direction_min_ev_pct:.2f}% after profitable {direction.value} exit"
+            )
+        if score < config.post_win_same_direction_min_score:
+            return (
+                f"Post-win same-direction re-entry blocked: score {score}/4 < "
+                f"{config.post_win_same_direction_min_score}/4 after profitable {direction.value} exit"
             )
         return None
 
@@ -804,6 +823,8 @@ class StrategyEngine:
         post_profit_reason = _post_profit_reentry_reason(
             reentry_snapshot,
             target_direction,
+            score,
+            target_ev.ev_pct,
             self.config,
         )
         if post_profit_reason:
