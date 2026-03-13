@@ -89,12 +89,15 @@ def _make_signal(
     token_price: float = 0.42,
     expected_value_pct: float = 12.0,
     model_context: TechnicalContext | None = None,
+    score: int = 2,
+    confidence: ConfidenceLevel = ConfidenceLevel.SCOUT,
+    needs_ai: bool | None = None,
 ) -> TradeSignal:
     return TradeSignal(
         slug="btc-hourly-test",
         direction=Direction.UP,
-        confidence=ConfidenceLevel.SCOUT,
-        score=2,
+        confidence=confidence,
+        score=score,
         expected_value_pct=expected_value_pct,
         expected_value_gross_pct=15.0,
         true_probability_pct=68.0,
@@ -103,7 +106,7 @@ def _make_signal(
         token_price=token_price,
         kelly_bet_usd=bet_size_usd,
         approved=True,
-        needs_ai=model_context is not None,
+        needs_ai=(model_context is not None) if needs_ai is None else needs_ai,
         reasons=("Regression test",),
         model_context=model_context,
         price_cap=token_price,
@@ -635,6 +638,65 @@ async def test_ai_validation_respects_recent_veto_cooldown() -> None:
     )
 
 
+async def test_recent_ai_veto_revalidates_auto_approved_signal() -> None:
+    state = await _build_state()
+    await state.record_ai_state(
+        "btc-hourly-test",
+        ai_calls=1,
+        last_veto_ts=time.time(),
+        last_veto_ev_pct=12.0,
+        last_veto_direction=Direction.UP,
+        last_veto_score=2,
+        last_veto_token_price=0.42,
+    )
+    signal = _make_signal(
+        token_price=0.45,
+        expected_value_pct=40.0,
+        score=3,
+        confidence=ConfidenceLevel.HIGH,
+        needs_ai=False,
+    )
+    runtime = SimpleNamespace(
+        http_session=None,
+        state=state,
+        ai_agent=object(),
+        ai_config=AIConfig(
+            veto_cooldown_seconds=45.0,
+            veto_min_ev_improvement_pct=2.0,
+            veto_min_score_improvement=1,
+            veto_min_token_price_move_cents=2.0,
+        ),
+        paper_trading=False,
+    )
+
+    ai_called = False
+    original_call_local_ai = main_module.call_local_ai
+
+    async def fake_call_local_ai(*args, **kwargs):
+        nonlocal ai_called
+        ai_called = True
+        return AIDecision(decision=Direction.UP, raw_response="FINAL:UP", reason="AI confirmed favored direction")
+
+    main_module.call_local_ai = fake_call_local_ai
+    try:
+        validated_signal, reason = await main_module.maybe_validate_with_ai(
+            runtime,
+            signal,
+            _make_context(bayesian_probability=0.79),
+            _make_odds(),
+        )
+    finally:
+        main_module.call_local_ai = original_call_local_ai
+
+    _assert(ai_called, "Recent same-direction AI veto forces revalidation even for auto-approved signals")
+    _assert(
+        validated_signal.approved and validated_signal.ai_validated and not validated_signal.needs_ai,
+        "Auto-approved signals keep AI approval state once revalidated",
+        f"signal={validated_signal}",
+    )
+    _assert(reason == "", "Successful revalidation keeps the rejection reason empty", f"reason={reason}")
+
+
 async def test_strategy_blocks_expensive_entries_without_extra_edge() -> None:
     original_apply_probabilistic_model = strategy_module.apply_probabilistic_model
     strategy_module.apply_probabilistic_model = lambda context, **kwargs: context
@@ -724,6 +786,50 @@ def test_position_monitor_prefers_executable_sell_price_over_public_mark() -> No
         math.isclose(fallback_price, 0.365, abs_tol=1e-9),
         "Position monitoring still falls back to public price when no executable bids exist",
         f"fallback_price={fallback_price:.4f}",
+    )
+
+
+def test_closed_trade_record_preserves_entry_and_exit_reasons() -> None:
+    position = {
+        "slug": "btc-hourly-test",
+        "decision": Direction.DOWN.value,
+        "strike": 69950.0,
+        "bought_price": 0.42,
+        "entry_underlying_price": 71346.84,
+        "bet_size_usd": 97.41,
+        "score": 3,
+        "bonus_score": 0,
+        "signals": ("VWAP Trend", "EV BYPASS (65.8% >= 3.0%, score=3/4, px=0.420)"),
+        "ml_features": {
+            "confidence": "High",
+            "ai_validated": True,
+            "expected_ev_pct": 65.77,
+            "market_resolution": "CANDLE_OPEN",
+        },
+    }
+
+    trade_record = main_module._build_closed_trade_record(
+        position,
+        exit_reason="STOP_LOSS_CONFIRMED (-9.6c, 4/4, underlying confirmed)",
+        exit_price=0.3243,
+        exit_underlying=71419.34,
+        outcome="DOWN",
+        result="LOSS",
+        pnl=-22.2,
+        bet_size_usd=97.41,
+        resolved_official_outcome="EARLY_EXIT",
+        resolved_match_status="EARLY_EXIT",
+    )
+
+    _assert(
+        trade_record["trigger_reason"].startswith("AI confirmed favored direction"),
+        "Closed trade records keep AI attribution on the entry rationale",
+        f"trigger_reason={trade_record['trigger_reason']}",
+    )
+    _assert(
+        "EV BYPASS" in trade_record["trigger_reason"] and trade_record["local_calc_outcome"].startswith("STOP_LOSS_CONFIRMED"),
+        "Closed trade records keep entry and exit reasons in separate fields",
+        f"record={trade_record}",
     )
 
 
@@ -853,6 +959,7 @@ async def run() -> None:
     print("\n--- AI Context Wiring ---")
     await test_ai_validation_uses_strategy_context()
     await test_ai_validation_respects_recent_veto_cooldown()
+    await test_recent_ai_veto_revalidates_auto_approved_signal()
     await test_build_context_prefers_live_price_over_last_closed_candle()
     await test_strategy_blocks_expensive_entries_without_extra_edge()
 
@@ -863,6 +970,7 @@ async def run() -> None:
     test_live_ws_sender_is_throttled()
     test_position_heartbeat_reports_soft_and_hard_stops()
     test_position_monitor_prefers_executable_sell_price_over_public_mark()
+    test_closed_trade_record_preserves_entry_and_exit_reasons()
 
     print("\n" + "=" * 52)
     print(f"PASSED: {PASSED}")

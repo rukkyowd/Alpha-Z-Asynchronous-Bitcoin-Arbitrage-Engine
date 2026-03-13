@@ -439,6 +439,15 @@ def _ai_veto_cooldown_reason(signal: TradeSignal, ai_state: Any, config: AIConfi
     )
 
 
+def _recent_same_direction_ai_veto(signal: TradeSignal, ai_state: Any, config: AIConfig) -> bool:
+    if ai_state is None or ai_state.last_veto_ts <= 0:
+        return False
+    if ai_state.last_veto_direction not in (Direction.UNKNOWN, signal.direction):
+        return False
+    age = time.time() - ai_state.last_veto_ts
+    return 0 <= age < config.veto_cooldown_seconds
+
+
 def _market_slug_for_et_datetime(now_et: datetime) -> str:
     month = now_et.strftime("%B").lower()
     day = now_et.day
@@ -1356,6 +1365,67 @@ def _position_has_ai_validation(position: dict[str, Any]) -> bool:
     return bool(ml_features.get("ai_validated") or ml_features.get("ai_confirmed"))
 
 
+def _position_entry_reason(position: dict[str, Any]) -> str:
+    signals = position.get("signals", ())
+    entry_signals: list[str] = []
+    if isinstance(signals, (list, tuple)):
+        entry_signals = [str(item).strip() for item in signals if str(item).strip()]
+
+    prefix = "AI confirmed favored direction" if _position_has_ai_validation(position) else ""
+    if prefix and entry_signals:
+        return f"{prefix} | {' | '.join(entry_signals)}"
+    if prefix:
+        return prefix
+    if entry_signals:
+        return " | ".join(entry_signals)
+
+    ml_features = position.get("ml_features", {})
+    for key in ("entry_reason", "trigger_reason"):
+        candidate = str(ml_features.get(key) or "").strip()
+        if candidate:
+            return candidate
+    return ""
+
+
+def _build_closed_trade_record(
+    position: dict[str, Any],
+    *,
+    exit_reason: str,
+    exit_price: float,
+    exit_underlying: float,
+    outcome: str,
+    result: str,
+    pnl: float,
+    bet_size_usd: float,
+    resolved_official_outcome: str,
+    resolved_match_status: str,
+) -> dict[str, Any]:
+    return {
+        "timestamp": utc_timestamp_text(),
+        "slug": position.get("slug", ""),
+        "decision": str(position.get("decision", Direction.UNKNOWN.value)),
+        "strike": _safe_float(position.get("strike")),
+        "final_price": round(exit_underlying, 2),
+        "actual_outcome": outcome,
+        "result": result,
+        "pnl_impact": round(pnl, 2),
+        "entry_price": _safe_float(position.get("bought_price")),
+        "exit_price": round(exit_price, 4),
+        "entry_underlying": _safe_float(position.get("entry_underlying_price")),
+        "exit_underlying": round(exit_underlying, 2),
+        "bet_size_usd": bet_size_usd,
+        "confidence": str(position.get("ml_features", {}).get("confidence", "")),
+        "score": _safe_int(position.get("score")),
+        "bonus_score": _safe_int(position.get("bonus_score")),
+        "ai_validated": _position_has_ai_validation(position),
+        "trigger_reason": _position_entry_reason(position),
+        "local_calc_outcome": exit_reason,
+        "official_outcome": resolved_official_outcome,
+        "match_status": resolved_match_status,
+        "metadata_json": json.dumps(position.get("ml_features", {}), default=str),
+    }
+
+
 def _build_execution_metric(
     *,
     slug: str,
@@ -1611,7 +1681,6 @@ async def finalize_closed_position(
     resolved_official_outcome = official_outcome or (outcome if settled_at_expiry else "EARLY_EXIT")
     resolved_match_status = settlement_source or ("LOCAL_SETTLED" if settled_at_expiry else "EARLY_EXIT")
     result = "WIN" if pnl > 0 else "LOSS" if pnl < 0 else "TIE"
-    ai_validated = _position_has_ai_validation(position)
 
     runtime.risk_manager.record_pnl(pnl)
     wins = runtime.state.total_wins + (1 if result == "WIN" else 0)
@@ -1627,30 +1696,18 @@ async def finalize_closed_position(
     if not runtime.paper_trading:
         runtime.current_balance = runtime.state.simulated_balance
 
-    trade_record = {
-        "timestamp": utc_timestamp_text(),
-        "slug": position.get("slug", ""),
-        "decision": str(position.get("decision", Direction.UNKNOWN.value)),
-        "strike": _safe_float(position.get("strike")),
-        "final_price": round(exit_underlying, 2),
-        "actual_outcome": outcome,
-        "result": result,
-        "pnl_impact": round(pnl, 2),
-        "entry_price": _safe_float(position.get("bought_price")),
-        "exit_price": round(exit_price, 4),
-        "entry_underlying": _safe_float(position.get("entry_underlying_price")),
-        "exit_underlying": round(exit_underlying, 2),
-        "bet_size_usd": bet_size_usd,
-        "confidence": str(position.get("ml_features", {}).get("confidence", "")),
-        "score": _safe_int(position.get("score")),
-        "bonus_score": _safe_int(position.get("bonus_score")),
-        "ai_validated": ai_validated,
-        "trigger_reason": exit_reason,
-        "local_calc_outcome": exit_reason,
-        "official_outcome": resolved_official_outcome,
-        "match_status": resolved_match_status,
-        "metadata_json": json.dumps(position.get("ml_features", {}), default=str),
-    }
+    trade_record = _build_closed_trade_record(
+        position,
+        exit_reason=exit_reason,
+        exit_price=exit_price,
+        exit_underlying=exit_underlying,
+        outcome=outcome,
+        result=result,
+        pnl=pnl,
+        bet_size_usd=bet_size_usd,
+        resolved_official_outcome=resolved_official_outcome,
+        resolved_match_status=resolved_match_status,
+    )
     await _record_trade(runtime, trade_record)
     await runtime.state.clear_slug_commit(trade_record["slug"])
     await runtime.state.clear_ai_state(trade_record["slug"])
@@ -1807,10 +1864,11 @@ async def maybe_validate_with_ai(
     context: TechnicalContext,
     odds: MarketOddsSnapshot,
 ) -> tuple[TradeSignal, str]:
-    if not signal.needs_ai:
+    ai_state = await runtime.state.get_ai_state(signal.slug)
+    recent_veto_same_direction = _recent_same_direction_ai_veto(signal, ai_state, runtime.ai_config)
+    if not signal.needs_ai and not recent_veto_same_direction:
         return signal, ""
 
-    ai_state = await runtime.state.get_ai_state(signal.slug)
     cooldown_reason = _ai_veto_cooldown_reason(signal, ai_state, runtime.ai_config)
     if cooldown_reason:
         return replace(signal, approved=False), cooldown_reason
@@ -1980,7 +2038,7 @@ async def evaluation_loop(runtime: EngineServices) -> None:
 
             ai_ms = 0.0
             ai_reason = ""
-            if signal.needs_ai:
+            if signal.approved:
                 ai_started = time.perf_counter()
                 signal, ai_reason = await maybe_validate_with_ai(runtime, signal, runtime.latest_context or context, odds)
                 ai_ms = (time.perf_counter() - ai_started) * 1000.0

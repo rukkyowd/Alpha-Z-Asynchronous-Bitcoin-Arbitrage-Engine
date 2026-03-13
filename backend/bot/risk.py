@@ -5,7 +5,7 @@ from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 
 from .indicators import blended_intraday_volatility
-from .models import ActivePosition, Direction, PositionStatus, TechnicalContext
+from .models import ActivePosition, Direction, MarketResolution, PositionStatus, TechnicalContext
 from .state import EngineState
 
 EPSILON = 1e-9
@@ -206,6 +206,7 @@ class PositionRiskConfig:
     hard_sl_extra_frac: float = 0.35
     hard_sl_min_token_delta: float = -0.18
     underlying_soft_sl_min_confirms: int = 1
+    candle_open_strike_extra_confirms: int = 1
     underlying_vwap_buffer_frac: float = 0.0005
     sl_entry_rel_max_loss_pct: float = 0.55
     sl_entry_rel_min_cents: float = 0.03
@@ -920,28 +921,41 @@ class RiskManager:
         underlying_price = current_underlying_price if current_underlying_price > 0 else context.price
         cvd_threshold = max(abs(context.adaptive_cvd_threshold), 1.0)
         confirmations = 0
+        market_resolution_text = str(position.ml_features.get("market_resolution") or "")
+        try:
+            market_resolution = MarketResolution(market_resolution_text)
+        except ValueError:
+            market_resolution = MarketResolution.UNKNOWN
 
         if position.decision == Direction.DOWN:
-            if position.strike > 0 and underlying_price >= position.strike:
-                return True
+            strike_reclaimed = position.strike > 0 and underlying_price >= position.strike
+            if strike_reclaimed:
+                confirmations += 1
             if context.vwap > 0 and underlying_price >= (context.vwap * (1.0 + cfg.underlying_vwap_buffer_frac)):
                 confirmations += 1
             if context.ema_9 >= context.ema_21:
                 confirmations += 1
             if context.cvd_candle_delta >= cvd_threshold:
                 confirmations += 1
-            return confirmations >= cfg.underlying_soft_sl_min_confirms
+            required_confirms = cfg.underlying_soft_sl_min_confirms
+            if strike_reclaimed and market_resolution == MarketResolution.CANDLE_OPEN:
+                required_confirms += cfg.candle_open_strike_extra_confirms
+            return confirmations >= required_confirms
 
         if position.decision == Direction.UP:
-            if position.strike > 0 and underlying_price <= position.strike:
-                return True
+            strike_lost = position.strike > 0 and underlying_price <= position.strike
+            if strike_lost:
+                confirmations += 1
             if context.vwap > 0 and underlying_price <= (context.vwap * (1.0 - cfg.underlying_vwap_buffer_frac)):
                 confirmations += 1
             if context.ema_9 <= context.ema_21:
                 confirmations += 1
             if context.cvd_candle_delta <= -cvd_threshold:
                 confirmations += 1
-            return confirmations >= cfg.underlying_soft_sl_min_confirms
+            required_confirms = cfg.underlying_soft_sl_min_confirms
+            if strike_lost and market_resolution == MarketResolution.CANDLE_OPEN:
+                required_confirms += cfg.candle_open_strike_extra_confirms
+            return confirmations >= required_confirms
 
         return True
 

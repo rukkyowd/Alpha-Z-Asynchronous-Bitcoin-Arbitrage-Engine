@@ -23,6 +23,7 @@ from bot.models import (
     Direction,
     ExitReasonKind,
     FillInferenceStatus,
+    MarketResolution,
     MarketOddsSnapshot,
     ReentryState,
     TechnicalContext,
@@ -267,6 +268,68 @@ def test_position_risk_defaults_cut_losers_faster() -> None:
     )
 
 
+def test_candle_open_stop_confirmation_needs_structure_beyond_open_retake() -> None:
+    manager = RiskManager(position_config=PositionRiskConfig())
+    candle_open_position = ActivePosition(
+        slug="btc-hourly-test",
+        decision=Direction.DOWN,
+        token_id="token-down",
+        strike=70000.0,
+        bet_size_usd=100.0,
+        bought_price=0.42,
+        ml_features={"market_resolution": MarketResolution.CANDLE_OPEN.value},
+    )
+    plain_position = ActivePosition(
+        slug="btc-hourly-test",
+        decision=Direction.DOWN,
+        token_id="token-down",
+        strike=70000.0,
+        bet_size_usd=100.0,
+        bought_price=0.42,
+    )
+    retake_only = _make_context(
+        price=70010.0,
+        vwap=70050.0,
+        ema_9=69980.0,
+        ema_21=70020.0,
+        cvd_candle_delta=-150.0,
+        adaptive_cvd_threshold=100.0,
+    )
+    retake_with_structure = _make_context(
+        price=70010.0,
+        vwap=69990.0,
+        ema_9=70030.0,
+        ema_21=69990.0,
+        cvd_candle_delta=150.0,
+        adaptive_cvd_threshold=100.0,
+    )
+
+    _assert(
+        not manager._underlying_soft_sl_confirmed(
+            candle_open_position,
+            retake_only,
+            current_underlying_price=70010.0,
+        ),
+        "CANDLE_OPEN stops no longer confirm on a bare strike retake",
+    )
+    _assert(
+        manager._underlying_soft_sl_confirmed(
+            candle_open_position,
+            retake_with_structure,
+            current_underlying_price=70010.0,
+        ),
+        "CANDLE_OPEN stops still confirm once the retake is backed by structure",
+    )
+    _assert(
+        manager._underlying_soft_sl_confirmed(
+            plain_position,
+            retake_only,
+            current_underlying_price=70010.0,
+        ),
+        "Non-CANDLE_OPEN markets still allow strike retakes to confirm the stop immediately",
+    )
+
+
 def test_crowd_skew_default_is_relaxed() -> None:
     config = StrategyConfig.from_dict({})
     _assert(
@@ -423,6 +486,7 @@ async def run() -> None:
     test_fill_inference_uses_enum_status()
     test_hard_stop_floor_has_more_breathing_room()
     test_position_risk_defaults_cut_losers_faster()
+    test_candle_open_stop_confirmation_needs_structure_beyond_open_retake()
     test_crowd_skew_default_is_relaxed()
     test_strategy_ai_thresholds_are_tighter_by_score()
     test_strategy_entry_quality_defaults_are_tighter()
