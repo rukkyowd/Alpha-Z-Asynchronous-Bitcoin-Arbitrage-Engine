@@ -276,6 +276,25 @@ def test_crowd_skew_default_is_relaxed() -> None:
     )
 
 
+def test_strategy_ai_thresholds_are_tighter_by_score() -> None:
+    config = StrategyConfig.from_dict({})
+    _assert(
+        math.isclose(config.ai_score1_min_ev_pct, 18.0, abs_tol=1e-9),
+        "Score-1 setups now need 18% EV before AI is consulted",
+        detail=f"score1_ai_min_ev={config.ai_score1_min_ev_pct:.1f}",
+    )
+    _assert(
+        math.isclose(config.ai_score2_min_ev_pct, 8.0, abs_tol=1e-9),
+        "Score-2 setups now need 8% EV before AI is consulted",
+        detail=f"score2_ai_min_ev={config.ai_score2_min_ev_pct:.1f}",
+    )
+    _assert(
+        math.isclose(config.ai_score3_min_ev_pct, 3.0, abs_tol=1e-9),
+        "Score-3 setups now need 3% EV before AI is consulted",
+        detail=f"score3_ai_min_ev={config.ai_score3_min_ev_pct:.1f}",
+    )
+
+
 def test_max_trade_pct_default_is_trimmed() -> None:
     config = RiskConfig()
     _assert(
@@ -391,6 +410,7 @@ async def run() -> None:
     test_hard_stop_floor_has_more_breathing_room()
     test_position_risk_defaults_cut_losers_faster()
     test_crowd_skew_default_is_relaxed()
+    test_strategy_ai_thresholds_are_tighter_by_score()
     test_max_trade_pct_default_is_trimmed()
     test_tiny_amm_fallback_needs_depth_budget()
     await test_market_params_cache()

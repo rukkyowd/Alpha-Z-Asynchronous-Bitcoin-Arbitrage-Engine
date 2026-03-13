@@ -260,6 +260,7 @@ class ExecutionConfig:
     twap_slice_interval_secs: float = 2.0
     ny_session_maker_window_multiplier: float = 1.5
     ny_session_max_entry_premium_cents: float = 0.015
+    ny_session_relaxed_entry_min_ev_pct: float = 6.0
     high_ev_entry_premium_cents: float = 0.02
     high_ev_entry_premium_min_ev_pct: float = 15.0
     smart_entry_min_spread_cents: float = 0.02
@@ -522,6 +523,16 @@ class ClobExecutionEngine:
     @staticmethod
     def _is_passive_shadow_cap(target_price: float, naive_target: float) -> bool:
         return target_price + 1e-9 < naive_target
+
+    def _active_entry_premium_cap(self, signal: TradeSignal) -> float:
+        active_premium_cap = self.config.max_entry_premium_cents
+        if self._is_ny_session():
+            active_premium_cap = min(active_premium_cap, self.config.ny_session_max_entry_premium_cents)
+            if signal.expected_value_pct >= self.config.ny_session_relaxed_entry_min_ev_pct:
+                active_premium_cap = max(active_premium_cap, self.config.max_entry_premium_cents)
+        if signal.expected_value_pct >= self.config.high_ev_entry_premium_min_ev_pct:
+            active_premium_cap = max(active_premium_cap, self.config.high_ev_entry_premium_cents)
+        return active_premium_cap
 
     def _compute_twap_slices(self, total_usd: float) -> list[float]:
         """TWAP slice computation (Pillar 3B).
@@ -1206,11 +1217,7 @@ class ClobExecutionEngine:
         adjusted_slippage = min(slippage_cents, max_acceptable_premium) if max_acceptable_premium > 0 else slippage_cents
 
         # --- Pillar 3D: NY session entry premium tightening ---
-        active_premium_cap = self.config.max_entry_premium_cents
-        if self._is_ny_session():
-            active_premium_cap = min(active_premium_cap, self.config.ny_session_max_entry_premium_cents)
-        if signal.expected_value_pct >= self.config.high_ev_entry_premium_min_ev_pct:
-            active_premium_cap = max(active_premium_cap, self.config.high_ev_entry_premium_cents)
+        active_premium_cap = self._active_entry_premium_cap(signal)
 
         smart_entry_is_passive = self._is_passive_shadow_cap(target_price, naive_target)
         limit_price = _quantize(_clamp(target_price + adjusted_slippage, 0.01, 0.99), tick_size, ROUND_UP)

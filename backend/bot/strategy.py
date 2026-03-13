@@ -51,6 +51,9 @@ class StrategyConfig:
     max_seconds_for_new_bet: float = 3585.0
     max_crowd_prob_to_call: float = 98.0
     min_ev_pct_to_call_ai: float = 1.0
+    ai_score1_min_ev_pct: float = 18.0
+    ai_score2_min_ev_pct: float = 8.0
+    ai_score3_min_ev_pct: float = 3.0
     ev_ai_bypass_threshold: float = 3.0
     score1_min_ev_pct: float = 15.0
     score2_min_ev_pct: float = 6.0
@@ -456,6 +459,16 @@ class StrategyEngine:
         self.risk_manager = RiskManager(self.config.risk)
         self.calibrator = calibrator
 
+    def _ai_trigger_threshold(self, score: int) -> float:
+        threshold = self.config.min_ev_pct_to_call_ai
+        if score <= 1:
+            return max(threshold, self.config.ai_score1_min_ev_pct)
+        if score == 2:
+            return max(threshold, self.config.ai_score2_min_ev_pct)
+        if score == 3:
+            return max(threshold, self.config.ai_score3_min_ev_pct)
+        return threshold
+
     def compute_expected_value(
         self,
         context: TechnicalContext,
@@ -737,6 +750,7 @@ class StrategyEngine:
         needs_ai = True
         trend_direction = _infer_trend_direction(enriched_context, self.config)
         is_countertrend = trend_direction in (Direction.UP, Direction.DOWN) and trend_direction != target_direction
+        ai_trigger_threshold = self._ai_trigger_threshold(score)
 
         if allow_score0_extreme_ev:
             confidence = ConfidenceLevel.SCOUT
@@ -758,22 +772,21 @@ class StrategyEngine:
                 f"EV BYPASS ({target_ev.ev_pct:.1f}% >= {self.config.ev_ai_bypass_threshold:.1f}%, "
                 f"score={score}/4, px={token_price:.3f})"
             )
-        elif target_ev.ev_pct >= self.config.ev_ai_bypass_threshold:
+        elif target_ev.ev_pct >= ai_trigger_threshold:
             confidence = ConfidenceLevel.SCOUT
             needs_ai = True
-            reasons.append(
-                f"HIGH EV requires AI (score={score}/4, px={token_price:.3f}; "
-                f"bypass needs score>={self.config.ev_bypass_min_score}, "
-                f"px>={self.config.ev_bypass_min_token_price:.2f})"
-            )
-        elif target_ev.ev_pct >= self.config.min_ev_pct_to_call_ai:
-            confidence = ConfidenceLevel.SCOUT
-            needs_ai = True
-            reasons.append(f"AI VALIDATION REQUIRED (score={score}/4)")
+            if target_ev.ev_pct >= self.config.ev_ai_bypass_threshold:
+                reasons.append(
+                    f"HIGH EV requires AI (score={score}/4, px={token_price:.3f}; "
+                    f"bypass needs score>={self.config.ev_bypass_min_score}, "
+                    f"px>={self.config.ev_bypass_min_token_price:.2f})"
+                )
+            else:
+                reasons.append(f"AI VALIDATION REQUIRED (score={score}/4)")
         else:
             return _skip_signal(
                 slug,
-                f"Net EV {target_ev.ev_pct:.2f}% below AI trigger ({self.config.min_ev_pct_to_call_ai:.2f}%)",
+                f"Net EV {target_ev.ev_pct:.2f}% below AI trigger ({ai_trigger_threshold:.2f}%)",
                 score=score,
             )
 

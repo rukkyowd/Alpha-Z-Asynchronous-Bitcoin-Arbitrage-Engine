@@ -19,11 +19,13 @@ if str(_BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(_BACKEND_DIR))
 
 import main as main_module
+import bot.strategy as strategy_module
 from bot.ai_agent import AIConfig, AIDecision, LocalAIAgent
 from bot.execution import ClobExecutionEngine, ExecutionConfig, LiquidityCheckResult
-from bot.models import ConfidenceLevel, Direction, MarketOddsSnapshot, TechnicalContext, TradeSignal
-from bot.risk import RiskManager
+from bot.models import ConfidenceLevel, Direction, MarketOddsSnapshot, MarketRegime, TechnicalContext, TradeSignal
+from bot.risk import EVComputation, RiskManager
 from bot.state import EngineState
+from bot.strategy import StrategyConfig, StrategyEngine
 
 PASSED = 0
 FAILED = 0
@@ -158,6 +160,11 @@ class TestExecutionEngine(ClobExecutionEngine):
         return await self.submit_market_hook(*args, **kwargs)
 
 
+class NySessionExecutionEngine(TestExecutionEngine):
+    def _is_ny_session(self) -> bool:
+        return True
+
+
 class RecordingRiskManager(RiskManager):
     def __init__(self):
         super().__init__()
@@ -166,6 +173,56 @@ class RecordingRiskManager(RiskManager):
     def evaluate_trade(self, **kwargs):
         self.observed_market_prob_pct.append(float(kwargs["market_prob_pct"]))
         return super().evaluate_trade(**kwargs)
+
+
+class StubStrategyEngine(StrategyEngine):
+    def __init__(self, *, config: StrategyConfig | None = None, up_ev: EVComputation, down_ev: EVComputation):
+        super().__init__(config=config)
+        self._up_ev = up_ev
+        self._down_ev = down_ev
+
+    def compute_expected_value(
+        self,
+        context: TechnicalContext,
+        odds: MarketOddsSnapshot,
+        direction: Direction,
+        bankroll: float,
+        *,
+        liquidity=None,
+    ) -> EVComputation:
+        if direction == Direction.UP:
+            return self._up_ev
+        return self._down_ev
+
+
+def _make_ev(
+    *,
+    ev_pct: float,
+    adjusted_token_price: float,
+    true_prob_pct: float,
+    market_prob_pct: float,
+    approved: bool = True,
+    kelly_bet_usd: float = 50.0,
+) -> EVComputation:
+    return EVComputation(
+        ev_pct=ev_pct,
+        ev_pct_gross=ev_pct + 2.0,
+        kelly_bet_usd=kelly_bet_usd,
+        raw_kelly_fraction=0.02,
+        adjusted_kelly_fraction=0.02,
+        kelly_confidence_multiplier=1.0,
+        token_price=adjusted_token_price,
+        adjusted_token_price=adjusted_token_price,
+        slippage_cost_pct=0.2,
+        market_impact_pct=0.1,
+        time_decay_multiplier=1.0,
+        edge_pct=ev_pct,
+        true_prob_pct=true_prob_pct,
+        market_prob_pct=market_prob_pct,
+        approved=approved,
+        available_depth_usd=1000.0,
+        effective_max_trade_pct=0.02,
+    )
 
 
 async def test_maker_partial_fill_sizes_taker_remainder() -> None:
@@ -314,6 +371,81 @@ async def test_high_ev_entry_premium_override_keeps_tradeable_edges() -> None:
     _assert(high_ev_position is not None, "High-EV setups can use the widened ~2.0c premium cap")
 
 
+def test_ny_session_premium_relaxes_once_ev_is_real() -> None:
+    engine = NySessionExecutionEngine(
+        None,
+        config=ExecutionConfig(
+            ny_session_max_entry_premium_cents=0.015,
+            ny_session_relaxed_entry_min_ev_pct=6.0,
+            max_entry_premium_cents=0.018,
+            high_ev_entry_premium_cents=0.02,
+            high_ev_entry_premium_min_ev_pct=15.0,
+        ),
+    )
+
+    low_ev_cap = engine._active_entry_premium_cap(_make_signal(expected_value_pct=5.5))
+    mid_ev_cap = engine._active_entry_premium_cap(_make_signal(expected_value_pct=8.0))
+    high_ev_cap = engine._active_entry_premium_cap(_make_signal(expected_value_pct=18.0))
+
+    _assert(math.isclose(low_ev_cap, 0.015, abs_tol=1e-9), "NY session keeps the tighter 1.5c cap for marginal EV")
+    _assert(math.isclose(mid_ev_cap, 0.018, abs_tol=1e-9), "NY session relaxes back to the base 1.8c cap once EV clears 6%")
+    _assert(math.isclose(high_ev_cap, 0.02, abs_tol=1e-9), "High-EV setups still unlock the 2.0c premium override in NY")
+
+
+async def test_strategy_skips_marginal_score2_ai_calls() -> None:
+    original_apply_probabilistic_model = strategy_module.apply_probabilistic_model
+    strategy_module.apply_probabilistic_model = lambda context, **kwargs: context
+    try:
+        engine = StubStrategyEngine(
+            config=StrategyConfig(
+                min_ev_pct_to_call_ai=1.0,
+                ai_score1_min_ev_pct=18.0,
+                ai_score2_min_ev_pct=8.0,
+                ai_score3_min_ev_pct=3.0,
+            ),
+            up_ev=_make_ev(ev_pct=7.0, adjusted_token_price=0.42, true_prob_pct=62.0, market_prob_pct=40.0),
+            down_ev=_make_ev(ev_pct=1.0, adjusted_token_price=0.58, true_prob_pct=38.0, market_prob_pct=60.0),
+        )
+        context = TechnicalContext(
+            timestamp=datetime.now(timezone.utc),
+            price=70000.0,
+            strike_price=69950.0,
+            vwap=69990.0,
+            vwap_distance=10.0,
+            ema_9=70005.0,
+            ema_21=69995.0,
+            ema_spread_pct=0.0001,
+            rsi_14=55.0,
+            current_volume=100.0,
+            vol_sma_20=100.0,
+            cvd_candle_delta=50.0,
+            adaptive_cvd_threshold=100.0,
+            market_regime=MarketRegime.RANGE,
+            bayesian_probability=0.62,
+            bayesian_logit=0.5,
+            expected_move_t=0.7,
+            realized_volatility=0.002,
+            parkinson_volatility=0.002,
+            garman_klass_volatility=0.002,
+        )
+
+        signal = await engine.evaluate_trade_signal(
+            context,
+            _make_odds(entry_prob_pct=40.0),
+            5000.0,
+            slug="btc-hourly-test",
+        )
+    finally:
+        strategy_module.apply_probabilistic_model = original_apply_probabilistic_model
+
+    _assert(signal.direction == Direction.SKIP, "Score-2 setups below the 8% AI floor are skipped before AI is called", f"signal={signal}")
+    _assert(
+        bool(signal.reasons) and "below AI trigger (8.00%)" in signal.reasons[0],
+        "Skip reason reports the tighter score-aware AI threshold",
+        f"reasons={signal.reasons}",
+    )
+
+
 async def test_ai_validation_uses_strategy_context() -> None:
     state = await _build_state()
     raw_context = _make_context(bayesian_probability=0.41)
@@ -422,6 +554,8 @@ async def run() -> None:
     print("\n--- Executable EV Recheck ---")
     await test_authoritative_ev_uses_executable_price()
     await test_high_ev_entry_premium_override_keeps_tradeable_edges()
+    test_ny_session_premium_relaxes_once_ev_is_real()
+    await test_strategy_skips_marginal_score2_ai_calls()
 
     print("\n--- AI Context Wiring ---")
     await test_ai_validation_uses_strategy_context()

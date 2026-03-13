@@ -2650,6 +2650,10 @@ async def bootstrap_runtime() -> EngineServices:
             risk=risk_config,
             close_equals_open_up_bias_prob=_env_float("CLOSE_EQUALS_OPEN_UP_BIAS_PROB", 0.0005),
             max_crowd_prob_to_call=_env_float("MAX_CROWD_PROB_TO_CALL", 98.0),
+            min_ev_pct_to_call_ai=_env_float("MIN_EV_PCT_TO_CALL_AI", 1.0),
+            ai_score1_min_ev_pct=_env_float("AI_SCORE1_MIN_EV_PCT", 18.0),
+            ai_score2_min_ev_pct=_env_float("AI_SCORE2_MIN_EV_PCT", 8.0),
+            ai_score3_min_ev_pct=_env_float("AI_SCORE3_MIN_EV_PCT", 3.0),
             late_lottery_block_score=_env_float("LATE_LOTTERY_BLOCK_SCORE", 0.14),
             late_lottery_min_ev_pct=_env_float("LATE_LOTTERY_MIN_EV_PCT", 20.0),
             late_lottery_min_score=_env_int("LATE_LOTTERY_MIN_SCORE", 3),
@@ -2668,6 +2672,7 @@ async def bootstrap_runtime() -> EngineServices:
         paper_use_live_clob=PAPER_USE_LIVE_CLOB,
         max_entry_premium_cents=_env_float("MAX_ENTRY_PREMIUM_CENTS", 0.018),
         ny_session_max_entry_premium_cents=_env_float("NY_SESSION_MAX_ENTRY_PREMIUM_CENTS", 0.015),
+        ny_session_relaxed_entry_min_ev_pct=_env_float("NY_SESSION_RELAXED_ENTRY_MIN_EV_PCT", 6.0),
         high_ev_entry_premium_cents=_env_float("HIGH_EV_ENTRY_PREMIUM_CENTS", 0.02),
         high_ev_entry_premium_min_ev_pct=_env_float("HIGH_EV_ENTRY_PREMIUM_MIN_EV_PCT", 15.0),
     )
