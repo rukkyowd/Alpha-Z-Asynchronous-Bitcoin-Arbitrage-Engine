@@ -295,6 +295,20 @@ def test_strategy_ai_thresholds_are_tighter_by_score() -> None:
     )
 
 
+def test_strategy_entry_quality_defaults_are_tighter() -> None:
+    config = StrategyConfig.from_dict({})
+    _assert(
+        math.isclose(config.score2_min_ev_pct, 8.0, abs_tol=1e-9),
+        "Score-2 setups now need 8% EV before they are considered tradable",
+        detail=f"score2_min_ev={config.score2_min_ev_pct:.1f}",
+    )
+    _assert(
+        math.isclose(config.min_raw_edge_cents, 1.0, abs_tol=1e-9),
+        "Minimum raw edge defaults to 1.0c to avoid market-maker-grade scraps",
+        detail=f"min_raw_edge_cents={config.min_raw_edge_cents:.1f}",
+    )
+
+
 def test_max_trade_pct_default_is_trimmed() -> None:
     config = RiskConfig()
     _assert(
@@ -411,6 +425,7 @@ async def run() -> None:
     test_position_risk_defaults_cut_losers_faster()
     test_crowd_skew_default_is_relaxed()
     test_strategy_ai_thresholds_are_tighter_by_score()
+    test_strategy_entry_quality_defaults_are_tighter()
     test_max_trade_pct_default_is_trimmed()
     test_tiny_amm_fallback_needs_depth_budget()
     await test_market_params_cache()

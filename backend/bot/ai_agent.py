@@ -30,6 +30,10 @@ class AIConfig:
     circuit_breaker_threshold: int = 4
     circuit_breaker_base_cooldown_seconds: float = 30.0
     circuit_breaker_max_cooldown_seconds: float = 300.0
+    veto_cooldown_seconds: float = 45.0
+    veto_min_ev_improvement_pct: float = 2.0
+    veto_min_score_improvement: int = 1
+    veto_min_token_price_move_cents: float = 2.0
     temperature: float = 0.0
     max_tokens: int = 128
 
@@ -298,6 +302,9 @@ class LocalAIAgent:
                         signal.slug,
                         last_veto_ts=time.time(),
                         last_veto_ev_pct=signal.expected_value_pct,
+                        last_veto_direction=signal.direction,
+                        last_veto_score=signal.score,
+                        last_veto_token_price=signal.token_price,
                     )
                     return AIDecision(
                         decision=Direction.SKIP,
@@ -305,6 +312,14 @@ class LocalAIAgent:
                         reason="AI vetoed borderline signal",
                         response_ms=response_ms,
                     )
+                await state.record_ai_state(
+                    signal.slug,
+                    last_veto_ts=0.0,
+                    last_veto_ev_pct=0.0,
+                    last_veto_direction=Direction.UNKNOWN,
+                    last_veto_score=0,
+                    last_veto_token_price=0.0,
+                )
                 return AIDecision(
                     decision=decision,
                     raw_response=raw_response,
@@ -322,6 +337,9 @@ class LocalAIAgent:
                 signal.slug,
                 last_veto_ts=time.time(),
                 last_veto_ev_pct=signal.expected_value_pct,
+                last_veto_direction=signal.direction,
+                last_veto_score=signal.score,
+                last_veto_token_price=signal.token_price,
             )
             await state.update_runtime_counters(
                 ai_consecutive_failures=current_failures,

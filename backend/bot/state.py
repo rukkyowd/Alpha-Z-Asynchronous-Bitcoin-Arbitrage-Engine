@@ -307,6 +307,9 @@ class EngineState:
         ai_calls: int | None = None,
         last_veto_ts: float | None = None,
         last_veto_ev_pct: float | None = None,
+        last_veto_direction: Direction | None = None,
+        last_veto_score: int | None = None,
+        last_veto_token_price: float | None = None,
     ) -> AISlugState:
         async with self.ai_lock:
             current = self.ai_state.get(slug, AISlugState())
@@ -315,6 +318,11 @@ class EngineState:
                 ai_calls=current.ai_calls if ai_calls is None else ai_calls,
                 last_veto_ts=current.last_veto_ts if last_veto_ts is None else last_veto_ts,
                 last_veto_ev_pct=current.last_veto_ev_pct if last_veto_ev_pct is None else last_veto_ev_pct,
+                last_veto_direction=current.last_veto_direction if last_veto_direction is None else last_veto_direction,
+                last_veto_score=current.last_veto_score if last_veto_score is None else last_veto_score,
+                last_veto_token_price=(
+                    current.last_veto_token_price if last_veto_token_price is None else last_veto_token_price
+                ),
             )
             self.ai_state[slug] = updated
             return updated.clone()
@@ -322,6 +330,11 @@ class EngineState:
     async def clear_ai_state(self, slug: str) -> None:
         async with self.ai_lock:
             self.ai_state.pop(slug, None)
+
+    async def get_ai_state(self, slug: str) -> AISlugState | None:
+        async with self.ai_lock:
+            current = self.ai_state.get(slug)
+            return current.clone() if current is not None else None
 
     async def record_execution_failure(self, slug: str, *, reason: str, ev_pct: float = 0.0) -> ExecutionFailureState:
         async with self.positions_lock:

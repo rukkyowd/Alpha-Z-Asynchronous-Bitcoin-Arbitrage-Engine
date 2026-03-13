@@ -7,6 +7,7 @@ Usage:
 from __future__ import annotations
 
 import asyncio
+import logging
 import math
 import sys
 import time
@@ -22,7 +23,18 @@ import main as main_module
 import bot.strategy as strategy_module
 from bot.ai_agent import AIConfig, AIDecision, LocalAIAgent
 from bot.execution import ClobExecutionEngine, ExecutionConfig, LiquidityCheckResult
-from bot.models import ConfidenceLevel, Direction, MarketOddsSnapshot, MarketRegime, TechnicalContext, TradeSignal
+from bot.models import (
+    ActivePosition,
+    ConfidenceLevel,
+    DataSource,
+    Direction,
+    MarketOddsSnapshot,
+    MarketRegime,
+    MarketTick,
+    PositionStatus,
+    TechnicalContext,
+    TradeSignal,
+)
 from bot.risk import EVComputation, RiskManager
 from bot.state import EngineState
 from bot.strategy import StrategyConfig, StrategyEngine
@@ -398,6 +410,7 @@ async def test_strategy_skips_marginal_score2_ai_calls() -> None:
     try:
         engine = StubStrategyEngine(
             config=StrategyConfig(
+                score2_min_ev_pct=6.0,
                 min_ev_pct_to_call_ai=1.0,
                 ai_score1_min_ev_pct=18.0,
                 ai_score2_min_ev_pct=8.0,
@@ -446,6 +459,58 @@ async def test_strategy_skips_marginal_score2_ai_calls() -> None:
     )
 
 
+async def test_strategy_skips_thin_raw_edge() -> None:
+    original_apply_probabilistic_model = strategy_module.apply_probabilistic_model
+    strategy_module.apply_probabilistic_model = lambda context, **kwargs: context
+    try:
+        engine = StubStrategyEngine(
+            config=StrategyConfig(
+                score2_min_ev_pct=8.0,
+                min_raw_edge_cents=1.0,
+            ),
+            up_ev=_make_ev(ev_pct=10.0, adjusted_token_price=0.615, true_prob_pct=62.0, market_prob_pct=40.0),
+            down_ev=_make_ev(ev_pct=1.0, adjusted_token_price=0.58, true_prob_pct=38.0, market_prob_pct=60.0),
+        )
+        context = TechnicalContext(
+            timestamp=datetime.now(timezone.utc),
+            price=70000.0,
+            strike_price=69950.0,
+            vwap=69990.0,
+            vwap_distance=10.0,
+            ema_9=70005.0,
+            ema_21=69995.0,
+            ema_spread_pct=0.0001,
+            rsi_14=55.0,
+            current_volume=100.0,
+            vol_sma_20=100.0,
+            cvd_candle_delta=50.0,
+            adaptive_cvd_threshold=100.0,
+            market_regime=MarketRegime.RANGE,
+            bayesian_probability=0.62,
+            bayesian_logit=0.5,
+            expected_move_t=0.7,
+            realized_volatility=0.002,
+            parkinson_volatility=0.002,
+            garman_klass_volatility=0.002,
+        )
+
+        signal = await engine.evaluate_trade_signal(
+            context,
+            _make_odds(entry_prob_pct=40.0),
+            5000.0,
+            slug="btc-hourly-test",
+        )
+    finally:
+        strategy_module.apply_probabilistic_model = original_apply_probabilistic_model
+
+    _assert(signal.direction == Direction.SKIP, "Thin raw-edge setups are skipped before the engine leans on AI", f"signal={signal}")
+    _assert(
+        bool(signal.reasons) and "Raw edge too thin (0.50c < 1.0c)" in signal.reasons[0],
+        "Skip reason reports the new minimum raw-edge filter",
+        f"reasons={signal.reasons}",
+    )
+
+
 async def test_ai_validation_uses_strategy_context() -> None:
     state = await _build_state()
     raw_context = _make_context(bayesian_probability=0.41)
@@ -477,6 +542,188 @@ async def test_ai_validation_uses_strategy_context() -> None:
     _assert(math.isclose(captured_probability, model_context.bayesian_probability, abs_tol=1e-9), "AI gate uses the strategy's prepared model context", f"captured={captured_probability:.4f}")
     _assert(validated_signal.ai_validated and validated_signal.approved and not validated_signal.needs_ai, "AI approval preserves validated signal state", f"signal={validated_signal}")
     _assert(reason == "", "AI approval returns no rejection reason", f"reason={reason}")
+
+
+async def test_build_context_prefers_live_price_over_last_closed_candle() -> None:
+    state = await _build_state()
+    closed_tick = MarketTick(
+        timestamp=datetime.now(timezone.utc),
+        source=DataSource.BINANCE,
+        price=70000.0,
+        open=69950.0,
+        high=70020.0,
+        low=69920.0,
+        close=70000.0,
+        volume=100.0,
+        quote_volume=7000000.0,
+        trade_count=50,
+        is_closed=True,
+        event_time_ms=1_000,
+        close_time_ms=2_000,
+    )
+    await state.append_candle(closed_tick)
+    await state.set_live_tick(price=70525.0)
+
+    runtime = SimpleNamespace(state=state, latest_context=None)
+    context = await main_module.build_context_from_state(runtime)
+
+    _assert(context is not None, "Fresh context can be rebuilt from state after a closed bar")
+    if context is not None:
+        _assert(
+            math.isclose(context.price, 70525.0, abs_tol=1e-9),
+            "Context prefers the latest live price even when the last candle is closed",
+            f"price={context.price:.2f}",
+        )
+
+
+async def test_ai_validation_respects_recent_veto_cooldown() -> None:
+    state = await _build_state()
+    await state.record_ai_state(
+        "btc-hourly-test",
+        ai_calls=1,
+        last_veto_ts=time.time(),
+        last_veto_ev_pct=12.0,
+        last_veto_direction=Direction.UP,
+        last_veto_score=2,
+        last_veto_token_price=0.42,
+    )
+    signal = _make_signal(
+        token_price=0.43,
+        expected_value_pct=13.0,
+        model_context=_make_context(bayesian_probability=0.79),
+    )
+    runtime = SimpleNamespace(
+        http_session=None,
+        state=state,
+        ai_agent=object(),
+        ai_config=AIConfig(
+            veto_cooldown_seconds=45.0,
+            veto_min_ev_improvement_pct=2.0,
+            veto_min_score_improvement=1,
+            veto_min_token_price_move_cents=2.0,
+        ),
+        paper_trading=False,
+    )
+
+    ai_called = False
+    original_call_local_ai = main_module.call_local_ai
+
+    async def fake_call_local_ai(*args, **kwargs):
+        nonlocal ai_called
+        ai_called = True
+        return AIDecision(decision=Direction.UP, raw_response="FINAL:UP", reason="AI confirmed favored direction")
+
+    main_module.call_local_ai = fake_call_local_ai
+    try:
+        validated_signal, reason = await main_module.maybe_validate_with_ai(runtime, signal, _make_context(), _make_odds())
+    finally:
+        main_module.call_local_ai = original_call_local_ai
+
+    _assert(not ai_called, "Recent AI vetoes suppress near-identical retries during cooldown")
+    _assert(
+        not validated_signal.approved and "AI veto cooldown active" in reason,
+        "Cooldown rejection explains the required improvement before re-querying AI",
+        f"reason={reason}",
+    )
+
+
+async def test_strategy_blocks_expensive_entries_without_extra_edge() -> None:
+    original_apply_probabilistic_model = strategy_module.apply_probabilistic_model
+    strategy_module.apply_probabilistic_model = lambda context, **kwargs: context
+    try:
+        engine = StubStrategyEngine(
+            config=StrategyConfig(
+                expensive_entry_price_floor=0.65,
+                expensive_entry_min_score=3,
+                expensive_entry_min_ev_pct=12.0,
+                expensive_entry_min_ev_lead_pct=4.0,
+                expensive_entry_min_true_prob_pct=68.0,
+            ),
+            up_ev=_make_ev(ev_pct=10.0, adjusted_token_price=0.70, true_prob_pct=72.0, market_prob_pct=40.0),
+            down_ev=_make_ev(ev_pct=1.0, adjusted_token_price=0.30, true_prob_pct=31.0, market_prob_pct=60.0),
+        )
+        context = TechnicalContext(
+            timestamp=datetime.now(timezone.utc),
+            price=70020.0,
+            strike_price=69950.0,
+            vwap=70000.0,
+            vwap_distance=20.0,
+            ema_9=70025.0,
+            ema_21=70005.0,
+            ema_spread_pct=0.0003,
+            rsi_14=56.0,
+            current_volume=120.0,
+            vol_sma_20=100.0,
+            cvd_candle_delta=50.0,
+            adaptive_cvd_threshold=100.0,
+            market_regime=MarketRegime.BULL_TREND,
+            bayesian_probability=0.64,
+            bayesian_logit=0.58,
+            expected_move_t=0.8,
+            realized_volatility=0.002,
+            parkinson_volatility=0.002,
+            garman_klass_volatility=0.002,
+        )
+
+        signal = await engine.evaluate_trade_signal(
+            context,
+            _make_odds(entry_prob_pct=40.0),
+            5000.0,
+            slug="btc-hourly-test",
+        )
+    finally:
+        strategy_module.apply_probabilistic_model = original_apply_probabilistic_model
+
+    _assert(signal.direction == Direction.SKIP, "Expensive entries need stronger EV before the engine will buy them", f"signal={signal}")
+    _assert(
+        bool(signal.reasons) and "Expensive entry blocked: px 0.700 needs EV >= 12.00%" in signal.reasons[0],
+        "Expensive-entry rejection reports the tighter EV threshold",
+        f"reasons={signal.reasons}",
+    )
+
+
+def test_position_heartbeat_reports_soft_and_hard_stops() -> None:
+    messages: list[str] = []
+
+    class _Capture(logging.Handler):
+        def emit(self, record: logging.LogRecord) -> None:
+            messages.append(record.getMessage())
+
+    handler = _Capture(level=logging.INFO)
+    runtime = SimpleNamespace(position_heartbeat_ts={})
+    position = ActivePosition(
+        slug="btc-hourly-test",
+        decision=Direction.UP,
+        token_id="token-up",
+        strike=69950.0,
+        bet_size_usd=100.0,
+        bought_price=0.70,
+        status=PositionStatus.OPEN,
+        current_token_price=0.68,
+        mark_price=0.68,
+        tp_delta=0.13,
+        sl_delta=-0.12,
+        hard_sl_delta=-0.18,
+        tp_token_price=0.83,
+        sl_token_price=0.58,
+        hard_sl_token_price=0.52,
+        seconds_remaining=2400,
+    )
+
+    main_module.logger.addHandler(handler)
+    previous_level = main_module.logger.level
+    main_module.logger.setLevel(logging.INFO)
+    try:
+        main_module.log_position_heartbeat(runtime, position, min_repeat_secs=0.0)
+    finally:
+        main_module.logger.setLevel(previous_level)
+        main_module.logger.removeHandler(handler)
+
+    _assert(
+        any("Soft SL:" in message and "Hard SL:" in message for message in messages),
+        "Heartbeat logs show both soft and hard stop levels",
+        detail=messages[-1] if messages else "",
+    )
 
 
 class _SlowResponse:
@@ -556,15 +803,20 @@ async def run() -> None:
     await test_high_ev_entry_premium_override_keeps_tradeable_edges()
     test_ny_session_premium_relaxes_once_ev_is_real()
     await test_strategy_skips_marginal_score2_ai_calls()
+    await test_strategy_skips_thin_raw_edge()
 
     print("\n--- AI Context Wiring ---")
     await test_ai_validation_uses_strategy_context()
+    await test_ai_validation_respects_recent_veto_cooldown()
+    await test_build_context_prefers_live_price_over_last_closed_candle()
+    await test_strategy_blocks_expensive_entries_without_extra_edge()
 
     print("\n--- AI Latency Budget ---")
     await test_ai_budget_limits_inline_latency()
 
     print("\n--- Live Runtime Pacing ---")
     test_live_ws_sender_is_throttled()
+    test_position_heartbeat_reports_soft_and_hard_stops()
 
     print("\n" + "=" * 52)
     print(f"PASSED: {PASSED}")

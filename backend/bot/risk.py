@@ -1057,8 +1057,10 @@ class RiskManager:
             live_underlying_price=current_underlying_price,
             tp_delta=snapshot.tp_delta,
             sl_delta=snapshot.sl_delta,
+            hard_sl_delta=snapshot.hard_sl_delta,
             tp_token_price=snapshot.tp_token_price,
             sl_token_price=snapshot.sl_token_price,
+            hard_sl_token_price=snapshot.hard_sl_token_price,
             sl_disabled=snapshot.sl_disabled,
             seconds_remaining=int(seconds_remaining),
         )

@@ -365,8 +365,10 @@ class ActivePosition(SerializableModel):
     entry_underlying_price: float = 0.0
     tp_delta: float = 0.0
     sl_delta: float = 0.0
+    hard_sl_delta: float = 0.0
     tp_token_price: float = 0.0
     sl_token_price: float = 0.0
+    hard_sl_token_price: float = 0.0
     seconds_remaining: int = 0
     sl_disabled: bool = False
     sl_breach_count: int = 0
@@ -408,6 +410,9 @@ class AISlugState(SerializableModel):
     ai_calls: int = 0
     last_veto_ts: float = 0.0
     last_veto_ev_pct: float = 0.0
+    last_veto_direction: Direction = Direction.UNKNOWN
+    last_veto_score: int = 0
+    last_veto_token_price: float = 0.0
 
 
 @dataclass(slots=True, kw_only=True)

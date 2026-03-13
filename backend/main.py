@@ -272,6 +272,8 @@ def _skip_log_repeat_secs(reason: str, default_secs: float = 15.0) -> float:
         return 60.0
     if "post-win opposite-direction cooldown" in normalized:
         return 60.0
+    if "ai veto cooldown active" in normalized:
+        return 30.0
     if "crowd skew too high" in normalized:
         return 45.0
     if normalized.startswith("too early") or normalized.startswith("too close to expiry"):
@@ -324,7 +326,7 @@ def log_position_heartbeat(
         unrealized_pct = (unrealized_pnl / position.bet_size_usd) * 100.0
 
     logger.info(
-        "[POSITION] %s %s | Mark: %.4f | U-PnL: $%+.2f (%+.2f%%) | TP: %+.1fc @ %.4f | SL: %+.1fc @ %.4f | T-%s | TP Armed: %s | SL Disabled: %s",
+        "[POSITION] %s %s | Mark: %.4f | U-PnL: $%+.2f (%+.2f%%) | TP: %+.1fc @ %.4f | Soft SL: %+.1fc @ %.4f | Hard SL: %+.1fc @ %.4f | T-%s | TP Armed: %s | SL Disabled: %s",
         position.status.value,
         position.slug,
         mark_price,
@@ -334,6 +336,8 @@ def log_position_heartbeat(
         position.tp_token_price,
         position.sl_delta * 100.0,
         position.sl_token_price,
+        position.hard_sl_delta * 100.0,
+        position.hard_sl_token_price if position.hard_sl_token_price > 0 else position.sl_token_price,
         _format_countdown(float(position.seconds_remaining)),
         "Y" if position.tp_armed else "N",
         "Y" if position.sl_disabled else "N",
@@ -360,6 +364,70 @@ def utc_now() -> datetime:
 def utc_timestamp_text(dt: datetime | None = None) -> str:
     value = dt or utc_now()
     return value.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+
+
+def _overlay_live_price(candle: MarketTick, live_price: float) -> MarketTick:
+    if live_price <= 0:
+        return candle
+    if abs(live_price - candle.resolved_price) <= 1e-9:
+        return candle
+
+    if candle.is_closed:
+        synthetic_open = candle.close if candle.close > 0 else candle.resolved_price
+        high_candidates = [value for value in (candle.high, synthetic_open, live_price) if value > 0]
+        low_seed = candle.low if candle.low > 0 else synthetic_open
+        low_candidates = [value for value in (low_seed, synthetic_open, live_price) if value > 0]
+        return replace(
+            candle,
+            timestamp=utc_now(),
+            price=live_price,
+            open=synthetic_open,
+            high=max(high_candidates) if high_candidates else live_price,
+            low=min(low_candidates) if low_candidates else live_price,
+            close=live_price,
+            is_closed=False,
+            close_time_ms=0,
+            event_time_ms=max(candle.event_time_ms, int(time.time() * 1000.0)),
+        )
+
+    high_candidates = [value for value in (candle.high, candle.open, candle.close, live_price) if value > 0]
+    low_candidates = [value for value in (candle.low, candle.open, candle.close, live_price) if value > 0]
+    return replace(
+        candle,
+        price=live_price,
+        close=live_price,
+        high=max(high_candidates) if high_candidates else live_price,
+        low=min(low_candidates) if low_candidates else live_price,
+        event_time_ms=max(candle.event_time_ms, int(time.time() * 1000.0)),
+    )
+
+
+def _ai_veto_cooldown_reason(signal: TradeSignal, ai_state: Any, config: AIConfig) -> str:
+    if ai_state is None or ai_state.last_veto_ts <= 0:
+        return ""
+    if ai_state.last_veto_direction not in (Direction.UNKNOWN, signal.direction):
+        return ""
+
+    age = time.time() - ai_state.last_veto_ts
+    if age < 0 or age >= config.veto_cooldown_seconds:
+        return ""
+
+    score_improvement = signal.score - ai_state.last_veto_score
+    ev_improvement = signal.expected_value_pct - ai_state.last_veto_ev_pct
+    price_move_cents = abs(signal.token_price - ai_state.last_veto_token_price) * 100.0
+    if (
+        score_improvement >= config.veto_min_score_improvement
+        or ev_improvement >= config.veto_min_ev_improvement_pct
+        or price_move_cents >= config.veto_min_token_price_move_cents
+    ):
+        return ""
+
+    cooldown_remaining = max(1, int(math.ceil(config.veto_cooldown_seconds - age)))
+    return (
+        f"AI veto cooldown active ({cooldown_remaining}s left; needs +"
+        f"{config.veto_min_ev_improvement_pct:.2f}% EV, +{config.veto_min_score_improvement} score, "
+        f"or {config.veto_min_token_price_move_cents:.1f}c repricing)"
+    )
 
 
 def _market_slug_for_et_datetime(now_et: datetime) -> str:
@@ -1092,8 +1160,8 @@ async def build_context_from_state(runtime: EngineServices) -> TechnicalContext 
         if not history:
             return None
         live_candle = history[-1].clone()
-    if live_price > 0 and (live_candle.close <= 0 or not live_candle.is_closed):
-        live_candle = replace(live_candle, price=live_price, close=live_price)
+    if live_price > 0:
+        live_candle = _overlay_live_price(live_candle, live_price)
 
     price = live_candle.resolved_price
     if price <= 0:
@@ -1733,6 +1801,11 @@ async def maybe_validate_with_ai(
     if not signal.needs_ai:
         return signal, ""
 
+    ai_state = await runtime.state.get_ai_state(signal.slug)
+    cooldown_reason = _ai_veto_cooldown_reason(signal, ai_state, runtime.ai_config)
+    if cooldown_reason:
+        return replace(signal, approved=False), cooldown_reason
+
     ai_context = signal.model_context or context
     ai_decision = await call_local_ai(
         runtime.http_session,
@@ -2032,7 +2105,9 @@ async def position_monitor_loop(runtime: EngineServices) -> None:
                 await asyncio.sleep(POSITION_MONITOR_SLEEP_SECS)
                 continue
 
-            context = runtime.latest_context or await build_context_from_state(runtime)
+            context = await build_context_from_state(runtime)
+            if context is None:
+                context = runtime.latest_context
             if context is None:
                 await asyncio.sleep(POSITION_MONITOR_SLEEP_SECS)
                 continue
@@ -2654,6 +2729,12 @@ async def bootstrap_runtime() -> EngineServices:
             ai_score1_min_ev_pct=_env_float("AI_SCORE1_MIN_EV_PCT", 18.0),
             ai_score2_min_ev_pct=_env_float("AI_SCORE2_MIN_EV_PCT", 8.0),
             ai_score3_min_ev_pct=_env_float("AI_SCORE3_MIN_EV_PCT", 3.0),
+            expensive_entry_price_floor=_env_float("EXPENSIVE_ENTRY_PRICE_FLOOR", 0.65),
+            expensive_entry_min_score=_env_int("EXPENSIVE_ENTRY_MIN_SCORE", 3),
+            expensive_entry_min_ev_pct=_env_float("EXPENSIVE_ENTRY_MIN_EV_PCT", 12.0),
+            expensive_entry_min_ev_lead_pct=_env_float("EXPENSIVE_ENTRY_MIN_EV_LEAD_PCT", 4.0),
+            expensive_entry_min_true_prob_pct=_env_float("EXPENSIVE_ENTRY_MIN_TRUE_PROB_PCT", 68.0),
+            expensive_entry_require_trend_alignment=_env_bool("EXPENSIVE_ENTRY_REQUIRE_TREND_ALIGNMENT", True),
             late_lottery_block_score=_env_float("LATE_LOTTERY_BLOCK_SCORE", 0.14),
             late_lottery_min_ev_pct=_env_float("LATE_LOTTERY_MIN_EV_PCT", 20.0),
             late_lottery_min_score=_env_int("LATE_LOTTERY_MIN_SCORE", 3),
@@ -2676,10 +2757,24 @@ async def bootstrap_runtime() -> EngineServices:
         high_ev_entry_premium_cents=_env_float("HIGH_EV_ENTRY_PREMIUM_CENTS", 0.02),
         high_ev_entry_premium_min_ev_pct=_env_float("HIGH_EV_ENTRY_PREMIUM_MIN_EV_PCT", 15.0),
     )
+    ai_defaults = AIConfig()
     ai_config = AIConfig(
-        model=os.getenv("LOCAL_AI_MODEL", AIConfig().model),
+        model=os.getenv("LOCAL_AI_MODEL", ai_defaults.model),
         groq_api_key=os.getenv("GROQ_API_KEY"),
-        groq_model=os.getenv("GROQ_MODEL", AIConfig().groq_model),
+        groq_model=os.getenv("GROQ_MODEL", ai_defaults.groq_model),
+        veto_cooldown_seconds=_env_float("AI_VETO_COOLDOWN_SECONDS", ai_defaults.veto_cooldown_seconds),
+        veto_min_ev_improvement_pct=_env_float(
+            "AI_VETO_MIN_EV_IMPROVEMENT_PCT",
+            ai_defaults.veto_min_ev_improvement_pct,
+        ),
+        veto_min_score_improvement=_env_int(
+            "AI_VETO_MIN_SCORE_IMPROVEMENT",
+            ai_defaults.veto_min_score_improvement,
+        ),
+        veto_min_token_price_move_cents=_env_float(
+            "AI_VETO_MIN_TOKEN_PRICE_MOVE_CENTS",
+            ai_defaults.veto_min_token_price_move_cents,
+        ),
     )
 
     http_session = create_http_session(data_config)

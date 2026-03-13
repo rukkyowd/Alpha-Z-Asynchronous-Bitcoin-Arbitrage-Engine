@@ -56,9 +56,16 @@ class StrategyConfig:
     ai_score3_min_ev_pct: float = 3.0
     ev_ai_bypass_threshold: float = 3.0
     score1_min_ev_pct: float = 15.0
-    score2_min_ev_pct: float = 6.0
+    score2_min_ev_pct: float = 8.0
+    min_raw_edge_cents: float = 1.0
     score0_min_ev_pct: float = 35.0
     score0_max_token_price: float = 0.35
+    expensive_entry_price_floor: float = 0.65
+    expensive_entry_min_score: int = 3
+    expensive_entry_min_ev_pct: float = 12.0
+    expensive_entry_min_ev_lead_pct: float = 4.0
+    expensive_entry_min_true_prob_pct: float = 68.0
+    expensive_entry_require_trend_alignment: bool = True
     ev_bypass_min_score: int = 3
     ev_bypass_min_token_price: float = 0.20
     volume_confirmation_ratio: float = 1.05
@@ -343,6 +350,51 @@ def _late_countertrend_reason(
         return (
             f"Late countertrend blocked: true {true_prob_pct:.2f}% < "
             f"{config.late_countertrend_min_true_prob_pct:.2f}%"
+        )
+    return None
+
+
+def _expensive_entry_reason(
+    direction: Direction,
+    trend_direction: Direction,
+    *,
+    token_price: float,
+    score: int,
+    ev_pct: float,
+    ev_lead_pct: float,
+    true_prob_pct: float,
+    config: StrategyConfig,
+) -> str | None:
+    if token_price < config.expensive_entry_price_floor:
+        return None
+    if score < config.expensive_entry_min_score:
+        return (
+            f"Expensive entry blocked: px {token_price:.3f} needs score >= "
+            f"{config.expensive_entry_min_score}/4 (got {score}/4)"
+        )
+    if ev_pct < config.expensive_entry_min_ev_pct:
+        return (
+            f"Expensive entry blocked: px {token_price:.3f} needs EV >= "
+            f"{config.expensive_entry_min_ev_pct:.2f}% (got {ev_pct:.2f}%)"
+        )
+    if ev_lead_pct < config.expensive_entry_min_ev_lead_pct:
+        return (
+            f"Expensive entry blocked: px {token_price:.3f} needs EV lead >= "
+            f"{config.expensive_entry_min_ev_lead_pct:.2f}% (got {ev_lead_pct:.2f}%)"
+        )
+    if true_prob_pct < config.expensive_entry_min_true_prob_pct:
+        return (
+            f"Expensive entry blocked: px {token_price:.3f} needs true >= "
+            f"{config.expensive_entry_min_true_prob_pct:.2f}% (got {true_prob_pct:.2f}%)"
+        )
+    if (
+        config.expensive_entry_require_trend_alignment
+        and trend_direction in (Direction.UP, Direction.DOWN)
+        and direction != trend_direction
+    ):
+        return (
+            f"Expensive entry blocked: px {token_price:.3f} is countertrend vs "
+            f"{trend_direction.value}"
         )
     return None
 
@@ -650,6 +702,27 @@ class StrategyEngine:
                 f"Score 2 requires EV >= {self.config.score2_min_ev_pct:.2f}% (got {target_ev.ev_pct:.2f}%)",
                 score=score,
             )
+        raw_edge_cents = target_ev.true_prob_pct - (token_price * 100.0)
+        if raw_edge_cents < self.config.min_raw_edge_cents and not allow_score0_extreme_ev:
+            return _skip_signal(
+                slug,
+                f"Raw edge too thin ({raw_edge_cents:.2f}c < {self.config.min_raw_edge_cents:.1f}c)",
+                score=score,
+            )
+
+        trend_direction = _infer_trend_direction(enriched_context, self.config)
+        expensive_entry_reason = _expensive_entry_reason(
+            target_direction,
+            trend_direction,
+            token_price=token_price,
+            score=score,
+            ev_pct=target_ev.ev_pct,
+            ev_lead_pct=ev_lead_pct,
+            true_prob_pct=target_ev.true_prob_pct,
+            config=self.config,
+        )
+        if expensive_entry_reason:
+            return _skip_signal(slug, expensive_entry_reason, score=score)
 
         if (
             odds.seconds_remaining <= self.config.late_countertrend_window_secs
@@ -748,7 +821,6 @@ class StrategyEngine:
 
         confidence = ConfidenceLevel.SCOUT
         needs_ai = True
-        trend_direction = _infer_trend_direction(enriched_context, self.config)
         is_countertrend = trend_direction in (Direction.UP, Direction.DOWN) and trend_direction != target_direction
         ai_trigger_threshold = self._ai_trigger_threshold(score)
 
