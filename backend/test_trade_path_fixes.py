@@ -111,15 +111,23 @@ def _make_signal(
     )
 
 
-def _make_liquidity(*, entry_price: float) -> LiquidityCheckResult:
+def _make_liquidity(
+    *,
+    entry_price: float,
+    ok: bool = True,
+    mode: str = "CLOB",
+    best_bid: float | None = None,
+    best_ask: float | None = None,
+    spread_pct: float = 0.01,
+) -> LiquidityCheckResult:
     return LiquidityCheckResult(
-        ok=True,
-        mode="CLOB",
+        ok=ok,
+        mode=mode,
         reason="OK",
         entry_price=entry_price,
-        best_bid=max(0.01, entry_price - 0.01),
-        best_ask=entry_price,
-        spread_pct=0.01,
+        best_bid=max(0.01, entry_price - 0.01) if best_bid is None else best_bid,
+        best_ask=entry_price if best_ask is None else best_ask,
+        spread_pct=spread_pct,
         available_depth_usd=5000.0,
         expected_slippage_pct=0.0,
         market_impact_pct=0.0,
@@ -682,6 +690,43 @@ async def test_strategy_blocks_expensive_entries_without_extra_edge() -> None:
     )
 
 
+def test_position_monitor_prefers_executable_sell_price_over_public_mark() -> None:
+    wide_spread_liquidity = _make_liquidity(
+        entry_price=0.44,
+        ok=False,
+        mode="WIDE_SPREAD",
+        best_bid=0.42,
+        best_ask=0.47,
+        spread_pct=0.05,
+    )
+    mark_price = main_module._position_monitor_mark_price(0.365, wide_spread_liquidity)
+    _assert(
+        math.isclose(mark_price, 0.44, abs_tol=1e-9),
+        "Position monitoring keeps the executable sell estimate when the book is wide but still bid",
+        f"mark_price={mark_price:.4f}",
+    )
+
+    no_bid_liquidity = LiquidityCheckResult(
+        ok=False,
+        mode="NO_BIDS",
+        reason="No executable bids on CLOB",
+        entry_price=0.44,
+        best_bid=None,
+        best_ask=0.47,
+        spread_pct=1.0,
+        available_depth_usd=0.0,
+        expected_slippage_pct=1.0,
+        market_impact_pct=1.0,
+        levels=0,
+    )
+    fallback_price = main_module._position_monitor_mark_price(0.365, no_bid_liquidity)
+    _assert(
+        math.isclose(fallback_price, 0.365, abs_tol=1e-9),
+        "Position monitoring still falls back to public price when no executable bids exist",
+        f"fallback_price={fallback_price:.4f}",
+    )
+
+
 def test_position_heartbeat_reports_soft_and_hard_stops() -> None:
     messages: list[str] = []
 
@@ -817,6 +862,7 @@ async def run() -> None:
     print("\n--- Live Runtime Pacing ---")
     test_live_ws_sender_is_throttled()
     test_position_heartbeat_reports_soft_and_hard_stops()
+    test_position_monitor_prefers_executable_sell_price_over_public_mark()
 
     print("\n" + "=" * 52)
     print(f"PASSED: {PASSED}")

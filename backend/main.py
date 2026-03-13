@@ -345,6 +345,15 @@ def log_position_heartbeat(
     runtime.position_heartbeat_ts[position.slug] = now_ts
 
 
+def _position_monitor_mark_price(public_price: float, liquidity: LiquidityCheckResult) -> float:
+    executable_price = _safe_float(liquidity.entry_price)
+    # For open positions, prefer the sell-side executable estimate whenever the book
+    # has bids, even if spread/depth gates reject it for new entries.
+    if executable_price > 0 and liquidity.best_bid is not None:
+        return executable_price
+    return public_price
+
+
 def sanitize_data(value: Any) -> Any:
     if isinstance(value, dict):
         return {key: sanitize_data(item) for key, item in value.items()}
@@ -2142,7 +2151,7 @@ async def position_monitor_loop(runtime: EngineServices) -> None:
                     odds=odds,
                     allow_tiny_amm_fallback=False,
                 )
-                mark_price = liquidity.entry_price if liquidity.ok and liquidity.entry_price > 0 else public_price
+                mark_price = _position_monitor_mark_price(public_price, liquidity)
 
                 monitor_decision = await runtime.risk_manager.apply_position_monitoring(
                     runtime.state,
